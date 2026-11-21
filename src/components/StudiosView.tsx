@@ -18,6 +18,13 @@ export function StudioEmblem({ studio }: { studio: GameItem }) {
     setFailed(false);
   }, [studio.coverImage]);
 
+  useEffect(() => {
+    if (!failed) return;
+    const handleOnline = () => setFailed(false);
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [failed]);
+
   if (!studio.coverImage || failed) {
     return (
       <div className="h-24 w-full rounded-[3px] bg-[#10161e] border border-white/[0.06] flex flex-col items-center justify-center p-3 gap-1.5 text-center">

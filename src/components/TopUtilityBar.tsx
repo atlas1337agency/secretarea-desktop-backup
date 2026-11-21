@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
   Clock,
+  Download,
   ExternalLink,
+  Loader2,
   Maximize2,
   Minimize2,
   Volume2,
@@ -14,6 +16,9 @@ interface TopUtilityBarProps {
   isFullscreen: boolean;
   onToggleSound: () => void;
   onToggleFullscreen: () => void;
+  desktopVersion?: string | null;
+  updateBadgeStatus?: 'none' | 'checking' | 'available' | 'downloading' | 'downloaded';
+  onOpenUpdates?: () => void;
 }
 
 export function TopUtilityBar({
@@ -22,6 +27,9 @@ export function TopUtilityBar({
   isFullscreen,
   onToggleSound,
   onToggleFullscreen,
+  desktopVersion = null,
+  updateBadgeStatus = 'none',
+  onOpenUpdates,
 }: TopUtilityBarProps) {
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -97,8 +105,40 @@ export function TopUtilityBar({
         </a>
       </div>
 
-      {/* Right Zone: Mute Toggle (in PS5 Fullscreen mode) + Fullscreen Icon */}
+      {/* Right Zone: Desktop Version / Updates + Sound + Fullscreen Icon */}
       <div className="flex items-center justify-end gap-1.5 sm:gap-2 flex-1 min-w-0">
+        {desktopVersion && onOpenUpdates && (
+          <button
+            type="button"
+            onClick={onOpenUpdates}
+            title="About SecretArea & Check for Updates"
+            aria-label="About SecretArea and Check for Updates"
+            className={`relative inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-all cursor-pointer shrink-0 ${
+              isPs5Theme
+                ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
+                : 'bg-[#1a222d] hover:bg-[#243040] text-[#c7d5e8] hover:text-white border border-white/[0.08]'
+            }`}
+          >
+            {updateBadgeStatus === 'checking' || updateBadgeStatus === 'downloading' ? (
+              <Loader2 className="w-3 h-3 text-[#66c0f4] animate-spin shrink-0" />
+            ) : updateBadgeStatus === 'available' || updateBadgeStatus === 'downloaded' ? (
+              <Download
+                className={`w-3 h-3 shrink-0 ${
+                  updateBadgeStatus === 'downloaded' ? 'text-[#34d399]' : 'text-[#66c0f4]'
+                }`}
+              />
+            ) : null}
+            <span>v{desktopVersion}</span>
+            {(updateBadgeStatus === 'available' || updateBadgeStatus === 'downloaded') && (
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  updateBadgeStatus === 'downloaded' ? 'bg-[#34d399]' : 'bg-[#1a9fff]'
+                }`}
+              />
+            )}
+          </button>
+        )}
+
         {isPs5Theme && (
           <button
             type="button"

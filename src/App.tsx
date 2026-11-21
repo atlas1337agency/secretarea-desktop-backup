@@ -8,8 +8,8 @@ import {
   loadFavorites,
   saveCachedCatalog,
   saveFavorites,
-  saveGasUrl,
 } from './services/sheetsApi';
+import { precacheCatalogImages } from './services/imageCache';
 import type {
   GameItem,
   LibrarySectionTab,
@@ -32,12 +32,11 @@ import { StudiosView } from './components/StudiosView';
 import { StudioDetailModal } from './components/StudioDetailModal';
 import { RequestsView } from './components/RequestsView';
 import { GameDetailModal } from './components/GameDetailModal';
-import { SyncModal } from './components/SyncModal';
-import { DesktopAppModal } from './components/DesktopAppModal';
+import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
 import {
-  getConfiguredDesktopExeUrl,
-  triggerExeDownload,
-} from './services/desktopDownload';
+  getDesktopUpdaterBridge,
+  type DesktopUpdateState,
+} from './services/desktopUpdater';
 import {
   playPsBackSound,
   playPsBootChime,
@@ -90,13 +89,10 @@ function updateGameUrlParam(slug: string | null, replace = false) {
 
 export default function App() {
   const [catalog, setCatalog] = useState<SheetCatalogData>(DEFAULT_CATALOG);
-  const [gasUrl, setGasUrl] = useState<string>(() => getSavedGasUrl());
-  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncError, setSyncError] = useState<string | null>(null);
-  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-  const [isDesktopModalOpen, setIsDesktopModalOpen] = useState(false);
-  const [desktopDownloadStarted, setDesktopDownloadStarted] = useState(false);
+  const catalogRef = useRef<SheetCatalogData>(catalog);
+  catalogRef.current = catalog;
+  const [gasUrl] = useState<string>(() => getSavedGasUrl());
+  const lastCatalogSignatureRef = useRef<string>(JSON.stringify(DEFAULT_CATALOG));
 
   const [activeSection, setActiveSection] = useState<PrimarySection>('store');
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(() => {
@@ -124,6 +120,66 @@ export default function App() {
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const updaterBridge = useMemo(() => getDesktopUpdaterBridge(), []);
+  const [desktopUpdateState, setDesktopUpdateState] = useState<DesktopUpdateState | null>(null);
+  const [isUpdaterModalOpen, setIsUpdaterModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!updaterBridge) return;
+    let active = true;
+
+    void updaterBridge.getState().then((initialState) => {
+      if (active && initialState) {
+        setDesktopUpdateState(initialState);
+      }
+    });
+
+    const unsubscribe = updaterBridge.onStateChange((nextState) => {
+      if (active) {
+        setDesktopUpdateState(nextState);
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [updaterBridge]);
+
+  const handleCheckForUpdates = useCallback(() => {
+    if (!updaterBridge) return;
+    void updaterBridge.checkForUpdates().then((nextState) => {
+      if (nextState) setDesktopUpdateState(nextState);
+    });
+  }, [updaterBridge]);
+
+  const handleDownloadUpdate = useCallback(() => {
+    if (!updaterBridge) return;
+    void updaterBridge.downloadUpdate().then((nextState) => {
+      if (nextState) setDesktopUpdateState(nextState);
+    });
+  }, [updaterBridge]);
+
+  const handlePostponeUpdate = useCallback(() => {
+    if (!updaterBridge) return;
+    void updaterBridge.postponeUpdate().then((nextState) => {
+      if (nextState) setDesktopUpdateState(nextState);
+    });
+  }, [updaterBridge]);
+
+  const handleInstallAndRestart = useCallback(() => {
+    if (!updaterBridge) return;
+    void updaterBridge.installUpdate();
+  }, [updaterBridge]);
+
+  const updateBadgeStatus: 'none' | 'checking' | 'available' | 'downloading' | 'downloaded' =
+    desktopUpdateState?.status === 'checking' ||
+    desktopUpdateState?.status === 'available' ||
+    desktopUpdateState?.status === 'downloading' ||
+    desktopUpdateState?.status === 'downloaded'
+      ? desktopUpdateState.status
+      : 'none';
 
   // PS5 Theme activates directly with Fullscreen mode
   const isPs5Theme = isFullscreen;
@@ -248,74 +304,63 @@ export default function App() {
     []
   );
 
-  const isBackgroundSyncingRef = useRef(false);
+  const isBackgroundRefreshingRef = useRef(false);
 
-  const handleSyncUrl = useCallback(
-    async (url: string, options: { silent?: boolean } = {}) => {
-      const clean = url.trim();
-      if (!clean || isBackgroundSyncingRef.current) return;
+  const refreshCatalogSilently = useCallback(async (url: string) => {
+    const clean = url.trim();
+    if (!clean || isBackgroundRefreshingRef.current) return;
 
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setIsOnline(false);
+      setConnectivityBadge('offline');
+      return;
+    }
+
+    isBackgroundRefreshingRef.current = true;
+    try {
+      const latest = await fetchCatalogFromGas(clean);
+      hasCompletedLiveSyncRef.current = true;
+      const nextCatalog: SheetCatalogData = {
+        ...latest,
+        game: latest.game.length > 0 ? latest.game : DEFAULT_CATALOG.game,
+      };
+      const nextSignature = JSON.stringify(nextCatalog);
+
+      if (nextSignature !== lastCatalogSignatureRef.current) {
+        lastCatalogSignatureRef.current = nextSignature;
+        setCatalog(nextCatalog);
+        void saveCachedCatalog(nextCatalog);
+      }
+
+      void precacheCatalogImages(nextCatalog);
+    } catch {
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setIsOnline(false);
         setConnectivityBadge('offline');
-        if (!options.silent) {
-          const offlineMsg = 'Offline Mode — using cached catalog.';
-          setSyncError(offlineMsg);
-          notify(offlineMsg, 'info');
-        }
-        return;
       }
+    } finally {
+      isBackgroundRefreshingRef.current = false;
+    }
+  }, []);
 
-      isBackgroundSyncingRef.current = true;
-      if (!options.silent) {
-        setIsSyncing(true);
-        setSyncError(null);
-      }
-      try {
-        const synced = await fetchCatalogFromGas(clean);
-        hasCompletedLiveSyncRef.current = true;
-        saveGasUrl(clean);
-        setGasUrl(clean);
-        const nextCatalog: SheetCatalogData = {
-          ...synced,
-          game: synced.game.length > 0 ? synced.game : DEFAULT_CATALOG.game,
-        };
-        setCatalog(nextCatalog);
-        void saveCachedCatalog(nextCatalog);
-        setLastSyncedAt(new Date().toISOString());
-        setSyncError(null);
-        if (!options.silent) {
-          notify(`Synced ${synced.game.length} games from Google Sheet`, 'success');
-        }
-      } catch (err) {
-        if (typeof navigator !== 'undefined' && !navigator.onLine) {
-          setIsOnline(false);
-          setConnectivityBadge('offline');
-        }
-        const msg = err instanceof Error ? err.message : 'Unable to sync Google Sheet.';
-        if (!options.silent) {
-          setSyncError(msg);
-          notify(msg, 'error');
-        }
-      } finally {
-        isBackgroundSyncingRef.current = false;
-        if (!options.silent) {
-          setIsSyncing(false);
-        }
-      }
-    },
-    [notify]
-  );
-
-  // Hydrate catalog from IndexedDB immediately so offline sessions retain synced data
+  // Hydrate catalog from IndexedDB immediately so offline sessions retain data & warm cover cache
   useEffect(() => {
     let cancelled = false;
     void loadCachedCatalog().then((cached) => {
-      if (!cancelled && cached && !hasCompletedLiveSyncRef.current) {
-        setCatalog({
+      if (cancelled) return;
+      if (cached && !hasCompletedLiveSyncRef.current) {
+        const nextCatalog: SheetCatalogData = {
           ...cached,
           game: cached.game.length > 0 ? cached.game : DEFAULT_CATALOG.game,
-        });
+        };
+        const nextSignature = JSON.stringify(nextCatalog);
+        if (nextSignature !== lastCatalogSignatureRef.current) {
+          lastCatalogSignatureRef.current = nextSignature;
+          setCatalog(nextCatalog);
+        }
+        void precacheCatalogImages(nextCatalog);
+      } else {
+        void precacheCatalogImages(DEFAULT_CATALOG);
       }
     });
     return () => {
@@ -347,7 +392,9 @@ export default function App() {
         onlineBadgeTimerRef.current = null;
       }, 4000);
       if (gasUrl) {
-        void handleSyncUrl(gasUrl, { silent: true });
+        void refreshCatalogSilently(gasUrl);
+      } else {
+        void precacheCatalogImages(catalogRef.current);
       }
     };
 
@@ -359,17 +406,19 @@ export default function App() {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, [gasUrl, handleSyncUrl]);
+  }, [gasUrl, refreshCatalogSilently]);
 
-  // Sync automatically on mount and every 5 seconds in the background when online
+  // Quietly check for catalog updates on mount & every 60s when visible & online (only updates state if changed)
   useEffect(() => {
     if (!gasUrl || !isOnline) return;
-    handleSyncUrl(gasUrl, { silent: true });
+    void refreshCatalogSilently(gasUrl);
     const intervalId = window.setInterval(() => {
-      handleSyncUrl(gasUrl, { silent: true });
-    }, 5000);
+      if (document.visibilityState === 'visible') {
+        void refreshCatalogSilently(gasUrl);
+      }
+    }, 60000);
     return () => window.clearInterval(intervalId);
-  }, [gasUrl, isOnline, handleSyncUrl]);
+  }, [gasUrl, isOnline, refreshCatalogSilently]);
 
   // Keep selectedGame synchronized with live catalog updates and URL ?game=<slug>
   useEffect(() => {
@@ -415,16 +464,6 @@ export default function App() {
       : 'SecretArea — Desktop Game Launcher & Catalog';
   }, [selectedGame]);
 
-  const handleResetBuiltin = () => {
-    saveGasUrl('');
-    setGasUrl('');
-    setCatalog(DEFAULT_CATALOG);
-    setLastSyncedAt(null);
-    setSyncError(null);
-    setIsSyncModalOpen(false);
-    notify('Restored built-in offline catalog', 'info');
-  };
-
   const handleToggleFavorite = (id: string) => {
     setFavorites((prev) => {
       const next = new Set(prev);
@@ -438,7 +477,6 @@ export default function App() {
     });
   };
 
-  const allGames = catalog.game;
   const activeSectionItems = catalog[libraryTab] || [];
 
   const sectionCounts = useMemo<Record<LibrarySectionTab, number>>(
@@ -554,15 +592,6 @@ export default function App() {
     favorites,
   ]);
 
-  const extrasCount = useMemo(
-    () =>
-      ALL_SHEET_TABS.filter((t) => t !== 'game').reduce(
-        (acc, tab) => acc + (catalog[tab]?.length || 0),
-        0
-      ),
-    [catalog]
-  );
-
   const handleOpenGame = useCallback(
     (game: GameItem, mode: 'overview' | 'trailer' | 'downloads' = 'overview') => {
       if (game.tab === 'profil') {
@@ -597,18 +626,6 @@ export default function App() {
     setActiveSection('studios');
   };
 
-  const handleOpenDesktopApp = useCallback(() => {
-    const exeUrl = getConfiguredDesktopExeUrl();
-    if (exeUrl) {
-      triggerExeDownload(exeUrl);
-      setDesktopDownloadStarted(true);
-      notify('Starting SecretArea.exe download...', 'success');
-    } else {
-      setDesktopDownloadStarted(false);
-    }
-    setIsDesktopModalOpen(true);
-  }, [notify]);
-
   return (
     <div
       className={`sa-app-shell h-screen w-screen overflow-hidden flex flex-col bg-[#141921] text-[#e5e9f0] ${
@@ -621,12 +638,16 @@ export default function App() {
         isFullscreen={isFullscreen}
         onToggleSound={() => setSoundEnabled((prev) => !prev)}
         onToggleFullscreen={handleToggleFullscreen}
+        desktopVersion={desktopUpdateState?.currentVersion || null}
+        updateBadgeStatus={updateBadgeStatus}
+        onOpenUpdates={
+          updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
+        }
       />
 
       <Navbar
         activeSection={activeSection}
         onSelectSection={setActiveSection}
-        onOpenDesktopApp={handleOpenDesktopApp}
         isPs5Theme={isPs5Theme}
       />
 
@@ -700,7 +721,6 @@ export default function App() {
             catalog={catalog}
             hasLiveUrl={Boolean(gasUrl)}
             onSelectItem={(item) => handleOpenGame(item, 'overview')}
-            onOpenSync={() => setIsSyncModalOpen(true)}
           />
         )}
 
@@ -727,25 +747,19 @@ export default function App() {
         onClose={handleCloseGame}
       />
 
-      <SyncModal
-        isOpen={isSyncModalOpen}
-        onClose={() => setIsSyncModalOpen(false)}
-        currentUrl={gasUrl}
-        lastSyncedAt={lastSyncedAt}
-        totalGames={allGames.length}
-        extrasCount={extrasCount}
-        isSyncing={isSyncing}
-        syncError={syncError}
-        onSyncUrl={handleSyncUrl}
-        onResetBuiltin={handleResetBuiltin}
-      />
-
-      <DesktopAppModal
-        isOpen={isDesktopModalOpen}
-        downloadStarted={desktopDownloadStarted}
-        onClose={() => setIsDesktopModalOpen(false)}
-        onNotify={notify}
-      />
+      {updaterBridge && (
+        <DesktopUpdaterModal
+          isOpen={isUpdaterModalOpen}
+          isPs5Theme={isPs5Theme}
+          state={desktopUpdateState}
+          onClose={() => setIsUpdaterModalOpen(false)}
+          onCheckForUpdates={handleCheckForUpdates}
+          onDownloadUpdate={handleDownloadUpdate}
+          onInstallAndRestart={handleInstallAndRestart}
+          onPostponeUpdate={handlePostponeUpdate}
+          onOpenModal={() => setIsUpdaterModalOpen(true)}
+        />
+      )}
 
       {/* Persistent Offline Mode / Auto-hiding Online Mode Badge */}
       {connectivityBadge !== 'hidden' && (

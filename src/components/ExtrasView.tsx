@@ -23,7 +23,6 @@ interface ExtrasViewProps {
   hasLiveUrl?: boolean;
   initialTab?: SheetTabKey;
   onSelectItem: (item: GameItem) => void;
-  onOpenSync?: () => void;
 }
 
 export function resolveSheetRefItem(
@@ -132,6 +131,13 @@ function SafeOverlayImg({
   useEffect(() => {
     setFailed(false);
   }, [src]);
+
+  useEffect(() => {
+    if (!failed) return;
+    const handleOnline = () => setFailed(false);
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [failed]);
 
   if (!src || failed) return null;
 

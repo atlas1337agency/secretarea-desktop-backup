@@ -1,32 +1,54 @@
-name: Build SecretArea Desktop Installer (.exe)
+name: Release SecretArea Desktop App
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags:
-      - 'v*'
+      - 'v*.*.*'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-windows-installer:
+  build-and-release-windows:
+    name: Build & Publish Windows Installer
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Read and verify version from package.json
+        id: meta
+        shell: pwsh
+        run: |
+          $pkg = Get-Content -Raw package.json | ConvertFrom-Json
+          $version = $pkg.version.Trim()
+          if (-not $version) {
+            throw "package.json version is empty."
+          }
+          $tag = "v$version"
+          if ("${{ github.ref }}".StartsWith("refs/tags/")) {
+            $pushedTag = "${{ github.ref_name }}"
+            if ($pushedTag -ne $tag) {
+              throw "Tag '$pushedTag' does not match package.json version '$tag'. Update package.json version first."
+            }
+          }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Building SecretArea Desktop $tag (version $version)"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install project dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Run TypeScript check
+        run: npm run lint
 
       - name: Install Electron & Electron Builder
         run: npm install --no-save electron electron-builder
@@ -34,21 +56,53 @@ jobs:
       - name: Build production web bundle
         run: npm run build
 
-      - name: Package Windows NSIS Installer (SecretArea.exe)
+      - name: Package Windows NSIS Installer & Updater Metadata
         run: npx electron-builder --win nsis --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SecretArea.exe workflow artifact
+      - name: Verify installer and updater metadata files
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            "release/SecretArea.exe",
+            "release/SecretArea.exe.blockmap",
+            "release/latest.yml"
+          )
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Missing required release artifact: $file"
+            }
+          }
+          $latestYml = Get-Content -Raw release/latest.yml
+          Write-Host "--- release/latest.yml ---"
+          Write-Host $latestYml
+          if ($latestYml -notmatch "version:\s*${{ steps.meta.outputs.version }}") {
+            throw "release/latest.yml version does not match package.json version ${{ steps.meta.outputs.version }}"
+          }
+          if ($latestYml -notmatch "SecretArea\.exe") {
+            throw "release/latest.yml does not reference SecretArea.exe"
+          }
+
+      - name: Upload Windows release workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SecretArea-Windows-Installer
-          path: release/SecretArea.exe
+          name: SecretArea-${{ steps.meta.outputs.tag }}-Windows
+          path: |
+            release/SecretArea.exe
+            release/SecretArea.exe.blockmap
+            release/latest.yml
           if-no-files-found: error
 
-      - name: Publish SecretArea.exe to GitHub Releases
+      - name: Publish Installer & Metadata to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
-          name: SecretArea Desktop Installer
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: SecretArea Desktop ${{ steps.meta.outputs.tag }}
+          generate_release_notes: true
           make_latest: true
+          fail_on_unmatched_files: true
           files: |
             release/SecretArea.exe
+            release/SecretArea.exe.blockmap
+            release/latest.yml

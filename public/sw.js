@@ -1,6 +1,7 @@
-const CACHE_NAME = 'secretarea-offline-v1';
+const CACHE_NAME = 'secretarea-offline-v2';
+const IMAGE_CACHE_NAME = 'secretarea-images-v1';
 
-const PRECACHE_URLS = ['/', '/index.html', '/img/logo01.png'];
+const PRECACHE_URLS = ['./', './index.html', './img/logo01.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -17,12 +18,19 @@ self.addEventListener('activate', (event) => {
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+          keys
+            .filter((key) => key !== CACHE_NAME && key !== IMAGE_CACHE_NAME)
+            .map((key) => caches.delete(key))
         )
       )
       .then(() => self.clients.claim())
   );
 });
+
+function isImageRequest(request, url) {
+  if (request.destination === 'image') return true;
+  return /\.(png|jpe?g|webp|gif|svg|avif|ico)(\?.*)?$/i.test(url.pathname);
+}
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -30,7 +38,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Never intercept Google Apps Script sync requests
+  // Never intercept Google Apps Script API requests
   if (
     url.hostname.includes('script.google.com') ||
     url.hostname.includes('script.googleusercontent.com')
@@ -38,7 +46,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation requests: network first, fallback to cached /index.html offline
+  // Navigation requests: network first, fallback to cached index.html offline
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -49,22 +57,44 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('/index.html').then((r) => r || caches.match('/')))
+        .catch(() =>
+          caches.match('./index.html').then((r) => r || caches.match('/index.html') || caches.match('./'))
+        )
     );
     return;
   }
 
-  // Same-origin static assets & external images/fonts: cache with background refresh
+  // Image requests (same-origin & external game covers): cache-first by exact URL across all caches
+  if (isImageRequest(request, url)) {
+    event.respondWith(
+      caches.match(request.url, { ignoreVary: true }).then((cached) => {
+        if (cached) {
+          return cached;
+        }
+        return fetch(request)
+          .then((response) => {
+            if (response && (response.ok || response.type === 'opaque')) {
+              const copy = response.clone();
+              caches.open(IMAGE_CACHE_NAME).then((cache) => cache.put(request.url, copy));
+            }
+            return response;
+          })
+          .catch(() => new Response('', { status: 404, statusText: 'Offline image unavailable' }));
+      })
+    );
+    return;
+  }
+
+  // Same-origin static scripts/styles/fonts
   const isSameOrigin = url.origin === self.location.origin;
   const isStaticAsset =
     request.destination === 'script' ||
     request.destination === 'style' ||
-    request.destination === 'image' ||
     request.destination === 'font';
 
   if (isSameOrigin || isStaticAsset) {
     event.respondWith(
-      caches.match(request).then((cached) => {
+      caches.match(request, { ignoreVary: true }).then((cached) => {
         const networkFetch = fetch(request)
           .then((response) => {
             if (response && (response.ok || response.type === 'opaque')) {

@@ -1,12 +1,10 @@
 import { useState, type ComponentType } from 'react';
-import { Home, Layers, Library, MessageSquarePlus, MonitorDown, Shield } from 'lucide-react';
+import { Home, Layers, Library, MessageSquarePlus, Shield } from 'lucide-react';
 import type { PrimarySection } from '../types';
-import { isRunningInDesktopApp } from '../services/desktopDownload';
 
 interface NavbarProps {
   activeSection: PrimarySection;
   onSelectSection: (section: PrimarySection) => void;
-  onOpenDesktopApp: () => void;
   isPs5Theme?: boolean;
 }
 
@@ -24,11 +22,9 @@ const NAV_ITEMS: {
 export function Navbar({
   activeSection,
   onSelectSection,
-  onOpenDesktopApp,
   isPs5Theme = false,
 }: NavbarProps) {
   const [logoError, setLogoError] = useState(false);
-  const isDesktopRuntime = isRunningInDesktopApp();
 
   return (
     <header
@@ -106,35 +102,18 @@ export function Navbar({
         })}
       </nav>
 
-      {/* Right Zone: Desktop App Installer Button (Web Only) */}
-      <div className="flex items-center justify-end gap-2.5 shrink-0">
+      {/* Right Zone: Balanced Spacer / PS5 Glyphs */}
+      <div className="hidden md:flex items-center justify-end w-[120px] shrink-0">
         {isPs5Theme && (
           <div
             aria-hidden="true"
-            className="hidden xl:inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-[#8ec5ff]/75"
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-[#8ec5ff]/75"
           >
             <span>△</span>
             <span>○</span>
             <span>×</span>
             <span>□</span>
           </div>
-        )}
-
-        {!isDesktopRuntime && (
-          <button
-            type="button"
-            aria-label="Desktop App"
-            onClick={onOpenDesktopApp}
-            className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded text-[11.5px] sm:text-[12px] font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
-              isPs5Theme
-                ? 'rounded-full bg-white/[0.14] hover:bg-white/[0.24] text-white border border-white/[0.25]'
-                : 'bg-[#1a9fff] hover:bg-[#38adff] text-white'
-            }`}
-          >
-            <MonitorDown className="w-3.5 h-3.5 shrink-0" />
-            <span className="sm:hidden">Desktop</span>
-            <span className="hidden sm:inline">Desktop App</span>
-          </button>
         )}
       </div>
     </header>
