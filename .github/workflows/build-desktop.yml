@@ -2,25 +2,40 @@ name: Release SecretArea Desktop App
 
 on:
   push:
+    branches:
+      - main
+      - master
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      force_release:
+        description: 'Rebuild and update release even if this version tag already exists'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release-windows:
-    name: Build & Publish Windows Installer
+  check-version:
+    name: Check Version for Release
     runs-on: windows-latest
+    outputs:
+      should_release: ${{ steps.meta.outputs.should_release }}
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Read and verify version from package.json
+      - name: Check package.json version against existing GitHub Releases
         id: meta
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $pkg = Get-Content -Raw package.json | ConvertFrom-Json
           $version = $pkg.version.Trim()
@@ -28,24 +43,60 @@ jobs:
             throw "package.json version is empty."
           }
           $tag = "v$version"
+
           if ("${{ github.ref }}".StartsWith("refs/tags/")) {
             $pushedTag = "${{ github.ref_name }}"
             if ($pushedTag -ne $tag) {
               throw "Tag '$pushedTag' does not match package.json version '$tag'. Update package.json version first."
             }
           }
+
+          $releaseExists = $false
+          gh release view $tag --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            $releaseExists = $true
+          }
+
+          $isManualForce = ("${{ github.event_name }}" -eq "workflow_dispatch") -and ("${{ inputs.force_release }}" -eq "true")
+          $isTagPush = "${{ github.ref }}".StartsWith("refs/tags/")
+
+          if (-not $releaseExists -or $isManualForce -or $isTagPush) {
+            $shouldRelease = "true"
+            Write-Host "Release $tag will be built and published."
+          } else {
+            $shouldRelease = "false"
+            Write-Host "Release $tag already exists. Skipping build (bump package.json version to publish a new update)."
+          }
+
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          Write-Host "Building SecretArea Desktop $tag (version $version)"
+          "should_release=$shouldRelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+  build-and-release-windows:
+    name: Build & Publish Windows Installer
+    needs: check-version
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install project dependencies
-        run: npm ci
+        shell: pwsh
+        run: |
+          npm ci --no-audit --no-fund
+          if (-not (Test-Path "node_modules/@typescript/typescript-win32-x64") -or -not (Test-Path "node_modules/@rolldown/binding-win32-x64-msvc")) {
+            Write-Host "Resolving Windows x64 optional native binaries..."
+            Remove-Item package-lock.json -Force -ErrorAction SilentlyContinue
+            npm install --no-audit --no-fund
+          }
 
       - name: Run TypeScript check
         run: npm run lint
@@ -64,6 +115,7 @@ jobs:
       - name: Verify installer and updater metadata files
         shell: pwsh
         run: |
+          $expectedVersion = "${{ needs.check-version.outputs.version }}"
           $requiredFiles = @(
             "release/SecretArea.exe",
             "release/SecretArea.exe.blockmap",
@@ -77,8 +129,8 @@ jobs:
           $latestYml = Get-Content -Raw release/latest.yml
           Write-Host "--- release/latest.yml ---"
           Write-Host $latestYml
-          if ($latestYml -notmatch "version:\s*${{ steps.meta.outputs.version }}") {
-            throw "release/latest.yml version does not match package.json version ${{ steps.meta.outputs.version }}"
+          if ($latestYml -notmatch "version:\s*$expectedVersion") {
+            throw "release/latest.yml version does not match package.json version $expectedVersion"
           }
           if ($latestYml -notmatch "SecretArea\.exe") {
             throw "release/latest.yml does not reference SecretArea.exe"
@@ -87,7 +139,7 @@ jobs:
       - name: Upload Windows release workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SecretArea-${{ steps.meta.outputs.tag }}-Windows
+          name: SecretArea-${{ needs.check-version.outputs.tag }}-Windows
           path: |
             release/SecretArea.exe
             release/SecretArea.exe.blockmap
@@ -97,8 +149,8 @@ jobs:
       - name: Publish Installer & Metadata to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.meta.outputs.tag }}
-          name: SecretArea Desktop ${{ steps.meta.outputs.tag }}
+          tag_name: ${{ needs.check-version.outputs.tag }}
+          name: SecretArea Desktop ${{ needs.check-version.outputs.tag }}
           generate_release_notes: true
           make_latest: true
           fail_on_unmatched_files: true
