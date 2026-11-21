@@ -1,8 +1,9 @@
 {
   "name": "secretarea",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SecretArea Desktop Game Launcher & Catalog",
+  "repository": "https://github.com/secretarea1337/secretarea-desktop",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
