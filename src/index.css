@@ -1,0 +1,322 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+
+  html,
+  body {
+    font-family: var(--font-sans);
+    background-color: #0e141b;
+    color: #dcdedf;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono-tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Steam-inspired subtle dark scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141920;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2f3846;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #435064;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   Enhanced PS5 Home Dashboard Theme (.theme-ps5)
+   Inspired directly by official PS5 Media/Games UI:
+   - Deep sapphire-cerulean atmospheric backdrop + drifting gold/sky dust motes
+   - Sleek floating frosted header & luminous white tab indicator
+   - ASTRO-style rounded hero spotlight with frosted PlayStation pill CTAs
+   - Rounded sapphire-glass game tiles with crisp white halo focus glow
+   - Deep PlayStation cobalt-glass Game Detail Pages & download panels
+   ========================================================================== */
+@keyframes ps5-particles-drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-18px, -14px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+html.theme-ps5,
+html.theme-ps5 body {
+  background-color: #010a1a;
+  color: #f0f6ff;
+}
+
+.theme-ps5 .sa-app-shell {
+  position: relative;
+  background:
+    radial-gradient(125% 88% at 64% 8%, rgba(0, 118, 224, 0.56) 0%, rgba(4, 58, 132, 0.36) 36%, rgba(2, 22, 62, 0.14) 68%, transparent 88%),
+    radial-gradient(80% 60% at 10% 95%, rgba(0, 90, 180, 0.25) 0%, transparent 65%),
+    linear-gradient(180deg, #021636 0%, #021029 52%, #010817 100%);
+}
+
+/* Subtle PS5 gold & cerulean floating particle dust behind content */
+.theme-ps5 .sa-app-shell::before {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.48;
+  background-image:
+    radial-gradient(1.5px 1.5px at 14% 22%, rgba(255, 226, 150, 0.72) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 32% 68%, rgba(125, 211, 252, 0.65) 50%, transparent 100%),
+    radial-gradient(2px 2px at 56% 18%, rgba(255, 215, 130, 0.55) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 78% 42%, rgba(186, 230, 253, 0.75) 50%, transparent 100%),
+    radial-gradient(2px 2px at 88% 76%, rgba(255, 226, 150, 0.5) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 44% 86%, rgba(147, 197, 253, 0.55) 50%, transparent 100%);
+  background-size: 460px 360px;
+  animation: ps5-particles-drift 22s ease-in-out infinite;
+}
+
+.theme-ps5 .sa-app-shell > header,
+.theme-ps5 .sa-app-shell > main,
+.theme-ps5 .sa-topbar {
+  position: relative;
+  z-index: 1;
+}
+
+/* Transparent frosted PlayStation header & sidebar */
+.theme-ps5 main > div,
+.theme-ps5 main > section {
+  background-image: none;
+  background-color: transparent;
+}
+
+.theme-ps5 main > aside {
+  background-image: none;
+  background-color: rgba(2, 16, 44, 0.72);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Hero Spotlight (ASTRO's PLAYROOM inspired framing & frosted buttons) */
+.theme-ps5 .sa-ps5-hero {
+  border-radius: 20px;
+  border-color: rgba(255, 255, 255, 0.16);
+  background-color: #02173b;
+  box-shadow:
+    0 24px 60px rgba(0, 6, 22, 0.68),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.theme-ps5 .sa-ps5-hero-img {
+  opacity: 0.72;
+}
+
+.theme-ps5 .sa-ps5-hero-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(1, 14, 40, 0.94) 0%,
+    rgba(2, 29, 74, 0.78) 46%,
+    rgba(0, 72, 150, 0.15) 100%
+  );
+}
+
+.theme-ps5 .sa-ps5-hero-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(1, 12, 34, 0.92) 0%,
+    rgba(2, 22, 58, 0.35) 55%,
+    rgba(1, 16, 44, 0.35) 100%
+  );
+}
+
+/* Game Cards & Tile Images (Rounded PS5 Icon Tiles + White Dual-Halo Focus) */
+.theme-ps5 [role="button"] {
+  border-radius: 14px;
+  border-color: rgba(255, 255, 255, 0.16);
+  background-color: rgba(4, 24, 62, 0.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 26px rgba(0, 6, 24, 0.45);
+  transition:
+    transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 190ms ease,
+    background-color 190ms ease;
+}
+
+.theme-ps5 [role="button"] img {
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), filter 200ms ease;
+}
+
+.theme-ps5 [role="button"]:hover,
+.theme-ps5 [role="button"]:focus-visible {
+  transform: translateY(-4px) scale(1.018);
+  background-color: rgba(7, 38, 92, 0.85);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 16px 38px rgba(0, 122, 255, 0.45);
+}
+
+/* Frosted PlayStation 5 Pill Buttons */
+.theme-ps5 button[class*="bg-[#1a9fff]"],
+.theme-ps5 a[class*="bg-[#1a9fff]"] {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 12, 40, 0.35);
+}
+
+.theme-ps5 button[class*="bg-[#1a9fff]"]:hover,
+.theme-ps5 a[class*="bg-[#1a9fff]"]:hover {
+  background: rgba(255, 255, 255, 0.34);
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.8),
+    0 10px 28px rgba(0, 128, 255, 0.45);
+}
+
+.theme-ps5 button[class*="bg-[#212a37]"],
+.theme-ps5 button[class*="bg-[#2a3441]"],
+.theme-ps5 button[class*="bg-[#232b36]"],
+.theme-ps5 button[class*="bg-[#252f3d]"] {
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.theme-ps5 button[class*="bg-[#212a37]"]:hover,
+.theme-ps5 button[class*="bg-[#2a3441]"]:hover,
+.theme-ps5 button[class*="bg-[#232b36]"]:hover,
+.theme-ps5 button[class*="bg-[#252f3d]"]:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+/* Game Detail Pages (GameDetailModal) */
+.theme-ps5 .sa-ps5-modal {
+  background:
+    radial-gradient(120% 80% at 65% 5%, rgba(0, 118, 224, 0.46) 0%, rgba(3, 44, 108, 0.3) 40%, transparent 75%),
+    linear-gradient(180deg, #02173c 0%, #020f28 55%, #010817 100%);
+}
+
+.theme-ps5 .sa-ps5-modal-header {
+  background-color: rgba(2, 14, 38, 0.78);
+  backdrop-filter: blur(18px);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-ps5 .sa-ps5-modal-scroll {
+  background: transparent;
+}
+
+.theme-ps5 .sa-ps5-modal-hero {
+  background-color: rgba(2, 20, 54, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-ps5 .sa-ps5-modal-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(2, 16, 44, 0.96) 0%,
+    rgba(2, 22, 58, 0.78) 55%,
+    rgba(1, 14, 38, 0.65) 100%
+  );
+}
+
+.theme-ps5 .sa-ps5-modal-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(2, 16, 44, 0.94) 0%,
+    rgba(3, 28, 74, 0.74) 55%,
+    transparent 100%
+  );
+}
+
+/* Frosted Sapphire Panels inside Game Pages, Requests, Extras, Studios */
+.theme-ps5 [class*="bg-[#171d25]"],
+.theme-ps5 [class*="bg-[#141b24]"],
+.theme-ps5 [class*="bg-[#18202b]"],
+.theme-ps5 [class*="bg-[#1b222d]"],
+.theme-ps5 [class*="bg-[#141921]"],
+.theme-ps5 [class*="bg-[#12171f]"] {
+  background-color: rgba(4, 22, 56, 0.68);
+  border-color: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+/* Inputs, Selects & Textareas */
+.theme-ps5 input,
+.theme-ps5 select,
+.theme-ps5 textarea {
+  border-radius: 12px;
+  background-color: rgba(2, 14, 36, 0.78);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.theme-ps5 input:focus,
+.theme-ps5 select:focus,
+.theme-ps5 textarea:focus {
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+/* PS5 Scrollbars */
+html.theme-ps5 ::-webkit-scrollbar-track {
+  background: #020c20;
+}
+
+html.theme-ps5 ::-webkit-scrollbar-thumb {
+  background: rgba(125, 196, 255, 0.32);
+  border-radius: 9999px;
+}
+
+html.theme-ps5 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-ps5 .sa-app-shell::before {
+    animation: none;
+  }
+
+  .theme-ps5 [role="button"],
+  .theme-ps5 [role="button"] img {
+    transition: none;
+  }
+}

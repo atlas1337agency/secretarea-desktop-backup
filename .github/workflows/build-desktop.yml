@@ -1,0 +1,54 @@
+name: Build SecretArea Desktop Installer (.exe)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install project dependencies
+        run: npm install
+
+      - name: Install Electron & Electron Builder
+        run: npm install --no-save electron electron-builder
+
+      - name: Build production web bundle
+        run: npm run build
+
+      - name: Package Windows NSIS Installer (SecretArea.exe)
+        run: npx electron-builder --win nsis --publish never
+
+      - name: Upload SecretArea.exe workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SecretArea-Windows-Installer
+          path: release/SecretArea.exe
+          if-no-files-found: error
+
+      - name: Publish SecretArea.exe to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          name: SecretArea Desktop Installer
+          make_latest: true
+          files: |
+            release/SecretArea.exe
