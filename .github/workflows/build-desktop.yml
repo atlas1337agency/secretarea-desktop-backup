@@ -1,3 +1,4 @@
+
 name: Release SecretArea Desktop App
 
 on:
@@ -7,6 +8,7 @@ on:
       - master
     tags:
       - 'v*.*.*'
+
   workflow_dispatch:
     inputs:
       force_release:
@@ -22,6 +24,7 @@ jobs:
   check-version:
     name: Check Version for Release
     runs-on: windows-latest
+
     outputs:
       should_release: ${{ steps.meta.outputs.should_release }}
       version: ${{ steps.meta.outputs.version }}
@@ -36,46 +39,105 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          FORCE_RELEASE: ${{ inputs.force_release }}
         run: |
+          $ErrorActionPreference = "Stop"
+
+          # Read and validate package.json
           $pkg = Get-Content -Raw package.json | ConvertFrom-Json
-          $version = $pkg.version.Trim()
-          if (-not $version) {
-            throw "package.json version is empty."
+
+          if ([string]::IsNullOrWhiteSpace([string]$pkg.version)) {
+            throw "package.json version is empty or missing."
           }
+
+          $version = ([string]$pkg.version).Trim()
+
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$') {
+            throw "Invalid package.json version: $version"
+          }
+
           $tag = "v$version"
 
-          if ("${{ github.ref }}".StartsWith("refs/tags/")) {
-            $pushedTag = "${{ github.ref_name }}"
+          Write-Host "Package version: $version"
+          Write-Host "Release tag: $tag"
+
+          # Validate pushed Git tag
+          if ($env:GITHUB_REF.StartsWith("refs/tags/")) {
+            $pushedTag = $env:GITHUB_REF_NAME
+
             if ($pushedTag -ne $tag) {
               throw "Tag '$pushedTag' does not match package.json version '$tag'. Update package.json version first."
             }
           }
 
+          # Check whether the GitHub Release already exists
           $releaseExists = $false
-          gh release view $tag --repo "${{ github.repository }}" *> $null
-          if ($LASTEXITCODE -eq 0) {
-            $releaseExists = $true
+
+          $releaseUrl = "https://api.github.com/repos/$env:REPOSITORY/releases/tags/$tag"
+
+          $headers = @{
+            Authorization = "Bearer $env:GH_TOKEN"
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
           }
 
-          $isManualForce = ("${{ github.event_name }}" -eq "workflow_dispatch") -and ("${{ inputs.force_release }}" -eq "true")
-          $isTagPush = "${{ github.ref }}".StartsWith("refs/tags/")
+          try {
+            $release = Invoke-RestMethod `
+              -Uri $releaseUrl `
+              -Headers $headers `
+              -Method Get
+
+            $releaseExists = $true
+            Write-Host "Release $tag already exists."
+          }
+          catch {
+            $statusCode = 0
+
+            if ($_.Exception.Response) {
+              $statusCode = [int]$_.Exception.Response.StatusCode
+            }
+
+            if ($statusCode -eq 404) {
+              $releaseExists = $false
+              Write-Host "Release $tag does not exist."
+            }
+            else {
+              throw "GitHub API error while checking release: $($_.Exception.Message)"
+            }
+          }
+
+          # Determine whether to publish
+          $isManualForce = (
+            $env:EVENT_NAME -eq "workflow_dispatch" -and
+            $env:FORCE_RELEASE -eq "true"
+          )
+
+          $isTagPush = $env:GITHUB_REF.StartsWith("refs/tags/")
 
           if (-not $releaseExists -or $isManualForce -or $isTagPush) {
             $shouldRelease = "true"
             Write-Host "Release $tag will be built and published."
-          } else {
+          }
+          else {
             $shouldRelease = "false"
-            Write-Host "Release $tag already exists. Skipping build (bump package.json version to publish a new update)."
+            Write-Host "Release $tag already exists. Skipping build."
           }
 
-          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "should_release=$shouldRelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          # Export GitHub Actions outputs
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "tag=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "should_release=$shouldRelease" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
   build-and-release-windows:
     name: Build & Publish Windows Installer
     needs: check-version
+
     if: needs.check-version.outputs.should_release == 'true'
+
     runs-on: windows-latest
 
     steps:
@@ -86,15 +148,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
 
       - name: Install project dependencies
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+
           npm ci --no-audit --no-fund
-          if (-not (Test-Path "node_modules/@typescript/typescript-win32-x64") -or -not (Test-Path "node_modules/@rolldown/binding-win32-x64-msvc")) {
+
+          if (
+            -not (Test-Path "node_modules/@typescript/typescript-win32-x64") -or
+            -not (Test-Path "node_modules/@rolldown/binding-win32-x64-msvc")
+          ) {
             Write-Host "Resolving Windows x64 optional native binaries..."
-            Remove-Item package-lock.json -Force -ErrorAction SilentlyContinue
+
             npm install --no-audit --no-fund
           }
 
@@ -114,27 +182,41 @@ jobs:
 
       - name: Verify installer and updater metadata files
         shell: pwsh
+        env:
+          EXPECTED_VERSION: ${{ needs.check-version.outputs.version }}
         run: |
-          $expectedVersion = "${{ needs.check-version.outputs.version }}"
+          $ErrorActionPreference = "Stop"
+
+          $expectedVersion = $env:EXPECTED_VERSION
+
           $requiredFiles = @(
             "release/SecretArea.exe",
             "release/SecretArea.exe.blockmap",
             "release/latest.yml"
           )
+
           foreach ($file in $requiredFiles) {
             if (-not (Test-Path $file)) {
               throw "Missing required release artifact: $file"
             }
+
+            Write-Host "Verified: $file"
           }
+
           $latestYml = Get-Content -Raw release/latest.yml
+
           Write-Host "--- release/latest.yml ---"
           Write-Host $latestYml
-          if ($latestYml -notmatch "version:\s*$expectedVersion") {
+
+          if ($latestYml -notmatch "(?m)^version:\s*['`"]?$([regex]::Escape($expectedVersion))['`"]?\s*$") {
             throw "release/latest.yml version does not match package.json version $expectedVersion"
           }
+
           if ($latestYml -notmatch "SecretArea\.exe") {
             throw "release/latest.yml does not reference SecretArea.exe"
           }
+
+          Write-Host "All updater metadata checks passed."
 
       - name: Upload Windows release workflow artifacts
         uses: actions/upload-artifact@v4
