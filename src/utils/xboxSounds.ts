@@ -9,6 +9,32 @@ let xboxChordTimer: number | null = null;
 let xboxShimmerTimer: number | null = null;
 let isXboxAmbientPlaying = false;
 let lastXboxHoverTime = 0;
+let xboxMasterVolume = 0.7;
+
+const XBOX_AMBIENT_BASE_GAIN = 0.22;
+
+export function setXboxVolume(volume01: number): void {
+  const clamped = Math.min(1, Math.max(0, Number.isFinite(volume01) ? volume01 : 0.7));
+  xboxMasterVolume = clamped;
+
+  if (xboxAudioCtx && xboxAudioCtx.state === 'suspended') {
+    void xboxAudioCtx.resume().catch(() => {
+      // ignore autoplay block
+    });
+  }
+
+  if (xboxAudioCtx && xboxMasterGain && isXboxAmbientPlaying) {
+    try {
+      const now = xboxAudioCtx.currentTime;
+      const targetGain = clamped <= 0.001 ? 0 : XBOX_AMBIENT_BASE_GAIN * Math.pow(clamped, 1.25);
+      xboxMasterGain.gain.cancelScheduledValues(now);
+      xboxMasterGain.gain.setValueAtTime(xboxMasterGain.gain.value, now);
+      xboxMasterGain.gain.setTargetAtTime(targetGain, now, 0.03);
+    } catch {
+      // ignore volume ramp errors
+    }
+  }
+}
 
 function getXboxAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -187,8 +213,12 @@ export function startXboxAmbientSound(): void {
     const now = ctx.currentTime;
 
     const master = ctx.createGain();
+    const initialTargetGain =
+      xboxMasterVolume <= 0.001
+        ? 0.0001
+        : XBOX_AMBIENT_BASE_GAIN * Math.pow(xboxMasterVolume, 1.25);
     master.gain.setValueAtTime(0.0001, now);
-    master.gain.linearRampToValueAtTime(0.11, now + 1.4);
+    master.gain.linearRampToValueAtTime(initialTargetGain, now + 1.4);
     master.connect(ctx.destination);
 
     const padFilter = ctx.createBiquadFilter();
@@ -302,6 +332,7 @@ export function stopXboxAmbientSound(): void {
 
 /** Authentic Xbox Series X|S woody-glass tile focus / hover tick */
 export function playXboxHoverSound(): void {
+  if (xboxMasterVolume <= 0.001) return;
   const perfNow = performance.now();
   if (perfNow - lastXboxHoverTime < 65) return;
   lastXboxHoverTime = perfNow;
@@ -325,7 +356,7 @@ export function playXboxHoverSound(): void {
     filter.Q.setValueAtTime(1.4, now);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.052, now + 0.004);
+    gain.gain.linearRampToValueAtTime(0.052 * xboxMasterVolume, now + 0.004);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.042);
 
     osc.connect(filter);
@@ -341,6 +372,7 @@ export function playXboxHoverSound(): void {
 
 /** Crisp Xbox (A) green confirmation glass chime on click */
 export function playXboxClickSound(): void {
+  if (xboxMasterVolume <= 0.001) return;
   const ctx = getXboxAudioContext();
   if (!ctx) return;
 
@@ -361,7 +393,7 @@ export function playXboxClickSound(): void {
     osc2.frequency.exponentialRampToValueAtTime(1479.98, now + 0.04);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.068, now + 0.006);
+    gain.gain.linearRampToValueAtTime(0.068 * xboxMasterVolume, now + 0.006);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
 
     osc1.connect(gain);
@@ -379,6 +411,7 @@ export function playXboxClickSound(): void {
 
 /** Warm Xbox (B) back/close descending release tone */
 export function playXboxBackSound(): void {
+  if (xboxMasterVolume <= 0.001) return;
   const ctx = getXboxAudioContext();
   if (!ctx) return;
 
@@ -398,7 +431,7 @@ export function playXboxBackSound(): void {
     oscSub.frequency.exponentialRampToValueAtTime(146.83, now + 0.09);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.065, now + 0.007);
+    gain.gain.linearRampToValueAtTime(0.065 * xboxMasterVolume, now + 0.007);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.125);
 
     osc.connect(gain);
@@ -416,6 +449,7 @@ export function playXboxBackSound(): void {
 
 /** Iconic Xbox Series X|S deep bass + luminous emerald chord startup chime */
 export function playXboxBootChime(): void {
+  if (xboxMasterVolume <= 0.001) return;
   const ctx = getXboxAudioContext();
   if (!ctx) return;
 
@@ -423,7 +457,7 @@ export function playXboxBootChime(): void {
     const now = ctx.currentTime;
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0.0001, now);
-    masterGain.gain.linearRampToValueAtTime(0.14, now + 0.08);
+    masterGain.gain.linearRampToValueAtTime(0.14 * xboxMasterVolume, now + 0.08);
     masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
 
     const reverb = getXboxHallReverb(ctx);

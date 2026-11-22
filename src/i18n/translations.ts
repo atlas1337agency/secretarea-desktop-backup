@@ -47,6 +47,15 @@ export interface LauncherTranslations {
     extras: string;
     requests: string;
     settings: string;
+    switchLight: string;
+    switchDark: string;
+    lightLabel: string;
+    darkLabel: string;
+    selectLanguage: string;
+    openMenu: string;
+    closeMenu: string;
+    languageLabel: string;
+    themeLabel: string;
   };
   topbar: {
     webVersion: string;
@@ -75,13 +84,28 @@ export interface LauncherTranslations {
     desktopSupportedBadge: string;
     webNotice: string;
     trayActiveHint: string;
+    canRunItTitle: string;
+    canRunItDesc: string;
     windowSectionTitle: string;
     compactNavbarTitle: string;
     compactNavbarDesc: string;
+    lightModeTitle: string;
+    lightModeDesc: string;
+    darkModeBadge: string;
+    lightModeBadge: string;
     alwaysPs5Title: string;
     alwaysPs5Desc: string;
     alwaysXboxTitle: string;
     alwaysXboxDesc: string;
+    audioSectionTitle: string;
+    audioSectionDesc: string;
+    ambientMusicTitle: string;
+    ambientMusicDesc: string;
+    uiSoundsTitle: string;
+    uiSoundsDesc: string;
+    volumeTitle: string;
+    volumeDesc: string;
+    consoleThemeAudioHint: string;
     activeLabel: string;
     inactiveLabel: string;
   };
@@ -90,6 +114,8 @@ export interface LauncherTranslations {
     latestRelease: string;
     download: string;
     watchTrailer: string;
+    viewDetails: string;
+    exploreCatalog: string;
     repackVsOriginal: string;
     upcomingGames: string;
     recentGames: string;
@@ -256,6 +282,7 @@ export interface LauncherTranslations {
     description: string;
     noDescription: string;
     requirementsAndCanRun: string;
+    requirementsOnly: string;
     tools: string;
     steps: string;
     completed: string;
@@ -301,11 +328,20 @@ export interface LauncherTranslations {
 const EN: LauncherTranslations = {
   locale: 'en-US',
   nav: {
-    home: 'HOME',
-    library: 'LIBRARY',
-    extras: 'EXTRAS',
-    requests: 'REQUESTS',
-    settings: 'SETTINGS',
+    home: 'Home',
+    library: 'Library',
+    extras: 'Extras',
+    requests: 'Requests',
+    settings: 'Settings',
+    switchLight: 'Switch to Light mode',
+    switchDark: 'Switch to Dark mode',
+    lightLabel: 'Light',
+    darkLabel: 'Dark',
+    selectLanguage: 'Select language',
+    openMenu: 'Open navigation menu',
+    closeMenu: 'Close navigation menu',
+    languageLabel: 'Language',
+    themeLabel: 'Appearance',
   },
   topbar: {
     webVersion: 'SecretArea web version',
@@ -321,7 +357,7 @@ const EN: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Settings',
-    pageSubtitle: 'Customize launcher language, startup behavior, and window appearance.',
+    pageSubtitle: 'Customize launcher language, startup behavior, window theme, and soundscape.',
     resetDefaults: 'Reset Defaults',
     resetToast: 'Settings restored to defaults',
     languageSectionTitle: 'Language',
@@ -334,13 +370,28 @@ const EN: LauncherTranslations = {
     desktopSupportedBadge: 'Windows Tray Sync',
     webNotice: 'Tray auto-start activates automatically in the SecretArea.exe desktop app.',
     trayActiveHint: 'Closing the window minimizes SecretArea to the system tray while auto-start is active.',
+    canRunItTitle: 'Can Run It hardware check',
+    canRunItDesc: 'Compare games and tools against your PC hardware requirements across Home, Library, and Game pages.',
     windowSectionTitle: 'Window',
     compactNavbarTitle: 'Compact Navbar',
     compactNavbarDesc: 'Show the navbar as icons, even in a wide window.',
+    lightModeTitle: 'Light / Dark mode',
+    lightModeDesc: 'Switch between crisp Light mode and Steam-inspired Dark mode. Enabling PS5 or Xbox theme switches back to Dark mode.',
+    darkModeBadge: 'Dark Mode',
+    lightModeBadge: 'Light Mode',
     alwaysPs5Title: 'Always run app with PS5 theme',
     alwaysPs5Desc: 'Keep the PlayStation 5 sapphire theme and ambient soundscape active across the launcher.',
     alwaysXboxTitle: 'Always run app with Xbox theme',
     alwaysXboxDesc: 'Apply the emerald Xbox dashboard theme, wireframe orb backdrop, and Xbox UI sound effects.',
+    audioSectionTitle: 'Audio & Soundscape',
+    audioSectionDesc: 'Toggle PS5 and Xbox ambient music vs. UI click sounds separately and control playback volume.',
+    ambientMusicTitle: 'Ambient background music (PS5 / Xbox)',
+    ambientMusicDesc: 'Play evolving cosmic PS5 or emerald Xbox Nexus ambient music while a console theme is active.',
+    uiSoundsTitle: 'UI click & hover sounds',
+    uiSoundsDesc: 'Play subtle console focus ticks, confirmation chimes, and back tones when navigating buttons and cards.',
+    volumeTitle: 'Master volume',
+    volumeDesc: 'Adjust output volume for both console ambient music and UI sound effects.',
+    consoleThemeAudioHint: 'Select the PS5 or Xbox theme in Window above to hear the active console soundscape.',
     activeLabel: 'On',
     inactiveLabel: 'Off',
   },
@@ -349,6 +400,8 @@ const EN: LauncherTranslations = {
     latestRelease: 'Latest Release',
     download: 'Download',
     watchTrailer: 'Watch Trailer',
+    viewDetails: 'Details',
+    exploreCatalog: 'Explore Catalog',
     repackVsOriginal: 'Repack Size vs Original',
     upcomingGames: 'Upcoming Games',
     recentGames: 'Recent Games',
@@ -515,6 +568,7 @@ const EN: LauncherTranslations = {
     description: 'Description',
     noDescription: 'No description provided in catalog.',
     requirementsAndCanRun: 'Requirements & Can Run It',
+    requirementsOnly: 'System Requirements',
     tools: 'Tools',
     steps: 'Steps',
     completed: 'completed',
@@ -560,11 +614,20 @@ const EN: LauncherTranslations = {
 const FR: LauncherTranslations = {
   locale: 'fr-FR',
   nav: {
-    home: 'ACCUEIL',
-    library: 'BIBLIOTHÈQUE',
-    extras: 'EXTRAS',
-    requests: 'DEMANDES',
-    settings: 'PARAMÈTRES',
+    home: 'Accueil',
+    library: 'Bibliothèque',
+    extras: 'Extras',
+    requests: 'Demandes',
+    settings: 'Paramètres',
+    switchLight: 'Passer en mode clair',
+    switchDark: 'Passer en mode sombre',
+    lightLabel: 'Clair',
+    darkLabel: 'Sombre',
+    selectLanguage: 'Choisir la langue',
+    openMenu: 'Ouvrir le menu de navigation',
+    closeMenu: 'Fermer le menu de navigation',
+    languageLabel: 'Langue',
+    themeLabel: 'Apparence',
   },
   topbar: {
     webVersion: 'SecretArea version web',
@@ -580,7 +643,7 @@ const FR: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Paramètres',
-    pageSubtitle: 'Personnalisez la langue du lanceur, le démarrage et l’apparence de la fenêtre.',
+    pageSubtitle: 'Personnalisez la langue, le démarrage, l’apparence de la fenêtre et l’ambiance sonore.',
     resetDefaults: 'Réinitialiser',
     resetToast: 'Paramètres réinitialisés par défaut',
     languageSectionTitle: 'Langue',
@@ -593,13 +656,28 @@ const FR: LauncherTranslations = {
     desktopSupportedBadge: 'Zone de notification Windows',
     webNotice: 'Le démarrage automatique dans la barre d’état s’active automatiquement dans SecretArea.exe.',
     trayActiveHint: 'Fermer la fenêtre réduit SecretArea dans la zone de notification tant que cette option est active.',
+    canRunItTitle: 'Vérification matérielle « Can Run It »',
+    canRunItDesc: 'Compare automatiquement les jeux et outils avec la configuration de votre PC sur l’accueil, la bibliothèque et les fiches.',
     windowSectionTitle: 'Fenêtre',
     compactNavbarTitle: 'Barre de navigation compacte',
     compactNavbarDesc: 'Afficher la barre de navigation sous forme d’icônes, même dans une large fenêtre.',
+    lightModeTitle: 'Mode Clair / Sombre',
+    lightModeDesc: 'Basculez entre le mode Clair lumineux et le mode Sombre. Activer un thème PS5 ou Xbox repasse en mode Sombre.',
+    darkModeBadge: 'Mode Sombre',
+    lightModeBadge: 'Mode Clair',
     alwaysPs5Title: 'Toujours lancer l’application avec le thème PS5',
     alwaysPs5Desc: 'Garder le thème saphir PlayStation 5 et la musique d’ambiance actifs dans tout le lanceur.',
     alwaysXboxTitle: 'Toujours lancer l’application avec le thème Xbox',
     alwaysXboxDesc: 'Appliquer le thème émeraude Xbox, l’orbe filaire et les effets sonores Xbox.',
+    audioSectionTitle: 'Audio et ambiance sonore',
+    audioSectionDesc: 'Activez ou coupez séparément la musique d’ambiance PS5/Xbox et les sons d’interface, et réglez le volume.',
+    ambientMusicTitle: 'Musique d’ambiance (PS5 / Xbox)',
+    ambientMusicDesc: 'Joue la musique spatiale PS5 ou l’ambiance émeraude Xbox Nexus lorsqu’un thème console est actif.',
+    uiSoundsTitle: 'Sons de clic et survol de l’interface',
+    uiSoundsDesc: 'Joue les clics, survols et tonalités de retour style console lors de la navigation.',
+    volumeTitle: 'Volume principal',
+    volumeDesc: 'Ajuste le niveau sonore global de la musique d’ambiance et des effets sonores de l’interface.',
+    consoleThemeAudioHint: 'Activez le thème PS5 ou Xbox dans la section Fenêtre ci-dessus pour écouter l’ambiance sonore.',
     activeLabel: 'Activé',
     inactiveLabel: 'Désactivé',
   },
@@ -608,6 +686,8 @@ const FR: LauncherTranslations = {
     latestRelease: 'Dernière sortie',
     download: 'Télécharger',
     watchTrailer: 'Voir la bande-annonce',
+    viewDetails: 'Détails',
+    exploreCatalog: 'Explorer le catalogue',
     repackVsOriginal: 'Taille Repack vs Original',
     upcomingGames: 'Jeux à venir',
     recentGames: 'Jeux récents',
@@ -774,6 +854,7 @@ const FR: LauncherTranslations = {
     description: 'Description',
     noDescription: 'Aucune description disponible.',
     requirementsAndCanRun: 'Configuration requise & Compatibilité',
+    requirementsOnly: 'Configuration requise',
     tools: 'Outils',
     steps: 'Étapes d’installation',
     completed: 'terminées',
@@ -819,11 +900,20 @@ const FR: LauncherTranslations = {
 const ES: LauncherTranslations = {
   locale: 'es-ES',
   nav: {
-    home: 'INICIO',
-    library: 'BIBLIOTECA',
-    extras: 'EXTRAS',
-    requests: 'SOLICITUDES',
-    settings: 'AJUSTES',
+    home: 'Inicio',
+    library: 'Biblioteca',
+    extras: 'Extras',
+    requests: 'Solicitudes',
+    settings: 'Ajustes',
+    switchLight: 'Cambiar a modo claro',
+    switchDark: 'Cambiar a modo oscuro',
+    lightLabel: 'Claro',
+    darkLabel: 'Oscuro',
+    selectLanguage: 'Seleccionar idioma',
+    openMenu: 'Abrir menú de navegación',
+    closeMenu: 'Cerrar menú de navegación',
+    languageLabel: 'Idioma',
+    themeLabel: 'Apariencia',
   },
   topbar: {
     webVersion: 'SecretArea versión web',
@@ -839,7 +929,7 @@ const ES: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Ajustes',
-    pageSubtitle: 'Personaliza el idioma del lanzador, el inicio con el sistema y la apariencia de la ventana.',
+    pageSubtitle: 'Personaliza el idioma, el inicio, la apariencia de la ventana y el paisaje sonoro.',
     resetDefaults: 'Restablecer',
     resetToast: 'Ajustes restablecidos a los valores predeterminados',
     languageSectionTitle: 'Idioma',
@@ -852,13 +942,28 @@ const ES: LauncherTranslations = {
     desktopSupportedBadge: 'Bandeja de Windows',
     webNotice: 'El inicio automático en bandeja se activa en la aplicación de escritorio SecretArea.exe.',
     trayActiveHint: 'Al cerrar la ventana, SecretArea permanecerá en la bandeja del sistema mientras esta opción esté activa.',
+    canRunItTitle: 'Comprobación de hardware «Can Run It»',
+    canRunItDesc: 'Compara juegos y herramientas con los requisitos de tu PC en Inicio, Biblioteca y fichas de juegos.',
     windowSectionTitle: 'Ventana',
     compactNavbarTitle: 'Barra de navegación compacta',
     compactNavbarDesc: 'Muestra la barra de navegación como iconos, incluso en una ventana ancha.',
+    lightModeTitle: 'Modo Claro / Oscuro',
+    lightModeDesc: 'Alterna entre el modo Claro y el modo Oscuro. Al activar el tema PS5 o Xbox vuelve al modo Oscuro.',
+    darkModeBadge: 'Modo Oscuro',
+    lightModeBadge: 'Modo Claro',
     alwaysPs5Title: 'Ejecutar siempre con tema PS5',
     alwaysPs5Desc: 'Mantén activo el tema zafiro de PlayStation 5 y su ambiente sonoro en todo el lanzador.',
     alwaysXboxTitle: 'Ejecutar siempre con tema Xbox',
     alwaysXboxDesc: 'Aplica el tema esmeralda de Xbox, el fondo de malla geométrica con orbe verde y sonidos de Xbox.',
+    audioSectionTitle: 'Audio y sonido',
+    audioSectionDesc: 'Activa o silencia por separado la música ambiental de PS5/Xbox y los clics de interfaz, y ajusta el volumen.',
+    ambientMusicTitle: 'Música ambiental de fondo (PS5 / Xbox)',
+    ambientMusicDesc: 'Reproduce la música ambiental espacial de PS5 o esmeralda de Xbox Nexus cuando hay un tema de consola activo.',
+    uiSoundsTitle: 'Sonidos de clic y enfoque en la interfaz',
+    uiSoundsDesc: 'Reproduce tonos suaves de enfoque, confirmación y retroceso al navegar por botones y tarjetas.',
+    volumeTitle: 'Volumen principal',
+    volumeDesc: 'Ajusta el nivel de salida tanto para la música ambiental como para los efectos de sonido de la interfaz.',
+    consoleThemeAudioHint: 'Selecciona el tema PS5 o Xbox en Ventana arriba para escuchar el paisaje sonoro de consola.',
     activeLabel: 'Activado',
     inactiveLabel: 'Desactivado',
   },
@@ -867,6 +972,8 @@ const ES: LauncherTranslations = {
     latestRelease: 'Último lanzamiento',
     download: 'Descargar',
     watchTrailer: 'Ver tráiler',
+    viewDetails: 'Detalles',
+    exploreCatalog: 'Explorar catálogo',
     repackVsOriginal: 'Tamaño Repack vs Original',
     upcomingGames: 'Próximos juegos',
     recentGames: 'Juegos recientes',
@@ -1033,6 +1140,7 @@ const ES: LauncherTranslations = {
     description: 'Descripción',
     noDescription: 'No hay descripción disponible.',
     requirementsAndCanRun: 'Requisitos y Compatibilidad',
+    requirementsOnly: 'Requisitos del sistema',
     tools: 'Herramientas',
     steps: 'Pasos de instalación',
     completed: 'completados',
@@ -1083,6 +1191,15 @@ const AR: LauncherTranslations = {
     extras: 'إضافات',
     requests: 'الطلبات',
     settings: 'الإعدادات',
+    switchLight: 'التبديل إلى الوضع الفاتح',
+    switchDark: 'التبديل إلى الوضع الداكن',
+    lightLabel: 'فاتح',
+    darkLabel: 'داكن',
+    selectLanguage: 'اختر اللغة',
+    openMenu: 'فتح قائمة التنقل',
+    closeMenu: 'إغلاق قائمة التنقل',
+    languageLabel: 'اللغة',
+    themeLabel: 'المظهر',
   },
   topbar: {
     webVersion: 'نسخة الويب SecretArea',
@@ -1098,7 +1215,7 @@ const AR: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'الإعدادات',
-    pageSubtitle: 'تخصيص لغة المشغّل، سلوك بدء التشغيل والإغلاق، ومظهر النافذة.',
+    pageSubtitle: 'تخصيص لغة المشغّل، البدء والإغلاق، مظهر النافذة، والمؤثرات الصوتية.',
     resetDefaults: 'استعادة الافتراضي',
     resetToast: 'تمت استعادة الإعدادات الافتراضية',
     languageSectionTitle: 'اللغة',
@@ -1111,13 +1228,28 @@ const AR: LauncherTranslations = {
     desktopSupportedBadge: 'تشغيل تلقائي في Tray',
     webNotice: 'يتفعّل التشغيل التلقائي في شريط النظام تلقائياً داخل تطبيق سطح المكتب SecretArea.exe.',
     trayActiveHint: 'عند تفعيل هذا الخيار، يؤدي إغلاق النافذة إلى تصغير SecretArea إلى شريط النظام.',
+    canRunItTitle: 'فحص التوافق مع الجهاز (Can Run It)',
+    canRunItDesc: 'مقارنة الألعاب والأدوات تلقائياً مع مواصفات جهازك في الصفحة الرئيسية والمكتبة وصفحات الألعاب.',
     windowSectionTitle: 'النافذة',
     compactNavbarTitle: 'شريط تنقّل مدمج',
     compactNavbarDesc: 'إظهار شريط التنقّل كأيقونات فقط، حتى في النافذة العريضة.',
+    lightModeTitle: 'الوضع الفاتح / الداكن',
+    lightModeDesc: 'التبديل بين الوضع الفاتح والوضع الداكن. تفعيل مظهر PS5 أو Xbox يعيد التبديل إلى الوضع الداكن.',
+    darkModeBadge: 'الوضع الداكن',
+    lightModeBadge: 'الوضع الفاتح',
     alwaysPs5Title: 'تشغيل التطبيق دائماً بمظهر PS5',
     alwaysPs5Desc: 'تشغيل مظهر PlayStation 5 الياقوتي والموسيقى المحيطة في كامل المشغّل.',
     alwaysXboxTitle: 'تشغيل التطبيق دائماً بمظهر Xbox',
     alwaysXboxDesc: 'تطبيق مظهر Xbox الأخضر الزمردي وخلفية الشبكة والكرة المضيئة مع مؤثرات Xbox الصوتية.',
+    audioSectionTitle: 'الصوت والمشهد الصوتي',
+    audioSectionDesc: 'التحكم المنفصل في الموسيقى المحيطة لـ PS5 و Xbox مقابل أصوات النقر في الواجهة مع شريط مستوى الصوت.',
+    ambientMusicTitle: 'الموسيقى المحيطة بالخلفية (PS5 / Xbox)',
+    ambientMusicDesc: 'تشغيل الموسيقى المحيطة الهادئة لـ PS5 أو Xbox Nexus عند تفعيل أحد مظاهر الكونسول.',
+    uiSoundsTitle: 'أصوات النقر والتمرير في الواجهة',
+    uiSoundsDesc: 'تشغيل نقرات التركيز ونغمات التأكيد والرجوع عند التنقل بين الأزرار والبطاقات.',
+    volumeTitle: 'مستوى الصوت الرئيسي',
+    volumeDesc: 'ضبط مستوى الصوت العام لكل من الموسيقى المحيطة ومؤثرات الواجهة الصوتية.',
+    consoleThemeAudioHint: 'اختر مظهر PS5 أو Xbox في قسم النافذة أعلاه لسماع المشهد الصوتي النشط.',
     activeLabel: 'مفعّل',
     inactiveLabel: 'متوقف',
   },
@@ -1126,6 +1258,8 @@ const AR: LauncherTranslations = {
     latestRelease: 'أحدث إصدار',
     download: 'تحميل',
     watchTrailer: 'مشاهدة العرض',
+    viewDetails: 'التفاصيل',
+    exploreCatalog: 'تصفح الكتالوج',
     repackVsOriginal: 'حجم الريباك مقابل الأصلي',
     upcomingGames: 'الألعاب القادمة',
     recentGames: 'أحدث الألعاب',
@@ -1292,6 +1426,7 @@ const AR: LauncherTranslations = {
     description: 'الوصف',
     noDescription: 'لا يوجد وصف متاح في الكتالوج.',
     requirementsAndCanRun: 'متطلبات التشغيل وفحص التوافق',
+    requirementsOnly: 'متطلبات التشغيل',
     tools: 'الأدوات',
     steps: 'خطوات التثبيت',
     completed: 'مكتمل',

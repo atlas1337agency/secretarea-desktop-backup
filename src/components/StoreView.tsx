@@ -1,23 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
-  AlertTriangle,
-  ArrowUpDown,
+  ArrowsDownUp,
+  ArrowsClockwise,
+  ArrowUpRight,
+  CaretDown,
+  CaretLeft,
+  CaretRight,
   Check,
-  ChevronLeft,
-  ChevronRight,
   Cpu,
-  Download,
-  EyeOff,
-  Gpu,
+  DownloadSimple,
+  EyeSlash,
+  GraphicsCard,
   HardDrive,
+  Info,
   Laptop,
-  Layers,
-  MemoryStick,
+  Memory,
   Play,
-  RefreshCw,
-  Users,
-} from 'lucide-react';
+  Stack,
+  UsersThree,
+  Warning,
+} from '@phosphor-icons/react';
 import type { GameItem, SheetCatalogData } from '../types';
 import { getStudioTotalCount, sortStudiosByTop } from '../utils/parsers';
 import { evaluateCanRunGame, type CanRunEvaluation } from '../services/canRunIt';
@@ -33,6 +36,7 @@ interface StoreViewProps {
   catalog: SheetCatalogData;
   favorites: Set<string>;
   systemSpecs?: SystemHardwareSpecs;
+  canRunItEnabled?: boolean;
   isRefreshingSpecs?: boolean;
   language?: AppLanguage;
   onRefreshSpecs?: () => void;
@@ -121,10 +125,10 @@ function HorizontalGameSlide({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+          <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
             {title}
           </h2>
-          <div className="h-px flex-1 bg-white/[0.07]" />
+          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -132,7 +136,7 @@ function HorizontalGameSlide({
             <button
               type="button"
               onClick={onAction}
-              className="text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors me-1 whitespace-nowrap cursor-pointer"
+              className="text-[12px] font-medium text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white transition-colors me-1 whitespace-nowrap cursor-pointer"
             >
               {actionLabel}
             </button>
@@ -142,17 +146,17 @@ function HorizontalGameSlide({
               type="button"
               aria-label={`Scroll ${title} left`}
               onClick={() => scrollByViewport(-1)}
-              className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-slate-700 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <CaretLeft weight="bold" className="w-4 h-4" />
             </button>
             <button
               type="button"
               aria-label={`Scroll ${title} right`}
               onClick={() => scrollByViewport(1)}
-              className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+              className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-slate-700 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
             >
-              <ChevronRight className="w-4 h-4" />
+              <CaretRight weight="bold" className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -168,9 +172,9 @@ function HorizontalGameSlide({
             return (
               <div
                 key={`${game.tab}-${game.id}`}
-                className="snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] bg-[#18202b] border border-white/[0.06] rounded overflow-hidden select-none"
+                className="snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] bg-white dark:bg-[#18202b] border border-slate-200 dark:border-white/[0.06] rounded overflow-hidden select-none shadow-sm dark:shadow-none"
               >
-                <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden pointer-events-none">
+                <div className="relative aspect-[2/3] bg-slate-200 dark:bg-[#0f141b] overflow-hidden pointer-events-none">
                   <GameCover
                     src={game.coverImage}
                     alt={game.name}
@@ -195,9 +199,9 @@ function HorizontalGameSlide({
               }}
               role="button"
               tabIndex={0}
-              className="snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] group bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+              className="snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] group bg-white hover:bg-slate-50 dark:bg-[#18202b] dark:hover:bg-[#212b3a] border border-slate-200 dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col shadow-sm dark:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
             >
-              <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+              <div className="relative aspect-[2/3] bg-slate-200 dark:bg-[#0f141b] overflow-hidden">
                 <GameCover
                   src={game.coverImage}
                   alt={game.name}
@@ -212,13 +216,13 @@ function HorizontalGameSlide({
               </div>
 
               <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
-                <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-black dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
                   {game.name}
                 </h3>
-                <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b9bb4] font-mono-tabular">
+                <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
                   <span className="truncate">{metaLine}</span>
                   {game.originalSize && (
-                    <span className="line-through text-[#59677b] shrink-0">
+                    <span className="line-through text-slate-400 dark:text-[#59677b] shrink-0">
                       {game.originalSize}
                     </span>
                   )}
@@ -235,6 +239,7 @@ function HorizontalGameSlide({
 export function StoreView({
   catalog,
   systemSpecs,
+  canRunItEnabled = true,
   isRefreshingSpecs = false,
   language = 'en',
   onRefreshSpecs,
@@ -255,6 +260,7 @@ export function StoreView({
   >('all');
   const popularSectionRef = useRef<HTMLElement | null>(null);
   const pcCompatScrollerRef = useRef<HTMLDivElement | null>(null);
+  const belowHeroRef = useRef<HTMLDivElement | null>(null);
 
   // Featured Hero Slides: prioritize latest releases with rich landscape screenshots
   const featuredGames = useMemo(() => {
@@ -272,6 +278,8 @@ export function StoreView({
     return pool.length > 0 ? pool.slice(0, 6) : games.slice(0, 6);
   }, [games]);
 
+  const activeFeaturedIdRef = useRef<string | null>(null);
+
   // Smooth Hero Auto-Rotation (respects hover pause)
   useEffect(() => {
     if (heroPaused || featuredGames.length <= 1) return;
@@ -280,6 +288,18 @@ export function StoreView({
     }, 6500);
     return () => window.clearInterval(timer);
   }, [heroPaused, featuredGames.length]);
+
+  useEffect(() => {
+    const pinnedId = activeFeaturedIdRef.current;
+    if (!pinnedId || featuredGames.length === 0) return;
+    const matchedIdx = featuredGames.findIndex((g) => g.id === pinnedId);
+    if (matchedIdx >= 0) {
+      setSlideIndex((prev) => {
+        const currentIdx = prev % featuredGames.length;
+        return currentIdx === matchedIdx ? prev : matchedIdx;
+      });
+    }
+  }, [featuredGames]);
 
   // Upcoming Games from Google Sheet `upcoming` tab — newest first
   const upcomingGames = useMemo(
@@ -553,10 +573,11 @@ export function StoreView({
 
   const activeFeatured =
     featuredGames[slideIndex % Math.max(1, featuredGames.length)] || games[0];
+  activeFeaturedIdRef.current = activeFeatured ? activeFeatured.id : null;
 
   if (!activeFeatured) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#1b222c] text-[#8b9bb4]">
+      <div className="flex-1 flex items-center justify-center bg-[#f4f6f9] text-slate-600 dark:bg-[#1b222c] dark:text-[#8b9bb4]">
         {t.noCatalogLoaded}
       </div>
     );
@@ -570,174 +591,384 @@ export function StoreView({
     popularSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const activeSlideIdx = slideIndex % Math.max(1, featuredGames.length);
+
   return (
-    <div className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-[#1a2330] via-[#151b24] to-[#10141b]">
-      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-7 space-y-8 sm:space-y-10">
-        {/* 1. Modern Animated Hero Spotlight */}
-        <section
-          onMouseEnter={() => setHeroPaused(true)}
-          onMouseLeave={() => setHeroPaused(false)}
-          className="sa-ps5-hero relative rounded-md overflow-hidden border border-white/[0.08] bg-[#0e131a] shadow-2xl"
-        >
-          <div className="relative min-h-[280px] sm:min-h-[340px] md:min-h-[370px] lg:min-h-[400px] 2xl:min-h-[450px] flex items-end">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeFeatured.id}
-                initial={{ opacity: 0, scale: 1.03 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-0"
-              >
-                {backdropSrc && (
-                  <img
-                    src={backdropSrc}
-                    alt={activeFeatured.name}
-                    referrerPolicy="no-referrer"
-                    className="sa-ps5-hero-img w-full h-full object-cover object-center opacity-55"
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+    <div className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#1a2330] dark:via-[#151b24] dark:to-[#10141b]">
+      {/* 1. Full-Width, Full-Height Modern Animated Hero Section */}
+      <section
+        onMouseEnter={() => setHeroPaused(true)}
+        onMouseLeave={() => setHeroPaused(false)}
+        className="sa-ps5-hero relative w-full min-h-[calc(100dvh-5.25rem)] sm:min-h-[calc(100dvh-5.75rem)] flex flex-col justify-between overflow-hidden bg-[#0a0f16] border-b border-slate-200/20 dark:border-white/[0.08]"
+      >
+        {/* Animated Full-Bleed Backdrop Layer */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`hero-bg-${activeFeatured.id}`}
+            initial={{ opacity: 0, scale: 1.08 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.05, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 pointer-events-none"
+          >
+            {backdropSrc && (
+              <motion.img
+                src={backdropSrc}
+                alt={activeFeatured.name}
+                referrerPolicy="no-referrer"
+                initial={{ scale: 1.04 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 6.5, ease: 'easeOut' }}
+                className="sa-ps5-hero-img w-full h-full object-cover object-center opacity-55"
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-            <div className="sa-hero-scrim-x sa-ps5-hero-scrim-x absolute inset-0 bg-gradient-to-r from-[#0c1016] via-[#0c1016]/85 to-[#0c1016]/25 pointer-events-none" />
-            <div className="sa-ps5-hero-scrim-y absolute inset-0 bg-gradient-to-t from-[#0c1016] via-transparent to-[#0c1016]/35 pointer-events-none" />
+        {/* Measured Contrast Scrims + Subtle Ambient Glow */}
+        <div className="sa-hero-scrim-x sa-ps5-hero-scrim-x absolute inset-0 bg-gradient-to-r from-[#080c12] via-[#0a0f17]/88 to-[#0a0f17]/35 pointer-events-none" />
+        <div className="sa-ps5-hero-scrim-y absolute inset-0 bg-gradient-to-t from-[#080c12] via-[#080c12]/35 to-[#080c12]/55 pointer-events-none" />
+        <motion.div
+          aria-hidden="true"
+          animate={{ opacity: [0.22, 0.42, 0.22] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-24 start-1/4 w-[520px] h-[320px] rounded-full bg-[#1a9fff]/20 blur-[110px] pointer-events-none"
+        />
 
-            <div className="relative z-10 w-full p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-5 sm:gap-6">
+        {/* Main Hero Editorial & Modern Card Showcase Grid */}
+        <div className="relative z-10 flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 pt-5 sm:pt-7 lg:pt-10 pb-3 flex items-center">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 items-center gap-5 md:gap-7 lg:gap-10 xl:gap-14">
+            {/* Start Column: Animated Typography, Mobile Inline Card & Action Buttons */}
+            <div className="md:col-span-7 min-w-0">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeFeatured.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  key={`hero-copy-${activeFeatured.id}`}
+                  initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-end gap-4 sm:gap-5 max-w-3xl"
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-3.5 sm:space-y-4 lg:space-y-5"
                 >
-                  <div className="hidden sm:block w-28 lg:w-32 2xl:w-36 aspect-[2/3] rounded overflow-hidden border border-white/[0.15] shadow-2xl shrink-0 bg-[#141921]">
-                    <GameCover src={activeFeatured.coverImage} alt={activeFeatured.name} priority />
+                  {/* Mobile (<768px) Compact Inline Card + Kicker & Title */}
+                  <div className="flex items-start gap-3.5 md:block">
+                    <button
+                      type="button"
+                      onClick={() => onSelectGame(activeFeatured, 'overview')}
+                      aria-label={`${activeFeatured.name} — ${t.viewDetails}`}
+                      className="md:hidden group relative w-[86px] sm:w-[102px] aspect-[2/3] rounded-xl overflow-hidden border border-white/[0.2] bg-[#0e141d] shadow-[0_14px_34px_rgba(0,0,0,0.65)] shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                    >
+                      <GameCover
+                        src={activeFeatured.coverImage}
+                        alt={activeFeatured.name}
+                        priority
+                        imgClassName="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
+                      />
+                    </button>
+
+                    <div className="min-w-0 flex-1 space-y-2 sm:space-y-2.5">
+                      {/* Clean Unboxed Kicker Line */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.38, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+                        className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10.5px] sm:text-[12px] font-semibold tracking-[0.11em] uppercase text-[#38bdf8]"
+                      >
+                        <span>
+                          {activeFeatured.isPinned ? t.featuredSpotlight : t.latestRelease}
+                        </span>
+                        {activeFeatured.repackBy && (
+                          <>
+                            <span aria-hidden="true" className="text-white/35">
+                              ·
+                            </span>
+                            <span className="text-[#93c5fd]">{activeFeatured.repackBy}</span>
+                          </>
+                        )}
+                        {activeFeatured.dateAdded && (
+                          <>
+                            <span aria-hidden="true" className="text-white/35">
+                              ·
+                            </span>
+                            <span className="text-white/70 font-mono-tabular">
+                              {new Date(activeFeatured.dateAdded).toLocaleDateString(tr.locale)}
+                            </span>
+                          </>
+                        )}
+                      </motion.div>
+
+                      {/* Hero Display Title */}
+                      <motion.h1
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.44, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        style={{
+                          fontSize: 'clamp(1.38rem, 3.2vw, 3.4rem)',
+                          textWrap: 'balance',
+                        }}
+                        className="font-display font-extrabold text-white tracking-[-0.025em] leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
+                      >
+                        {activeFeatured.name}
+                      </motion.h1>
+
+                      {/* Mobile Inline Repack Size */}
+                      {(activeFeatured.repackSize || activeFeatured.originalSize) && (
+                        <div className="md:hidden flex items-baseline gap-2 pt-0.5 font-mono-tabular">
+                          <span className="text-[13px] font-bold text-[#66c0f4]">
+                            {activeFeatured.repackSize || 'N/A'}
+                          </span>
+                          {activeFeatured.originalSize && (
+                            <span className="text-[11px] text-[#8ea0b8] line-through">
+                              {activeFeatured.originalSize}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="space-y-2.5 min-w-0">
-                    <div className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#66c0f4]">
-                      {[
-                        activeFeatured.isPinned ? t.featuredSpotlight : t.latestRelease,
-                        activeFeatured.repackBy,
-                        activeFeatured.dateAdded
-                          ? new Date(activeFeatured.dateAdded).toLocaleDateString(tr.locale)
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </div>
-
-                    <h1
-                      style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.5rem)', textWrap: 'balance' }}
-                      className="font-display font-bold text-white tracking-tight leading-[1.12]"
+                  {/* Clean Metadata Strip */}
+                  {(activeFeatured.genreList.length > 0 || activeFeatured.version) && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.42, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                      className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-medium text-[#b5c4d6] tracking-wide line-clamp-1"
                     >
-                      {activeFeatured.name}
-                    </h1>
-
-                    <p className="text-[12.5px] text-[#aeb9c7]">
                       {[...activeFeatured.genreList.slice(0, 4), activeFeatured.version]
                         .filter(Boolean)
                         .join(' · ')}
-                    </p>
+                    </motion.p>
+                  )}
 
-                    <p className="text-[13px] lg:text-[13.5px] text-[#c6d4df] leading-relaxed line-clamp-2 lg:line-clamp-3 max-w-2xl">
-                      {activeFeatured.description}
-                    </p>
+                  {/* Narrative Description */}
+                  <motion.p
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.44, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#d6e1ed] leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-2xl"
+                  >
+                    {activeFeatured.description}
+                  </motion.p>
 
-                    <div className="pt-1 flex flex-wrap items-center gap-2.5">
+                  {/* Action Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className="pt-1 flex flex-wrap items-center gap-2.5 sm:gap-3"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelectGame(activeFeatured, 'downloads')}
+                      className="group relative overflow-hidden inline-flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-xl bg-[#0284c7] hover:bg-[#0ea5e9] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13px] sm:text-[14px] font-semibold shadow-[0_12px_32px_rgba(26,159,255,0.38)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                      />
+                      <DownloadSimple className="w-4 h-4 relative z-10 shrink-0" />
+                      <span className="relative z-10">{t.download}</span>
+                    </button>
+
+                    {activeFeatured.embedTrailerUrl && (
                       <button
                         type="button"
-                        onClick={() => onSelectGame(activeFeatured, 'downloads')}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[13px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        onClick={() => onSelectGame(activeFeatured, 'trailer')}
+                        className="inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-xl bg-white/[0.11] hover:bg-white/[0.2] backdrop-blur-md border border-white/[0.2] text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>{t.download}</span>
+                        <Play weight="fill" className="w-4 h-4 fill-current shrink-0" />
+                        <span>{t.watchTrailer}</span>
                       </button>
+                    )}
 
-                      {activeFeatured.embedTrailerUrl && (
-                        <button
-                          type="button"
-                          onClick={() => onSelectGame(activeFeatured, 'trailer')}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#2a3441]/90 hover:bg-[#344050] border border-white/[0.1] text-[#e5e9f0] text-[13px] font-medium transition-colors whitespace-nowrap cursor-pointer"
-                        >
-                          <Play className="w-4 h-4 fill-current" />
-                          <span>{t.watchTrailer}</span>
-                        </button>
-                      )}
+                    <button
+                      type="button"
+                      onClick={() => onSelectGame(activeFeatured, 'overview')}
+                      className="inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-4.5 sm:py-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] backdrop-blur-md border border-white/[0.14] text-[#dce8f5] hover:text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    >
+                      <Info className="w-4 h-4 shrink-0" />
+                      <span>{t.viewDetails}</span>
+                    </button>
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* End Column (Tablet & Desktop md+): Modern Animated Featured Cover Card */}
+            <div className="hidden md:flex md:col-span-5 justify-end">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`hero-card-${activeFeatured.id}`}
+                  initial={{ opacity: 0, y: 22, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -12, scale: 0.96 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6, scale: 1.015 }}
+                  className="md:w-[190px] lg:w-[235px] xl:w-[285px] 2xl:w-[320px] shrink-0"
+                >
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onSelectGame(activeFeatured, 'overview')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelectGame(activeFeatured, 'overview');
+                      }
+                    }}
+                    aria-label={`${activeFeatured.name} — ${t.viewDetails}`}
+                    className="group relative rounded-2xl overflow-hidden border border-white/[0.18] bg-[#0e141d]/85 backdrop-blur-xl shadow-[0_28px_70px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                  >
+                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#121822]">
+                      <GameCover
+                        src={activeFeatured.coverImage}
+                        alt={activeFeatured.name}
+                        priority
+                        imgClassName="w-full h-full object-cover group-hover:scale-[1.045] transition-transform duration-500 ease-out"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-gradient-to-t from-[#090d14] via-transparent to-white/[0.06] pointer-events-none"
+                      />
+                    </div>
+
+                    {/* Clean Integrated Card Footer Strip */}
+                    <div className="px-3.5 py-2.5 lg:px-4 lg:py-3 bg-[#0b1018]/92 border-t border-white/[0.08] flex items-center justify-between gap-2.5">
+                      <div className="min-w-0">
+                        <div className="text-[9.5px] lg:text-[10px] uppercase tracking-[0.09em] text-[#8ea0b8] truncate">
+                          {t.repackVsOriginal}
+                        </div>
+                        <div className="mt-0.5 flex items-baseline gap-2 font-mono-tabular">
+                          <span className="text-[13.5px] lg:text-[15px] xl:text-base font-bold text-[#66c0f4]">
+                            {activeFeatured.repackSize || 'N/A'}
+                          </span>
+                          {activeFeatured.originalSize && (
+                            <span className="text-[11px] lg:text-[11.5px] text-[#6d7b8e] line-through">
+                              {activeFeatured.originalSize}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg bg-white/[0.08] group-hover:bg-[#1a9fff] text-white/80 group-hover:text-white flex items-center justify-center transition-colors shrink-0">
+                        <ArrowUpRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </span>
                     </div>
                   </div>
                 </motion.div>
               </AnimatePresence>
-
-              {/* End Column: Size Comparison + Animated Carousel Selector */}
-              <div className="flex flex-wrap sm:flex-row lg:flex-col items-center lg:items-end justify-between w-full lg:w-auto gap-3 shrink-0">
-                <div className="bg-[#0d1117]/85 backdrop-blur-md border border-white/[0.08] rounded px-3.5 py-2.5 text-start lg:text-end">
-                  <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4]">
-                    {t.repackVsOriginal}
-                  </div>
-                  <div className="mt-0.5 flex items-baseline gap-2.5 font-mono-tabular">
-                    <span className="text-base lg:text-lg font-bold text-[#66c0f4]">
-                      {activeFeatured.repackSize || 'N/A'}
-                    </span>
-                    {activeFeatured.originalSize && (
-                      <span className="text-[12px] text-[#6b788b] line-through">
-                        {activeFeatured.originalSize}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {featuredGames.length > 1 && (
-                  <div dir="ltr" className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      aria-label="Previous featured game"
-                      onClick={() =>
-                        setSlideIndex(
-                          (prev) => (prev - 1 + featuredGames.length) % featuredGames.length
-                        )
-                      }
-                      className="p-1.5 rounded bg-black/55 hover:bg-black/85 border border-white/[0.1] text-white cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <div className="flex items-center gap-1.5">
-                      {featuredGames.map((item, idx) => {
-                        const isActive = idx === slideIndex % featuredGames.length;
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            aria-label={`Spotlight ${item.name}`}
-                            onClick={() => setSlideIndex(idx)}
-                            className={`h-1.5 rounded-sm transition-all cursor-pointer ${
-                              isActive
-                                ? 'w-7 bg-[#1a9fff]'
-                                : 'w-2.5 bg-white/30 hover:bg-white/55'
-                            }`}
-                          />
-                        );
-                      })}
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Next featured game"
-                      onClick={() =>
-                        setSlideIndex((prev) => (prev + 1) % featuredGames.length)
-                      }
-                      className="p-1.5 rounded bg-black/55 hover:bg-black/85 border border-white/[0.1] text-white cursor-pointer"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
-        </section>
+        </div>
+
+        {/* Hero Bottom Interactive Dock: Featured Thumbnails + Controls + Scroll Cue */}
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 pb-3.5 sm:pb-5 pt-1.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 pt-2.5 border-t border-white/[0.1]">
+            {/* Clickable Featured Game Thumbnail Rail */}
+            {featuredGames.length > 1 && (
+              <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0 flex-1 min-w-0">
+                {featuredGames.map((item, idx) => {
+                  const isActive = idx === activeSlideIdx;
+                  return (
+                    <button
+                      key={`hero-thumb-${item.id}`}
+                      type="button"
+                      onClick={() => setSlideIndex(idx)}
+                      aria-label={`Spotlight ${item.name}`}
+                      className={`group relative flex items-center gap-2 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border text-start transition-all duration-200 cursor-pointer shrink-0 overflow-hidden ${
+                        isActive
+                          ? 'bg-white/[0.14] border-white/[0.3] text-white shadow-lg min-w-[145px] sm:min-w-[180px]'
+                          : 'bg-black/35 hover:bg-white/[0.08] border-white/[0.08] text-white/70 hover:text-white max-w-[135px] sm:max-w-[170px]'
+                      }`}
+                    >
+                      <div className="w-6 h-8 sm:w-7 sm:h-9 rounded overflow-hidden bg-[#141a23] shrink-0 border border-white/[0.1]">
+                        <GameCover
+                          src={item.coverImage}
+                          alt={item.name}
+                          imgClassName="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="text-[11px] sm:text-[11.5px] font-medium truncate">
+                        {item.name}
+                      </span>
+                      {isActive && (
+                        <motion.span
+                          key={`progress-${item.id}-${heroPaused ? 'paused' : 'play'}`}
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: heroPaused ? 0 : 1 }}
+                          transition={{
+                            duration: heroPaused ? 0.15 : 6.5,
+                            ease: 'linear',
+                          }}
+                          style={{
+                            transformOrigin: language === 'ar' ? '100% 50%' : '0% 50%',
+                          }}
+                          className="absolute inset-x-0 bottom-0 h-[2px] bg-[#38bdf8]"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Carousel Controls + Explore Below Cue */}
+            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+              {featuredGames.length > 1 && (
+                <div dir="ltr" className="inline-flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    aria-label="Previous featured game"
+                    onClick={() =>
+                      setSlideIndex(
+                        (prev) => (prev - 1 + featuredGames.length) % featuredGames.length
+                      )
+                    }
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.18] border border-white/[0.14] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <CaretLeft weight="bold" className="w-4 h-4" />
+                  </button>
+                  <span className="px-1.5 sm:px-2 text-[11px] sm:text-[11.5px] font-mono-tabular text-white/75 select-none">
+                    {activeSlideIdx + 1} / {featuredGames.length}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Next featured game"
+                    onClick={() =>
+                      setSlideIndex((prev) => (prev + 1) % featuredGames.length)
+                    }
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.18] border border-white/[0.14] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <CaretRight weight="bold" className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  belowHeroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+                aria-label={t.exploreCatalog}
+                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 h-8 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.14] text-white/90 hover:text-white text-[11.5px] sm:text-[12px] font-medium transition-colors whitespace-nowrap cursor-pointer"
+              >
+                <span>{t.exploreCatalog}</span>
+                <motion.span
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="inline-flex"
+                >
+                  <CaretDown weight="bold" className="w-3.5 h-3.5" />
+                </motion.span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div
+        ref={belowHeroRef}
+        className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8 sm:space-y-10"
+      >
 
         {/* 2. Upcoming Games Slide (Google Sheet: upcoming) */}
         <HorizontalGameSlide
@@ -759,24 +990,24 @@ export function StoreView({
         />
 
         {/* 3.5 Can Run It? — Real PC Compatibility Scanner (All Catalog Sections) */}
-        {systemSpecs && (
-          <section className="sa-ps5-panel rounded-xl bg-gradient-to-br from-[#131b26] via-[#10161f] to-[#0d1118] border border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-xl">
+        {canRunItEnabled && systemSpecs && (
+          <section className="sa-ps5-panel rounded-xl bg-gradient-to-br from-white via-slate-50 to-slate-100/80 dark:from-[#131b26] dark:via-[#10161f] dark:to-[#0d1118] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-lg bg-[#1a9fff]/15 border border-[#1a9fff]/35 text-[#66c0f4] flex items-center justify-center shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-[#1a9fff]/15 border border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
                   <Laptop className="w-4 h-4" />
                 </span>
                 <div className="min-w-0">
-                  <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white">
+                  <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white">
                     {t.canRunTitle}
                   </h2>
-                  <p className="text-[11.5px] text-[#8b9bb4]">{t.canRunSubtitle}</p>
+                  <p className="text-[11.5px] text-slate-600 dark:text-[#8b9bb4]">{t.canRunSubtitle}</p>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 {/* Scope Filter: All / Games / Hypervisor / SteamTools / PS5 / Tools */}
-                <div className="sa-ps5-pill-group inline-flex flex-wrap items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]">
+                <div className="sa-ps5-pill-group inline-flex flex-wrap items-center p-0.5 rounded bg-slate-200/85 dark:bg-[#141a23] border border-slate-300/80 dark:border-white/[0.08]">
                   {(
                     [
                       { key: 'all', label: t.scopeAll },
@@ -796,7 +1027,7 @@ export function StoreView({
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
                           pcCompatScope === opt.key
                             ? 'bg-[#1a9fff] text-white'
-                            : 'text-[#9fb0c7] hover:text-white'
+                            : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -811,15 +1042,15 @@ export function StoreView({
                 </div>
 
                 {/* Can Run (Green) vs Can't Run (Red) Toggle */}
-                <div className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]">
+                <div className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-slate-200/85 dark:bg-[#141a23] border border-slate-300/80 dark:border-white/[0.08]">
                   <button
                     type="button"
                     data-active={pcCompatTab === 'can-run' ? 'true' : 'false'}
                     onClick={() => setPcCompatTab('can-run')}
                     className={`sa-ps5-toggle-pass inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-bold transition-colors cursor-pointer ${
                       pcCompatTab === 'can-run'
-                        ? 'bg-emerald-600/85 text-white shadow-sm'
-                        : 'text-[#4ade80] hover:bg-emerald-500/10'
+                        ? 'bg-emerald-600 dark:bg-emerald-600/85 text-white shadow-sm'
+                        : 'text-emerald-700 hover:bg-emerald-500/10 dark:text-[#4ade80]'
                     }`}
                   >
                     <Check className="w-3.5 h-3.5" />
@@ -834,11 +1065,11 @@ export function StoreView({
                     onClick={() => setPcCompatTab('cannot-run')}
                     className={`sa-ps5-toggle-fail inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-bold transition-colors cursor-pointer ${
                       pcCompatTab === 'cannot-run'
-                        ? 'bg-rose-600/85 text-white shadow-sm'
-                        : 'text-[#f87171] hover:bg-rose-500/10'
+                        ? 'bg-rose-600 dark:bg-rose-600/85 text-white shadow-sm'
+                        : 'text-rose-700 hover:bg-rose-500/10 dark:text-[#f87171]'
                     }`}
                   >
-                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <Warning className="w-3.5 h-3.5" />
                     <span>{t.cannotRunBtn}</span>
                     <span className="font-mono-tabular opacity-90">
                       ({pcCompatibilityData.cannotRun.length})
@@ -851,49 +1082,49 @@ export function StoreView({
                     type="button"
                     aria-label="Scroll compatibility list left"
                     onClick={() => scrollPcCompat(-1)}
-                    className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                    className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <CaretLeft weight="bold" className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
                     aria-label="Scroll compatibility list right"
                     onClick={() => scrollPcCompat(1)}
-                    className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                    className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Detected PC Specs Ribbon */}
-            <div className="sa-ps5-subpanel flex flex-wrap items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-[#0d1219] border border-white/[0.06] text-[11.5px]">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[#cbd5e1]">
+            <div className="sa-ps5-subpanel flex flex-wrap items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-white dark:bg-[#0d1219] border border-slate-200 dark:border-white/[0.06] text-[11.5px]">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-slate-700 dark:text-[#cbd5e1]">
                 <span className="inline-flex items-center gap-1.5">
-                  <Gpu className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
-                  <span className="text-[#8b9bb4]">{t.gpuLabel}:</span>
-                  <strong className="text-white font-semibold">{systemSpecs.gpuName}</strong>
+                  <GraphicsCard className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                  <span className="text-slate-500 dark:text-[#8b9bb4]">{t.gpuLabel}:</span>
+                  <strong className="text-slate-900 dark:text-white font-semibold">{systemSpecs.gpuName}</strong>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
-                  <span className="text-[#8b9bb4]">{t.cpuLabel}:</span>
-                  <strong className="text-white font-semibold">{systemSpecs.cpuName}</strong>
+                  <Cpu className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                  <span className="text-slate-500 dark:text-[#8b9bb4]">{t.cpuLabel}:</span>
+                  <strong className="text-slate-900 dark:text-white font-semibold">{systemSpecs.cpuName}</strong>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <MemoryStick className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
-                  <span className="text-[#8b9bb4]">{t.ramLabel}:</span>
-                  <strong className="text-white font-semibold font-mono-tabular">
+                  <Memory className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                  <span className="text-slate-500 dark:text-[#8b9bb4]">{t.ramLabel}:</span>
+                  <strong className="text-slate-900 dark:text-white font-semibold font-mono-tabular">
                     {systemSpecs.ramIsApprox ? `${systemSpecs.ramGB} GB+` : `${systemSpecs.ramGB} GB`}
                   </strong>
                 </span>
                 {systemSpecs.freeSpaceGB !== null && (
                   <span className="inline-flex items-center gap-1.5">
-                    <HardDrive className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
-                    <span className="text-[#8b9bb4]">
+                    <HardDrive className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                    <span className="text-slate-500 dark:text-[#8b9bb4]">
                       {t.freeDriveLabel} ({systemSpecs.spaceDrive}):
                     </span>
-                    <strong className="text-white font-semibold font-mono-tabular">
+                    <strong className="text-slate-900 dark:text-white font-semibold font-mono-tabular">
                       {systemSpecs.freeSpaceGB.toFixed(1)} GB
                     </strong>
                   </span>
@@ -905,9 +1136,9 @@ export function StoreView({
                   type="button"
                   onClick={onRefreshSpecs}
                   disabled={isRefreshingSpecs}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1a222d] hover:bg-[#243040] border border-white/[0.08] text-[11px] font-semibold text-[#66c0f4] hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[11px] font-semibold text-[#0284c7] hover:text-slate-900 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.08] dark:text-[#66c0f4] dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-3 h-3 ${isRefreshingSpecs ? 'animate-spin' : ''}`} />
+                  <ArrowsClockwise className={`w-3 h-3 ${isRefreshingSpecs ? 'animate-spin' : ''}`} />
                   <span>{t.scanPc}</span>
                 </button>
               )}
@@ -915,7 +1146,7 @@ export function StoreView({
 
             {/* Matching Cards Row */}
             {activePcCompatList.length === 0 ? (
-              <div className="sa-ps5-subpanel py-8 text-center rounded bg-[#0e131b] border border-white/[0.05] text-[13px] text-[#8b9bb4]">
+              <div className="sa-ps5-subpanel py-8 text-center rounded bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.05] text-[13px] text-slate-600 dark:text-[#8b9bb4]">
                 {pcCompatTab === 'cannot-run' ? t.canRunEmptyFail : t.canRunEmptyPass}
               </div>
             ) : (
@@ -938,13 +1169,13 @@ export function StoreView({
                           onSelectGame(item, 'overview');
                         }
                       }}
-                      className={`snap-start shrink-0 w-[142px] sm:w-[164px] md:w-[176px] lg:w-[186px] group bg-[#18202b] hover:bg-[#212b3a] border rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff] ${
+                      className={`snap-start shrink-0 w-[142px] sm:w-[164px] md:w-[176px] lg:w-[186px] group bg-white hover:bg-slate-50 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] border rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff] ${
                         isPass
-                          ? 'sa-ps5-card-pass border-emerald-500/25 hover:border-emerald-400/60'
-                          : 'sa-ps5-card-fail border-rose-500/35 hover:border-rose-400/75'
+                          ? 'sa-ps5-card-pass border-emerald-500/40 hover:border-emerald-500 dark:border-emerald-500/25 dark:hover:border-emerald-400/60'
+                          : 'sa-ps5-card-fail border-rose-500/40 hover:border-rose-500 dark:border-rose-500/35 dark:hover:border-rose-400/75'
                       }`}
                     >
-                      <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+                      <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                         <GameCover
                           src={item.coverImage}
                           alt={item.name}
@@ -960,13 +1191,13 @@ export function StoreView({
                       </div>
 
                       <div className="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
-                        <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                        <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
                           {item.name}
                         </h3>
                         <div className="flex items-center justify-between gap-1.5">
                           <span
                             className={`inline-flex items-center gap-1 text-[11px] font-bold truncate ${
-                              isPass ? 'text-[#4ade80]' : 'text-[#f87171]'
+                              isPass ? 'text-emerald-700 dark:text-[#4ade80]' : 'text-rose-700 dark:text-[#f87171]'
                             }`}
                           >
                             {isPass ? (
@@ -976,12 +1207,12 @@ export function StoreView({
                               </>
                             ) : (
                               <>
-                                <AlertTriangle className="w-3 h-3 shrink-0" />
+                                <Warning className="w-3 h-3 shrink-0" />
                                 <span className="truncate">{evalRes.shortBadge}</span>
                               </>
                             )}
                           </span>
-                          <span className="text-[10.5px] text-[#8b9bb4] font-mono-tabular shrink-0">
+                          <span className="text-[10.5px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular shrink-0">
                             {item.repackSize || item.tab}
                           </span>
                         </div>
@@ -999,13 +1230,13 @@ export function StoreView({
           <section ref={popularSectionRef} className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.mostPopularGames}
                 </h2>
-                <span className="px-2 py-0.5 rounded bg-[#18202b] border border-white/[0.08] text-[12px] font-mono-tabular font-semibold text-[#66c0f4] shrink-0">
+                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[12px] font-mono-tabular font-semibold text-[#0284c7] dark:bg-[#18202b] dark:border-white/[0.08] dark:text-[#66c0f4] shrink-0">
                   {popularGames.length}
                 </span>
-                <div className="h-px flex-1 bg-white/[0.07] hidden sm:block" />
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07] hidden sm:block" />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -1013,7 +1244,7 @@ export function StoreView({
                 <div
                   role="group"
                   aria-label={t.mostPopularGames}
-                  className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]"
+                  className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-slate-200/85 dark:bg-[#141a23] border border-slate-300/80 dark:border-white/[0.08]"
                 >
                   <button
                     type="button"
@@ -1025,10 +1256,10 @@ export function StoreView({
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
                       popularFilter === 'all'
                         ? 'bg-[#1a9fff] text-white shadow-sm'
-                        : 'text-[#9fb0c7] hover:text-white'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                     }`}
                   >
-                    <Layers className="w-3 h-3 shrink-0" />
+                    <Stack className="w-3 h-3 shrink-0" />
                     <span>{t.showAll}</span>
                     <span className="font-mono-tabular opacity-80">({popularFilterCounts.all})</span>
                   </button>
@@ -1042,10 +1273,10 @@ export function StoreView({
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
                       popularFilter === 'hide-hv'
                         ? 'bg-[#1a9fff] text-white shadow-sm'
-                        : 'text-[#9fb0c7] hover:text-white'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                     }`}
                   >
-                    <EyeOff className="w-3 h-3 shrink-0" />
+                    <EyeSlash className="w-3 h-3 shrink-0" />
                     <span>{t.hideHv}</span>
                     <span className="font-mono-tabular opacity-80">({popularFilterCounts.gamesOnly})</span>
                   </button>
@@ -1060,18 +1291,18 @@ export function StoreView({
                     className={`sa-ps5-toggle-fail inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
                       popularFilter === 'hide-games'
                         ? 'bg-[#dc2626] text-white shadow-sm'
-                        : 'text-[#9fb0c7] hover:text-white'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                     }`}
                   >
-                    <EyeOff className="w-3 h-3 shrink-0" />
+                    <EyeSlash className="w-3 h-3 shrink-0" />
                     <span>{t.hideGames}</span>
                     <span className="font-mono-tabular opacity-80">({popularFilterCounts.hvOnly})</span>
                   </button>
                 </div>
 
                 {/* Organization / Sort Selector */}
-                <div className="sa-ps5-pill-group inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#141a23] border border-white/[0.08] text-[11.5px] text-[#c6d4df]">
-                  <ArrowUpDown className="w-3 h-3 text-[#66c0f4] shrink-0" />
+                <div className="sa-ps5-pill-group inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-200/85 dark:bg-[#141a23] border border-slate-300/80 dark:border-white/[0.08] text-[11.5px] text-slate-700 dark:text-[#c6d4df]">
+                  <ArrowsDownUp className="w-3 h-3 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
                   <select
                     aria-label={t.mostPopularGames}
                     value={popularSort}
@@ -1079,18 +1310,18 @@ export function StoreView({
                       setPopularSort(e.target.value as PopularSortMode);
                       setPopularPage(0);
                     }}
-                    className="bg-transparent text-[#e5e9f0] font-medium focus:outline-none cursor-pointer"
+                    className="bg-transparent text-slate-800 dark:text-[#e5e9f0] font-medium focus:outline-none cursor-pointer"
                   >
-                    <option value="newest" className="bg-[#141a23] text-white">
+                    <option value="newest" className="bg-white text-slate-900 dark:bg-[#141a23] dark:text-white">
                       {t.newestFirst}
                     </option>
-                    <option value="az" className="bg-[#141a23] text-white">
+                    <option value="az" className="bg-white text-slate-900 dark:bg-[#141a23] dark:text-white">
                       {t.nameAz}
                     </option>
                   </select>
                 </div>
 
-                <div className="text-[12px] text-[#8b9bb4] font-mono-tabular whitespace-nowrap ps-1">
+                <div className="text-[12px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular whitespace-nowrap ps-1">
                   {t.pageOf} {safePopularPage + 1} / {totalPopularPages}
                 </div>
               </div>
@@ -1110,9 +1341,9 @@ export function StoreView({
                   }}
                   role="button"
                   tabIndex={0}
-                  className="group bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                  className="group bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                 >
-                  <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+                  <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                     <GameCover
                       src={game.coverImage}
                       alt={game.name}
@@ -1133,13 +1364,13 @@ export function StoreView({
                   </div>
 
                   <div className="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
-                    <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                    <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
                       {game.name}
                     </h3>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b9bb4] font-mono-tabular">
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
                       <span className="truncate">{game.repackSize || game.tab}</span>
                       {game.originalSize && (
-                        <span className="line-through text-[#59677b] shrink-0">
+                        <span className="line-through text-slate-400 dark:text-[#59677b] shrink-0">
                           {game.originalSize}
                         </span>
                       )}
@@ -1151,15 +1382,15 @@ export function StoreView({
 
             {/* Pagination & See More Controls */}
             {totalPopularPages > 1 && (
-              <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06]">
+              <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 dark:border-white/[0.06]">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button
                     type="button"
                     disabled={safePopularPage === 0}
                     onClick={() => goToPopularPage(safePopularPage - 1)}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
                   >
-                    <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                    <CaretLeft weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                     <span>{t.previous}</span>
                   </button>
 
@@ -1171,7 +1402,7 @@ export function StoreView({
                       className={`min-w-[34px] h-[34px] px-2 rounded text-[12px] font-mono-tabular font-semibold transition-colors cursor-pointer ${
                         pageIdx === safePopularPage
                           ? 'bg-[#1a9fff] text-white'
-                          : 'bg-[#18202b] text-[#9ca8b8] hover:bg-[#232f3e] hover:text-white border border-white/[0.06]'
+                          : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.06]'
                       }`}
                     >
                       {pageIdx + 1}
@@ -1182,10 +1413,10 @@ export function StoreView({
                     type="button"
                     disabled={safePopularPage >= totalPopularPages - 1}
                     onClick={() => goToPopularPage(safePopularPage + 1)}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
                   >
                     <span>{t.next}</span>
-                    <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                    <CaretRight weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                   </button>
                 </div>
 
@@ -1199,13 +1430,13 @@ export function StoreView({
                       {t.seeMoreNext} {nextPopularPageCount}{' '}
                       {nextPopularPageCount === 1 ? t.gameSingular : t.gamePlural}
                     </span>
-                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                    <CaretRight weight="bold" className="w-4 h-4 rtl:rotate-180" />
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => goToPopularPage(0)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                   >
                     <span>{t.backToPage1}</span>
                   </button>
@@ -1220,16 +1451,16 @@ export function StoreView({
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.topStudios}
                 </h2>
-                <div className="h-px flex-1 bg-white/[0.07]" />
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
               </div>
 
               <button
                 type="button"
                 onClick={onOpenStudiosPage}
-                className="text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="text-[12px] font-medium text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
                 {t.viewAllStudios}
               </button>
@@ -1246,10 +1477,10 @@ export function StoreView({
                     title={studio.name}
                     aria-label={`${studio.name} (${totalGames} ${t.gamePlural})`}
                     onClick={() => onSelectGame(studio, 'overview')}
-                    className="group p-3 rounded bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/55 transition-all duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                    className="group p-3 rounded bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/55 transition-all duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                   >
                     <StudioEmblem studio={studio} />
-                    <span className="text-[12px] font-semibold font-mono-tabular text-[#c6d4df] group-hover:text-white">
+                    <span className="text-[12px] font-semibold font-mono-tabular text-slate-700 group-hover:text-slate-900 dark:text-[#c6d4df] dark:group-hover:text-white">
                       {totalGames} {totalGames === 1 ? t.gameSingular : t.gamePlural}
                     </span>
                   </button>
@@ -1259,42 +1490,43 @@ export function StoreView({
           </section>
         )}
 
-        {/* 6. Best games For Two Players (Google Sheet: onlinegames — flush slide, non-clickable images only) */}
+        {/* 6. Best games For Two Players (Google Sheet: onlinegames — seamless desktop canvas carousel) */}
         {twoPlayerGames.length > 0 && (
           <section
             onMouseEnter={() => setTwoPlayersPaused(true)}
             onMouseLeave={() => setTwoPlayersPaused(false)}
             onFocus={() => setTwoPlayersPaused(true)}
             onBlur={() => setTwoPlayersPaused(false)}
-            className="sa-ps5-panel rounded-xl bg-gradient-to-br from-[#141d29] via-[#101721] to-[#0d121a] border border-white/[0.08] p-3.5 sm:p-5 space-y-3.5 shadow-xl"
+            className="space-y-4"
           >
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#1a9fff]/15 border border-[#1a9fff]/35 text-[#66c0f4] flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4" />
-                </span>
-                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white truncate">
+                <UsersThree className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
                   {t.bestTwoPlayers}
                 </h2>
-                <div className="h-px flex-1 bg-white/[0.07] hidden sm:block" />
+                <span className="text-[12px] font-mono-tabular text-slate-500 dark:text-[#7f91a8] shrink-0">
+                  {twoPlayerGames.length}
+                </span>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
               </div>
 
-              <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div dir="ltr" className="inline-flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   aria-label="Scroll Best games For Two Players left"
                   onClick={() => scrollTwoPlayers(-1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   aria-label="Scroll Best games For Two Players right"
                   onClick={() => scrollTwoPlayers(1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1302,22 +1534,58 @@ export function StoreView({
             <div
               dir="ltr"
               ref={twoPlayersScrollerRef}
-              className="sa-ps5-subpanel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg overflow-hidden border border-white/[0.08] bg-[#0b0e14]"
+              className="no-scrollbar flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1.5"
             >
-              {twoPlayerGames.map((game) => (
-                <div
-                  key={`two-player-${game.tab}-${game.id}`}
-                  className="snap-start shrink-0 w-[44vw] sm:w-[162px] md:w-[176px] lg:w-[190px] xl:w-[204px] 2xl:w-[218px] bg-[#0f141b] border-r border-white/[0.06] last:border-r-0 overflow-hidden select-none pointer-events-none"
-                >
-                  <div className="relative aspect-[2/3] w-full bg-[#0f141b] overflow-hidden">
-                    <GameCover
-                      src={game.coverImage}
-                      alt={game.name}
-                      imgClassName="w-full h-full object-cover"
-                    />
+              {twoPlayerGames.map((game) => {
+                const metaText = [game.repackSize, game.genreList[0]]
+                  .filter(Boolean)
+                  .join(' · ');
+
+                return (
+                  <div
+                    key={`two-player-${game.tab}-${game.id}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onSelectGame(game, 'overview')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelectGame(game, 'overview');
+                      }
+                    }}
+                    aria-label={game.name}
+                    className="group relative snap-start shrink-0 w-[148px] sm:w-[168px] md:w-[180px] lg:w-[192px] xl:w-[208px] 2xl:w-[222px] rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#141b25] hover:border-[#0284c7]/60 dark:hover:border-[#38bdf8]/60 shadow-sm hover:shadow-lg dark:shadow-none hover:-translate-y-1 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                  >
+                    <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-200 dark:bg-[#0f141b]">
+                      <GameCover
+                        src={game.coverImage}
+                        alt={game.name}
+                        imgClassName="w-full h-full object-cover group-hover:scale-[1.045] transition-transform duration-300 ease-out"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/40 to-transparent pointer-events-none"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-2.5 end-2.5 w-7 h-7 rounded-lg bg-black/55 backdrop-blur-sm border border-white/[0.16] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </span>
+                      <div className="absolute inset-x-0 bottom-0 p-3 sm:p-3.5">
+                        <h3 className="text-[13px] sm:text-[13.5px] font-semibold text-white leading-snug line-clamp-2">
+                          {game.name}
+                        </h3>
+                        {metaText && (
+                          <p className="mt-1 text-[11px] text-[#cbd5e1] font-mono-tabular truncate">
+                            {metaText}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

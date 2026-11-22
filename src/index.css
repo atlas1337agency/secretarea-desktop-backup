@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
@@ -10,6 +11,12 @@
   html,
   body {
     font-family: var(--font-sans);
+    background-color: #f4f6f9;
+    color: #0f172a;
+  }
+
+  html.dark,
+  html.dark body {
     background-color: #0e141b;
     color: #dcdedf;
   }
@@ -33,22 +40,35 @@
   }
 }
 
-/* Steam-inspired subtle dark scrollbars */
+/* Subtle light & dark scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #141920;
+  background: #e2e8f0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2f3846;
+  background: #94a3b8;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #141920;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2f3846;
+  border-radius: 2px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #435064;
 }
 
@@ -203,7 +223,7 @@ html.theme-ps5 body {
 
 /* Hero Spotlight (ASTRO-inspired framing & frosted buttons) */
 .theme-ps5 .sa-ps5-hero {
-  border-radius: 22px;
+  border-radius: 0 0 22px 22px;
   border-color: rgba(255, 255, 255, 0.18);
   background-color: #02173b;
   box-shadow:
@@ -552,7 +572,7 @@ html.theme-ps5 body {
 }
 
 /* Inputs, Selects & Textareas */
-.theme-ps5 input,
+.theme-ps5 input:not([type="range"]),
 .theme-ps5 select,
 .theme-ps5 textarea {
   border-radius: 12px;
@@ -560,7 +580,7 @@ html.theme-ps5 body {
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-.theme-ps5 input:focus,
+.theme-ps5 input:not([type="range"]):focus,
 .theme-ps5 select:focus,
 .theme-ps5 textarea:focus {
   border-color: rgba(255, 255, 255, 0.9);
@@ -696,7 +716,7 @@ html.theme-xbox body {
 
 /* Hero Spotlight in Xbox Mode */
 .theme-xbox .sa-ps5-hero {
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   border-color: rgba(110, 231, 85, 0.3);
   background-color: #07190a;
   box-shadow:
@@ -1033,7 +1053,7 @@ html.theme-xbox body {
 }
 
 /* Inputs, Selects & Textareas in Xbox Mode */
-.theme-xbox input,
+.theme-xbox input:not([type="range"]),
 .theme-xbox select,
 .theme-xbox textarea {
   border-radius: 6px;
@@ -1041,7 +1061,7 @@ html.theme-xbox body {
   border-color: rgba(110, 231, 85, 0.25);
 }
 
-.theme-xbox input:focus,
+.theme-xbox input:not([type="range"]):focus,
 .theme-xbox select:focus,
 .theme-xbox textarea:focus {
   border-color: #7cf25c;

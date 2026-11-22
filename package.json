@@ -1,7 +1,7 @@
 {
   "name": "secretarea",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "SecretArea Desktop Game Launcher",
   "repository": "https://github.com/secretarea1337/secretarea-desktop",
   "type": "module",
@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.1",
     "dotenv": "^17.2.3",

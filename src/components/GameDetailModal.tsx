@@ -1,41 +1,50 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
-  AlertTriangle,
+  Archive,
   ArrowLeft,
-  BadgeCheck,
-  Calendar,
+  ArrowSquareOut,
+  ArrowUpRight,
+  CalendarBlank,
+  CaretLeft,
+  CaretRight,
   Check,
-  ChevronLeft,
-  ChevronRight,
-  CloudDownload,
+  CloudArrowDown,
   Copy,
+  CornersOut,
   Cpu,
-  Download,
-  ExternalLink,
+  DownloadSimple,
   FileText,
-  Gamepad2,
+  FilmStrip,
+  GameController,
   Globe,
-  Gpu,
+  GraphicsCard,
   HardDrive,
+  HardDrives,
   Hash,
+  Key,
+  Lightning,
+  LinkSimple,
   ListChecks,
   Magnet,
-  MemoryStick,
+  Memory,
   Monitor,
-  PackageCheck,
-  Pin,
+  Package,
   Play,
-  ShieldAlert,
+  PushPin,
+  SealCheck,
+  ShieldWarning,
   SlidersHorizontal,
-  Sparkles,
+  Sparkle,
+  Stack,
   Tag,
   ThumbsDown,
   ThumbsUp,
   UserCheck,
+  Warning,
   Wrench,
   X,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import type { GameItem, MirrorLink, SheetCatalogData } from '../types';
 import { isTruthyFlag } from '../utils/parsers';
 import { evaluateCanRunGame } from '../services/canRunIt';
@@ -44,7 +53,7 @@ import { CanRunItHeroBadge, CanRunItPanel } from './CanRunItPanel';
 import { GameCover } from './GameCover';
 import { resolveSheetRefItem } from './ExtrasView';
 import { HypervisorGuideModal } from './HypervisorGuideModal';
-import { SectionSourceBadge } from './SectionBadge';
+import { getSectionVisualMeta, SectionSourceBadge } from './SectionBadge';
 import type { AppLanguage } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
 
@@ -55,6 +64,7 @@ interface GameDetailModalProps {
   initialViewMode?: 'overview' | 'trailer' | 'downloads';
   favorites?: Set<string>;
   systemSpecs?: SystemHardwareSpecs;
+  canRunItEnabled?: boolean;
   isRefreshingSpecs?: boolean;
   onRefreshSpecs?: () => void;
   onSaveCustomSpecs?: (next: SystemHardwareSpecs) => void;
@@ -127,6 +137,7 @@ export function GameDetailModal({
   initialViewMode = 'overview',
   favorites,
   systemSpecs,
+  canRunItEnabled = true,
   isRefreshingSpecs = false,
   onRefreshSpecs,
   onSaveCustomSpecs,
@@ -134,12 +145,16 @@ export function GameDetailModal({
   onJumpToItem,
   onClose,
 }: GameDetailModalProps) {
-  const t = getTranslations(language).detail;
+  const tr = getTranslations(language);
+  const t = tr.detail;
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(() => new Set());
   const [isRecPaused, setIsRecPaused] = useState(false);
   const [isHvGuideOpen, setIsHvGuideOpen] = useState(false);
   const [copiedGameId, setCopiedGameId] = useState(false);
+  const [copiedMirrorKey, setCopiedMirrorKey] = useState<string | null>(null);
+  const [activeChannelFilter, setActiveChannelFilter] = useState<string>('all');
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
 
   const pageScrollRef = useRef<HTMLDivElement | null>(null);
   const mediaSectionRef = useRef<HTMLElement | null>(null);
@@ -148,8 +163,8 @@ export function GameDetailModal({
   const recommendedSliderRef = useRef<HTMLDivElement | null>(null);
 
   const canRunEvaluation = useMemo(
-    () => (game && systemSpecs ? evaluateCanRunGame(game, systemSpecs) : null),
-    [game, systemSpecs]
+    () => (game && canRunItEnabled && systemSpecs ? evaluateCanRunGame(game, systemSpecs) : null),
+    [game, canRunItEnabled, systemSpecs]
   );
 
   const mediaSlides = useMemo<MediaSlide[]>(() => {
@@ -196,6 +211,19 @@ export function GameDetailModal({
       }))
       .filter((entry) => entry.links.length > 0);
   }, [game]);
+
+  const totalMirrorLinks = useMemo(
+    () => groupedMirrors.reduce((acc, entry) => acc + entry.links.length, 0),
+    [groupedMirrors]
+  );
+
+  const visibleMirrors = useMemo(
+    () =>
+      activeChannelFilter === 'all'
+        ? groupedMirrors
+        : groupedMirrors.filter((entry) => entry.groupName === activeChannelFilter),
+    [groupedMirrors, activeChannelFilter]
+  );
 
   const linkedCatalogItems = useMemo(() => {
     if (!game || !catalog) return [];
@@ -307,6 +335,9 @@ export function GameDetailModal({
     setCheckedSteps(new Set());
     setIsHvGuideOpen(false);
     setCopiedGameId(false);
+    setCopiedMirrorKey(null);
+    setActiveChannelFilter('all');
+    setLightboxImageUrl(null);
     recommendedSliderRef.current?.scrollTo({ left: 0 });
     if (initialViewMode === 'downloads') {
       const timer = window.setTimeout(() => {
@@ -320,11 +351,17 @@ export function GameDetailModal({
   useEffect(() => {
     if (!game || isHvGuideOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (lightboxImageUrl) {
+          setLightboxImageUrl(null);
+          return;
+        }
+        onClose();
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [game, isHvGuideOpen, onClose]);
+  }, [game, isHvGuideOpen, lightboxImageUrl, onClose]);
 
   useEffect(() => {
     if (!game || isRecPaused || recommendedGames.length <= 2) return;
@@ -418,6 +455,19 @@ export function GameDetailModal({
     }
   };
 
+  const handleCopyMirrorUrl = async (mirrorKey: string, url: string) => {
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedMirrorKey(mirrorKey);
+      window.setTimeout(() => {
+        setCopiedMirrorKey((current) => (current === mirrorKey ? null : current));
+      }, 2000);
+    } catch {
+      // Clipboard fallback ignored cleanly
+    }
+  };
+
   const completedRatio =
     game.parsedSteps.length > 0
       ? Math.round((checkedSteps.size / game.parsedSteps.length) * 100)
@@ -428,31 +478,31 @@ export function GameDetailModal({
       role="dialog"
       aria-modal="true"
       aria-label={game.name}
-      className="sa-ps5-modal fixed inset-0 z-50 w-screen h-screen bg-[#141921] flex flex-col overflow-hidden"
+      className="sa-ps5-modal fixed inset-0 z-50 w-screen h-screen bg-[#f4f6f9] dark:bg-[#141921] flex flex-col overflow-hidden"
     >
       {/* Top Game Page Navigation Header */}
-      <header className="sa-ps5-modal-header px-4 sm:px-6 lg:px-8 py-3 bg-[#171a21] border-b border-white/[0.08] shrink-0">
+      <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3 bg-white/95 dark:bg-[#10151e]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/[0.08] shrink-0">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-semibold text-[#e5e9f0] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-white/[0.07] dark:hover:bg-white/[0.14] dark:border-white/[0.1] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
               <span>{t.back}</span>
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 text-[12px] text-[#8b9bb4] min-w-0">
+            <div className="hidden sm:flex items-center gap-2 text-[12px] text-slate-500 dark:text-[#8b9bb4] min-w-0">
               <button
                 type="button"
                 onClick={onClose}
-                className="hover:text-white transition-colors cursor-pointer shrink-0"
+                className="hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 {t.home}
               </button>
-              <span className="text-[#4b5b70]">/</span>
-              <span className="text-white font-semibold truncate">{game.name}</span>
+              <span className="text-slate-300 dark:text-[#4b5b70]">/</span>
+              <span className="text-slate-900 dark:text-white font-semibold truncate">{game.name}</span>
             </div>
           </div>
 
@@ -460,7 +510,7 @@ export function GameDetailModal({
             type="button"
             onClick={onClose}
             aria-label={t.close}
-            className="p-2 rounded bg-[#252f3d] hover:bg-[#313e50] text-[#aeb9c7] hover:text-white transition-colors cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.14] dark:border-white/[0.08] dark:text-[#aeb9c7] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -470,253 +520,477 @@ export function GameDetailModal({
       {/* Scrollable Full-Screen Game Page */}
       <div
         ref={pageScrollRef}
-        className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-gradient-to-b from-[#18202c] via-[#131922] to-[#0f131a]"
+        className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#18202c] dark:via-[#131922] dark:to-[#0f131a]"
       >
         {/* Game Page Hero Header */}
-        <section className="sa-ps5-modal-hero relative border-b border-white/[0.07] overflow-hidden bg-[#10151d]">
-          {heroBackdrop && (
-            <img
-              src={heroBackdrop}
-              alt=""
-              aria-hidden="true"
-              referrerPolicy="no-referrer"
-              className="absolute inset-0 w-full h-full object-cover object-center opacity-25 blur-[2px] scale-105 pointer-events-none"
-            />
-          )}
-          <div
-            aria-hidden="true"
-            className="sa-ps5-modal-scrim-y absolute inset-0 bg-gradient-to-t from-[#131922] via-[#131922]/85 to-[#10151d]/70"
-          />
-          <div
-            aria-hidden="true"
-            className="sa-modal-scrim-x sa-ps5-modal-scrim-x absolute inset-0 bg-gradient-to-r from-[#10151d]/95 via-[#10151d]/75 to-transparent"
-          />
+        {(() => {
+          const sectionMeta = getSectionVisualMeta(game.tab);
+          const formattedDateAdded = (() => {
+            if (!game.dateAdded) return '';
+            const parsed = new Date(game.dateAdded);
+            if (Number.isNaN(parsed.getTime())) return game.dateAdded;
+            return parsed.toLocaleDateString(tr.locale, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            });
+          })();
+          const hasReqsTarget = Boolean(canRunEvaluation || hasStructuredReqs || raw);
 
-          <div className="relative max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-9">
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-7 items-start">
-              {/* Portrait coverImage + SteamTools Ratings below coverImage */}
-              <div className="w-36 sm:w-44 lg:w-52 shrink-0 flex flex-col gap-2.5">
-                <div className="w-full aspect-[2/3] rounded bg-[#0c1016] border border-white/[0.12] shadow-2xl overflow-hidden">
-                  <GameCover
-                    src={game.coverImage}
-                    alt={game.name}
-                    imgClassName="w-full h-full object-cover"
-                  />
-                </div>
+          return (
+            <section className="sa-ps5-modal-hero relative border-b border-slate-200/20 dark:border-white/[0.08] overflow-hidden bg-[#0a0f16]">
+              {/* Animated Full-Bleed Backdrop */}
+              {heroBackdrop && (
+                <motion.img
+                  key={`detail-bg-${game.tab}-${game.id}`}
+                  src={heroBackdrop}
+                  alt=""
+                  aria-hidden="true"
+                  referrerPolicy="no-referrer"
+                  initial={{ opacity: 0.1, scale: 1.08 }}
+                  animate={{ opacity: 0.34, scale: 1.01 }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute inset-0 w-full h-full object-cover object-center blur-[1.5px] pointer-events-none"
+                />
+              )}
 
-                {isSteamTools && (ratingPositiveRaw || ratingNegativeRaw) && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {ratingPositiveRaw && (
-                      <div className="p-2 sm:p-2.5 rounded bg-[#141b24]/95 border border-white/[0.08] text-center">
-                        <div
-                          className={`flex items-center justify-center gap-1 text-[13px] sm:text-[14px] font-bold font-mono-tabular ${
-                            !Number.isNaN(ratingPositiveNum) && ratingPositiveNum >= 70
-                              ? 'text-[#4ade80]'
-                              : !Number.isNaN(ratingPositiveNum) && ratingPositiveNum >= 50
-                              ? 'text-[#facc15]'
-                              : 'text-[#f87171]'
-                          }`}
-                        >
-                          <ThumbsUp className="w-3.5 h-3.5 shrink-0" />
-                          <span>
-                            {ratingPositiveRaw.endsWith('%')
-                              ? ratingPositiveRaw
-                              : `${ratingPositiveRaw}%`}
-                          </span>
+              {/* Measured Contrast Scrims + Subtle Ambient Glow */}
+              <div
+                aria-hidden="true"
+                className="sa-ps5-modal-scrim-y absolute inset-0 bg-gradient-to-t from-[#0d131c] via-[#0d131c]/80 to-[#0a0f16]/65 pointer-events-none"
+              />
+              <div
+                aria-hidden="true"
+                className="sa-modal-scrim-x sa-ps5-modal-scrim-x absolute inset-0 bg-gradient-to-r from-[#0a0f16]/95 via-[#0b1119]/82 to-[#0b1119]/40 pointer-events-none"
+              />
+              <motion.div
+                aria-hidden="true"
+                animate={{ opacity: [0.18, 0.34, 0.18] }}
+                transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -top-24 end-1/4 w-[460px] h-[280px] rounded-full bg-[#1a9fff]/20 blur-[110px] pointer-events-none"
+              />
+
+              <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9 lg:py-11">
+                <div className="grid grid-cols-1 md:grid-cols-12 items-center gap-6 md:gap-8 lg:gap-10">
+                  {/* Start Column (md+): Modern Animated Portrait Cover Showcase Card + Ratings */}
+                  <div className="hidden md:flex md:col-span-4 lg:col-span-3 flex-col items-center md:items-start gap-3">
+                    <motion.div
+                      key={`detail-cover-${game.tab}-${game.id}`}
+                      initial={{ opacity: 0, y: 18, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+                      whileHover={{ y: -5, scale: 1.015 }}
+                      className="w-[195px] lg:w-[225px] xl:w-[248px] shrink-0"
+                    >
+                      <div className="rounded-2xl overflow-hidden border border-white/[0.18] bg-[#0e141d]/85 backdrop-blur-xl shadow-[0_24px_60px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)]">
+                        <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#121822]">
+                          <GameCover
+                            src={game.coverImage}
+                            alt={game.name}
+                            priority
+                            imgClassName="w-full h-full object-cover"
+                          />
+                          <div
+                            aria-hidden="true"
+                            className="absolute inset-0 bg-gradient-to-t from-[#090d14]/85 via-transparent to-white/[0.06] pointer-events-none"
+                          />
                         </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#8b9bb4]">
-                          {t.positive}
-                        </div>
+
+                        {(game.repackSize || game.originalSize) && (
+                          <div className="px-3.5 py-2.5 bg-[#0b1018]/92 border-t border-white/[0.08] flex items-center justify-between gap-2">
+                            <span className="text-[10px] uppercase tracking-[0.09em] text-[#8ea0b8] truncate">
+                              {isTools ? t.downloadSize : t.repackSize}
+                            </span>
+                            <div className="flex items-baseline gap-1.5 font-mono-tabular shrink-0">
+                              <span className="text-[13.5px] font-bold text-[#66c0f4]">
+                                {game.repackSize || '—'}
+                              </span>
+                              {game.originalSize && (
+                                <span className="text-[11px] text-[#6d7b8e] line-through">
+                                  {game.originalSize}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </motion.div>
 
-                    {ratingNegativeRaw && (
-                      <div className="p-2 sm:p-2.5 rounded bg-[#141b24]/95 border border-white/[0.08] text-center">
-                        <div className="flex items-center justify-center gap-1 text-[13px] sm:text-[14px] font-bold font-mono-tabular text-[#f87171]">
-                          <ThumbsDown className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">
-                            {!Number.isNaN(ratingNegativeNum)
-                              ? ratingNegativeNum.toLocaleString()
-                              : ratingNegativeRaw}
-                          </span>
-                        </div>
-                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#8b9bb4]">
-                          {t.negative}
-                        </div>
+                    {isSteamTools && (ratingPositiveRaw || ratingNegativeRaw) && (
+                      <div className="w-[195px] lg:w-[225px] xl:w-[248px] grid grid-cols-2 gap-2">
+                        {ratingPositiveRaw && (
+                          <div className="p-2.5 rounded-xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] text-center">
+                            <div
+                              className={`flex items-center justify-center gap-1 text-[13px] font-bold font-mono-tabular ${
+                                !Number.isNaN(ratingPositiveNum) && ratingPositiveNum >= 70
+                                  ? 'text-[#4ade80]'
+                                  : !Number.isNaN(ratingPositiveNum) && ratingPositiveNum >= 50
+                                  ? 'text-[#facc15]'
+                                  : 'text-[#f87171]'
+                              }`}
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5 shrink-0" />
+                              <span>
+                                {ratingPositiveRaw.endsWith('%')
+                                  ? ratingPositiveRaw
+                                  : `${ratingPositiveRaw}%`}
+                              </span>
+                            </div>
+                            <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#94a6bd]">
+                              {t.positive}
+                            </div>
+                          </div>
+                        )}
+
+                        {ratingNegativeRaw && (
+                          <div className="p-2.5 rounded-xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] text-center">
+                            <div className="flex items-center justify-center gap-1 text-[13px] font-bold font-mono-tabular text-[#f87171]">
+                              <ThumbsDown className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">
+                                {!Number.isNaN(ratingNegativeNum)
+                                  ? ratingNegativeNum.toLocaleString()
+                                  : ratingNegativeRaw}
+                              </span>
+                            </div>
+                            <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#94a6bd]">
+                              {t.negative}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
 
-              {/* Game Title, Genres, Core Specs & Quick Actions */}
-              <div className="flex-1 min-w-0 w-full space-y-4">
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-[#66c0f4]">
-                    <SectionSourceBadge tab={game.tab} />
-                    {game.isNew && (
-                      <span className="px-1.5 py-0.5 rounded-[2px] bg-[#1a9fff] text-white font-bold tracking-[0.08em]">
-                        NEW
-                      </span>
-                    )}
-                    {isTools && game.isPinned && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-amber-500/20 border border-amber-400/50 text-amber-300 font-bold tracking-[0.08em]">
-                        <Pin className="w-3 h-3" />
-                        <span>{t.pinned}</span>
-                      </span>
-                    )}
-                    {isTools && game.isFree && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold tracking-[0.08em]">
-                        <BadgeCheck className="w-3 h-3" />
-                        <span>{t.free}</span>
-                      </span>
-                    )}
-                    <span className="text-[#4b5b70]">·</span>
-                    <span>{isTools ? t.tools : game.category || game.tab}</span>
-                    {game.repackBy && (
-                      <>
-                        <span className="text-[#4b5b70]">·</span>
-                        <span className="text-[#9cb1c9]">{game.repackBy}</span>
-                      </>
-                    )}
-                    {game.dateAdded && (
-                      <>
-                        <span className="text-[#4b5b70]">·</span>
-                        <span className="text-[#8b9bb4] font-mono-tabular">{game.dateAdded}</span>
-                      </>
-                    )}
-                  </div>
-
-                  <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight text-balance">
-                    {game.name}
-                  </h1>
-
-                  <div className="text-[13px] sm:text-[14px] text-[#9cb4cc]">
-                    {game.genreList.length > 0
-                      ? game.genreList.join(' · ')
-                      : isTools
-                      ? [
-                          game.isFree ? 'Free Software' : 'Software Tool',
-                          game.isPinned ? 'Pinned Release' : '',
-                          game.version ? `v${game.version.replace(/^v/i, '')}` : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')
-                      : game.genresRaw || 'PC Release'}
-                  </div>
-                </div>
-
-                {/* Key Release Numbers Strip + Compact Your PC Can Run It Badge */}
-                <div
-                  className={`grid grid-cols-2 gap-2.5 sm:gap-3 pt-1 ${
-                    canRunEvaluation ? 'sm:grid-cols-5 max-w-3xl' : 'sm:grid-cols-4 max-w-2xl'
-                  }`}
-                >
-                  {isSteamTools ? (
-                    <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
-                      <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                        {t.gameId}
+                  {/* End Column: Animated Title, Clean Kicker, Spec Cards & Action Buttons */}
+                  <motion.div
+                    key={`detail-info-${game.tab}-${game.id}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="md:col-span-8 lg:col-span-9 min-w-0 w-full space-y-4 sm:space-y-5"
+                  >
+                    {/* Mobile (<768px) Compact Inline Artwork + Kicker & Title */}
+                    <div className="flex items-start gap-3.5 md:block">
+                      <div className="md:hidden w-[88px] sm:w-[106px] aspect-[2/3] rounded-xl overflow-hidden border border-white/[0.2] bg-[#0e141d] shadow-[0_14px_34px_rgba(0,0,0,0.65)] shrink-0">
+                        <GameCover
+                          src={game.coverImage}
+                          alt={game.name}
+                          priority
+                          imgClassName="w-full h-full object-cover"
+                        />
                       </div>
-                      {steamGameId ? (
-                        <button
-                          type="button"
-                          onClick={handleCopyGameId}
-                          title={t.gameId}
-                          className="mt-0.5 inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-semibold font-mono-tabular text-[#66c0f4] hover:text-white transition-colors cursor-pointer max-w-full"
-                        >
-                          <span className="truncate">{steamGameId}</span>
-                          {copiedGameId ? (
-                            <Check className="w-3.5 h-3.5 text-[#34d399] shrink-0" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5 shrink-0 opacity-80" />
+
+                      <div className="min-w-0 flex-1 space-y-2">
+                        {/* Unboxed Typographic Kicker */}
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.11em] text-[#38bdf8]">
+                          <span>{isTools ? t.tools : sectionMeta.label}</span>
+                          {game.category &&
+                            game.category.toLowerCase() !== sectionMeta.label.toLowerCase() && (
+                              <>
+                                <span aria-hidden="true" className="text-white/35">
+                                  ·
+                                </span>
+                                <span className="text-[#93c5fd]">{game.category}</span>
+                              </>
+                            )}
+                          {game.isNew && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="text-emerald-400">NEW</span>
+                            </>
                           )}
-                        </button>
-                      ) : (
-                        <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-white">
-                          —
+                          {isTools && game.isPinned && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-amber-300">
+                                <PushPin className="w-3 h-3" />
+                                <span>{t.pinned}</span>
+                              </span>
+                            </>
+                          )}
+                          {isTools && game.isFree && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-emerald-300">
+                                <SealCheck className="w-3 h-3" />
+                                <span>{t.free}</span>
+                              </span>
+                            </>
+                          )}
+                          {game.repackBy && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="text-[#cbd5e1]">{game.repackBy}</span>
+                            </>
+                          )}
+                          {formattedDateAdded && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="text-white/70 font-mono-tabular">
+                                {formattedDateAdded}
+                              </span>
+                            </>
+                          )}
                         </div>
+
+                        {/* Hero Display Title */}
+                        <h1
+                          style={{
+                            fontSize: 'clamp(1.42rem, 3vw, 2.85rem)',
+                            textWrap: 'balance',
+                          }}
+                          className="font-display font-extrabold text-white tracking-[-0.025em] leading-[1.08] drop-shadow-[0_4px_22px_rgba(0,0,0,0.45)]"
+                        >
+                          {game.name}
+                        </h1>
+
+                        {/* Genres / Release Classification */}
+                        <p className="text-[12.5px] sm:text-[13.5px] font-medium text-[#b5c4d6] tracking-wide line-clamp-2">
+                          {game.genreList.length > 0
+                            ? game.genreList.join(' · ')
+                            : isTools
+                            ? [
+                                game.isFree ? 'Free Software' : 'Software Tool',
+                                game.isPinned ? 'Pinned Release' : '',
+                                game.version ? `v${game.version.replace(/^v/i, '')}` : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')
+                            : game.genresRaw || 'PC Release'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Concise Overview Preview */}
+                    {game.description && (
+                      <p className="text-[13px] sm:text-[14px] text-[#cfdbe8]/90 leading-relaxed line-clamp-2 max-w-3xl">
+                        {game.description}
+                      </p>
+                    )}
+
+                    {/* Mobile SteamTools Ratings Strip (<768px) */}
+                    {isSteamTools && (ratingPositiveRaw || ratingNegativeRaw) && (
+                      <div className="md:hidden grid grid-cols-2 gap-2.5">
+                        {ratingPositiveRaw && (
+                          <div className="p-2.5 rounded-xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] flex items-center justify-center gap-2">
+                            <ThumbsUp className="w-3.5 h-3.5 text-[#4ade80] shrink-0" />
+                            <span className="text-[12.5px] font-bold font-mono-tabular text-[#4ade80]">
+                              {ratingPositiveRaw.endsWith('%')
+                                ? ratingPositiveRaw
+                                : `${ratingPositiveRaw}%`}
+                            </span>
+                            <span className="text-[10.5px] uppercase tracking-wider text-[#94a6bd]">
+                              {t.positive}
+                            </span>
+                          </div>
+                        )}
+                        {ratingNegativeRaw && (
+                          <div className="p-2.5 rounded-xl bg-white/[0.06] backdrop-blur-md border border-white/[0.12] flex items-center justify-center gap-2">
+                            <ThumbsDown className="w-3.5 h-3.5 text-[#f87171] shrink-0" />
+                            <span className="text-[12.5px] font-bold font-mono-tabular text-[#f87171]">
+                              {!Number.isNaN(ratingNegativeNum)
+                                ? ratingNegativeNum.toLocaleString()
+                                : ratingNegativeRaw}
+                            </span>
+                            <span className="text-[10.5px] uppercase tracking-wider text-[#94a6bd]">
+                              {t.negative}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Modern Glassmorphic Spec Cards Grid */}
+                    <div
+                      className={`grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 ${
+                        canRunEvaluation ? 'xl:grid-cols-5 max-w-4xl' : 'xl:grid-cols-4 max-w-3xl'
+                      }`}
+                    >
+                      {isSteamTools ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: 0.06 }}
+                          className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
+                            <Hash className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                            <span className="truncate">{t.gameId}</span>
+                          </div>
+                          {steamGameId ? (
+                            <button
+                              type="button"
+                              onClick={handleCopyGameId}
+                              title={t.gameId}
+                              className="mt-1 inline-flex items-center gap-1.5 text-[13px] sm:text-[13.5px] font-bold font-mono-tabular text-[#66c0f4] hover:text-white transition-colors cursor-pointer max-w-full"
+                            >
+                              <span className="truncate">{steamGameId}</span>
+                              {copiedGameId ? (
+                                <Check className="w-3.5 h-3.5 text-[#34d399] shrink-0" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                              )}
+                            </button>
+                          ) : (
+                            <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-white">
+                              —
+                            </div>
+                          )}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: 0.06 }}
+                          className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
+                            <Tag className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                            <span className="truncate">{t.version}</span>
+                          </div>
+                          <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-white truncate">
+                            {game.version || 'Latest'}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: 0.1 }}
+                        className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
+                          <HardDrive className="w-3 h-3 text-[#94a6bd] shrink-0" />
+                          <span className="truncate">{t.originalSize}</span>
+                        </div>
+                        <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-[#e5e9f0] font-mono-tabular truncate">
+                          {game.originalSize || '—'}
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: 0.14 }}
+                        className="p-3 sm:p-3.5 rounded-xl bg-[#1a9fff]/[0.1] hover:bg-[#1a9fff]/[0.16] backdrop-blur-md border border-[#38bdf8]/25 hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#93c5fd] font-semibold">
+                          <DownloadSimple className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                          <span className="truncate">
+                            {isTools ? t.downloadSize : t.repackSize}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-[13px] sm:text-[14px] font-bold text-[#66c0f4] font-mono-tabular truncate">
+                          {game.repackSize || '—'}
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: 0.18 }}
+                        className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
+                          <CloudArrowDown className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                          <span className="truncate">{t.downloadChannels}</span>
+                        </div>
+                        <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-white font-mono-tabular truncate">
+                          {groupedMirrors.length}{' '}
+                          {groupedMirrors.length === 1 ? t.channelSingular : t.channelPlural}
+                        </div>
+                      </motion.div>
+
+                      {canRunEvaluation && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: 0.22 }}
+                          className="col-span-2 sm:col-span-1 grid"
+                        >
+                          <CanRunItHeroBadge
+                            evaluation={canRunEvaluation}
+                            language={language}
+                            onClick={() =>
+                              requirementsSectionRef.current?.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start',
+                              })
+                            }
+                          />
+                        </motion.div>
                       )}
                     </div>
-                  ) : (
-                    <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
-                      <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                        {t.version}
-                      </div>
-                      <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-white truncate">
-                        {game.version || 'Latest'}
-                      </div>
-                    </div>
-                  )}
-                  <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
-                    <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      {t.originalSize}
-                    </div>
-                    <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-[#e5e9f0] font-mono-tabular truncate">
-                      {game.originalSize || '—'}
-                    </div>
-                  </div>
-                  <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
-                    <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      {isTools ? t.downloadSize : t.repackSize}
-                    </div>
-                    <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-[#66c0f4] font-mono-tabular truncate">
-                      {game.repackSize || '—'}
-                    </div>
-                  </div>
-                  <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
-                    <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      {t.downloadChannels}
-                    </div>
-                    <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-white font-mono-tabular">
-                      {groupedMirrors.length}{' '}
-                      {groupedMirrors.length === 1 ? t.channelSingular : t.channelPlural}
-                    </div>
-                  </div>
-                  {canRunEvaluation && (
-                    <CanRunItHeroBadge
-                      evaluation={canRunEvaluation}
-                      language={language}
-                      onClick={() =>
-                        requirementsSectionRef.current?.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'start',
-                        })
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* Primary Hero Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      downloadsSectionRef.current?.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start',
-                      })
-                    }
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[13px] font-semibold transition-colors cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>{t.downloadChannels}</span>
-                  </button>
-
-                  {(game.embedTrailerUrl || game.trailerUrl) && (
-                    <button
-                      type="button"
-                      onClick={handleWatchTrailer}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.1] text-[#e5e9f0] hover:text-white text-[13px] font-semibold transition-colors cursor-pointer"
+                    {/* Modern Animated Hero Action Buttons */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.38, delay: 0.24 }}
+                      className="pt-1 flex flex-wrap items-center gap-2.5 sm:gap-3"
                     >
-                      <Play className="w-4 h-4 text-[#66c0f4] fill-current" />
-                      <span>{t.watchTrailer}</span>
-                    </button>
-                  )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          downloadsSectionRef.current?.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start',
+                          })
+                        }
+                        className="group relative overflow-hidden inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-[#0284c7] hover:bg-[#0ea5e9] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13px] sm:text-[14px] font-semibold shadow-[0_12px_30px_rgba(26,159,255,0.35)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                        />
+                        <DownloadSimple className="w-4 h-4 relative z-10 shrink-0" />
+                        <span className="relative z-10">{t.downloadChannels}</span>
+                      </button>
+
+                      {(game.embedTrailerUrl || game.trailerUrl) && (
+                        <button
+                          type="button"
+                          onClick={handleWatchTrailer}
+                          className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-white/[0.11] hover:bg-white/[0.2] backdrop-blur-md border border-white/[0.2] text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        >
+                          <Play weight="fill" className="w-4 h-4 text-[#66c0f4] fill-current shrink-0" />
+                          <span>{t.watchTrailer}</span>
+                        </button>
+                      )}
+
+                      {hasReqsTarget && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            requirementsSectionRef.current?.scrollIntoView({
+                              behavior: 'smooth',
+                              block: 'start',
+                            })
+                          }
+                          className="inline-flex items-center gap-2 px-4 py-3 sm:py-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] backdrop-blur-md border border-white/[0.14] text-[#dce8f5] hover:text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                        >
+                          <Cpu className="w-4 h-4 shrink-0" />
+                          <span>{canRunEvaluation ? t.canRunItTitle : t.requirementsOnly}</span>
+                        </button>
+                      )}
+                    </motion.div>
+                  </motion.div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          );
+        })()}
 
         {/* Main Body Content */}
         <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 lg:py-8 space-y-7 sm:space-y-8">
@@ -726,7 +1000,7 @@ export function GameDetailModal({
               href="https://t.me/secretarea1337"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 rounded-xl bg-[#0d1824] hover:bg-[#112131] border border-[#24a1de]/30 hover:border-[#24a1de]/65 transition-colors"
+              className="group flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-[#24a1de]/40 hover:border-[#24a1de]/75 dark:bg-[#0d1824] dark:hover:bg-[#112131] dark:border-[#24a1de]/30 dark:hover:border-[#24a1de]/65 transition-colors"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 <span className="w-10 h-10 rounded-full bg-[#24a1de] text-white flex items-center justify-center shrink-0 shadow-md">
@@ -740,165 +1014,245 @@ export function GameDetailModal({
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[12px] font-medium text-[#8b9bb4] leading-tight">
+                  <div className="text-[12px] font-medium text-slate-600 dark:text-[#8b9bb4] leading-tight">
                     Join our community
                   </div>
-                  <div className="mt-0.5 text-[14.5px] sm:text-[15.5px] font-bold text-[#24a1de] group-hover:text-[#4cc2ff] transition-colors truncate">
+                  <div className="mt-0.5 text-[14.5px] sm:text-[15.5px] font-bold text-[#0284c7] group-hover:text-[#0369a1] dark:text-[#24a1de] dark:group-hover:text-[#4cc2ff] transition-colors truncate">
                     Get it on Telegram
                   </div>
                 </div>
               </div>
-              <ExternalLink className="w-5 h-5 text-[#24a1de] group-hover:text-[#4cc2ff] shrink-0 transition-colors" />
+              <ArrowSquareOut className="w-5 h-5 text-[#0284c7] group-hover:text-[#0369a1] dark:text-[#24a1de] dark:group-hover:text-[#4cc2ff] shrink-0 transition-colors" />
             </a>
           )}
 
-          {/* Release Details Section (Above Trailer & Gallery) */}
-          <section className="p-4 sm:p-5 rounded bg-[#12171f] border border-white/[0.06] space-y-3.5">
-            <div className="flex items-center gap-2">
-              <PackageCheck className="w-4 h-4 text-[#66c0f4]" />
-              <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
+          {/* Release Details Section (Seamless Unboxed Architectural Strip) */}
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.36, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-4 sm:space-y-5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <Package className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+              <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                 {t.releaseDetails}
               </h2>
+              <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
             </div>
 
-            <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-[12.5px]">
+            <dl className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-5">
               {isSteamTools ? (
-                <div className="space-y-1">
-                  <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                    <Hash className="w-3.5 h-3.5 text-[#66c0f4]" />
-                    <span>{t.gameId}</span>
-                  </dt>
-                  <dd className="text-white font-semibold font-mono-tabular">
-                    {steamGameId ? (
-                      <button
-                        type="button"
-                        onClick={handleCopyGameId}
-                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#1b2430] hover:bg-[#243040] border border-white/[0.08] text-[#66c0f4] hover:text-white transition-colors cursor-pointer"
-                      >
-                        <span>{steamGameId}</span>
-                        {copiedGameId ? (
-                          <Check className="w-3 h-3 text-[#34d399]" />
-                        ) : (
-                          <Copy className="w-3 h-3 opacity-80" />
-                        )}
-                      </button>
-                    ) : (
-                      '—'
-                    )}
-                  </dd>
+                <div className="flex items-start gap-3 min-w-0">
+                  <Hash className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                      {t.gameId}
+                    </dt>
+                    <dd className="text-[13.5px] sm:text-[14px] font-semibold font-mono-tabular text-slate-900 dark:text-white">
+                      {steamGameId ? (
+                        <button
+                          type="button"
+                          onClick={handleCopyGameId}
+                          title={t.gameId}
+                          className="inline-flex items-center gap-1.5 text-[#0284c7] hover:text-slate-950 dark:text-[#38bdf8] dark:hover:text-white transition-colors cursor-pointer"
+                        >
+                          <span className="truncate">{steamGameId}</span>
+                          {copiedGameId ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-[#34d399] shrink-0" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5 opacity-75 shrink-0" />
+                          )}
+                        </button>
+                      ) : (
+                        '—'
+                      )}
+                    </dd>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                    <Tag className="w-3.5 h-3.5 text-[#66c0f4]" />
-                    <span>{t.version}</span>
-                  </dt>
-                  <dd className="text-white font-semibold">{game.version || '—'}</dd>
+                <div className="flex items-start gap-3 min-w-0">
+                  <Tag className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                      {t.version}
+                    </dt>
+                    <dd className="text-[13.5px] sm:text-[14px] font-semibold text-slate-900 dark:text-white break-words">
+                      {game.version || '—'}
+                    </dd>
+                  </div>
                 </div>
               )}
-              <div className="space-y-1">
-                <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                  <HardDrive className="w-3.5 h-3.5 text-[#66c0f4]" />
-                  <span>{t.originalSize}</span>
-                </dt>
-                <dd className="text-[#e5e9f0] font-mono-tabular font-medium">
-                  {game.originalSize || '—'}
-                </dd>
+
+              <div className="flex items-start gap-3 min-w-0">
+                <HardDrive className="w-4 h-4 text-slate-500 dark:text-[#94a6bd] mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                    {t.originalSize}
+                  </dt>
+                  <dd className="text-[13.5px] sm:text-[14px] font-semibold font-mono-tabular text-slate-800 dark:text-[#e5e9f0]">
+                    {game.originalSize || '—'}
+                  </dd>
+                </div>
               </div>
-              <div className="space-y-1">
-                <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                  <Download className="w-3.5 h-3.5 text-[#66c0f4]" />
-                  <span>{isTools ? t.downloadSize : t.repackSize}</span>
-                </dt>
-                <dd className="font-semibold text-[#66c0f4] font-mono-tabular">
-                  {game.repackSize || '—'}
-                </dd>
+
+              <div className="flex items-start gap-3 min-w-0">
+                <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                    {isTools ? t.downloadSize : t.repackSize}
+                  </dt>
+                  <dd className="text-[13.5px] sm:text-[14px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#66c0f4]">
+                    {game.repackSize || '—'}
+                  </dd>
+                </div>
               </div>
+
               {isTools ? (
                 <>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <BadgeCheck className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.license}</span>
-                    </dt>
-                    <dd>
-                      {game.isFree ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/45 text-emerald-300 text-[11.5px] font-semibold">
-                          {t.free}
-                        </span>
-                      ) : (
-                        <span className="text-[#e5e9f0] font-medium">Full Package</span>
-                      )}
-                    </dd>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <SealCheck
+                      className={`w-4 h-4 mt-0.5 shrink-0 ${
+                        game.isFree
+                          ? 'text-emerald-600 dark:text-[#34d399]'
+                          : 'text-[#0284c7] dark:text-[#38bdf8]'
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.license}
+                      </dt>
+                      <dd
+                        className={`text-[13.5px] sm:text-[14px] font-semibold ${
+                          game.isFree
+                            ? 'text-emerald-700 dark:text-[#34d399]'
+                            : 'text-slate-800 dark:text-[#e5e9f0]'
+                        }`}
+                      >
+                        {game.isFree ? t.free : 'Full Package'}
+                      </dd>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <Pin className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.pinned}</span>
-                    </dt>
-                    <dd>
-                      {game.isPinned ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/45 text-amber-300 text-[11.5px] font-semibold">
-                          {t.pinned}
-                        </span>
-                      ) : (
-                        <span className="text-[#8b9bb4]">{t.standard}</span>
-                      )}
-                    </dd>
+
+                  <div className="flex items-start gap-3 min-w-0">
+                    <PushPin
+                      className={`w-4 h-4 mt-0.5 shrink-0 ${
+                        game.isPinned
+                          ? 'text-amber-600 dark:text-amber-300'
+                          : 'text-slate-400 dark:text-[#8b9bb4]'
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.pinned}
+                      </dt>
+                      <dd
+                        className={`text-[13.5px] sm:text-[14px] font-semibold ${
+                          game.isPinned
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : 'text-slate-600 dark:text-[#9cb1c9]'
+                        }`}
+                      >
+                        {game.isPinned ? t.pinned : t.standard}
+                      </dd>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <Calendar className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.dateAdded}</span>
-                    </dt>
-                    <dd className="text-[#e5e9f0] font-mono-tabular">
-                      {game.dateAdded || '—'}
-                    </dd>
+
+                  <div className="flex items-start gap-3 min-w-0">
+                    <CalendarBlank className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.dateAdded}
+                      </dt>
+                      <dd className="text-[13.5px] sm:text-[14px] font-semibold font-mono-tabular text-slate-800 dark:text-[#e5e9f0]">
+                        {(() => {
+                          if (!game.dateAdded) return '—';
+                          const parsed = new Date(game.dateAdded);
+                          if (Number.isNaN(parsed.getTime())) return game.dateAdded;
+                          return parsed.toLocaleDateString(tr.locale, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          });
+                        })()}
+                      </dd>
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <UserCheck className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.repacker}</span>
-                    </dt>
-                    <dd className="text-[#e5e9f0] font-medium">{game.repackBy || '—'}</dd>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <UserCheck className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.repacker}
+                      </dt>
+                      <dd className="text-[13.5px] sm:text-[14px] font-semibold text-slate-800 dark:text-[#e5e9f0] break-words">
+                        {game.repackBy || '—'}
+                      </dd>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <Globe className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.languages}</span>
-                    </dt>
-                    <dd className="text-[#e5e9f0]">{game.languages || '—'}</dd>
+
+                  <div className="flex items-start gap-3 min-w-0">
+                    <Globe className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.languages}
+                      </dt>
+                      <dd className="text-[13.5px] sm:text-[14px] font-semibold text-slate-800 dark:text-[#e5e9f0] break-words">
+                        {game.languages || '—'}
+                      </dd>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
-                      <Gamepad2 className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>{t.genres}</span>
-                    </dt>
-                    <dd className="text-[#e5e9f0]">{game.genreList.join(' · ') || '—'}</dd>
+
+                  <div className="flex items-start gap-3 min-w-0">
+                    <GameController className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.genres}
+                      </dt>
+                      <dd className="text-[13.5px] sm:text-[14px] font-semibold text-slate-800 dark:text-[#e5e9f0] break-words">
+                        {game.genreList.join(' · ') || '—'}
+                      </dd>
+                    </div>
                   </div>
                 </>
               )}
             </dl>
-          </section>
+          </motion.section>
 
-          {/* Trailer & Gallery Media Carousel */}
+          {/* Trailer & Gallery Media Showcase */}
           {(mediaSlides.length > 0 || game.trailerUrl) && (
-            <section ref={mediaSectionRef} className="space-y-3">
+            <motion.section
+              ref={mediaSectionRef}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.38, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-4 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+            >
+              {/* Unboxed Header Row */}
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                  {t.trailerGallery}
-                </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <FilmStrip className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                  <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
+                    {t.trailerGallery}
+                  </h2>
+                  {mediaSlides.length > 1 && (
+                    <span className="text-[12px] font-mono-tabular text-slate-500 dark:text-[#7f91a8] shrink-0">
+                      {activeSlideIndex + 1} / {mediaSlides.length}
+                    </span>
+                  )}
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08] hidden sm:block" />
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
                   {trailerSlideIdx >= 0 && activeSlideIndex !== trailerSlideIdx && (
                     <button
                       type="button"
                       onClick={() => setActiveSlideIndex(trailerSlideIdx)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0284c7]/10 hover:bg-[#0284c7]/20 dark:bg-[#38bdf8]/12 dark:hover:bg-[#38bdf8]/22 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] transition-colors cursor-pointer whitespace-nowrap"
                     >
-                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <Play weight="fill" className="w-3.5 h-3.5 fill-current shrink-0" />
                       <span>{t.switchToTrailer}</span>
                     </button>
                   )}
@@ -907,52 +1261,106 @@ export function GameDetailModal({
                       href={game.trailerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0284c7]/10 hover:bg-[#0284c7]/20 dark:bg-[#38bdf8]/12 dark:hover:bg-[#38bdf8]/22 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] transition-colors whitespace-nowrap"
                     >
-                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <Play weight="fill" className="w-3.5 h-3.5 fill-current shrink-0" />
                       <span>{t.openTrailer}</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <ArrowSquareOut className="w-3 h-3 shrink-0" />
                     </a>
+                  )}
+                  {mediaSlides.length > 1 && (
+                    <div dir="ltr" className="hidden sm:inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        aria-label="Previous media"
+                        onClick={() =>
+                          setActiveSlideIndex(
+                            (prev) => (prev - 1 + mediaSlides.length) % mediaSlides.length
+                          )
+                        }
+                        className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                      >
+                        <CaretLeft weight="bold" className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Next media"
+                        onClick={() =>
+                          setActiveSlideIndex((prev) => (prev + 1) % mediaSlides.length)
+                        }
+                        className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                      >
+                        <CaretRight weight="bold" className="w-4 h-4" />
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
 
               {mediaSlides.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-3.5 items-start">
+                <div
+                  className={`grid grid-cols-1 gap-3.5 sm:gap-4 items-start ${
+                    mediaSlides.length > 1 ? 'lg:grid-cols-12' : ''
+                  }`}
+                >
+                  {/* Primary 16:9 Cinema Stage */}
                   <div
                     dir="ltr"
-                    className="lg:col-span-3 relative aspect-video bg-[#0b0e14] rounded overflow-hidden border border-white/[0.08]"
+                    className={`${
+                      mediaSlides.length > 1 ? 'lg:col-span-9' : ''
+                    } relative aspect-video bg-[#080c12] rounded-2xl overflow-hidden border border-slate-300/80 dark:border-white/[0.1] shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)] group`}
                   >
-                    {activeSlide?.kind === 'trailer' && (
-                      <iframe
-                        key={activeSlide.url}
-                        src={activeSlide.url}
-                        title={`${game.name} Trailer`}
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        className="w-full h-full border-0"
-                      />
-                    )}
-                    {activeSlide?.kind === 'video' && (
-                      <video
-                        key={activeSlide.url}
-                        src={activeSlide.url}
-                        autoPlay
-                        controls
-                        muted
-                        loop
-                        playsInline
-                        className="w-full h-full object-contain bg-black"
-                      />
-                    )}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={`media-stage-${activeSlide?.kind}-${activeSlideIndex}`}
+                        initial={{ opacity: 0.35, scale: 1.01 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0.3 }}
+                        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-full h-full"
+                      >
+                        {activeSlide?.kind === 'trailer' && (
+                          <iframe
+                            src={activeSlide.url}
+                            title={`${game.name} Trailer`}
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            className="w-full h-full border-0"
+                          />
+                        )}
+                        {activeSlide?.kind === 'video' && (
+                          <video
+                            src={activeSlide.url}
+                            autoPlay
+                            controls
+                            muted
+                            loop
+                            playsInline
+                            className="w-full h-full object-contain bg-black"
+                          />
+                        )}
+                        {activeSlide?.kind === 'image' && (
+                          <img
+                            src={activeSlide.url}
+                            alt={`${game.name} screenshot`}
+                            referrerPolicy="no-referrer"
+                            onClick={() => setLightboxImageUrl(activeSlide.url)}
+                            className="w-full h-full object-cover cursor-zoom-in"
+                          />
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+
                     {activeSlide?.kind === 'image' && (
-                      <img
-                        src={activeSlide.url}
-                        alt={`${game.name} screenshot`}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImageUrl(activeSlide.url)}
+                        aria-label="Expand screenshot"
+                        className="absolute top-3 right-3 w-9 h-9 rounded-xl bg-black/55 hover:bg-black/80 backdrop-blur-md border border-white/[0.18] text-white flex items-center justify-center opacity-85 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                      >
+                        <CornersOut className="w-4 h-4" />
+                      </button>
                     )}
 
                     {mediaSlides.length > 1 && (
@@ -965,9 +1373,9 @@ export function GameDetailModal({
                               (prev) => (prev - 1 + mediaSlides.length) % mediaSlides.length
                             )
                           }
-                          className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/65 hover:bg-black/90 text-white border border-white/10 cursor-pointer"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/55 hover:bg-black/80 backdrop-blur-md text-white border border-white/[0.16] flex items-center justify-center opacity-90 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                         >
-                          <ChevronLeft className="w-4 h-4" />
+                          <CaretLeft weight="bold" className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                         <button
                           type="button"
@@ -975,16 +1383,20 @@ export function GameDetailModal({
                           onClick={() =>
                             setActiveSlideIndex((prev) => (prev + 1) % mediaSlides.length)
                           }
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/65 hover:bg-black/90 text-white border border-white/10 cursor-pointer"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/55 hover:bg-black/80 backdrop-blur-md text-white border border-white/[0.16] flex items-center justify-center opacity-90 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                         >
-                          <ChevronRight className="w-4 h-4" />
+                          <CaretRight weight="bold" className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       </>
                     )}
                   </div>
 
+                  {/* Responsive Thumbnail Strip: Horizontal scroll on < lg, Vertical rail on lg+ */}
                   {mediaSlides.length > 1 && (
-                    <div className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[420px] pb-1 lg:pb-0 lg:pe-1">
+                    <div
+                      dir="ltr"
+                      className="lg:col-span-3 no-scrollbar flex lg:flex-col gap-2.5 overflow-x-auto lg:overflow-y-auto lg:max-h-[460px] xl:max-h-[540px] pb-1 lg:pb-0 lg:pe-1 snap-x snap-mandatory lg:snap-none"
+                    >
                       {mediaSlides.map((slide, idx) => {
                         const active = idx === activeSlideIndex;
                         return (
@@ -992,10 +1404,11 @@ export function GameDetailModal({
                             key={`${slide.kind}-${idx}`}
                             type="button"
                             onClick={() => setActiveSlideIndex(idx)}
-                            className={`relative w-32 lg:w-full aspect-video rounded overflow-hidden shrink-0 border transition-all cursor-pointer bg-[#10151c] ${
+                            aria-label={`View media ${idx + 1}`}
+                            className={`group relative snap-start w-32 sm:w-40 lg:w-full aspect-video rounded-xl overflow-hidden shrink-0 border transition-all duration-200 cursor-pointer bg-slate-200 dark:bg-[#0f141c] ${
                               active
-                                ? 'border-[#1a9fff] ring-1 ring-[#1a9fff]'
-                                : 'border-white/[0.08] opacity-70 hover:opacity-100'
+                                ? 'border-[#0284c7] dark:border-[#38bdf8] ring-2 ring-[#0284c7]/35 dark:ring-[#38bdf8]/40 opacity-100 shadow-md'
+                                : 'border-slate-300/80 dark:border-white/[0.08] opacity-70 hover:opacity-100 hover:border-slate-400 dark:hover:border-white/[0.24]'
                             }`}
                           >
                             {slide.kind === 'image' ? (
@@ -1003,16 +1416,37 @@ export function GameDetailModal({
                                 src={slide.url}
                                 alt=""
                                 referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
                               />
                             ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-[#1e2633] text-[#66c0f4]">
-                                <Play className="w-4 h-4 fill-current" />
-                                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                              <div className="relative w-full h-full flex flex-col items-center justify-center gap-1.5 bg-[#0d141f] text-white overflow-hidden">
+                                {heroBackdrop && (
+                                  <img
+                                    src={heroBackdrop}
+                                    alt=""
+                                    aria-hidden="true"
+                                    referrerPolicy="no-referrer"
+                                    className="absolute inset-0 w-full h-full object-cover opacity-35 blur-[1px]"
+                                  />
+                                )}
+                                <span className="relative z-10 w-8 h-8 rounded-full bg-[#0284c7]/90 dark:bg-[#1a9fff]/90 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                                  <Play weight="fill" className="w-3.5 h-3.5 fill-current translate-x-[0.5px]" />
+                                </span>
+                                <span className="relative z-10 text-[10px] font-semibold uppercase tracking-wider text-white/95 drop-shadow">
                                   {slide.kind === 'trailer' ? 'Official Trailer' : 'Gameplay Clip'}
                                 </span>
                               </div>
                             )}
+
+                            <span
+                              className={`absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-mono-tabular font-semibold leading-none backdrop-blur-sm ${
+                                active
+                                  ? 'bg-[#0284c7] text-white'
+                                  : 'bg-black/60 text-white/85'
+                              }`}
+                            >
+                              {idx + 1}
+                            </span>
                           </button>
                         );
                       })}
@@ -1020,7 +1454,7 @@ export function GameDetailModal({
                   )}
                 </div>
               )}
-            </section>
+            </motion.section>
           )}
 
           {/* Description, Download Channels, Requirements, Steps & Tools */}
@@ -1029,30 +1463,43 @@ export function GameDetailModal({
               hasSecondarySidebar ? 'lg:grid-cols-3' : ''
             }`}
           >
-            <div className={`${hasSecondarySidebar ? 'lg:col-span-2' : ''} space-y-7`}>
-              {/* Description with Icon */}
-              <section className="p-4 sm:p-5 rounded bg-[#12171f] border border-white/[0.06] space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[#66c0f4]" />
-                  <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
+            <div className={`${hasSecondarySidebar ? 'lg:col-span-2' : ''} space-y-6 sm:space-y-7`}>
+              {/* Description (Seamless Editorial Section) */}
+              <motion.section
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.36, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-3.5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <FileText className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                  <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                     {t.description}
                   </h2>
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
                 </div>
-                <p className="text-[13.5px] sm:text-[14px] leading-relaxed text-[#d4dde7] whitespace-pre-line">
+                <p className="text-[14px] sm:text-[15px] leading-[1.7] text-slate-700 dark:text-[#d4dde7] whitespace-pre-line max-w-4xl">
                   {game.description || t.noDescription}
                 </p>
-              </section>
+              </motion.section>
 
               {/* System Requirements + Can Run It? Hardware Comparison */}
-              <section ref={requirementsSectionRef} className="space-y-3.5">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-[#66c0f4]" />
-                  <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                    {t.requirementsAndCanRun}
+              <motion.section
+                ref={requirementsSectionRef}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.36, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-4 sm:space-y-5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+              >
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <SlidersHorizontal className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                  <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
+                    {canRunItEnabled ? t.requirementsAndCanRun : t.requirementsOnly}
                   </h2>
+                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
                 </div>
 
-                {canRunEvaluation && systemSpecs && (
+                {canRunItEnabled && canRunEvaluation && systemSpecs && (
                   <CanRunItPanel
                     evaluation={canRunEvaluation}
                     specs={systemSpecs}
@@ -1065,178 +1512,181 @@ export function GameDetailModal({
                 )}
 
                 {hasStructuredReqs ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 pt-1">
                     {os && (
-                      <div className="p-3.5 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3">
-                        <div className="p-2 rounded bg-[#1a222e] text-[#66c0f4] shrink-0">
-                          <Monitor className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28, delay: 0.04 }}
+                        className="flex items-start gap-3.5 min-w-0"
+                      >
+                        <Monitor className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.osLabel}
-                          </div>
-                          <div className="mt-1 text-[13px] text-[#dce4ee]">{os}</div>
+                          </dt>
+                          <dd className="text-[13.5px] sm:text-[14px] font-medium text-slate-800 dark:text-[#dce4ee] leading-relaxed break-words">
+                            {os}
+                          </dd>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {ram && (
-                      <div className="p-3.5 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3">
-                        <div className="p-2 rounded bg-[#1a222e] text-[#66c0f4] shrink-0">
-                          <MemoryStick className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28, delay: 0.08 }}
+                        className="flex items-start gap-3.5 min-w-0"
+                      >
+                        <Memory className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.ramLabel}
-                          </div>
-                          <div className="mt-1 text-[13px] text-[#dce4ee]">{ram}</div>
+                          </dt>
+                          <dd className="text-[13.5px] sm:text-[14px] font-medium text-slate-800 dark:text-[#dce4ee] leading-relaxed break-words">
+                            {ram}
+                          </dd>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {cpu && (
-                      <div className="p-3.5 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3">
-                        <div className="p-2 rounded bg-[#1a222e] text-[#66c0f4] shrink-0">
-                          <Cpu className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28, delay: 0.12 }}
+                        className="flex items-start gap-3.5 min-w-0"
+                      >
+                        <Cpu className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.cpuLabel}
-                          </div>
-                          <div className="mt-1 text-[13px] text-[#dce4ee]">{cpu}</div>
+                          </dt>
+                          <dd className="text-[13.5px] sm:text-[14px] font-medium text-slate-800 dark:text-[#dce4ee] leading-relaxed break-words">
+                            {cpu}
+                          </dd>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {gpu && (
-                      <div className="p-3.5 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3">
-                        <div className="p-2 rounded bg-[#1a222e] text-[#66c0f4] shrink-0">
-                          <Gpu className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.28, delay: 0.16 }}
+                        className="flex items-start gap-3.5 min-w-0"
+                      >
+                        <GraphicsCard className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.gpuLabel}
-                          </div>
-                          <div className="mt-1 text-[13px] text-[#dce4ee]">{gpu}</div>
+                          </dt>
+                          <dd className="text-[13.5px] sm:text-[14px] font-medium text-slate-800 dark:text-[#dce4ee] leading-relaxed break-words">
+                            {gpu}
+                          </dd>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </dl>
                 ) : (
-                  <div className="p-4 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3 text-[13px] text-[#c6d4df]">
-                    <div className="p-2 rounded bg-[#1a222e] text-[#66c0f4] shrink-0">
-                      <HardDrive className="w-4 h-4" />
-                    </div>
-                    <div className="pt-0.5">
+                  <div className="flex items-start gap-3.5 text-[13.5px] sm:text-[14px] text-slate-700 dark:text-[#c6d4df] leading-relaxed">
+                    <HardDrive className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1 whitespace-pre-line">
                       {raw || t.noReqsListed}
                     </div>
                   </div>
                 )}
-              </section>
+              </motion.section>
 
-              {/* Tools & Steps (Steps directly below Tools) */}
-              {(game.parsedTools.length > 0 ||
-                rawToolsFallback ||
-                game.parsedSteps.length > 0) && (
-                <div className="space-y-6">
-                  {(game.parsedTools.length > 0 || rawToolsFallback) && (
-                    <section className="p-5 rounded bg-[#12171f] border border-white/[0.07] space-y-3.5">
-                      <div className="flex items-center gap-2">
-                        <Wrench className="w-4 h-4 text-[#66c0f4]" />
-                        <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                          {t.tools}
-                        </h2>
-                      </div>
-                      {game.parsedTools.length > 0 ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {game.parsedTools.map((tool, i) => (
-                            <a
-                              key={i}
-                              href={tool.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors"
-                            >
-                              <Wrench className="w-3.5 h-3.5" />
-                              <span>{tool.name}</span>
-                              <ExternalLink className="w-3 h-3 text-[#8b9bb4]" />
-                            </a>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2.5 text-[13px] text-[#c6d4df]">
-                          <Wrench className="w-4 h-4 text-[#66c0f4] shrink-0 mt-0.5" />
-                          <p className="whitespace-pre-line">{rawToolsFallback}</p>
-                        </div>
-                      )}
-                    </section>
-                  )}
-
+              {/* Steps & Tools (Steps placed directly ABOVE Tools) */}
+              {(game.parsedSteps.length > 0 ||
+                game.parsedTools.length > 0 ||
+                rawToolsFallback) && (
+                <div className="space-y-6 sm:space-y-7">
+                  {/* Interactive Installation Steps Timeline */}
                   {game.parsedSteps.length > 0 && (
-                    <section className="p-5 rounded bg-[#12171f] border border-white/[0.07] space-y-4">
+                    <motion.section
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.36, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      className="space-y-4 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+                    >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <ListChecks className="w-4 h-4 text-[#66c0f4]" />
-                          <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                          <ListChecks className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                          <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                             {t.steps}
                           </h2>
+                          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
                         </div>
-                        <span className="text-[11px] font-mono-tabular text-[#8b9bb4]">
+                        <span className="text-[12px] font-mono-tabular font-medium text-slate-500 dark:text-[#8b9bb4] shrink-0">
                           {checkedSteps.size}/{game.parsedSteps.length} {t.completed}
                         </span>
                       </div>
 
                       {/* Animated Progress Bar */}
-                      <div className="h-1 w-full rounded bg-[#1d2532] overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
                         <motion.div
-                          className="h-full bg-[#1a9fff]"
+                          className="h-full rounded-full bg-gradient-to-r from-[#0284c7] to-[#38bdf8]"
                           initial={{ width: 0 }}
                           animate={{ width: `${completedRatio}%` }}
-                          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
                         />
                       </div>
 
-                      <ol className="relative space-y-2.5">
+                      <ol className="relative space-y-1.5 pt-1">
                         {game.parsedSteps.map((step, i) => {
                           const isDone = checkedSteps.has(i);
                           const isLast = i === game.parsedSteps.length - 1;
                           return (
                             <motion.li
                               key={`${game.id}-step-${i}`}
-                              initial={{ opacity: 0, x: -12 }}
+                              role="checkbox"
+                              aria-checked={isDone}
+                              tabIndex={0}
+                              initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{
                                 duration: 0.28,
-                                delay: Math.min(i * 0.06, 0.4),
+                                delay: Math.min(i * 0.05, 0.35),
                                 ease: [0.16, 1, 0.3, 1],
                               }}
                               whileHover={{ x: 3 }}
                               onClick={() => toggleStepDone(i)}
-                              className={`relative p-3 rounded border transition-colors cursor-pointer flex items-start gap-3 ${
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  toggleStepDone(i);
+                                }
+                              }}
+                              className={`group relative py-2.5 px-3 -mx-2 rounded-xl transition-colors cursor-pointer flex items-start gap-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
                                 isDone
-                                  ? 'bg-[#152436] border-[#1a9fff]/50'
-                                  : 'bg-[#171e29] hover:bg-[#1d2635] border-white/[0.06]'
+                                  ? 'bg-sky-500/[0.07] dark:bg-[#38bdf8]/[0.08]'
+                                  : 'hover:bg-slate-200/55 dark:hover:bg-white/[0.04]'
                               }`}
                             >
                               {!isLast && (
                                 <span
                                   aria-hidden="true"
-                                  className="absolute start-[23px] top-10 bottom-[-14px] w-px bg-white/[0.09] pointer-events-none"
+                                  className="absolute start-[24px] top-10 bottom-[-10px] w-px bg-slate-200 dark:bg-white/[0.1] pointer-events-none"
                                 />
                               )}
 
                               <motion.span
-                                animate={{ scale: isDone ? [1, 1.15, 1] : 1 }}
+                                animate={{ scale: isDone ? [1, 1.16, 1] : 1 }}
                                 transition={{ duration: 0.25 }}
                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold font-mono-tabular shrink-0 mt-0.5 transition-colors ${
                                   isDone
-                                    ? 'bg-[#1a9fff] text-white'
-                                    : 'bg-[#222c3c] text-[#66c0f4] border border-white/[0.1]'
+                                    ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-sm'
+                                    : 'bg-slate-100 text-[#0284c7] border border-slate-300 group-hover:border-[#0284c7]/60 dark:bg-[#1f2937] dark:text-[#38bdf8] dark:border-white/[0.14] dark:group-hover:border-[#38bdf8]/60'
                                 }`}
                               >
                                 {isDone ? <Check className="w-3.5 h-3.5" /> : i + 1}
                               </motion.span>
 
                               <span
-                                className={`text-[13px] leading-relaxed transition-colors ${
-                                  isDone ? 'text-white' : 'text-[#d4dde7]'
+                                className={`text-[13.5px] sm:text-[14px] leading-relaxed transition-colors ${
+                                  isDone
+                                    ? 'text-slate-900 font-medium dark:text-white'
+                                    : 'text-slate-700 dark:text-[#d4dde7]'
                                 }`}
                               >
                                 {step}
@@ -1245,7 +1695,60 @@ export function GameDetailModal({
                           );
                         })}
                       </ol>
-                    </section>
+                    </motion.section>
+                  )}
+
+                  {/* Required Tools & Utilities (Directly Below Steps) */}
+                  {(game.parsedTools.length > 0 || rawToolsFallback) && (
+                    <motion.section
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.36, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="space-y-4 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
+                    >
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        <Wrench className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
+                          {t.tools}
+                        </h2>
+                        {game.parsedTools.length > 0 && (
+                          <span className="text-[12px] font-mono-tabular text-slate-500 dark:text-[#7f91a8] shrink-0">
+                            {game.parsedTools.length}
+                          </span>
+                        )}
+                        <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                      </div>
+
+                      {game.parsedTools.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3">
+                          {game.parsedTools.map((tool, i) => (
+                            <motion.a
+                              key={`${tool.name}-${i}`}
+                              href={tool.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.26, delay: Math.min(i * 0.04, 0.24) }}
+                              className="group flex items-center justify-between gap-3 py-2.5 px-3 -mx-1 rounded-xl hover:bg-slate-200/65 dark:hover:bg-white/[0.05] text-[#0284c7] hover:text-slate-950 dark:text-[#66c0f4] dark:hover:text-white transition-all duration-200"
+                            >
+                              <span className="flex items-center gap-2.5 min-w-0">
+                                <Wrench className="w-4 h-4 shrink-0 opacity-85 group-hover:rotate-[-12deg] transition-transform duration-200" />
+                                <span className="text-[13.5px] font-semibold truncate">
+                                  {tool.name}
+                                </span>
+                              </span>
+                              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                            </motion.a>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-3 text-[13.5px] sm:text-[14px] text-slate-700 dark:text-[#c6d4df] leading-relaxed">
+                          <Wrench className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                          <p className="whitespace-pre-line">{rawToolsFallback}</p>
+                        </div>
+                      )}
+                    </motion.section>
                   )}
                 </div>
               )}
@@ -1255,8 +1758,8 @@ export function GameDetailModal({
             {hasSecondarySidebar && (
               <aside className="space-y-4">
                 {linkedCatalogItems.length > 0 && onJumpToItem && (
-                  <div className="p-4 rounded bg-[#12171f] border border-white/[0.06] space-y-2.5">
-                    <h2 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
+                  <div className="p-4 rounded bg-white border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#12171f] dark:border-white/[0.06] space-y-2.5">
+                    <h2 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#0284c7] dark:text-[#66c0f4]">
                       {t.linkedEntries} ({linkedCatalogItems.length})
                     </h2>
                     <div className="space-y-1.5 max-h-60 overflow-y-auto">
@@ -1265,16 +1768,16 @@ export function GameDetailModal({
                           key={`${linked.tab}-${linked.id}`}
                           type="button"
                           onClick={() => onJumpToItem(linked)}
-                          className="w-full p-2 rounded bg-[#1a222d] hover:bg-[#243040] border border-white/[0.06] flex items-center gap-2.5 text-start transition-colors cursor-pointer"
+                          className="w-full p-2 rounded bg-slate-50 hover:bg-slate-100 border border-slate-200 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.06] flex items-center gap-2.5 text-start transition-colors cursor-pointer"
                         >
-                          <div className="w-7 h-9 rounded-[2px] overflow-hidden bg-[#0b0e14] shrink-0">
+                          <div className="w-7 h-9 rounded-[2px] overflow-hidden bg-slate-200 dark:bg-[#0b0e14] shrink-0">
                             <GameCover src={linked.coverImage} alt={linked.name} compact />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-[12px] font-semibold text-white truncate">
+                            <div className="text-[12px] font-semibold text-slate-900 dark:text-white truncate">
                               {linked.name}
                             </div>
-                            <div className="text-[10.5px] text-[#66c0f4] font-mono-tabular uppercase">
+                            <div className="text-[10.5px] text-[#0284c7] dark:text-[#66c0f4] font-mono-tabular uppercase">
                               {linked.tab} {linked.repackSize ? `· ${linked.repackSize}` : ''}
                             </div>
                           </div>
@@ -1289,24 +1792,24 @@ export function GameDetailModal({
 
           {/* What is a Hypervisor Bypass? Section (Hypervisor pages only, directly above Download Channels) */}
           {game.tab === 'hypervisor' && (
-            <section className="p-5 rounded bg-[#1d1418] border border-[#dc2626]/45 space-y-2.5">
+            <section className="p-5 rounded bg-rose-50 border border-rose-300 dark:bg-[#1d1418] dark:border-[#dc2626]/45 space-y-2.5">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-[#f87171] shrink-0" />
-                <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#fca5a5]">
+                <ShieldWarning className="w-4 h-4 text-rose-600 dark:text-[#f87171] shrink-0" />
+                <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-rose-800 dark:text-[#fca5a5]">
                   {t.hvWarningTitle}
                 </h2>
               </div>
-              <p className="text-[13.5px] text-[#e5e9f0] leading-relaxed">
+              <p className="text-[13.5px] text-slate-800 dark:text-[#e5e9f0] leading-relaxed">
                 {t.hvWarningBody}
               </p>
               <div>
                 <button
                   type="button"
                   onClick={() => setIsHvGuideOpen(true)}
-                  className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#66c0f4] hover:text-white underline underline-offset-4 break-all text-start cursor-pointer"
+                  className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-4 break-all text-start cursor-pointer"
                 >
                   <span>https://fitgirl-repacks.site/hypervisor-guide/</span>
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  <ArrowSquareOut className="w-3.5 h-3.5 shrink-0" />
                 </button>
               </div>
             </section>
@@ -1316,16 +1819,16 @@ export function GameDetailModal({
           {isSteamTools && (hasDenuvo || hasExternalLauncher) && (
             <section className="space-y-3" aria-label="DRM and launcher compatibility warnings">
               {hasDenuvo && (
-                <div className="p-4 sm:p-5 rounded bg-[#2a161b] border border-[#ef4444]/60 flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-[#f87171] shrink-0 mt-0.5" />
-                  <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-[#e5e9f0]">
-                    <strong className="text-white">Denuvo DRM Detected:</strong>{' '}
+                <div className="p-4 sm:p-5 rounded bg-rose-50 border border-rose-300 dark:bg-[#2a161b] dark:border-[#ef4444]/60 flex items-start gap-3">
+                  <Warning className="w-5 h-5 text-rose-600 dark:text-[#f87171] shrink-0 mt-0.5" />
+                  <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-slate-800 dark:text-[#e5e9f0]">
+                    <strong className="text-rose-950 dark:text-white">Denuvo DRM Detected:</strong>{' '}
                     This game uses Denuvo Anti-Tampering DRM. There is currently no known public bypass for Denuvo, meaning you likely will NOT be able to play this game. However, there&apos;s a slight chance it might be available in the{' '}
                     <a
                       href="https://depotbox.lol/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#60a5fa] hover:text-white underline underline-offset-2 font-semibold"
+                      className="text-blue-700 hover:text-blue-900 dark:text-[#60a5fa] dark:hover:text-white underline underline-offset-2 font-semibold"
                     >
                       DepotBox Launcher
                     </a>{' '}
@@ -1335,10 +1838,10 @@ export function GameDetailModal({
               )}
 
               {hasExternalLauncher && (
-                <div className="p-4 sm:p-5 rounded bg-[#262216] border border-[#eab308]/60 flex items-start gap-3">
-                  <UserCheck className="w-5 h-5 text-[#facc15] shrink-0 mt-0.5" />
-                  <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-[#e5e9f0]">
-                    <strong className="text-white">Third-Party Account/Launcher Required:</strong>{' '}
+                <div className="p-4 sm:p-5 rounded bg-amber-50 border border-amber-300 dark:bg-[#262216] dark:border-[#eab308]/60 flex items-start gap-3">
+                  <UserCheck className="w-5 h-5 text-amber-600 dark:text-[#facc15] shrink-0 mt-0.5" />
+                  <p className="text-[13px] sm:text-[13.5px] leading-relaxed text-slate-800 dark:text-[#e5e9f0]">
+                    <strong className="text-amber-950 dark:text-white">Third-Party Account/Launcher Required:</strong>{' '}
                     This game requires an external launcher or account verification.
                     {hasDenuvo
                       ? ' As this game also has Denuvo, it might be impossible to play in any case. Download at your own risk.'
@@ -1349,27 +1852,57 @@ export function GameDetailModal({
             </section>
           )}
 
-          {/* Download Channels Section (Directly Above Recommended For You) */}
-          <section ref={downloadsSectionRef} id="download-channels" className="pt-2 space-y-3.5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <CloudDownload className="w-4 h-4 text-[#66c0f4]" />
-                <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                  {t.downloadChannels}
-                </h2>
+          {/* Download Channels Section (Distinct Interactive Boxed Hub Directly Above Recommended For You) */}
+          <motion.section
+            ref={downloadsSectionRef}
+            id="download-channels"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.38, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="sa-ps5-panel relative rounded-2xl p-4 sm:p-6 lg:p-7 bg-white/95 dark:bg-[#0f1621]/95 border border-slate-200/90 dark:border-white/[0.1] shadow-[0_14px_42px_rgba(15,23,42,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] space-y-5 overflow-hidden"
+          >
+            {/* Subtle Top Accent Beam */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#0284c7] via-[#38bdf8] to-transparent dark:from-[#1a9fff] dark:via-[#38bdf8] dark:to-transparent"
+            />
+
+            {/* Box Header + Channel Metrics */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 border border-sky-200/90 dark:bg-[#1a9fff]/12 dark:border-[#1a9fff]/30 flex items-center justify-center shrink-0">
+                  <CloudArrowDown className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8]" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="font-display text-[16px] sm:text-[18px] lg:text-[19px] font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+                    {t.downloadChannels}
+                  </h2>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
+                    <span>
+                      {groupedMirrors.length}{' '}
+                      {groupedMirrors.length === 1 ? t.channelSingular : t.channelPlural}
+                    </span>
+                    <span aria-hidden="true" className="text-slate-300 dark:text-white/20">
+                      ·
+                    </span>
+                    <span>
+                      {totalMirrorLinks} {totalMirrorLinks === 1 ? 'link' : 'links'}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {isTools && (game.isPinned || game.isFree) && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3 text-[11.5px] font-bold uppercase tracking-[0.07em]">
                   {game.isPinned && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10.5px] font-bold uppercase tracking-[0.06em]">
-                      <Pin className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-300">
+                      <PushPin className="w-3.5 h-3.5" />
                       <span>{t.pinned}</span>
                     </span>
                   )}
                   {game.isFree && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[10.5px] font-bold uppercase tracking-[0.06em]">
-                      <BadgeCheck className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+                      <SealCheck className="w-3.5 h-3.5" />
                       <span>{t.free}</span>
                     </span>
                   )}
@@ -1377,93 +1910,253 @@ export function GameDetailModal({
               )}
             </div>
 
-            {groupedMirrors.length === 0 ? (
-              <div className="p-4 rounded bg-[#12171f] border border-white/[0.06] text-[13px] text-[#8b9bb4]">
-                {t.noChannels}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Interactive Channel Filter Tabs (visible when > 1 channel exists) */}
+            {groupedMirrors.length > 1 && (
+              <div
+                role="tablist"
+                aria-label={t.downloadChannels}
+                className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeChannelFilter === 'all'}
+                  onClick={() => setActiveChannelFilter('all')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
+                    activeChannelFilter === 'all'
+                      ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-[0_6px_16px_rgba(2,132,199,0.28)]'
+                      : 'bg-slate-100 hover:bg-slate-200/85 text-slate-700 border border-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-[#b8c6d8] dark:border-white/[0.07]'
+                  }`}
+                >
+                  <Stack className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tr.studios?.all ?? 'All'}</span>
+                  <span
+                    className={`font-mono-tabular text-[11px] ${
+                      activeChannelFilter === 'all'
+                        ? 'text-white/85'
+                        : 'text-slate-500 dark:text-[#7f91a8]'
+                    }`}
+                  >
+                    {totalMirrorLinks}
+                  </span>
+                </button>
+
                 {groupedMirrors.map(({ groupName, links }) => {
-                  const isMagnetChannel = groupName === 'Magnet Link';
-                  const isFullDownloadChannel = groupName === 'Full Download';
-                  const isFeaturedDirect =
-                    isMagnetChannel ||
-                    isFullDownloadChannel ||
-                    groupName === 'MediaFire (Direct Link)';
+                  const isActive = activeChannelFilter === groupName;
+                  const TabIcon =
+                    groupName === 'Magnet Link'
+                      ? Magnet
+                      : groupName === 'MediaFire (Direct Link)'
+                      ? Lightning
+                      : groupName === 'Mega (Backup)'
+                      ? Archive
+                      : groupName === 'Full Download'
+                      ? CloudArrowDown
+                      : groupName === 'Unlockers' || groupName === 'Resources'
+                      ? Key
+                      : groupName === 'Direct Mirrors' || groupName === 'Anker'
+                      ? LinkSimple
+                      : HardDrives;
                   return (
-                    <div
-                      key={groupName}
-                      className={`p-4 rounded border space-y-3 ${
-                        isFeaturedDirect
-                          ? 'md:col-span-2 bg-[#121a26] border-[#1a9fff]/40'
-                          : 'bg-[#12171f] border-white/[0.07]'
+                    <button
+                      key={`tab-${groupName}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveChannelFilter(groupName)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
+                        isActive
+                          ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-[0_6px_16px_rgba(2,132,199,0.28)]'
+                          : 'bg-slate-100 hover:bg-slate-200/85 text-slate-700 border border-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-[#b8c6d8] dark:border-white/[0.07]'
                       }`}
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          {isMagnetChannel ? (
-                            <Magnet className="w-4 h-4 text-[#1a9fff]" />
-                          ) : (
-                            <Download className="w-3.5 h-3.5 text-[#66c0f4]" />
-                          )}
-                          <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#66c0f4]">
-                            {groupName}
-                          </span>
-                          {isFeaturedDirect && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-[#1a9fff]/20 border border-[#1a9fff]/45 text-[#66c0f4] text-[10px] font-bold uppercase tracking-[0.06em]">
-                              <Sparkles className="w-3 h-3" />
-                              <span>{t.recommendedTag}</span>
-                            </span>
-                          )}
-                          {isTools && isFullDownloadChannel && game.isFree && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-emerald-500/20 border border-emerald-400/45 text-emerald-300 text-[10px] font-bold uppercase tracking-[0.06em]">
-                              <BadgeCheck className="w-3 h-3" />
-                              <span>{t.free}</span>
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] font-mono-tabular text-[#7a8ba3]">
-                          {links.length} {links.length === 1 ? 'link' : 'links'}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {links.map((mirror, idx) => {
-                          const key = `${groupName}-${idx}`;
-                          if (mirror.isMagnet) {
-                            return (
-                              <a
-                                key={key}
-                                href={mirror.url}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors"
-                              >
-                                <Magnet className="w-3.5 h-3.5" />
-                                <span>{mirror.label}</span>
-                                <Download className="w-3.5 h-3.5" />
-                              </a>
-                            );
-                          }
-
-                          return (
-                            <a
-                              key={key}
-                              href={mirror.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded bg-[#232b36] hover:bg-[#2e3948] border border-white/[0.08] text-[#e5e9f0] text-[12px] font-medium transition-colors"
-                            >
-                              <Download className="w-3.5 h-3.5 text-[#66c0f4]" />
-                              <span>{mirror.label}</span>
-                              <ExternalLink className="w-3 h-3 text-[#8b9bb4]" />
-                            </a>
-                          );
-                        })}
-                      </div>
-                    </div>
+                      <TabIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{groupName}</span>
+                      <span
+                        className={`font-mono-tabular text-[11px] ${
+                          isActive
+                            ? 'text-white/85'
+                            : 'text-slate-500 dark:text-[#7f91a8]'
+                        }`}
+                      >
+                        {links.length}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
             )}
-          </section>
+
+            {groupedMirrors.length === 0 ? (
+              <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-[13.5px] text-slate-600 dark:bg-[#141c28] dark:border-white/[0.08] dark:text-[#8b9bb4]">
+                {t.noChannels}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {visibleMirrors.map(({ groupName, links }, groupIndex) => {
+                    const isMagnetChannel = groupName === 'Magnet Link';
+                    const isFullDownloadChannel = groupName === 'Full Download';
+                    const isMediaFireChannel = groupName === 'MediaFire (Direct Link)';
+                    const isFeaturedDirect =
+                      isMagnetChannel || isFullDownloadChannel || isMediaFireChannel;
+
+                    const ChannelIcon = isMagnetChannel
+                      ? Magnet
+                      : isMediaFireChannel
+                      ? Lightning
+                      : isFullDownloadChannel
+                      ? CloudArrowDown
+                      : groupName === 'Mega (Backup)'
+                      ? Archive
+                      : groupName === 'Unlockers' || groupName === 'Resources'
+                      ? Key
+                      : groupName === 'Direct Mirrors' || groupName === 'Anker'
+                      ? LinkSimple
+                      : HardDrives;
+
+                    const shouldSpanFull =
+                      activeChannelFilter !== 'all' || isFeaturedDirect || visibleMirrors.length === 1;
+
+                    return (
+                      <motion.div
+                        key={groupName}
+                        layout
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98 }}
+                        transition={{
+                          duration: 0.25,
+                          delay: Math.min(groupIndex * 0.04, 0.2),
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className={`rounded-xl p-4 sm:p-5 border transition-colors space-y-3.5 ${
+                          shouldSpanFull ? 'lg:col-span-2' : ''
+                        } ${
+                          isFeaturedDirect
+                            ? 'bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 dark:from-[#132033] dark:via-[#111a28] dark:to-[#0f1724] border-sky-300/80 dark:border-[#1a9fff]/40'
+                            : 'bg-slate-50/90 hover:bg-white dark:bg-[#141c28]/90 dark:hover:bg-[#172130] border-slate-200/90 hover:border-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.15]'
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2.5">
+                          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+                            <span
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                                isFeaturedDirect
+                                  ? 'bg-[#0284c7]/12 text-[#0284c7] border border-[#0284c7]/25 dark:bg-[#1a9fff]/20 dark:text-[#38bdf8] dark:border-[#38bdf8]/30'
+                                  : 'bg-slate-200/75 text-slate-700 border border-slate-300/70 dark:bg-white/[0.07] dark:text-[#9cb0c9] dark:border-white/[0.1]'
+                              }`}
+                            >
+                              <ChannelIcon className="w-4 h-4" />
+                            </span>
+
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 min-w-0">
+                              <span className="text-[13px] sm:text-[13.5px] font-bold tracking-tight text-slate-900 dark:text-white">
+                                {groupName}
+                              </span>
+                              {isFeaturedDirect && (
+                                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-[0.07em] text-[#0284c7] dark:text-[#38bdf8]">
+                                  <Sparkle className="w-3 h-3" />
+                                  <span>{t.recommendedTag}</span>
+                                </span>
+                              )}
+                              {isTools && isFullDownloadChannel && game.isFree && (
+                                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-[0.07em] text-emerald-700 dark:text-emerald-300">
+                                  <SealCheck className="w-3 h-3" />
+                                  <span>{t.free}</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="text-[11.5px] font-mono-tabular font-semibold text-slate-500 dark:text-[#7f91a8]">
+                            {links.length} {links.length === 1 ? 'link' : 'links'}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2.5">
+                          {links.map((mirror, idx) => {
+                            const mirrorKey = `${groupName}-${idx}`;
+                            const isCopied = copiedMirrorKey === mirrorKey;
+
+                            if (mirror.isMagnet) {
+                              return (
+                                <div
+                                  key={mirrorKey}
+                                  className="w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden shadow-[0_8px_22px_rgba(2,132,199,0.24)] hover:shadow-[0_12px_28px_rgba(26,159,255,0.36)] hover:-translate-y-0.5 transition-all duration-200"
+                                >
+                                  <a
+                                    href={mirror.url}
+                                    className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 group-hover:translate-x-[360%] transition-transform duration-700 ease-out"
+                                    />
+                                    <Magnet className="w-4 h-4 shrink-0" />
+                                    <span className="truncate">{mirror.label}</span>
+                                    <DownloadSimple className="w-3.5 h-3.5 shrink-0 opacity-90 group-hover:translate-y-0.5 transition-transform" />
+                                  </a>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyMirrorUrl(mirrorKey, mirror.url)}
+                                    aria-label={`Copy ${mirror.label}`}
+                                    title={isCopied ? 'Copied' : 'Copy Magnet Link'}
+                                    className="px-3 bg-[#0369a1] hover:bg-[#075985] dark:bg-[#0e6eb8] dark:hover:bg-[#1482d6] text-white border-s border-white/20 flex items-center justify-center transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                                  >
+                                    {isCopied ? (
+                                      <Check className="w-4 h-4 text-emerald-300" />
+                                    ) : (
+                                      <Copy className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div
+                                key={mirrorKey}
+                                className="group w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden bg-white hover:bg-sky-50/75 border border-slate-200 hover:border-[#0284c7]/55 dark:bg-[#192331] dark:hover:bg-[#1e2b3d] dark:border-white/[0.09] dark:hover:border-[#38bdf8]/55 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                              >
+                                <a
+                                  href={mirror.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors"
+                                >
+                                  <span className="flex items-center gap-2 min-w-0">
+                                    <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
+                                    <span className="truncate">{mirror.label}</span>
+                                  </span>
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                                </a>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyMirrorUrl(mirrorKey, mirror.url)}
+                                  aria-label={`Copy ${mirror.label}`}
+                                  title={isCopied ? 'Copied' : 'Copy Link'}
+                                  className="px-2.5 border-s border-slate-200/85 dark:border-white/[0.08] flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-sky-100/70 dark:text-[#7f91a8] dark:hover:text-[#38bdf8] dark:hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0284c7]"
+                                >
+                                  {isCopied ? (
+                                    <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            )}
+          </motion.section>
 
           {/* Recommended For You: Same Genres Auto-Slide (No Scrollbar, Button + Auto Controls; omitted on SteamTools) */}
           {!isSteamTools && recommendedGames.length > 0 && (
@@ -1472,14 +2165,14 @@ export function GameDetailModal({
               onMouseLeave={() => setIsRecPaused(false)}
               onFocus={() => setIsRecPaused(true)}
               onBlur={() => setIsRecPaused(false)}
-              className="pt-4 border-t border-white/[0.08] space-y-4"
+              className="pt-4 border-t border-slate-200 dark:border-white/[0.08] space-y-4"
             >
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-[15px] font-bold tracking-[0.06em] uppercase text-white">
+                  <h2 className="text-[15px] font-bold tracking-[0.06em] uppercase text-slate-900 dark:text-white">
                     {t.recommendedForYou}
                   </h2>
-                  <p className="text-[12px] text-[#8b9bb4] mt-0.5">
+                  <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4] mt-0.5">
                     {isTools
                       ? game.name
                       : game.genreList.length > 0
@@ -1493,17 +2186,17 @@ export function GameDetailModal({
                     type="button"
                     aria-label="Slide recommended games left"
                     onClick={() => scrollRecommended(-1)}
-                    className="p-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#dce4ee] hover:text-white transition-colors cursor-pointer"
+                    className="p-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] dark:hover:text-white transition-colors cursor-pointer"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <CaretLeft weight="bold" className="w-4 h-4" />
                   </button>
                   <button
                     type="button"
                     aria-label="Slide recommended games right"
                     onClick={() => scrollRecommended(1)}
-                    className="p-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#dce4ee] hover:text-white transition-colors cursor-pointer"
+                    className="p-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] dark:hover:text-white transition-colors cursor-pointer"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1514,7 +2207,7 @@ export function GameDetailModal({
                 className="no-scrollbar flex gap-3 sm:gap-3.5 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory"
               >
                 {recommendedGames.map((rec) => {
-                  const recEval = systemSpecs ? evaluateCanRunGame(rec, systemSpecs) : null;
+                  const recEval = canRunItEnabled && systemSpecs ? evaluateCanRunGame(rec, systemSpecs) : null;
                   const metaLine = [
                     rec.tab === 'architect'
                       ? [rec.isFree ? t.free : '', rec.isPinned ? t.pinned : '', rec.version]
@@ -1538,9 +2231,9 @@ export function GameDetailModal({
                           onJumpToItem?.(rec);
                         }
                       }}
-                      className="group w-[138px] sm:w-[168px] md:w-[184px] lg:w-[196px] 2xl:w-[210px] shrink-0 snap-start bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                      className="group w-[138px] sm:w-[168px] md:w-[184px] lg:w-[196px] 2xl:w-[210px] shrink-0 snap-start bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                     >
-                      <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+                      <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                         <GameCover
                           src={rec.coverImage}
                           alt={rec.name}
@@ -1566,16 +2259,16 @@ export function GameDetailModal({
                       </div>
 
                       <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
-                        <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                        <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
                           {rec.name}
                         </h3>
-                        <div className="text-[11px] text-[#8b9bb4] truncate">{metaLine}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4] truncate">{metaLine}</div>
                         {recEval && recEval.status !== 'unknown' && (
                           <div
                             className={`text-[10.5px] font-bold truncate ${
                               recEval.status === 'can-run'
-                                ? 'text-[#4ade80]'
-                                : 'text-[#f87171]'
+                                ? 'text-emerald-700 dark:text-[#4ade80]'
+                                : 'text-rose-700 dark:text-[#f87171]'
                             }`}
                           >
                             {recEval.status === 'can-run'
@@ -1597,6 +2290,32 @@ export function GameDetailModal({
         isOpen={isHvGuideOpen}
         onClose={() => setIsHvGuideOpen(false)}
       />
+
+      {lightboxImageUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${game.name} screenshot preview`}
+          onClick={() => setLightboxImageUrl(null)}
+          className="fixed inset-0 z-[80] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImageUrl(null)}
+            aria-label={t.close}
+            className="absolute top-4 end-4 w-10 h-10 rounded-full bg-white/[0.12] hover:bg-white/[0.22] border border-white/[0.2] text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img
+            src={lightboxImageUrl}
+            alt={`${game.name} screenshot`}
+            referrerPolicy="no-referrer"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[88vh] rounded-2xl border border-white/[0.14] shadow-2xl object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }

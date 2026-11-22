@@ -9,6 +9,32 @@ let ambientChordTimer: number | null = null;
 let ambientSparkleTimer: number | null = null;
 let isAmbientPlaying = false;
 let lastHoverTime = 0;
+let psMasterVolume = 0.7;
+
+const PS_AMBIENT_BASE_GAIN = 0.24;
+
+export function setPsVolume(volume01: number): void {
+  const clamped = Math.min(1, Math.max(0, Number.isFinite(volume01) ? volume01 : 0.7));
+  psMasterVolume = clamped;
+
+  if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+    void sharedAudioCtx.resume().catch(() => {
+      // ignore autoplay block
+    });
+  }
+
+  if (sharedAudioCtx && ambientMasterGain && isAmbientPlaying) {
+    try {
+      const now = sharedAudioCtx.currentTime;
+      const targetGain = clamped <= 0.001 ? 0 : PS_AMBIENT_BASE_GAIN * Math.pow(clamped, 1.25);
+      ambientMasterGain.gain.cancelScheduledValues(now);
+      ambientMasterGain.gain.setValueAtTime(ambientMasterGain.gain.value, now);
+      ambientMasterGain.gain.setTargetAtTime(targetGain, now, 0.03);
+    } catch {
+      // ignore volume ramp errors
+    }
+  }
+}
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -206,8 +232,12 @@ export function startPsAmbientSound(): void {
     const now = ctx.currentTime;
 
     const master = ctx.createGain();
+    const initialTargetGain =
+      psMasterVolume <= 0.001
+        ? 0.0001
+        : PS_AMBIENT_BASE_GAIN * Math.pow(psMasterVolume, 1.25);
     master.gain.setValueAtTime(0.0001, now);
-    master.gain.linearRampToValueAtTime(0.13, now + 1.5);
+    master.gain.linearRampToValueAtTime(initialTargetGain, now + 1.5);
     master.connect(ctx.destination);
 
     // Breathing lowpass bus for warm velvet pads
@@ -324,6 +354,7 @@ export function stopPsAmbientSound(): void {
 
 /** Subtle PlayStation tile hover/focus tick */
 export function playPsHoverSound(): void {
+  if (psMasterVolume <= 0.001) return;
   const perfNow = performance.now();
   if (perfNow - lastHoverTime < 65) return;
   lastHoverTime = perfNow;
@@ -341,7 +372,7 @@ export function playPsHoverSound(): void {
     osc.frequency.exponentialRampToValueAtTime(700, now + 0.025);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.022, now + 0.005);
+    gain.gain.linearRampToValueAtTime(0.022 * psMasterVolume, now + 0.005);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
 
     osc.connect(gain);
@@ -356,6 +387,7 @@ export function playPsHoverSound(): void {
 
 /** Crisp DualSense / PS5 confirmation tone on button click */
 export function playPsClickSound(): void {
+  if (psMasterVolume <= 0.001) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -375,7 +407,7 @@ export function playPsClickSound(): void {
     osc2.frequency.exponentialRampToValueAtTime(1975.53, now + 0.03);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.055, now + 0.007);
+    gain.gain.linearRampToValueAtTime(0.055 * psMasterVolume, now + 0.007);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
 
     osc.connect(gain);
@@ -393,6 +425,7 @@ export function playPsClickSound(): void {
 
 /** Soft descending PlayStation circle/back tone when closing or returning */
 export function playPsBackSound(): void {
+  if (psMasterVolume <= 0.001) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -406,7 +439,7 @@ export function playPsBackSound(): void {
     osc.frequency.exponentialRampToValueAtTime(392.0, now + 0.085);
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.055, now + 0.009);
+    gain.gain.linearRampToValueAtTime(0.055 * psMasterVolume, now + 0.009);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
 
     osc.connect(gain);
@@ -421,6 +454,7 @@ export function playPsBackSound(): void {
 
 /** Lush PlayStation 5 cosmic startup chime when activating Fullscreen PS5 mode */
 export function playPsBootChime(): void {
+  if (psMasterVolume <= 0.001) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -429,7 +463,7 @@ export function playPsBootChime(): void {
     const notes = [196.0, 293.66, 392.0, 493.88, 587.33, 783.99];
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0.0001, now);
-    masterGain.gain.linearRampToValueAtTime(0.11, now + 0.08);
+    masterGain.gain.linearRampToValueAtTime(0.11 * psMasterVolume, now + 0.08);
     masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.65);
 
     const reverb = getCosmicReverb(ctx);

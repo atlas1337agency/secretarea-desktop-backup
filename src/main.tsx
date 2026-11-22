@@ -1,4 +1,5 @@
-import {createRoot} from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
+import { IconContext } from '@phosphor-icons/react';
 import App from './App.tsx';
 import './index.css';
 
@@ -13,4 +14,8 @@ if (
   });
 }
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(
+  <IconContext.Provider value={{ weight: 'duotone' }}>
+    <App />
+  </IconContext.Provider>
+);

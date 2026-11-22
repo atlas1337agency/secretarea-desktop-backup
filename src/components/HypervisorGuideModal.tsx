@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import {
-  AlertTriangle,
   ArrowLeft,
-  ChevronDown,
-  ChevronRight,
+  ArrowSquareOut,
+  CaretDown,
+  CaretRight,
   Cpu,
-  ExternalLink,
-  ShieldAlert,
   ShieldCheck,
+  ShieldWarning,
   Terminal,
+  Warning,
   Wrench,
   X,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 
 interface HypervisorGuideModalProps {
   isOpen: boolean;
@@ -40,18 +40,18 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
       role="dialog"
       aria-modal="true"
       aria-label="Hypervisor Guide"
-      className="fixed inset-0 z-[60] w-screen h-screen bg-[#11161d] flex flex-col overflow-hidden"
+      className="fixed inset-0 z-[60] w-screen h-screen bg-[#f4f6f9] dark:bg-[#11161d] flex flex-col overflow-hidden"
     >
       {/* Sticky Top Popup Bar */}
-      <header className="px-4 sm:px-6 lg:px-8 py-3 bg-[#171a21] border-b border-white/[0.08] shrink-0">
+      <header className="px-4 sm:px-6 lg:px-8 py-3 bg-white dark:bg-[#171a21] border-b border-slate-200 dark:border-white/[0.08] shrink-0">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-semibold text-[#e5e9f0] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-[#232b36] dark:hover:bg-[#2d3847] dark:border-white/[0.08] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
               <span>Back to Game</span>
             </button>
 
@@ -59,7 +59,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
               <span className="px-1.5 py-[2px] rounded-[2px] bg-[#dc2626] text-white text-[10px] font-extrabold uppercase tracking-wider shrink-0">
                 HV
               </span>
-              <h2 className="font-display text-sm sm:text-base font-bold text-white truncate">
+              <h2 className="font-display text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
                 Hypervisor Guide
               </h2>
             </div>
@@ -70,16 +70,16 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
               href="https://fitgirl-repacks.site/hypervisor-guide/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#1d2532] hover:bg-[#273244] border border-white/[0.08] text-[11.5px] font-medium text-[#66c0f4] hover:text-white transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[11.5px] font-medium text-[#0284c7] hover:text-slate-900 dark:bg-[#1d2532] dark:hover:bg-[#273244] dark:border-white/[0.08] dark:text-[#66c0f4] dark:hover:text-white transition-colors"
             >
               <span>Original Article</span>
-              <ExternalLink className="w-3 h-3" />
+              <ArrowSquareOut className="w-3 h-3" />
             </a>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close Hypervisor Guide"
-              className="p-2 rounded bg-[#252f3d] hover:bg-[#313e50] text-[#aeb9c7] hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#252f3d] dark:hover:bg-[#313e50] dark:text-[#aeb9c7] dark:hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -88,20 +88,20 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
       </header>
 
       {/* Scrollable Guide Body */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-[#161e29] via-[#121821] to-[#0d1118]">
-        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 text-[13.5px] sm:text-[14px] leading-relaxed text-[#cfd9e4]">
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#161e29] dark:via-[#121821] dark:to-[#0d1118]">
+        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 text-[13.5px] sm:text-[14px] leading-relaxed text-slate-700 dark:text-[#cfd9e4]">
           {/* Title + WIP Notice */}
-          <div className="space-y-3 border-b border-white/[0.08] pb-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-[#dc2626]/15 border border-[#dc2626]/40 text-[#fca5a5] text-[12px] font-semibold">
-              <AlertTriangle className="w-3.5 h-3.5 text-[#f87171] shrink-0" />
+          <div className="space-y-3 border-b border-slate-200 dark:border-white/[0.08] pb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-rose-50 border border-rose-300 text-rose-800 dark:bg-[#dc2626]/15 dark:border-[#dc2626]/40 dark:text-[#fca5a5] text-[12px] font-semibold">
+              <Warning className="w-3.5 h-3.5 text-rose-600 dark:text-[#f87171] shrink-0" />
               <span>This page is a work-in-progress and will be updated.</span>
             </div>
 
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               Hypervisor Guide
             </h1>
 
-            <p className="text-[#aeb9c7]">
+            <p className="text-slate-600 dark:text-[#aeb9c7]">
               This article is partially based on RessourectoR’s (admin of cs.rin.ru site) article:
             </p>
             <p>
@@ -109,13 +109,13 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                 href="https://cs.rin.ru/forum/viewtopic.php?f=10&t=156407"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[15px] sm:text-[17px] font-semibold text-[#66c0f4] hover:text-white underline underline-offset-4 break-all"
+                className="inline-flex items-center gap-1.5 text-[15px] sm:text-[17px] font-semibold text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-4 break-all"
               >
                 <span>https://cs.rin.ru/forum/viewtopic.php?f=10&amp;t=156407</span>
-                <ExternalLink className="w-4 h-4 shrink-0" />
+                <ArrowSquareOut className="w-4 h-4 shrink-0" />
               </a>
             </p>
-            <p className="text-[#b8c4d4]">
+            <p className="text-slate-600 dark:text-[#b8c4d4]">
               I highly recommend to open and read it at least one time. It’s more complex than this page and covers more security topics.
             </p>
           </div>
@@ -123,8 +123,8 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
           {/* What are Hypervisor Cracks? */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-[#f87171] shrink-0" />
-              <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+              <ShieldWarning className="w-4 h-4 text-rose-600 dark:text-[#f87171] shrink-0" />
+              <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 What are Hypervisor Cracks?
               </h3>
             </div>
@@ -140,26 +140,26 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
           </section>
 
           {/* Windows virtualization-based security components */}
-          <section className="space-y-3 p-4 sm:p-5 rounded bg-[#121822] border border-white/[0.07]">
+          <section className="space-y-3 p-4 sm:p-5 rounded bg-white dark:bg-[#121822] border border-slate-200 dark:border-white/[0.07] shadow-sm dark:shadow-none">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#66c0f4] shrink-0" />
-              <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+              <ShieldCheck className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+              <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 Windows virtualization-based security components
               </h3>
             </div>
             <p>
               On modern systems with Secure Boot, TPM 2.0 and hardware-assisted virtualization capabilities, Windows 10 and 11 enable, mostly* by default, various security solutions via Virtualization-based Security (VBS). VBS is an umbrella term for using a bare-metal hypervisor, the Windows hypervisor, to create isolated virtual spaces that are safe from even a fully compromised OS, in which these security components run and monitor the OS or store confidential information.
             </p>
-            <p className="text-[#e5e9f0] font-medium">
+            <p className="text-slate-900 dark:text-[#e5e9f0] font-medium">
               The following Windows components are such security solutions:
             </p>
-            <ul className="list-disc pl-5 space-y-2.5 text-[#c8d4e0]">
+            <ul className="list-disc pl-5 space-y-2.5 text-slate-700 dark:text-[#c8d4e0]">
               <li>
                 <a
                   href="https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#66c0f4] hover:text-white underline underline-offset-2 font-semibold"
+                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
                 >
                   Memory Integrity (HVCI)
                 </a>
@@ -170,7 +170,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-credential-guard"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#66c0f4] hover:text-white underline underline-offset-2 font-semibold"
+                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
                 >
                   Credential Guard
                 </a>
@@ -181,7 +181,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/windows-hello"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#66c0f4] hover:text-white underline underline-offset-2 font-semibold"
+                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
                 >
                   Windows Hello
                 </a>
@@ -192,7 +192,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows/security/hardware-security/how-hardware-based-root-of-trust-helps-protect-windows"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#66c0f4] hover:text-white underline underline-offset-2 font-semibold"
+                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
                 >
                   System Guard (Secure Launch)
                 </a>
@@ -201,7 +201,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://en.wikipedia.org/wiki/System_Management_Mode"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#66c0f4] hover:text-white underline underline-offset-2"
+                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2"
                 >
                   System Management Mode
                 </a>{' '}
@@ -209,10 +209,10 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
               </li>
               <li>From what RessourectoR could find, this is cutting edge and not enabled by default.</li>
             </ul>
-            <p className="text-[12.5px] text-[#9cb0c6]">
+            <p className="text-[12.5px] text-slate-500 dark:text-[#9cb0c6]">
               * Even though hardware and boot requirements are met, Windows sometimes seems to fail at enabling features that are supposed to be enabled automatically, such as VBS and memority integrity.
             </p>
-            <div className="p-3.5 rounded bg-[#182230] border border-[#66c0f4]/30 text-white font-semibold space-y-2">
+            <div className="p-3.5 rounded bg-sky-50 border border-sky-200 text-slate-900 dark:bg-[#182230] dark:border-[#66c0f4]/30 dark:text-white font-semibold space-y-2">
               <p>
                 Without the Windows hypervisor, none of these security features can be used. By design, the hypervisor cannot be disabled directly. Instead, all the above features that want to utilize VBS signal that it needs to be enabled, which then loads the hypervisor. Therefore, we must disable all those features to prevent the Windows hypervisor from being loaded.
               </p>
@@ -224,7 +224,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
 
           {/* Safety Section */}
           <section className="space-y-3">
-            <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+            <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               I want to play that new Denuvo-protected game, is it safe to disable all this and use a hypervisor crack?
             </h3>
             <p>
@@ -242,7 +242,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
             <p>
               Aside from the disabled Windows features, even if you trust the authors of the hypervisor driver and even compile it yourself from source, a serious vulnerability in its code could instantly provide maximum and undetectable access to your system.
             </p>
-            <p className="font-bold text-white">
+            <p className="font-bold text-slate-900 dark:text-white">
               Whether that game is worth the risks is something you will ultimately have to decide for yourself.
             </p>
           </section>
@@ -250,8 +250,8 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
           {/* What's inside those cracks? */}
           <section className="space-y-4">
             <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-[#34d399] shrink-0" />
-              <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+              <Terminal className="w-4 h-4 text-emerald-600 dark:text-[#34d399] shrink-0" />
+              <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 What’s inside those cracks?
               </h3>
             </div>
@@ -259,7 +259,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
 
             <ol className="list-decimal pl-5 space-y-5">
               <li className="space-y-3">
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-slate-900 dark:text-white">
                   VBS.cmd: special command-line script, which checks your existing settings and modify them to make your system prepared for HV-cracks.
                 </p>
                 <p>
@@ -267,48 +267,48 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                 </p>
 
                 {/* Highlighted Green VBS.cmd Card */}
-                <div className="rounded-lg bg-[#12331b]/55 border border-[#159311] p-4 sm:p-5 space-y-3">
+                <div className="rounded-lg bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
                   <a
                     href="https://paste.fitgirl-repacks.site/?770949937a1c73bd#HH6HLTXZj4NFQtUoe44KYiPetXHqenCveB4Wc8uYC5mf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-bold text-[#6ee7b7] hover:text-white underline underline-offset-4"
+                    className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-bold text-emerald-700 hover:text-emerald-950 dark:text-[#6ee7b7] dark:hover:text-white underline underline-offset-4"
                   >
                     <span>Current version: v2.0 (Updated on October 29, 2026)</span>
-                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    <ArrowSquareOut className="w-3.5 h-3.5 shrink-0" />
                   </a>
 
                   {/* Expandable Changes Log Spoiler */}
-                  <div className="rounded bg-[#0d1712]/80 border border-white/[0.1] overflow-hidden">
+                  <div className="rounded bg-white border border-emerald-200 dark:bg-[#0d1712]/80 dark:border-white/[0.1] overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setChangelogOpen((prev) => !prev)}
-                      className="w-full px-3.5 py-2.5 flex items-center justify-between text-left text-[13px] font-semibold text-[#e5e9f0] hover:bg-white/[0.04] transition-colors cursor-pointer"
+                      className="w-full px-3.5 py-2.5 flex items-center justify-between text-left text-[13px] font-semibold text-slate-900 hover:bg-slate-50 dark:text-[#e5e9f0] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
                     >
                       <span className="flex items-center gap-2">
                         {changelogOpen ? (
-                          <ChevronDown className="w-4 h-4 text-[#34d399]" />
+                          <CaretDown className="w-4 h-4 text-emerald-600 dark:text-[#34d399]" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-[#34d399]" />
+                          <CaretRight className="w-4 h-4 text-emerald-600 dark:text-[#34d399]" />
                         )}
                         <span>Changes log:</span>
                       </span>
-                      <span className="text-[11px] text-[#8b9bb4]">
+                      <span className="text-[11px] text-slate-500 dark:text-[#8b9bb4]">
                         {changelogOpen ? 'Click to collapse' : 'v1.1 → v2.0'}
                       </span>
                     </button>
 
                     {changelogOpen && (
-                      <div className="px-4 py-4 border-t border-white/[0.08] space-y-4 text-[12.5px] sm:text-[13px] text-[#c7d4e2]">
+                      <div className="px-4 py-4 border-t border-emerald-200 dark:border-white/[0.08] space-y-4 text-[12.5px] sm:text-[13px] text-slate-700 dark:text-[#c7d4e2]">
                         <div>
-                          <h4 className="font-bold text-white mb-1">v2.0</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v2.0</h4>
                           <p>
                             Temporary removes AVX-512 support for the session to make HV work with newer Denuvo versions
                           </p>
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.9</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.9</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>
                               Added a check for Bitdefender Advanced Threat Defense. The script will now warn the user when Bitdefender Advanced Threat Defense is on, as it may cause an “Initialization error 5” message in certain games that use VMProtect, notably Ubisoft and Capcom titles.
@@ -324,7 +324,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#66c0f4] hover:text-white underline"
+                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -334,7 +334,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.8</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.8</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>
                               The script now enables Test Signing instead of taking the user to disable driver signature enforcement through the Startup Settings in cases where Secure Boot is off. This approach is more stable, and does not need to be reapplied after every restart. Learn more about Test Signing{' '}
@@ -342,7 +342,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://learn.microsoft.com/en-us/windows-hardware/drivers/install/test-signing#test-sign-a-driver-package"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#66c0f4] hover:text-white underline"
+                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                               >
                                 here
                               </a>
@@ -358,7 +358,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#66c0f4] hover:text-white underline"
+                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -368,7 +368,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.7.2</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.7.2</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Improved boot entry identifier detection, addressing issues for some dual boot systems.</li>
                             <li>Added an error message for when the current boot entry could not be identified.</li>
@@ -382,7 +382,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#66c0f4] hover:text-white underline"
+                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -392,7 +392,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.7.1</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.7.1</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Improved Windows Hello detection.</li>
                             <li>Improved BitLocker detection and suspension.</li>
@@ -404,7 +404,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#66c0f4] hover:text-white underline"
+                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -414,7 +414,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                         </div>
 
                         <div className="space-y-2">
-                          <h4 className="font-bold text-white">v1.7</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white">v1.7</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>
                               Added detection for mapped network drives. Running the script from a mapped network drive, including shared folders in virtual machines that appear as mapped networks drives, is not supported and the script will now exit with an appropriate message instead of outright crashing. This is a Windows issue and not the script’s.
@@ -448,7 +448,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                             <li>Bug fixes.</li>
                           </ol>
 
-                          <div className="p-3 rounded bg-[#141b25] border border-white/[0.08] space-y-1.5 text-[12px]">
+                          <div className="p-3 rounded bg-slate-50 border border-slate-200 dark:bg-[#141b25] dark:border-white/[0.08] space-y-1.5 text-[12px]">
                             <p>
                               The “Run as administrator” option in the context menu will fail to execute the script on paths that contain certain special characters. This is a Windows issue and not the script’s.
                             </p>
@@ -456,7 +456,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                               We recommend that instructions avoid explicitly directing users to run the script with administrative privileges. Instead, users should launch the script normally and, if prompted, simply approve the UAC dialog to grant the necessary privileges.
                             </p>
                             <p>In order to fix this, open Command Prompt as administrator, then paste in and execute these commands:</p>
-                            <pre className="p-2.5 rounded bg-[#0a0d12] border border-white/[0.06] text-[#93c5fd] font-mono text-[11px] overflow-x-auto select-all whitespace-pre-wrap">
+                            <pre className="p-2.5 rounded bg-slate-900 border border-slate-800 text-sky-300 dark:bg-[#0a0d12] dark:border-white/[0.06] dark:text-[#93c5fd] font-mono text-[11px] overflow-x-auto select-all whitespace-pre-wrap">
 {`set _r=^%SystemRoot^%
 reg add HKLM\\SOFTWARE\\Classes\\batfile\\shell\\runas\\command /f /v "" /t REG_EXPAND_SZ /d "%_r%\\System32\\cmd.exe /C \\"\\"%1\\" %*\\""
 reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_EXPAND_SZ /d "%_r%\\System32\\cmd.exe /C \\"\\"%1\\" %*\\""`}
@@ -465,7 +465,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.6.2</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.6.2</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>
                               Fixed an issue where a “All changes have been reverted successfully. A restart is not necessary.” message would incorrectly be shown when reverting changes in cases where only driver signature enforcement is off.
@@ -474,7 +474,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.6.1</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.6.1</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>
                               Fixed an issue where reverting Credential Guard would explicitly set LsaCfgFlags to 2 even on systems where it was running due to Windows default enablement rather than explicit configuration. The original value is now backed up before disabling and restored accurately on revert, or left unset if it was never explicitly configured.
@@ -489,7 +489,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.6</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.6</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Added detection and disabling of FACEIT Anti-Cheat. The driver is now automatically unloaded if found running.</li>
                             <li>Added detection and disabling of the WindowsHelloSecureBiometrics registry key, an additional Enhanced Sign-in Security key that was missing from the previous implementation.</li>
@@ -504,7 +504,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.5</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.5</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Improved the Windows hypervisor detection. The script now also checks if Hyper-V, Virtual Machine Platform, Windows Hypervisor Platform, Windows Subsystem for Linux, or Windows Sandbox features are enabled. If any of these are enabled and a hypervisor is detected as running, the Windows hypervisor will be disabled, covering cases where VBS appeared disabled but the hypervisor remained active due to these features.</li>
                             <li>Added VSM (Virtual Secure Mode) launch type detection. If vsmlaunchtype is set to Auto in the boot configuration, it is disabled alongside the hypervisor and restored on revert.</li>
@@ -514,11 +514,11 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                             <li>Added a Temp folder check. If the script is launched directly from an archive file, the user is informed to extract it first.</li>
                             <li>Improved robustness by explicitly setting environment variables at launch, ensuring correct behavior regardless of system configuration or how the script is invoked.</li>
                           </ol>
-                          <p className="mt-1 text-[#9fb0c5]">Other minor improvements.</p>
+                          <p className="mt-1 text-slate-500 dark:text-[#9fb0c5]">Other minor improvements.</p>
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.4</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.4</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Added Driver Signature Enforcement (DSE) and test signing detection. If test signing is already enabled, the script will skip the Startup Settings step, BitLocker suspension, and onetimeadvancedoptions entirely, as driver signature enforcement is already bypassed.</li>
                             <li>Fixed an issue where the Revert Changes option would incorrectly show “Nothing to revert, as no changes were previously applied.” when DSE was still disabled, even though a reboot was required to restore it.</li>
@@ -530,7 +530,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.3</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.3</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Fixed an issue where Credential Guard Scenarios registry key was being restored on revert even when Credential Guard itself was not running before the script was executed. CG and CG Scenarios are now tracked and reverted independently.</li>
                             <li>Fixed an issue where Memory Integrity (HVCI) would not be detected if it was configured but not yet running, which could keep VBS active. HVCI detection now checks both runtime status and registry configuration.</li>
@@ -542,7 +542,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.2</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.2</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Fixed a compatibility issue where launching the script from a 32-bit application, like Compact AutoRunner which is used in Hypervisor Launcher by FitGirl, would cause system tools such as bcdedit to not be found, due to System32 being redirected to SysWOW64 in 32-bit processes. This manifested as the Windows hypervisor showing as failed to disable, and UEFI lock removal failing entirely. The script now relaunches itself as a 64-bit process when this is detected. Thanks to galaxyxyz888 on Discord.</li>
                             <li>Fixed an issue where the Credential Guard Scenarios registry key was not being disabled, which could keep VBS active even when Credential Guard was not running. Thanks to sowhatnumber on Discord.</li>
@@ -556,7 +556,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-white mb-1">v1.1</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">v1.1</h4>
                           <ol className="list-decimal pl-5 space-y-1">
                             <li>Fixed a crash when the script path or filename contained spaces or special characters, such as when downloaded multiple times and renamed to VBS (1).cmd.</li>
                             <li>Fixed an issue where Enhanced Sign-in Security was preventing VBS from being disabled. A check has been added to disable it if detected. This mainly affected ROG Ally X users where it is enabled by default. Thanks to .oathkeeper213 on Discord and Azazel35 on Reddit.</li>
@@ -574,7 +574,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
               </li>
 
               <li className="space-y-2">
-                <p className="font-semibold text-white">The Crack/Bypass itself</p>
+                <p className="font-semibold text-slate-900 dark:text-white">The Crack/Bypass itself</p>
                 <p>
                   Consists of EXEs/DLLs, which does the actual Denuvo bypassing + other additional DLLs, like Goldberg Steam emulator to get past the underlying Steam protection.
                 </p>
@@ -588,22 +588,22 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
           {/* Other Software Updates */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-[#34d399] shrink-0" />
-              <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+              <Wrench className="w-4 h-4 text-emerald-600 dark:text-[#34d399] shrink-0" />
+              <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 Other Software Updates
               </h3>
             </div>
 
-            <div className="rounded-lg bg-[#12331b]/55 border border-[#159311] p-4 sm:p-5 space-y-3">
+            <div className="rounded-lg bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
               <div>
                 <a
                   href="https://paste.fitgirl-repacks.site/?7bb76c6f568d3725#G68jW7TWoMwDHUxBXhP4ttUX7Eeky9yCPPVHHtTs9aKj"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-bold text-[#6ee7b7] hover:text-white underline underline-offset-4"
+                  className="inline-flex items-center gap-2 text-[14px] sm:text-[15px] font-bold text-emerald-700 hover:text-emerald-950 dark:text-[#6ee7b7] dark:hover:text-white underline underline-offset-4"
                 >
                   <span>Updated hypervisor-launcher.exe v1.3.1</span>
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  <ArrowSquareOut className="w-3.5 h-3.5 shrink-0" />
                 </a>
                 <p className="mt-1.5">
                   Solves the PC restart issue on some systems, mostly on Intels. This a mirror from{' '}
@@ -611,7 +611,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                     href="https://github.com/NotAndreh/hypervisor-launcher/releases"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#66c0f4] hover:text-white underline"
+                    className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
                   >
                     this official GitHub page
                   </a>
@@ -623,16 +623,16 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
               </div>
 
               <div className="space-y-1.5">
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-slate-900 dark:text-white">
                   My repacks with older version “hypervisor-launcher.exe”:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-[#93c5fd]">
+                <ul className="list-disc pl-5 space-y-1 text-[#0284c7] dark:text-[#93c5fd]">
                   <li>
                     <a
                       href="https://fitgirl-repacks.site/assassins-creed-shadows/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white underline"
+                      className="hover:text-slate-900 dark:hover:text-white underline"
                     >
                       Assassin’s Creed Shadows
                     </a>
@@ -642,7 +642,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/hello-kitty-island-adventure/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white underline"
+                      className="hover:text-slate-900 dark:hover:text-white underline"
                     >
                       Hello Kitty Island Adventure
                     </a>
@@ -652,7 +652,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/nba-2k26/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white underline"
+                      className="hover:text-slate-900 dark:hover:text-white underline"
                     >
                       NBA 2K26
                     </a>
@@ -662,7 +662,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/stellar-blade/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white underline"
+                      className="hover:text-slate-900 dark:hover:text-white underline"
                     >
                       Stellar Blade
                     </a>
@@ -673,10 +673,10 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
           </section>
 
           {/* Pre-requirements */}
-          <section className="space-y-2 p-4 sm:p-5 rounded bg-[#121822] border border-white/[0.07]">
+          <section className="space-y-2 p-4 sm:p-5 rounded bg-white border border-slate-200 dark:bg-[#121822] dark:border-white/[0.07]">
             <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-[#66c0f4] shrink-0" />
-              <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+              <Cpu className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+              <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 Pre-requirements
               </h3>
             </div>
@@ -686,11 +686,11 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
           </section>
 
           {/* Secure Boot FAQ */}
-          <section className="space-y-2 p-4 sm:p-5 rounded bg-[#121822] border border-white/[0.07]">
-            <h3 className="font-display text-lg sm:text-xl font-bold text-white">
+          <section className="space-y-2 p-4 sm:p-5 rounded bg-white border border-slate-200 dark:bg-[#121822] dark:border-white/[0.07]">
+            <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               Do I need to disable Secure Boot or use EfiGuard?
             </h3>
-            <p className="text-[#e5e9f0] font-medium">
+            <p className="text-slate-800 dark:text-[#e5e9f0] font-medium">
               No. Current HV bypasses do not require those changes.
             </p>
           </section>

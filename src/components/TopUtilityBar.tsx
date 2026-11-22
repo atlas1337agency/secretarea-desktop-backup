@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import {
+  ArrowSquareOut,
+  ArrowsIn,
   Clock,
-  Download,
-  ExternalLink,
-  Loader2,
-  Maximize2,
-  Minimize2,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
+  CornersOut,
+  DownloadSimple,
+  SpeakerHigh,
+  SpeakerSlash,
+  SpinnerGap,
+} from '@phosphor-icons/react';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
 
@@ -64,14 +64,15 @@ export function TopUtilityBar({
 
   return (
     <div
-      className={`sa-topbar relative z-30 h-9 shrink-0 px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 text-[11.5px] select-none border-b transition-colors duration-200 ${
+      className={`sa-topbar relative z-30 h-9 shrink-0 select-none border-b transition-colors duration-200 ${
         isPs5Theme
           ? 'bg-[#020f2b]/85 border-white/[0.12] text-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,6,20,0.45)]'
           : isXboxTheme
           ? 'bg-[#071509]/88 border-[#52e042]/22 text-[#e8f8ea] backdrop-blur-md shadow-[0_4px_20px_rgba(2,14,4,0.5)]'
-          : 'bg-[#101318] border-white/[0.06] text-[#9fb0c7]'
+          : 'bg-slate-50/95 border-slate-200/80 text-slate-600 dark:bg-[#0b0f16]/95 dark:border-white/[0.06] dark:text-[#9fb0c7]'
       }`}
     >
+      <div className="w-full max-w-[1600px] mx-auto h-full px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 text-[11.5px]">
       {/* Left Zone: Live Date & Time */}
       <div className="flex items-center gap-1.5 min-w-0 flex-1 font-mono-tabular">
         <Clock
@@ -80,7 +81,7 @@ export function TopUtilityBar({
               ? 'text-[#7cc4ff]'
               : isXboxTheme
               ? 'text-[#6ee755]'
-              : 'text-[#66c0f4]'
+              : 'text-[#0284c7] dark:text-[#66c0f4]'
           }`}
         />
         <span
@@ -89,12 +90,17 @@ export function TopUtilityBar({
               ? 'text-white/75 font-light'
               : isXboxTheme
               ? 'text-[#b7dab9] font-normal'
-              : 'text-[#b8c7dc]'
+              : 'text-slate-600 dark:text-[#b8c7dc]'
           }`}
         >
           {formattedDate}
         </span>
-        <span className="hidden sm:inline text-white/25" aria-hidden="true">
+        <span
+          className={`hidden sm:inline ${
+            hasConsoleAudio ? 'text-white/25' : 'text-slate-300 dark:text-white/25'
+          }`}
+          aria-hidden="true"
+        >
           ·
         </span>
         <span
@@ -103,7 +109,7 @@ export function TopUtilityBar({
               ? 'text-white font-light tracking-wider text-[12.5px]'
               : isXboxTheme
               ? 'text-white font-semibold tracking-wider text-[12px]'
-              : 'text-white/90 font-medium'
+              : 'text-slate-900 dark:text-white/90 font-medium'
           }`}
         >
           {formattedTime}
@@ -122,11 +128,11 @@ export function TopUtilityBar({
               ? 'text-white/90 hover:text-white drop-shadow-[0_1px_6px_rgba(0,118,255,0.45)]'
               : isXboxTheme
               ? 'text-[#dcfce0] hover:text-[#6ee755] drop-shadow-[0_1px_6px_rgba(82,224,66,0.35)]'
-              : 'text-[#d4e2f4] hover:text-[#1a9fff]'
+              : 'text-slate-800 hover:text-[#1a9fff] dark:text-[#d4e2f4] dark:hover:text-[#1a9fff]'
           }`}
         >
           <span>{t.topbar.webVersion}</span>
-          <ExternalLink className="w-3 h-3 opacity-75 shrink-0" />
+          <ArrowSquareOut className="w-3.5 h-3.5 opacity-80 shrink-0" />
         </a>
       </div>
 
@@ -143,18 +149,18 @@ export function TopUtilityBar({
                 ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
                 : isXboxTheme
                 ? 'rounded-md bg-[#122b15] hover:bg-[#183b1c] text-[#e7fce9] border border-[#52e042]/30 hover:border-[#6ee755]/75'
-                : 'bg-[#1a222d] hover:bg-[#243040] text-[#c7d5e8] hover:text-white border border-white/[0.08]'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
             }`}
           >
             {updateBadgeStatus === 'checking' || updateBadgeStatus === 'downloading' ? (
-              <Loader2
-                className={`w-3 h-3 animate-spin shrink-0 ${
+              <SpinnerGap
+                className={`w-3.5 h-3.5 animate-spin shrink-0 ${
                   isXboxTheme ? 'text-[#6ee755]' : 'text-[#66c0f4]'
                 }`}
               />
             ) : updateBadgeStatus === 'available' || updateBadgeStatus === 'downloaded' ? (
-              <Download
-                className={`w-3 h-3 shrink-0 ${
+              <DownloadSimple
+                className={`w-3.5 h-3.5 shrink-0 ${
                   updateBadgeStatus === 'downloaded'
                     ? 'text-[#34d399]'
                     : isXboxTheme
@@ -208,7 +214,7 @@ export function TopUtilityBar({
           >
             {soundEnabled ? (
               <>
-                <Volume2
+                <SpeakerHigh
                   className={`w-3.5 h-3.5 ${
                     isXboxTheme ? 'text-[#6ee755]' : 'text-[#7cc4ff]'
                   }`}
@@ -228,7 +234,7 @@ export function TopUtilityBar({
                 </span>
               </>
             ) : (
-              <VolumeX className="w-3.5 h-3.5 opacity-65" />
+              <SpeakerSlash className="w-3.5 h-3.5 opacity-65" />
             )}
           </button>
         )}
@@ -243,15 +249,16 @@ export function TopUtilityBar({
               ? 'rounded-full bg-white/[0.12] hover:bg-white/[0.24] text-white ring-1 ring-white/40 hover:ring-white/80 shadow-[0_0_14px_rgba(0,118,255,0.4)]'
               : isXboxTheme
               ? 'rounded-md bg-[#122b15] hover:bg-[#183c1d] text-[#e7fce9] border border-[#52e042]/40 hover:border-[#6ee755] shadow-[0_0_12px_rgba(82,224,66,0.22)]'
-              : 'bg-[#1a222d] hover:bg-[#243040] text-[#c7d5e8] hover:text-white border border-white/[0.08]'
+              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
           }`}
         >
           {isFullscreen ? (
-            <Minimize2 className="w-3.5 h-3.5" />
+            <ArrowsIn className="w-3.5 h-3.5" />
           ) : (
-            <Maximize2 className="w-3.5 h-3.5" />
+            <CornersOut className="w-3.5 h-3.5" />
           )}
         </button>
+      </div>
       </div>
     </div>
   );

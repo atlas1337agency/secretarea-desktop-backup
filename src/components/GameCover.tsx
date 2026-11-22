@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Gamepad2 } from 'lucide-react';
+import { GameController } from '@phosphor-icons/react';
 
 interface GameCoverProps {
   src?: string;
@@ -34,15 +34,15 @@ export function GameCover({
   if (!src || failed) {
     return (
       <div
-        className={`relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#1f2937] via-[#16202d] to-[#0e141b] text-center select-none ${className}`}
+        className={`relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200 dark:from-[#1f2937] dark:via-[#16202d] dark:to-[#0e141b] text-center select-none ${className}`}
       >
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,#1a9fff,transparent_60%)]" />
-        <Gamepad2
-          className={compact ? 'w-3.5 h-3.5 text-[#677487]' : 'w-8 h-8 text-[#4b5c73] mb-2'}
+        <GameController
+          className={compact ? 'w-3.5 h-3.5 text-slate-400 dark:text-[#677487]' : 'w-8 h-8 text-slate-400 dark:text-[#4b5c73] mb-2'}
           aria-hidden="true"
         />
         {!compact && (
-          <span className="px-3 text-[11px] font-medium leading-tight tracking-wide text-[#8b9bb4] line-clamp-3">
+          <span className="px-3 text-[11px] font-medium leading-tight tracking-wide text-slate-600 dark:text-[#8b9bb4] line-clamp-3">
             {alt}
           </span>
         )}
