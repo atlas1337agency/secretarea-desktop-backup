@@ -3,14 +3,18 @@ import {
   ArrowDownWideNarrow,
   ChevronLeft,
   ChevronRight,
+  Laptop,
   Search,
-  Star,
   X,
 } from 'lucide-react';
 import type { GameItem, LibrarySectionTab, SortOption } from '../types';
 import { LIBRARY_SECTIONS } from '../utils/parsers';
+import { evaluateCanRunGame } from '../services/canRunIt';
+import type { SystemHardwareSpecs } from '../services/systemSpecs';
 import { GameCover } from './GameCover';
 import { SectionSourceBadge } from './SectionBadge';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface LibraryViewProps {
   activeSectionTab: LibrarySectionTab;
@@ -22,9 +26,13 @@ interface LibraryViewProps {
   onSortChange: (sort: SortOption) => void;
   genreFilter: string;
   onGenreFilterChange: (genre: string) => void;
+  canRunFilter?: 'all' | 'can-run' | 'cannot-run';
+  onCanRunFilterChange?: (filter: 'all' | 'can-run' | 'cannot-run') => void;
   onClearAllFilters: () => void;
   availableGenres: string[];
   favorites: Set<string>;
+  systemSpecs?: SystemHardwareSpecs;
+  language?: AppLanguage;
   onToggleFavorite: (id: string) => void;
   onSelectGame: (game: GameItem) => void;
 }
@@ -60,18 +68,21 @@ export function LibraryView({
   onSortChange,
   genreFilter,
   onGenreFilterChange,
+  canRunFilter = 'all',
+  onCanRunFilterChange,
   onClearAllFilters,
   availableGenres,
-  favorites,
-  onToggleFavorite,
+  systemSpecs,
+  language = 'en',
   onSelectGame,
 }: LibraryViewProps) {
+  const t = getTranslations(language).library;
   const [page, setPage] = useState(0);
   const scrollSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setPage(0);
-  }, [activeSectionTab, games.length, sortBy, genreFilter, searchQuery]);
+  }, [activeSectionTab, games.length, sortBy, genreFilter, canRunFilter, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(games.length / LIBRARY_PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
@@ -83,7 +94,8 @@ export function LibraryView({
 
   const sectionLabel =
     LIBRARY_SECTIONS.find((s) => s.key === activeSectionTab)?.label || 'Games';
-  const hasActiveFilters = genreFilter !== 'all' || searchQuery.trim() !== '';
+  const hasActiveFilters =
+    genreFilter !== 'all' || canRunFilter !== 'all' || searchQuery.trim() !== '';
 
   const goToPage = (nextPage: number) => {
     const bounded = Math.max(0, Math.min(nextPage, totalPages - 1));
@@ -113,7 +125,7 @@ export function LibraryView({
 
         {totalPages > 1 && (
           <span className="text-[12px] text-[#8b9bb4] font-mono-tabular shrink-0">
-            Page {safePage + 1} / {totalPages}
+            {t.pageOf} {safePage + 1} / {totalPages}
           </span>
         )}
       </div>
@@ -125,39 +137,64 @@ export function LibraryView({
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <ArrowDownWideNarrow className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
             <span className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#8b9bb4] shrink-0">
-              Sort By
+              {t.sortBy}
             </span>
             <select
-              aria-label="Smart sort library items"
+              aria-label={t.sortBy}
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as SortOption)}
               className="flex-1 sm:flex-initial px-2.5 py-1.5 rounded bg-[#2a3340] border border-white/[0.08] text-[12px] font-medium text-[#e5e9f0] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
             >
-              <option value="smart">Smart Sort (Best &amp; New)</option>
-              <option value="latest">Newest First</option>
-              <option value="alphabetical">Name: A → Z</option>
-              <option value="alphabetical-desc">Name: Z → A</option>
-              <option value="favorites">Favorites First</option>
-              <option value="size-asc">Size: Smallest First</option>
-              <option value="size-desc">Size: Largest First</option>
-              <option value="mirrors">Most Download Channels</option>
+              <option value="smart">{t.sortSmart}</option>
+              <option value="latest">{t.sortLatest}</option>
+              <option value="alphabetical">{t.sortAz}</option>
+              <option value="alphabetical-desc">{t.sortZa}</option>
+              <option value="favorites">{t.sortFavorites}</option>
+              <option value="size-asc">{t.sortSizeAsc}</option>
+              <option value="size-desc">{t.sortSizeDesc}</option>
+              <option value="mirrors">{t.sortMirrors}</option>
             </select>
           </div>
 
           {/* All Genres Dropdown */}
           <select
-            aria-label="Filter by genre"
+            aria-label={t.allGenres}
             value={genreFilter}
             onChange={(e) => onGenreFilterChange(e.target.value)}
             className="w-full sm:w-auto px-2.5 py-1.5 rounded bg-[#2a3340] border border-white/[0.08] text-[12px] font-medium text-[#e5e9f0] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
           >
-            <option value="all">All Genres</option>
+            <option value="all">{t.allGenres}</option>
             {availableGenres.map((genre) => (
               <option key={genre} value={genre}>
                 {genre}
               </option>
             ))}
           </select>
+
+          {/* Can Run It PC Compatibility Filter */}
+          {onCanRunFilterChange && (
+            <div className="sa-ps5-select-wrap inline-flex items-center gap-1.5 w-full sm:w-auto px-2.5 py-1.5 rounded bg-[#2a3340] border border-white/[0.08]">
+              <Laptop className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
+              <select
+                aria-label={t.canRunAll}
+                value={canRunFilter}
+                onChange={(e) =>
+                  onCanRunFilterChange(e.target.value as 'all' | 'can-run' | 'cannot-run')
+                }
+                className="flex-1 sm:flex-initial bg-transparent text-[12px] font-medium text-[#e5e9f0] focus:outline-none cursor-pointer"
+              >
+                <option value="all" className="bg-[#1b222c] text-white">
+                  {t.canRunAll}
+                </option>
+                <option value="can-run" className="bg-[#1b222c] text-[#4ade80]">
+                  {t.canRunPass}
+                </option>
+                <option value="cannot-run" className="bg-[#1b222c] text-[#f87171]">
+                  {t.canRunFail}
+                </option>
+              </select>
+            </div>
+          )}
 
           {hasActiveFilters && (
             <button
@@ -166,27 +203,27 @@ export function LibraryView({
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[11px] font-medium text-[#c6d4df] transition-colors cursor-pointer"
             >
               <X className="w-3 h-3" />
-              <span>Clear</span>
+              <span>{t.clear}</span>
             </button>
           )}
         </div>
 
         {/* Single Smart Search Bar */}
         <div className="relative w-full md:w-64 lg:w-72 shrink-0">
-          <Search className="w-3.5 h-3.5 text-[#677487] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-[#677487] absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={`Smart search ${sectionLabel.toLowerCase()}...`}
-            className="w-full pl-8 pr-7 py-1.5 rounded bg-[#141b24] border border-white/[0.08] text-[12px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+            placeholder={`${t.searchPlaceholder} ${sectionLabel.toLowerCase()}...`}
+            className="w-full ps-8 pe-7 py-1.5 rounded bg-[#141b24] border border-white/[0.08] text-[12px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
           />
           {searchQuery && (
             <button
               type="button"
-              aria-label="Clear search query"
+              aria-label={t.clear}
               onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-[#677487] hover:text-white cursor-pointer"
+              className="absolute end-2 top-1/2 -translate-y-1/2 text-[#677487] hover:text-white cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -198,18 +235,18 @@ export function LibraryView({
       {pageGames.length === 0 ? (
         <div className="py-20 text-center bg-[#141921]/60 border border-white/[0.06] rounded">
           <p className="text-[15px] font-semibold text-[#e5e9f0] mb-1">
-            No items match your current filters
+            {t.emptyTitle}
           </p>
           <p className="text-[13px] text-[#8b9bb4]">
-            Try clearing the search query, genre filter, or switching sections.
+            {t.emptySubtitle}
           </p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             {pageGames.map((game, index) => {
-              const isFav = favorites.has(game.id);
               const metaBadge = game.repackSize || game.version || game.category;
+              const canRunEval = systemSpecs ? evaluateCanRunGame(game, systemSpecs) : null;
               return (
                 <div
                   key={`${game.tab}-${game.id}`}
@@ -234,7 +271,7 @@ export function LibraryView({
                   {/* New Ribbon (3 newest in games catalog) */}
                   {game.isNew && (
                     <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] px-1.5 text-center shadow-sm">
-                      NEW TO LIBRARY
+                      {t.newToLibrary}
                     </div>
                   )}
 
@@ -242,29 +279,8 @@ export function LibraryView({
                   <SectionSourceBadge
                     tab={game.tab}
                     hasTopRibbon={game.isNew}
-                    className="absolute left-1.5"
+                    className="absolute start-1.5"
                   />
-
-                  {/* Favorite Star Button */}
-                  <button
-                    type="button"
-                    aria-label={isFav ? `Remove ${game.name} from favorites` : `Favorite ${game.name}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleFavorite(game.id);
-                    }}
-                    className={`absolute right-1.5 ${
-                      game.isNew ? 'top-7' : 'top-1.5'
-                    } p-1.5 rounded bg-black/65 hover:bg-black/85 backdrop-blur-sm transition-opacity cursor-pointer ${
-                      isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}
-                  >
-                    <Star
-                      className={`w-3.5 h-3.5 ${
-                        isFav ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-white/80'
-                      }`}
-                    />
-                  </button>
 
                   {/* Metadata Scrim (Always readable on small touchscreens, hover reveal on desktop) */}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0b0e14] via-[#0b0e14]/90 to-transparent pt-10 pb-2.5 px-2.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end">
@@ -276,12 +292,12 @@ export function LibraryView({
                       <div className="flex items-center gap-1 shrink-0">
                         {game.tab === 'architect' && game.isPinned && (
                           <span className="px-1 py-[1px] rounded-[2px] bg-amber-500/20 text-amber-300 text-[9.5px] font-bold uppercase">
-                            Pinned
+                            {t.pinned}
                           </span>
                         )}
                         {game.tab === 'architect' && game.isFree && (
                           <span className="px-1 py-[1px] rounded-[2px] bg-emerald-500/20 text-emerald-300 text-[9.5px] font-bold uppercase">
-                            Free
+                            {t.free}
                           </span>
                         )}
                         {game.repackBy && (
@@ -289,6 +305,19 @@ export function LibraryView({
                         )}
                       </div>
                     </div>
+                    {canRunEval && canRunEval.status !== 'unknown' && (
+                      <div
+                        className={`mt-1 text-[10.5px] font-bold truncate ${
+                          canRunEval.status === 'can-run'
+                            ? 'text-[#4ade80]'
+                            : 'text-[#f87171]'
+                        }`}
+                      >
+                        {canRunEval.status === 'can-run'
+                          ? t.canRunCard
+                          : `✕ ${canRunEval.shortBadge}`}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -305,8 +334,8 @@ export function LibraryView({
                   onClick={() => goToPage(safePage - 1)}
                   className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Previous</span>
+                  <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                  <span>{t.previous}</span>
                 </button>
 
                 {pageTokens.map((token, idx) =>
@@ -339,8 +368,8 @@ export function LibraryView({
                   onClick={() => goToPage(safePage + 1)}
                   className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
                 >
-                  <span>Next</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <span>{t.next}</span>
+                  <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                 </button>
               </div>
 
@@ -350,8 +379,8 @@ export function LibraryView({
                   onClick={() => goToPage(safePage + 1)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                 >
-                  <span>Next 50 Items</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span>{t.next50}</span>
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </button>
               ) : (
                 <button
@@ -359,7 +388,7 @@ export function LibraryView({
                   onClick={() => goToPage(0)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                 >
-                  <span>Back to Page 1</span>
+                  <span>{t.backToPage1}</span>
                 </button>
               )}
             </div>

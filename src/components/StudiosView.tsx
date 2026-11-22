@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Building2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import type { GameItem } from '../types';
 import { getStudioTotalCount, sortStudiosByTop } from '../utils/parsers';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface StudiosViewProps {
   studios: GameItem[];
+  language?: AppLanguage;
   onSelectStudio: (studio: GameItem) => void;
   onBackHome: () => void;
 }
@@ -49,7 +52,8 @@ export function StudioEmblem({ studio }: { studio: GameItem }) {
   );
 }
 
-export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosViewProps) {
+export function StudiosView({ studios, language = 'en', onSelectStudio, onBackHome }: StudiosViewProps) {
+  const t = getTranslations(language).studios;
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
   const topRef = useRef<HTMLDivElement | null>(null);
@@ -93,29 +97,29 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
               onClick={onBackHome}
               className="inline-flex items-center gap-2 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[12px] sm:text-[12.5px] font-semibold text-[#e5e9f0] hover:text-white transition-colors whitespace-nowrap cursor-pointer shrink-0"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
+              <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+              <span>{t.backToHome}</span>
             </button>
 
             <h1 className="font-display text-lg lg:text-xl font-bold text-white tracking-tight truncate">
-              Top Studios
+              {t.topStudios}
             </h1>
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:flex-initial">
-              <Search className="w-3.5 h-3.5 text-[#677487] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-[#677487] absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search studios..."
-                className="w-full sm:w-64 pl-8 pr-3 py-2 rounded bg-[#10151c] border border-white/[0.1] text-[12.5px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+                placeholder={t.searchPlaceholder}
+                className="w-full sm:w-64 ps-8 pe-3 py-2 rounded bg-[#10151c] border border-white/[0.1] text-[12.5px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
               />
             </div>
 
             <span className="text-[12px] text-[#8b9bb4] font-mono-tabular whitespace-nowrap shrink-0">
-              Page {safePage + 1} / {totalPages}
+              {t.pageOf} {safePage + 1} / {totalPages}
             </span>
           </div>
         </div>
@@ -123,7 +127,7 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
         {/* Studios Grid: Logo + Total Games */}
         {pageItems.length === 0 ? (
           <div className="py-16 text-center rounded bg-[#141921] border border-white/[0.06] text-[13px] text-[#8b9bb4]">
-            No studios match your search.
+            {t.noMatch}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-3.5 lg:gap-4">
@@ -134,13 +138,13 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
                   key={`studio-page-${studio.id}`}
                   type="button"
                   title={studio.name}
-                  aria-label={`${studio.name} (${totalGames} Games)`}
+                  aria-label={`${studio.name} (${totalGames} ${t.gamePlural})`}
                   onClick={() => onSelectStudio(studio)}
                   className="group p-3 rounded bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 transition-all duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                 >
                   <StudioEmblem studio={studio} />
                   <span className="text-[12px] font-semibold font-mono-tabular text-[#c6d4df] group-hover:text-white">
-                    {totalGames} {totalGames === 1 ? 'Game' : 'Games'}
+                    {totalGames} {totalGames === 1 ? t.gameSingular : t.gamePlural}
                   </span>
                 </button>
               );
@@ -158,8 +162,8 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
                 onClick={() => goToPage(safePage - 1)}
                 className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Previous</span>
+                <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                <span>{t.previous}</span>
               </button>
 
               {Array.from({ length: totalPages }, (_, idx) => (
@@ -183,8 +187,8 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
                 onClick={() => goToPage(safePage + 1)}
                 className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
               >
-                <span>Next</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <span>{t.next}</span>
+                <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
               </button>
             </div>
 
@@ -193,8 +197,8 @@ export function StudiosView({ studios, onSelectStudio, onBackHome }: StudiosView
               onClick={onBackHome}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[12px] font-semibold text-[#e5e9f0] cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Home</span>
+              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+              <span>{t.backToHome}</span>
             </button>
           </div>
         )}

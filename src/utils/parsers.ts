@@ -97,13 +97,15 @@ export function extractYouTubeEmbedUrl(raw?: string): { watchUrl: string; embedU
   if (!target) return { watchUrl: '', embedUrl: null };
 
   let videoId = '';
-  const embedMatch = target.match(/youtube\.com\/embed\/([A-Za-z0-9_-]{6,})/);
+  const embedMatch = target.match(/youtube(?:-nocookie)?\.com\/embed\/([A-Za-z0-9_-]{6,})/);
   const watchMatch = target.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
   const shortMatch = target.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  const shortsOrLiveMatch = target.match(/youtube\.com\/(?:shorts|live)\/([A-Za-z0-9_-]{6,})/);
 
   if (embedMatch) videoId = embedMatch[1];
   else if (watchMatch) videoId = watchMatch[1];
   else if (shortMatch) videoId = shortMatch[1];
+  else if (shortsOrLiveMatch) videoId = shortsOrLiveMatch[1];
 
   if (!videoId) {
     return { watchUrl: target, embedUrl: null };
@@ -415,6 +417,93 @@ function buildFallbackDescription(row: RawSheetRow, tab: SheetTabKey): string {
     return `Linked ID: ${row.id || ''} — Mode: ${row.category}`;
   }
   return '';
+}
+
+function hasNonEmptyText(value: unknown): boolean {
+  return value !== undefined && value !== null && String(value).trim() !== '';
+}
+
+export function isUntitledPlaceholderName(name?: string | null): boolean {
+  if (!name) return true;
+  const trimmed = name.trim();
+  return !trimmed || /^Untitled Item \d+$/i.test(trimmed);
+}
+
+export function isValidSheetRow(
+  row: RawSheetRow | null | undefined,
+  tab: SheetTabKey
+): boolean {
+  if (!row || typeof row !== 'object') return false;
+
+  switch (tab) {
+    case 'game':
+    case 'hypervisor':
+    case 'steamtools':
+    case 'ps5':
+    case 'architect':
+    case 'extra':
+    case 'upcoming':
+    case 'topgames':
+      return hasNonEmptyText(row.name) || hasNonEmptyText(row.title);
+
+    case 'upcomingtrailers':
+    case 'bestgameseries':
+      return hasNonEmptyText(row.title) || hasNonEmptyText(row.name);
+
+    case 'profil':
+      return (
+        hasNonEmptyText(row.Company) ||
+        hasNonEmptyText(row.name) ||
+        hasNonEmptyText(row.title)
+      );
+
+    case 'upcominglist':
+      return [
+        row.game,
+        row.steamtools,
+        row.hypervisor,
+        row.ps5,
+        row.tools,
+        row.savegames,
+        row.name,
+        row.title,
+      ].some(hasNonEmptyText);
+
+    case 'popularrepacks':
+      return (
+        hasNonEmptyText(row['Game ID']) ||
+        hasNonEmptyText(row.name) ||
+        hasNonEmptyText(row.title)
+      );
+
+    case 'onlinegames':
+      return (
+        hasNonEmptyText(row.id) ||
+        hasNonEmptyText(row.name) ||
+        hasNonEmptyText(row.title)
+      );
+
+    case 'steamaccounts':
+      return [
+        row.username,
+        row['free steam'],
+        row['game review'],
+        row['digital products'],
+        row.name,
+        row.title,
+      ].some(hasNonEmptyText);
+
+    case 'maintenance':
+      return hasNonEmptyText(row.message) || hasNonEmptyText(row.active);
+
+    case 'mastergift':
+    default:
+      return Object.entries(row).some(
+        ([k, v]) =>
+          !/^(id|date|pinned|free|denuvo|launcher)$/i.test(k.trim()) &&
+          hasNonEmptyText(v)
+      );
+  }
 }
 
 export function normalizeRow(row: RawSheetRow, tab: SheetTabKey, index: number): GameItem {

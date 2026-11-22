@@ -11,6 +11,8 @@ import type { GameItem, LibrarySectionTab } from '../types';
 import { LIBRARY_SECTIONS } from '../utils/parsers';
 import { GameCover } from './GameCover';
 import { getSectionVisualMeta } from './SectionBadge';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface LibrarySidebarProps {
   activeSectionTab: LibrarySectionTab;
@@ -22,6 +24,7 @@ interface LibrarySidebarProps {
   onGenreFilterChange: (value: string) => void;
   availableGenres: string[];
   favorites: Set<string>;
+  language?: AppLanguage;
   onSelectGame: (game: GameItem) => void;
 }
 
@@ -35,8 +38,10 @@ export function LibrarySidebar({
   onGenreFilterChange,
   availableGenres,
   favorites,
+  language = 'en',
   onSelectGame,
 }: LibrarySidebarProps) {
+  const t = getTranslations(language).library;
   const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
   const [mobileListOpen, setMobileListOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -70,23 +75,23 @@ export function LibrarySidebar({
   const ActiveIcon = activeVisual.icon;
 
   return (
-    <aside className="w-full lg:w-[272px] xl:w-[288px] shrink-0 bg-[#171d25] border-b lg:border-b-0 lg:border-r border-white/[0.06] flex flex-col lg:h-full select-none">
+    <aside className="w-full lg:w-[272px] xl:w-[288px] shrink-0 bg-[#171d25] border-b lg:border-b-0 lg:border-e border-white/[0.06] flex flex-col lg:h-full select-none">
       {/* Section Dropdown (with Icons) + Genres Dropdown Only */}
       <div className="p-3 space-y-3 border-b border-white/[0.05]">
         {/* Section Switcher Dropdown with Icons */}
         <div className="space-y-1.5 relative" ref={dropdownRef}>
           <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#8b9bb4]">
             <FolderKanban className="w-3 h-3 text-[#66c0f4]" />
-            <span>Section</span>
+            <span>{t.sectionLabel}</span>
           </span>
 
           <button
             type="button"
             aria-haspopup="listbox"
             aria-expanded={sectionMenuOpen}
-            aria-label="Choose library section"
+            aria-label={t.sectionLabel}
             onClick={() => setSectionMenuOpen((prev) => !prev)}
-            className={`w-full px-2.5 py-2 rounded bg-[#232b36] hover:bg-[#2a3441] border transition-colors flex items-center justify-between gap-2 text-left cursor-pointer ${
+            className={`w-full px-2.5 py-2 rounded bg-[#232b36] hover:bg-[#2a3441] border transition-colors flex items-center justify-between gap-2 text-start cursor-pointer ${
               sectionMenuOpen ? 'border-[#1a9fff]' : 'border-white/[0.08]'
             }`}
           >
@@ -109,8 +114,8 @@ export function LibrarySidebar({
           {sectionMenuOpen && (
             <div
               role="listbox"
-              aria-label="Library sections"
-              className="absolute left-0 right-0 top-full mt-1 z-30 rounded bg-[#1b222c] border border-white/[0.12] shadow-2xl py-1 overflow-hidden"
+              aria-label={t.sectionLabel}
+              className="absolute inset-x-0 top-full mt-1 z-30 rounded bg-[#1b222c] border border-white/[0.12] shadow-2xl py-1 overflow-hidden"
             >
               {LIBRARY_SECTIONS.map((sec) => {
                 const isSelected = sec.key === activeSectionTab;
@@ -126,7 +131,7 @@ export function LibrarySidebar({
                       onSelectSectionTab(sec.key);
                       setSectionMenuOpen(false);
                     }}
-                    className={`w-full px-3 py-2 flex items-center justify-between gap-2 text-left text-[12.5px] transition-colors cursor-pointer ${
+                    className={`w-full px-3 py-2 flex items-center justify-between gap-2 text-start text-[12.5px] transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-[#2a394b] text-white font-semibold'
                         : 'text-[#c6d4df] hover:bg-white/[0.06] hover:text-white'
@@ -152,7 +157,7 @@ export function LibrarySidebar({
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#8b9bb4]">
               <Tag className="w-3 h-3 text-[#66c0f4]" />
-              <span>Genres in {activeSection.label}</span>
+              <span>{t.genresIn} {activeSection.label}</span>
             </span>
             {genreFilter !== 'all' && (
               <button
@@ -160,18 +165,18 @@ export function LibrarySidebar({
                 onClick={() => onGenreFilterChange('all')}
                 className="text-[10.5px] text-[#66c0f4] hover:text-white cursor-pointer"
               >
-                Reset
+                {t.reset}
               </button>
             )}
           </div>
 
           <select
-            aria-label="Select genre inside section"
+            aria-label={t.allGenres}
             value={genreFilter}
             onChange={(e) => onGenreFilterChange(e.target.value)}
             className="w-full px-2.5 py-1.5 rounded bg-[#1f2733] border border-white/[0.08] text-[12px] text-[#dce4ee] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
           >
-            <option value="all">All Genres ({availableGenres.length})</option>
+            <option value="all">{t.allGenres} ({availableGenres.length})</option>
             {availableGenres.map((genre) => (
               <option key={genre} value={genre}>
                 {genre}
@@ -185,13 +190,14 @@ export function LibrarySidebar({
       <button
         type="button"
         onClick={() => setMobileListOpen((prev) => !prev)}
-        className="lg:pointer-events-none w-full px-3 py-2 bg-[#202936]/80 border-b border-white/[0.05] flex items-center justify-between text-left cursor-pointer lg:cursor-default"
+        className="lg:pointer-events-none w-full px-3 py-2 bg-[#202936]/80 border-b border-white/[0.05] flex items-center justify-between text-start cursor-pointer lg:cursor-default"
       >
         <span className="text-[11px] font-semibold tracking-wider uppercase text-[#c6d4df]">
-          ALL <span className="text-[#66c0f4] font-mono-tabular">({sidebarItems.length})</span>
+          {t.allCountLabel}{' '}
+          <span className="text-[#66c0f4] font-mono-tabular">({sidebarItems.length})</span>
         </span>
         <span className="lg:hidden inline-flex items-center gap-1 text-[11px] text-[#8b9bb4]">
-          <span>{mobileListOpen ? 'Hide' : 'Show'}</span>
+          <span>{mobileListOpen ? t.hide : t.show}</span>
           {mobileListOpen ? (
             <ChevronUp className="w-3.5 h-3.5" />
           ) : (
@@ -208,7 +214,7 @@ export function LibrarySidebar({
       >
         {sidebarItems.length === 0 ? (
           <div className="px-3 py-6 text-center text-[12px] text-[#677487]">
-            No matching titles found.
+            {t.noMatchingTitles}
           </div>
         ) : (
           sidebarItems.map((game) => {
@@ -219,7 +225,7 @@ export function LibrarySidebar({
                 key={`${game.tab}-${game.id}`}
                 type="button"
                 onClick={() => onSelectGame(game)}
-                className={`w-full px-3 py-1.5 flex items-center gap-2.5 text-left transition-colors cursor-pointer ${
+                className={`w-full px-3 py-1.5 flex items-center gap-2.5 text-start transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-[#2d3e52] text-white'
                     : 'text-[#aeb9c7] hover:bg-white/[0.04] hover:text-white'

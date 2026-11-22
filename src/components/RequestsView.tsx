@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, Inbox, Send } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  HeartHandshake,
+  Inbox,
+  Send,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import type { ItemRequestPayload } from '../types';
 import {
   fetchRequestsFromGas,
   loadLocalRequests,
   submitItemRequest,
 } from '../services/sheetsApi';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface RequestsViewProps {
   gasUrl: string;
+  language?: AppLanguage;
   onNotify: (message: string, type?: 'success' | 'info' | 'error') => void;
 }
 
@@ -20,7 +32,15 @@ const REQUEST_CATEGORIES = [
   'Broken Link Report',
 ];
 
-export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
+const TROCADOR_DONATION_URL =
+  'https://trocador.app/anonpay/?ticker_to=xmr&network_to=Mainnet&address=48UqVGkdrErEXVUKWZ9dCkRFxG4qFyzorS2h77K96nG8fdHShgv95k4cPPYWGMoM267PdajjEoLUwG1kyvgSd8vX8VK8RkS&donation=True&simple_mode=False&name=SecretArea&description=Support+our+mission+and+help+us+grow.+Every+contribution+makes+a+difference.&email=secretarea1337@gmail.com&bgcolor=00000000&direct=True';
+
+const TELEGRAM_URL = 'https://t.me/secretarea1337';
+const DISCORD_URL = 'https://discord.com/invite/pygmDWFAHK';
+
+export function RequestsView({ gasUrl, language = 'en', onNotify }: RequestsViewProps) {
+  const tr = getTranslations(language);
+  const t = tr.requests;
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(REQUEST_CATEGORIES[0]);
   const [image, setImage] = useState('');
@@ -64,12 +84,10 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
       setImage('');
       setMessage('');
 
-      const notice = result.syncedToSheet
-        ? 'Request submitted successfully and saved to Google Sheet (requests)!'
-        : 'Request saved to your queue. It appears in Recent Requests.';
+      const notice = result.syncedToSheet ? t.syncedNotice : t.localNotice;
       setStatusNotice(notice);
       onNotify(
-        result.syncedToSheet ? 'Request sent to Google Sheet' : 'Request added to Recent Requests',
+        result.syncedToSheet ? t.syncedNotice : t.localNotice,
         'success'
       );
     } finally {
@@ -79,25 +97,25 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
 
   return (
     <div className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-[#1d2633] via-[#171d26] to-[#12161d]">
-      <div className="max-w-5xl mx-auto px-5 lg:px-8 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-7">
+        {/* Page Heading */}
         <div className="flex items-center gap-3">
           <h1 className="text-[15px] font-bold tracking-[0.08em] uppercase text-[#e5e9f0] shrink-0">
-            Game & Tool Requests
+            {t.pageTitle}
           </h1>
           <div className="h-px flex-1 bg-white/[0.08]" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Request Form + Recent Queue */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-6">
           {/* Submission Form */}
           <form
             onSubmit={handleSubmit}
-            className="lg:col-span-3 p-5 rounded bg-[#171d25] border border-white/[0.08] space-y-4"
+            className="sa-ps5-panel lg:col-span-3 p-4 sm:p-5 rounded-xl bg-[#171d25] border border-white/[0.08] space-y-4 shadow-lg"
           >
             <div className="space-y-1">
-              <h2 className="text-[15px] font-semibold text-white">Submit a Catalog Request</h2>
-              <p className="text-[12.5px] text-[#8b9bb4]">
-                Request missing repacks, latest patches, DLC bundles, or report dead mirrors.
-              </p>
+              <h2 className="text-[15px] font-semibold text-white">{t.formTitle}</h2>
+              <p className="text-[12.5px] text-[#8b9bb4]">{t.formSubtitle}</p>
             </div>
 
             {statusNotice && (
@@ -115,7 +133,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                 htmlFor="req-title"
                 className="block text-[11px] font-semibold uppercase tracking-[0.07em] text-[#8b9bb4]"
               >
-                Title
+                {t.titleLabel}
               </label>
               <input
                 id="req-title"
@@ -123,7 +141,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Ghost of Yotei or Forza Horizon 6 v461.691"
+                placeholder={t.titlePlaceholder}
                 className="w-full px-3 py-2 rounded bg-[#0e1319] border border-white/[0.1] text-[13px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
               />
             </div>
@@ -134,7 +152,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                   htmlFor="req-category"
                   className="block text-[11px] font-semibold uppercase tracking-[0.07em] text-[#8b9bb4]"
                 >
-                  Category
+                  {t.categoryLabel}
                 </label>
                 <select
                   id="req-category"
@@ -155,11 +173,12 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                   htmlFor="req-image"
                   className="block text-[11px] font-semibold uppercase tracking-[0.07em] text-[#8b9bb4]"
                 >
-                  Cover URL (Optional)
+                  {t.coverUrlLabel}
                 </label>
                 <input
                   id="req-image"
                   type="url"
+                  dir="ltr"
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   placeholder="https://..."
@@ -173,7 +192,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                 htmlFor="req-message"
                 className="block text-[11px] font-semibold uppercase tracking-[0.07em] text-[#8b9bb4]"
               >
-                Details / Notes
+                {t.detailsLabel}
               </label>
               <textarea
                 id="req-message"
@@ -181,7 +200,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                 rows={4}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Include preferred repacker, specific version or DLCs needed..."
+                placeholder={t.detailsPlaceholder}
                 className="w-full px-3 py-2 rounded bg-[#0e1319] border border-white/[0.1] text-[13px] text-white placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
               />
             </div>
@@ -193,16 +212,16 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] disabled:opacity-50 text-white text-[13px] font-semibold transition-colors cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
-                <span>{isSubmitting ? 'Sending...' : 'Submit Request'}</span>
+                <span>{isSubmitting ? t.sending : t.submitRequest}</span>
               </button>
             </div>
           </form>
 
           {/* Submitted History */}
-          <div className="lg:col-span-2 p-5 rounded bg-[#171d25] border border-white/[0.08] flex flex-col max-h-[540px]">
+          <div className="sa-ps5-panel lg:col-span-2 p-4 sm:p-5 rounded-xl bg-[#171d25] border border-white/[0.08] flex flex-col max-h-[540px] shadow-lg">
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.06]">
               <h2 className="text-[13px] font-bold tracking-[0.06em] uppercase text-[#e5e9f0]">
-                Recent Requests{' '}
+                {t.recentRequests}{' '}
                 <span className="text-[#8b9bb4] font-mono-tabular">({requests.length})</span>
               </h2>
             </div>
@@ -211,13 +230,13 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
               {requests.length === 0 ? (
                 <div className="py-12 text-center text-[#677487] space-y-2">
                   <Inbox className="w-7 h-7 mx-auto opacity-60" />
-                  <p className="text-[12.5px]">No requests submitted yet.</p>
+                  <p className="text-[12.5px]">{t.noRequestsYet}</p>
                 </div>
               ) : (
                 requests.map((req, idx) => (
                   <div
                     key={req.id || idx}
-                    className="p-3 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3"
+                    className="sa-ps5-subpanel p-3 rounded bg-[#12171f] border border-white/[0.06] flex items-start gap-3"
                   >
                     {req.image && (
                       <img
@@ -238,7 +257,7 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
                         {req.timestamp && (
                           <span className="inline-flex items-center gap-1 text-[#6b788b] font-mono-tabular">
                             · <Clock className="w-3 h-3" />
-                            {new Date(req.timestamp).toLocaleDateString()}
+                            {new Date(req.timestamp).toLocaleDateString(tr.locale)}
                           </span>
                         )}
                       </div>
@@ -250,6 +269,155 @@ export function RequestsView({ gasUrl, onNotify }: RequestsViewProps) {
             </div>
           </div>
         </div>
+
+        {/* Community & Support Us Section */}
+        <section aria-label={t.communitySupportTitle} className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-[14px] font-bold tracking-[0.08em] uppercase text-[#e5e9f0] shrink-0">
+              {t.communitySupportTitle}
+            </h2>
+            <div className="h-px flex-1 bg-white/[0.08]" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
+            {/* Community Links: Telegram & Discord */}
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              <div className="sa-ps5-panel p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#17202c] via-[#141b25] to-[#11161f] border border-white/[0.08] space-y-4 flex-1 flex flex-col justify-between shadow-lg">
+                <div className="space-y-1.5">
+                  <div className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[#66c0f4]">
+                    <Users className="w-4 h-4" />
+                    <span>{t.joinCommunityTitle}</span>
+                  </div>
+                  <p className="text-[12.5px] text-[#9fb0c7] leading-relaxed">
+                    {t.joinCommunityDesc}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Telegram Community Card */}
+                  <a
+                    href={TELEGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sa-ps5-community-card sa-ps5-community-tg group flex items-center justify-between gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#0e1926] hover:bg-[#122234] border border-[#24a1de]/35 hover:border-[#24a1de]/75 transition-all duration-200 hover:-translate-y-0.5 shadow-md"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="w-11 h-11 rounded-xl bg-[#24a1de]/20 border border-[#24a1de]/45 text-[#38bdf8] group-hover:bg-[#24a1de] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                          className="w-5 h-5 -translate-x-[1px]"
+                        >
+                          <path d="M21.93 3.29a1.5 1.5 0 0 0-1.56-.21L2.74 10.1a1.45 1.45 0 0 0 .08 2.71l4.41 1.48 1.66 5.26a1.15 1.15 0 0 0 1.91.47l2.54-2.5 4.4 3.24a1.45 1.45 0 0 0 2.27-.87l3.01-14.92a1.5 1.5 0 0 0-.09-1.68ZM9.65 13.79l8.22-6.66-6.37 7.6-.47 3.1-1.38-4.04Z" />
+                        </svg>
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#7dd3fc]">
+                          {t.telegramLabel}
+                        </div>
+                        <div dir="ltr" className="text-[14px] sm:text-[15px] font-bold text-white truncate">
+                          t.me/secretarea1337
+                        </div>
+                        <div className="text-[11.5px] text-[#8b9bb4] truncate">
+                          {t.telegramSub}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#24a1de]/15 text-[#38bdf8] group-hover:bg-[#24a1de] group-hover:text-white text-[11.5px] font-semibold shrink-0 transition-colors">
+                      <span className="hidden sm:inline">{t.joinBtn}</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </span>
+                  </a>
+
+                  {/* Discord Community Card */}
+                  <a
+                    href={DISCORD_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sa-ps5-community-card sa-ps5-community-discord group flex items-center justify-between gap-3.5 p-3.5 sm:p-4 rounded-xl bg-[#13162b] hover:bg-[#191d38] border border-[#5865F2]/35 hover:border-[#5865F2]/80 transition-all duration-200 hover:-translate-y-0.5 shadow-md"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span className="w-11 h-11 rounded-xl bg-[#5865F2]/20 border border-[#5865F2]/45 text-[#818cf8] group-hover:bg-[#5865F2] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                          className="w-5 h-5"
+                        >
+                          <path d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.45.87-.61 1.26a18.27 18.27 0 0 0-5.49 0 12.64 12.64 0 0 0-.62-1.26.08.08 0 0 0-.08-.04A19.74 19.74 0 0 0 3.67 4.37a.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-2a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.9.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.29a.08.08 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.08.08 0 0 1 .08.01c.12.1.24.2.37.29a.08.08 0 0 1-.01.13c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.11c.36.7.77 1.37 1.23 2a.08.08 0 0 0 .08.03 19.83 19.83 0 0 0 6-3.03.08.08 0 0 0 .03-.06c.5-5.18-.84-9.68-3.55-13.66a.06.06 0 0 0-.03-.03ZM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.96 2.42-2.16 2.42Zm7.97 0c-1.18 0-2.16-1.08-2.16-2.42 0-1.33.96-2.42 2.16-2.42 1.21 0 2.18 1.1 2.16 2.42 0 1.34-.95 2.42-2.16 2.42Z" />
+                        </svg>
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#a5b4fc]">
+                          {t.discordLabel}
+                        </div>
+                        <div className="text-[14px] sm:text-[15px] font-bold text-white truncate">
+                          SecretArea Server
+                        </div>
+                        <div className="text-[11.5px] text-[#8b9bb4] truncate">
+                          {t.discordSub}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#5865F2]/20 text-[#a5b4fc] group-hover:bg-[#5865F2] group-hover:text-white text-[11.5px] font-semibold shrink-0 transition-colors">
+                      <span className="hidden sm:inline">{t.joinBtn}</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Support Us Card with Trocador AnonPay XMR Donation Widget */}
+            <div className="sa-ps5-panel lg:col-span-7 p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#171f2b] via-[#131922] to-[#0f131b] border border-white/[0.08] shadow-lg flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-6">
+              <div className="flex-1 min-w-0 space-y-3.5 text-center sm:text-start">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-[11px] font-bold uppercase tracking-[0.07em]">
+                  <HeartHandshake className="w-3.5 h-3.5" />
+                  <span>{t.supportBadge}</span>
+                </div>
+
+                <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight">
+                  {t.supportHeadline}
+                </h3>
+
+                <p className="text-[12.5px] sm:text-[13px] text-[#aeb9c7] leading-relaxed">
+                  {t.supportDesc}
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1 text-[11.5px] text-[#8b9bb4]">
+                  <span className="sa-ps5-subpanel inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0e131b] border border-white/[0.07] text-[#c6d4df]">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{t.anonMonero}</span>
+                  </span>
+                  <a
+                    href={TROCADOR_DONATION_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[#66c0f4] hover:text-white font-medium underline underline-offset-4 transition-colors"
+                  >
+                    <span>{t.openInBrowser}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Embedded Trocador AnonPay Iframe */}
+              <div className="sa-ps5-subpanel shrink-0 w-full max-w-[310px] rounded-xl bg-[#0b1017]/90 border border-white/[0.1] p-1.5 shadow-2xl flex items-center justify-center overflow-hidden">
+                <iframe
+                  src={TROCADOR_DONATION_URL}
+                  title="Support SecretArea via Trocador AnonPay"
+                  width="310"
+                  height="350"
+                  scrolling="no"
+                  className="border-0 w-[310px] max-w-full h-[350px] block rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

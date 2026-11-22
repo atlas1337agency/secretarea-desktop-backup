@@ -14,6 +14,12 @@
     color: #dcdedf;
   }
 
+  html[lang="ar"],
+  html[lang="ar"] body,
+  html[lang="ar"] .font-display {
+    font-family: "Cairo", var(--font-sans);
+  }
+
   h1,
   h2,
   h3,
@@ -57,63 +63,128 @@
 
 /* ==========================================================================
    Enhanced PS5 Home Dashboard Theme (.theme-ps5)
-   Inspired directly by official PS5 Media/Games UI:
-   - Deep sapphire-cerulean atmospheric backdrop + drifting gold/sky dust motes
-   - Sleek floating frosted header & luminous white tab indicator
-   - ASTRO-style rounded hero spotlight with frosted PlayStation pill CTAs
-   - Rounded sapphire-glass game tiles with crisp white halo focus glow
-   - Deep PlayStation cobalt-glass Game Detail Pages & download panels
+   - Deep sapphire-cerulean atmospheric backdrop + animated silk aurora wave
+   - Gold/ice dust motes safely contained inside shell (zero viewport overflow)
+   - Always-pinned frosted PlayStation topbar & header (never clips in fullscreen)
+   - GPU-friendly translucent sapphire game tiles with crisp dual-white focus halo
    ========================================================================== */
 @keyframes ps5-particles-drift {
   0% {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(-18px, -14px, 0);
+    transform: translate3d(-14px, -10px, 0);
   }
   100% {
     transform: translate3d(0, 0, 0);
   }
 }
 
+@keyframes ps5-aurora-sweep {
+  0% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(4%, 2%, 0) scale(1.06);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+    opacity: 0.55;
+  }
+}
+
+@keyframes ps5-eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.sa-ps5-eq-bar-1 {
+  animation: ps5-eq-bar 0.75s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.sa-ps5-eq-bar-2 {
+  animation: ps5-eq-bar 0.58s ease-in-out 0.18s infinite;
+  transform-origin: bottom;
+}
+
+.sa-ps5-eq-bar-3 {
+  animation: ps5-eq-bar 0.85s ease-in-out 0.34s infinite;
+  transform-origin: bottom;
+}
+
 html.theme-ps5,
 html.theme-ps5 body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   background-color: #010a1a;
   color: #f0f6ff;
 }
 
 .theme-ps5 .sa-app-shell {
   position: relative;
+  overflow: hidden;
   background:
-    radial-gradient(125% 88% at 64% 8%, rgba(0, 118, 224, 0.56) 0%, rgba(4, 58, 132, 0.36) 36%, rgba(2, 22, 62, 0.14) 68%, transparent 88%),
-    radial-gradient(80% 60% at 10% 95%, rgba(0, 90, 180, 0.25) 0%, transparent 65%),
+    radial-gradient(125% 88% at 64% 8%, rgba(0, 124, 236, 0.58) 0%, rgba(4, 58, 132, 0.36) 36%, rgba(2, 22, 62, 0.14) 68%, transparent 88%),
+    radial-gradient(80% 60% at 10% 95%, rgba(0, 90, 180, 0.28) 0%, transparent 65%),
     linear-gradient(180deg, #021636 0%, #021029 52%, #010817 100%);
 }
 
-/* Subtle PS5 gold & cerulean floating particle dust behind content */
+/* Subtle PS5 gold & cerulean floating particle dust safely bounded inside shell */
 .theme-ps5 .sa-app-shell::before {
   content: "";
-  position: fixed;
-  inset: -40px;
+  position: absolute;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.48;
+  opacity: 0.52;
   background-image:
-    radial-gradient(1.5px 1.5px at 14% 22%, rgba(255, 226, 150, 0.72) 50%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 32% 68%, rgba(125, 211, 252, 0.65) 50%, transparent 100%),
-    radial-gradient(2px 2px at 56% 18%, rgba(255, 215, 130, 0.55) 50%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 78% 42%, rgba(186, 230, 253, 0.75) 50%, transparent 100%),
-    radial-gradient(2px 2px at 88% 76%, rgba(255, 226, 150, 0.5) 50%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 44% 86%, rgba(147, 197, 253, 0.55) 50%, transparent 100%);
+    radial-gradient(1.5px 1.5px at 14% 22%, rgba(255, 226, 150, 0.78) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 32% 68%, rgba(125, 211, 252, 0.7) 50%, transparent 100%),
+    radial-gradient(2px 2px at 56% 18%, rgba(255, 215, 130, 0.6) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 78% 42%, rgba(186, 230, 253, 0.78) 50%, transparent 100%),
+    radial-gradient(2px 2px at 88% 76%, rgba(255, 226, 150, 0.54) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 44% 86%, rgba(147, 197, 253, 0.6) 50%, transparent 100%);
   background-size: 460px 360px;
-  animation: ps5-particles-drift 22s ease-in-out infinite;
+  animation: ps5-particles-drift 20s ease-in-out infinite;
 }
 
-.theme-ps5 .sa-app-shell > header,
-.theme-ps5 .sa-app-shell > main,
-.theme-ps5 .sa-topbar {
+/* Soft PlayStation silk light aurora ribbon */
+.theme-ps5 .sa-app-shell::after {
+  content: "";
+  position: absolute;
+  inset: -12% -10% 35% -10%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    65% 48% at 52% 24%,
+    rgba(56, 189, 248, 0.16) 0%,
+    rgba(29, 78, 216, 0.12) 45%,
+    transparent 75%
+  );
+  animation: ps5-aurora-sweep 16s ease-in-out infinite;
+}
+
+.theme-ps5 .sa-topbar,
+.theme-ps5 .sa-app-shell > header {
   position: relative;
-  z-index: 1;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+.theme-ps5 .sa-app-shell > main {
+  position: relative;
+  z-index: 10;
 }
 
 /* Transparent frosted PlayStation header & sidebar */
@@ -125,23 +196,23 @@ html.theme-ps5 body {
 
 .theme-ps5 main > aside {
   background-image: none;
-  background-color: rgba(2, 16, 44, 0.72);
-  backdrop-filter: blur(20px);
+  background-color: rgba(2, 16, 44, 0.78);
+  backdrop-filter: blur(16px);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Hero Spotlight (ASTRO's PLAYROOM inspired framing & frosted buttons) */
+/* Hero Spotlight (ASTRO-inspired framing & frosted buttons) */
 .theme-ps5 .sa-ps5-hero {
-  border-radius: 20px;
-  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  border-color: rgba(255, 255, 255, 0.18);
   background-color: #02173b;
   box-shadow:
-    0 24px 60px rgba(0, 6, 22, 0.68),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 24px 60px rgba(0, 6, 22, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .theme-ps5 .sa-ps5-hero-img {
-  opacity: 0.72;
+  opacity: 0.74;
 }
 
 .theme-ps5 .sa-ps5-hero-scrim-x {
@@ -149,7 +220,25 @@ html.theme-ps5 body {
     90deg,
     rgba(1, 14, 40, 0.94) 0%,
     rgba(2, 29, 74, 0.78) 46%,
-    rgba(0, 72, 150, 0.15) 100%
+    rgba(0, 72, 150, 0.16) 100%
+  );
+}
+
+[dir="rtl"] .sa-hero-scrim-x {
+  background: linear-gradient(
+    270deg,
+    #0c1016 0%,
+    rgba(12, 16, 22, 0.85) 50%,
+    rgba(12, 16, 22, 0.25) 100%
+  );
+}
+
+[dir="rtl"].theme-ps5 .sa-ps5-hero-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(1, 14, 40, 0.94) 0%,
+    rgba(2, 29, 74, 0.78) 46%,
+    rgba(0, 72, 150, 0.16) 100%
   );
 }
 
@@ -162,18 +251,19 @@ html.theme-ps5 body {
   );
 }
 
-/* Game Cards & Tile Images (Rounded PS5 Icon Tiles + White Dual-Halo Focus) */
+/* Game Cards & Tile Images (GPU-smooth sapphire tiles + authentic PS5 white halo) */
 .theme-ps5 [role="button"] {
-  border-radius: 14px;
+  border-radius: 16px;
   border-color: rgba(255, 255, 255, 0.16);
-  background-color: rgba(4, 24, 62, 0.72);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 26px rgba(0, 6, 24, 0.45);
+  background: linear-gradient(180deg, rgba(10, 34, 78, 0.86) 0%, rgba(4, 18, 48, 0.94) 100%);
+  box-shadow:
+    0 10px 24px rgba(0, 6, 24, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition:
     transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 190ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 190ms ease,
-    background-color 190ms ease;
+    background 190ms ease;
 }
 
 .theme-ps5 [role="button"] img {
@@ -182,12 +272,13 @@ html.theme-ps5 body {
 
 .theme-ps5 [role="button"]:hover,
 .theme-ps5 [role="button"]:focus-visible {
-  transform: translateY(-4px) scale(1.018);
-  background-color: rgba(7, 38, 92, 0.85);
-  border-color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-4px) scale(1.02);
+  background: linear-gradient(180deg, rgba(16, 52, 118, 0.95) 0%, rgba(7, 28, 72, 0.98) 100%);
+  border-color: rgba(255, 255, 255, 0.96);
   box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.92),
-    0 16px 38px rgba(0, 122, 255, 0.45);
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 0 24px rgba(84, 174, 255, 0.55),
+    0 18px 38px rgba(0, 12, 42, 0.65);
 }
 
 /* Frosted PlayStation 5 Pill Buttons */
@@ -195,10 +286,11 @@ html.theme-ps5 body {
 .theme-ps5 a[class*="bg-[#1a9fff]"] {
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.38);
   color: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 12, 40, 0.35);
+  box-shadow:
+    0 8px 24px rgba(0, 12, 40, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .theme-ps5 button[class*="bg-[#1a9fff]"]:hover,
@@ -206,7 +298,7 @@ html.theme-ps5 body {
   background: rgba(255, 255, 255, 0.34);
   border-color: #ffffff;
   box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 0 2px rgba(255, 255, 255, 0.85),
     0 10px 28px rgba(0, 128, 255, 0.45);
 }
 
@@ -215,30 +307,29 @@ html.theme-ps5 body {
 .theme-ps5 button[class*="bg-[#232b36]"],
 .theme-ps5 button[class*="bg-[#252f3d]"] {
   border-radius: 9999px;
-  background-color: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .theme-ps5 button[class*="bg-[#212a37]"]:hover,
 .theme-ps5 button[class*="bg-[#2a3441]"]:hover,
 .theme-ps5 button[class*="bg-[#232b36]"]:hover,
 .theme-ps5 button[class*="bg-[#252f3d]"]:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.78);
 }
 
 /* Game Detail Pages (GameDetailModal) */
 .theme-ps5 .sa-ps5-modal {
   background:
-    radial-gradient(120% 80% at 65% 5%, rgba(0, 118, 224, 0.46) 0%, rgba(3, 44, 108, 0.3) 40%, transparent 75%),
+    radial-gradient(120% 80% at 65% 5%, rgba(0, 118, 224, 0.48) 0%, rgba(3, 44, 108, 0.32) 40%, transparent 75%),
     linear-gradient(180deg, #02173c 0%, #020f28 55%, #010817 100%);
 }
 
 .theme-ps5 .sa-ps5-modal-header {
-  background-color: rgba(2, 14, 38, 0.78);
-  backdrop-filter: blur(18px);
-  border-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(2, 14, 38, 0.84);
+  backdrop-filter: blur(16px);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .theme-ps5 .sa-ps5-modal-scroll {
@@ -268,16 +359,196 @@ html.theme-ps5 body {
   );
 }
 
-/* Frosted Sapphire Panels inside Game Pages, Requests, Extras, Studios */
+[dir="rtl"] .sa-modal-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(16, 21, 29, 0.95) 0%,
+    rgba(16, 21, 29, 0.75) 50%,
+    transparent 100%
+  );
+}
+
+[dir="rtl"].theme-ps5 .sa-ps5-modal-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(2, 16, 44, 0.94) 0%,
+    rgba(3, 28, 74, 0.74) 55%,
+    transparent 100%
+  );
+}
+
+/* Sapphire Panels inside Home Sections, Game Pages, Requests, Extras, Studios */
+.theme-ps5 .sa-ps5-panel,
 .theme-ps5 [class*="bg-[#171d25]"],
 .theme-ps5 [class*="bg-[#141b24]"],
 .theme-ps5 [class*="bg-[#18202b]"],
 .theme-ps5 [class*="bg-[#1b222d]"],
 .theme-ps5 [class*="bg-[#141921]"],
-.theme-ps5 [class*="bg-[#12171f]"] {
-  background-color: rgba(4, 22, 56, 0.68);
-  border-color: rgba(255, 255, 255, 0.14);
+.theme-ps5 [class*="bg-[#12171f]"],
+.theme-ps5 [class*="bg-[#11161d]"],
+.theme-ps5 [class*="bg-[#121923]"],
+.theme-ps5 [class*="bg-[#141c27]"],
+.theme-ps5 [class*="bg-[#151c26]"],
+.theme-ps5 [class*="bg-[#161d28]"] {
+  background-image: none;
+  background: linear-gradient(155deg, rgba(8, 34, 84, 0.78) 0%, rgba(3, 18, 52, 0.88) 100%);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 16px 38px rgba(0, 6, 24, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+}
+
+.theme-ps5 .sa-ps5-subpanel {
+  background-image: none;
+  background: rgba(2, 14, 42, 0.76);
+  border-color: rgba(255, 255, 255, 0.13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.theme-ps5 .sa-ps5-pill-group {
+  background-image: none;
+  background-color: rgba(2, 15, 44, 0.78);
+  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.theme-ps5 .sa-ps5-pill-group button {
+  border-radius: 9999px;
+}
+
+.theme-ps5 .sa-ps5-select-wrap {
+  border-radius: 12px;
+  background-color: rgba(2, 14, 36, 0.82);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.theme-ps5 button[class*="bg-[#1a222d]"],
+.theme-ps5 button[class*="bg-[#1b2430]"],
+.theme-ps5 button[class*="bg-[#1d2633]"],
+.theme-ps5 a[class*="bg-[#232b36]"] {
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.theme-ps5 button[class*="bg-[#1a222d]"]:hover,
+.theme-ps5 button[class*="bg-[#1b2430]"]:hover,
+.theme-ps5 button[class*="bg-[#1d2633]"]:hover,
+.theme-ps5 a[class*="bg-[#232b36]"]:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.78);
+}
+
+/* Can Run It? Toggle Pills, Verdict Banners & Hero Badge in PS5 Mode */
+.theme-ps5 .sa-ps5-toggle-pass[data-active="true"] {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.42), rgba(5, 150, 105, 0.52));
+  border: 1px solid rgba(74, 222, 128, 0.8);
+  color: #ecfdf5;
+  box-shadow:
+    0 0 18px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.theme-ps5 .sa-ps5-toggle-fail[data-active="true"] {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.42), rgba(220, 38, 38, 0.52));
+  border: 1px solid rgba(251, 113, 133, 0.8);
+  color: #fff1f2;
+  box-shadow:
+    0 0 18px rgba(244, 63, 94, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.theme-ps5 [role="button"].sa-ps5-card-pass {
+  border-color: rgba(52, 211, 153, 0.38);
+}
+
+.theme-ps5 [role="button"].sa-ps5-card-fail {
+  border-color: rgba(251, 113, 133, 0.44);
+}
+
+.theme-ps5 [role="button"].sa-ps5-card-pass:hover,
+.theme-ps5 [role="button"].sa-ps5-card-pass:focus-visible,
+.theme-ps5 [role="button"].sa-ps5-card-fail:hover,
+.theme-ps5 [role="button"].sa-ps5-card-fail:focus-visible {
+  border-color: rgba(255, 255, 255, 0.96);
+}
+
+.theme-ps5 .sa-ps5-compat-badge {
+  border-radius: 14px;
   backdrop-filter: blur(12px);
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.theme-ps5 .sa-ps5-compat-pass {
+  background: linear-gradient(145deg, rgba(6, 78, 59, 0.72), rgba(4, 34, 58, 0.84));
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.theme-ps5 .sa-ps5-compat-fail {
+  background: linear-gradient(145deg, rgba(127, 29, 29, 0.72), rgba(24, 18, 48, 0.84));
+  border-color: rgba(248, 113, 113, 0.55);
+}
+
+.theme-ps5 .sa-ps5-compat-neutral {
+  background: linear-gradient(145deg, rgba(10, 34, 78, 0.78), rgba(4, 18, 48, 0.88));
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.theme-ps5 .sa-ps5-compat-badge:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 255, 255, 0.8),
+    0 10px 24px rgba(0, 12, 42, 0.55);
+}
+
+.theme-ps5 .sa-ps5-verdict-pass {
+  background: linear-gradient(90deg, rgba(6, 78, 59, 0.65) 0%, rgba(4, 47, 68, 0.72) 100%);
+  border-color: rgba(74, 222, 128, 0.52);
+  box-shadow: inset 0 1px 0 rgba(167, 243, 208, 0.16);
+}
+
+.theme-ps5 .sa-ps5-verdict-fail {
+  background: linear-gradient(90deg, rgba(127, 29, 29, 0.65) 0%, rgba(36, 20, 56, 0.74) 100%);
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: inset 0 1px 0 rgba(254, 202, 202, 0.14);
+}
+
+/* Community Cards (Telegram & Discord) in Requests Page */
+.theme-ps5 .sa-ps5-community-card {
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 190ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 190ms ease,
+    background 190ms ease;
+}
+
+.theme-ps5 .sa-ps5-community-tg {
+  background: linear-gradient(135deg, rgba(8, 47, 88, 0.82) 0%, rgba(4, 24, 58, 0.9) 100%);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.theme-ps5 .sa-ps5-community-discord {
+  background: linear-gradient(135deg, rgba(35, 38, 102, 0.82) 0%, rgba(12, 22, 62, 0.9) 100%);
+  border-color: rgba(129, 140, 248, 0.45);
+}
+
+.theme-ps5 .sa-ps5-community-card:hover,
+.theme-ps5 .sa-ps5-community-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 24px rgba(84, 174, 255, 0.5),
+    0 16px 34px rgba(0, 12, 42, 0.6);
 }
 
 /* Inputs, Selects & Textareas */
@@ -285,8 +556,8 @@ html.theme-ps5 body {
 .theme-ps5 select,
 .theme-ps5 textarea {
   border-radius: 12px;
-  background-color: rgba(2, 14, 36, 0.78);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(2, 14, 36, 0.82);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .theme-ps5 input:focus,
@@ -302,21 +573,514 @@ html.theme-ps5 ::-webkit-scrollbar-track {
 }
 
 html.theme-ps5 ::-webkit-scrollbar-thumb {
-  background: rgba(125, 196, 255, 0.32);
+  background: rgba(125, 196, 255, 0.35);
   border-radius: 9999px;
 }
 
 html.theme-ps5 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ==========================================================================
+   Xbox Series X|S & Original Nexus Dashboard Theme (.theme-xbox)
+   - Deep forest-black canvas with green faceted wireframe mesh
+   - Luminous central Xbox emerald/lime orb glow (from attached Xbox menu)
+   - Squared-off Xbox tiles (8px) with bright lime-green focus halo (#6ee755)
+   - Authentic Xbox green primary actions (#107C10) & emerald glass panels
+   ========================================================================== */
+@keyframes xbox-orb-pulse {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.96);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate3d(0, -6px, 0) scale(1.06);
+    opacity: 0.96;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.96);
+    opacity: 0.72;
+  }
+}
+
+@keyframes xbox-mesh-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 180px 180px;
+  }
+}
+
+html.theme-xbox,
+html.theme-xbox body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #030a04;
+  color: #edf9ee;
+}
+
+.theme-xbox .sa-app-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(95% 75% at 50% 24%, rgba(28, 152, 34, 0.42) 0%, rgba(16, 100, 22, 0.25) 38%, rgba(6, 28, 10, 0.14) 68%, transparent 90%),
+    linear-gradient(180deg, #07190a 0%, #051107 52%, #020803 100%);
+}
+
+/* Faceted emerald geometric wireframe mesh inspired by Xbox "The Original" backdrop */
+.theme-xbox .sa-app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.42;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%2352e042' stroke-width='0.85' stroke-opacity='0.42'%3E%3Cpath d='M0 0 L90 42 L180 0 M0 180 L90 138 L180 180 M0 0 L46 90 L0 180 M180 0 L134 90 L180 180 M46 90 L90 42 L134 90 L90 138 Z M90 42 L90 138 M46 90 L134 90 M0 90 L46 90 M134 90 L180 90'/%3E%3C/g%3E%3Ccircle cx='90' cy='42' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='46' cy='90' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='134' cy='90' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='90' cy='138' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: xbox-mesh-drift 48s linear infinite;
+}
+
+/* Central luminous Xbox Nexus Emerald Orb */
+.theme-xbox .sa-app-shell::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  width: min(560px, 78vw);
+  height: min(560px, 78vw);
+  margin-left: calc(min(560px, 78vw) / -2);
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 48%,
+      rgba(155, 240, 11, 0.28) 0%,
+      rgba(82, 224, 66, 0.22) 22%,
+      rgba(16, 124, 16, 0.16) 44%,
+      rgba(8, 52, 12, 0.05) 64%,
+      transparent 74%
+    );
+  box-shadow: inset 0 0 65px rgba(132, 245, 83, 0.14);
+  animation: xbox-orb-pulse 8.5s ease-in-out infinite;
+}
+
+.theme-xbox .sa-topbar,
+.theme-xbox .sa-app-shell > header {
+  position: relative;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+.theme-xbox .sa-app-shell > main {
+  position: relative;
+  z-index: 10;
+}
+
+/* Translucent Xbox Main & Sidebar Surfaces */
+.theme-xbox main > div,
+.theme-xbox main > section {
+  background-image: none;
+  background-color: transparent;
+}
+
+.theme-xbox main > aside {
+  background-image: none;
+  background-color: rgba(6, 20, 9, 0.84);
+  backdrop-filter: blur(16px);
+  border-color: rgba(82, 224, 66, 0.2);
+}
+
+/* Hero Spotlight in Xbox Mode */
+.theme-xbox .sa-ps5-hero {
+  border-radius: 10px;
+  border-color: rgba(110, 231, 85, 0.3);
+  background-color: #07190a;
+  box-shadow:
+    0 22px 54px rgba(0, 10, 2, 0.72),
+    inset 0 1px 0 rgba(155, 240, 11, 0.22);
+}
+
+.theme-xbox .sa-ps5-hero-img {
+  opacity: 0.74;
+}
+
+.theme-xbox .sa-ps5-hero-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(4, 15, 6, 0.95) 0%,
+    rgba(7, 26, 10, 0.8) 46%,
+    rgba(16, 124, 16, 0.16) 100%
+  );
+}
+
+[dir="rtl"].theme-xbox .sa-ps5-hero-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(4, 15, 6, 0.95) 0%,
+    rgba(7, 26, 10, 0.8) 46%,
+    rgba(16, 124, 16, 0.16) 100%
+  );
+}
+
+.theme-xbox .sa-ps5-hero-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(4, 14, 6, 0.94) 0%,
+    rgba(8, 26, 11, 0.36) 55%,
+    rgba(6, 20, 8, 0.36) 100%
+  );
+}
+
+/* Game Tiles & Focusable Cards (Signature Bright Lime Xbox Highlight Border) */
+.theme-xbox [role="button"] {
+  border-radius: 8px;
+  border-color: rgba(110, 231, 85, 0.2);
+  background: linear-gradient(180deg, rgba(13, 35, 17, 0.88) 0%, rgba(7, 19, 10, 0.94) 100%);
+  box-shadow:
+    0 10px 24px rgba(0, 8, 2, 0.5),
+    inset 0 1px 0 rgba(155, 240, 11, 0.12);
+  transition:
+    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 170ms ease,
+    background 170ms ease;
+}
+
+.theme-xbox [role="button"] img {
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), filter 180ms ease;
+}
+
+.theme-xbox [role="button"]:hover,
+.theme-xbox [role="button"]:focus-visible {
+  transform: translateY(-3px) scale(1.022);
+  background: linear-gradient(180deg, rgba(18, 52, 24, 0.96) 0%, rgba(10, 28, 13, 0.98) 100%);
+  border-color: #7cf25c;
+  box-shadow:
+    0 0 0 2px #7cf25c,
+    0 0 24px rgba(82, 224, 66, 0.5),
+    0 16px 34px rgba(0, 14, 4, 0.7);
+}
+
+/* Signature Xbox Green Primary CTA Buttons */
+.theme-xbox button[class*="bg-[#1a9fff]"],
+.theme-xbox a[class*="bg-[#1a9fff]"] {
+  border-radius: 6px;
+  background: linear-gradient(180deg, #169c16 0%, #107c10 100%);
+  border: 1px solid rgba(124, 242, 92, 0.65);
+  color: #ffffff;
+  box-shadow:
+    0 6px 20px rgba(16, 124, 16, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.theme-xbox button[class*="bg-[#1a9fff]"]:hover,
+.theme-xbox a[class*="bg-[#1a9fff]"]:hover {
+  background: linear-gradient(180deg, #1cb81c 0%, #138f13 100%);
+  border-color: #9bf00b;
+  box-shadow:
+    0 0 0 2px rgba(124, 242, 92, 0.8),
+    0 10px 26px rgba(82, 224, 66, 0.42);
+}
+
+.theme-xbox button[class*="bg-[#212a37]"],
+.theme-xbox button[class*="bg-[#2a3441]"],
+.theme-xbox button[class*="bg-[#232b36]"],
+.theme-xbox button[class*="bg-[#252f3d]"] {
+  border-radius: 6px;
+  background-color: rgba(16, 42, 20, 0.78);
+  border-color: rgba(110, 231, 85, 0.25);
+}
+
+.theme-xbox button[class*="bg-[#212a37]"]:hover,
+.theme-xbox button[class*="bg-[#2a3441]"]:hover,
+.theme-xbox button[class*="bg-[#232b36]"]:hover,
+.theme-xbox button[class*="bg-[#252f3d]"]:hover {
+  background-color: rgba(22, 68, 28, 0.9);
+  border-color: #7cf25c;
+}
+
+/* Game Detail & Series Modals in Xbox Mode */
+.theme-xbox .sa-ps5-modal {
+  background:
+    radial-gradient(110% 78% at 62% 8%, rgba(22, 138, 28, 0.38) 0%, rgba(10, 58, 14, 0.3) 42%, transparent 76%),
+    linear-gradient(180deg, #07190a 0%, #051107 55%, #020803 100%);
+}
+
+.theme-xbox .sa-ps5-modal-header {
+  background-color: rgba(5, 18, 7, 0.88);
+  backdrop-filter: blur(16px);
+  border-color: rgba(82, 224, 66, 0.2);
+}
+
+.theme-xbox .sa-ps5-modal-scroll {
+  background: transparent;
+}
+
+.theme-xbox .sa-ps5-modal-hero {
+  background-color: rgba(7, 24, 10, 0.62);
+  border-color: rgba(82, 224, 66, 0.18);
+}
+
+.theme-xbox .sa-ps5-modal-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(4, 16, 6, 0.96) 0%,
+    rgba(6, 22, 9, 0.78) 55%,
+    rgba(4, 14, 6, 0.65) 100%
+  );
+}
+
+.theme-xbox .sa-ps5-modal-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(4, 16, 6, 0.95) 0%,
+    rgba(7, 26, 10, 0.76) 55%,
+    transparent 100%
+  );
+}
+
+[dir="rtl"].theme-xbox .sa-ps5-modal-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(4, 16, 6, 0.95) 0%,
+    rgba(7, 26, 10, 0.76) 55%,
+    transparent 100%
+  );
+}
+
+/* Emerald Glass Panels across Home, Library, Requests, Settings, Extras, Studios */
+.theme-xbox .sa-ps5-panel,
+.theme-xbox [class*="bg-[#171d25]"],
+.theme-xbox [class*="bg-[#141b24]"],
+.theme-xbox [class*="bg-[#18202b]"],
+.theme-xbox [class*="bg-[#1b222d]"],
+.theme-xbox [class*="bg-[#141921]"],
+.theme-xbox [class*="bg-[#12171f]"],
+.theme-xbox [class*="bg-[#11161d]"],
+.theme-xbox [class*="bg-[#121923]"],
+.theme-xbox [class*="bg-[#141c27]"],
+.theme-xbox [class*="bg-[#151c26]"],
+.theme-xbox [class*="bg-[#161d28]"] {
+  background-image: none;
+  background: linear-gradient(155deg, rgba(11, 32, 15, 0.84) 0%, rgba(5, 16, 8, 0.92) 100%);
+  border-color: rgba(110, 231, 85, 0.2);
+  box-shadow:
+    0 16px 38px rgba(0, 10, 2, 0.5),
+    inset 0 1px 0 rgba(155, 240, 11, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.theme-xbox .sa-ps5-subpanel {
+  background-image: none;
+  background: rgba(6, 20, 9, 0.8);
+  border-color: rgba(110, 231, 85, 0.18);
+  box-shadow: inset 0 1px 0 rgba(155, 240, 11, 0.08);
+}
+
+.theme-xbox .sa-ps5-subpanel[aria-pressed="true"] {
+  border-color: #7cf25c;
+  background: rgba(16, 68, 22, 0.82);
+  box-shadow: 0 0 0 1px rgba(124, 242, 92, 0.55), 0 0 18px rgba(82, 224, 66, 0.22);
+}
+
+.theme-xbox .sa-ps5-pill-group {
+  background-image: none;
+  background-color: rgba(6, 22, 9, 0.84);
+  border-color: rgba(110, 231, 85, 0.22);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.theme-xbox .sa-ps5-pill-group button {
+  border-radius: 6px;
+}
+
+.theme-xbox .sa-ps5-select-wrap {
+  border-radius: 8px;
+  background-color: rgba(6, 20, 9, 0.88);
+  border-color: rgba(110, 231, 85, 0.28);
+}
+
+.theme-xbox button[class*="bg-[#1a222d]"],
+.theme-xbox button[class*="bg-[#1b2430]"],
+.theme-xbox button[class*="bg-[#1d2633]"],
+.theme-xbox a[class*="bg-[#232b36]"] {
+  border-radius: 6px;
+  background-color: rgba(16, 44, 20, 0.78);
+  border-color: rgba(110, 231, 85, 0.26);
+}
+
+.theme-xbox button[class*="bg-[#1a222d]"]:hover,
+.theme-xbox button[class*="bg-[#1b2430]"]:hover,
+.theme-xbox button[class*="bg-[#1d2633]"]:hover,
+.theme-xbox a[class*="bg-[#232b36]"]:hover {
+  background-color: rgba(24, 68, 30, 0.9);
+  border-color: #7cf25c;
+}
+
+/* Can Run It? Toggles, Verdict Banners & Hero Badges in Xbox Mode */
+.theme-xbox .sa-ps5-toggle-pass[data-active="true"] {
+  background: linear-gradient(135deg, rgba(16, 124, 16, 0.72), rgba(22, 163, 74, 0.65));
+  border: 1px solid #7cf25c;
+  color: #ecfdf5;
+  box-shadow:
+    0 0 18px rgba(82, 224, 66, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.theme-xbox .sa-ps5-toggle-fail[data-active="true"] {
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.62), rgba(127, 29, 29, 0.72));
+  border: 1px solid rgba(248, 113, 113, 0.82);
+  color: #fff1f2;
+  box-shadow:
+    0 0 16px rgba(244, 63, 94, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.theme-xbox [role="button"].sa-ps5-card-pass {
+  border-color: rgba(110, 231, 85, 0.45);
+}
+
+.theme-xbox [role="button"].sa-ps5-card-fail {
+  border-color: rgba(248, 113, 113, 0.48);
+}
+
+.theme-xbox [role="button"].sa-ps5-card-pass:hover,
+.theme-xbox [role="button"].sa-ps5-card-pass:focus-visible,
+.theme-xbox [role="button"].sa-ps5-card-fail:hover,
+.theme-xbox [role="button"].sa-ps5-card-fail:focus-visible {
+  border-color: #7cf25c;
+}
+
+.theme-xbox .sa-ps5-compat-badge {
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 170ms ease,
+    border-color 170ms ease;
+}
+
+.theme-xbox .sa-ps5-compat-pass {
+  background: linear-gradient(145deg, rgba(12, 68, 20, 0.8), rgba(6, 30, 11, 0.9));
+  border-color: rgba(110, 231, 85, 0.55);
+}
+
+.theme-xbox .sa-ps5-compat-fail {
+  background: linear-gradient(145deg, rgba(110, 24, 24, 0.78), rgba(22, 14, 16, 0.88));
+  border-color: rgba(248, 113, 113, 0.55);
+}
+
+.theme-xbox .sa-ps5-compat-neutral {
+  background: linear-gradient(145deg, rgba(11, 36, 16, 0.84), rgba(6, 20, 9, 0.92));
+  border-color: rgba(110, 231, 85, 0.24);
+}
+
+.theme-xbox .sa-ps5-compat-badge:hover {
+  transform: translateY(-2px);
+  border-color: #7cf25c;
+  box-shadow:
+    0 0 0 1.5px #7cf25c,
+    0 10px 24px rgba(0, 14, 4, 0.58);
+}
+
+.theme-xbox .sa-ps5-verdict-pass {
+  background: linear-gradient(90deg, rgba(12, 68, 20, 0.72) 0%, rgba(7, 38, 14, 0.78) 100%);
+  border-color: rgba(110, 231, 85, 0.55);
+  box-shadow: inset 0 1px 0 rgba(167, 243, 208, 0.16);
+}
+
+.theme-xbox .sa-ps5-verdict-fail {
+  background: linear-gradient(90deg, rgba(110, 24, 24, 0.7) 0%, rgba(28, 14, 18, 0.78) 100%);
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: inset 0 1px 0 rgba(254, 202, 202, 0.14);
+}
+
+/* Community Cards (Telegram & Discord) in Requests Page */
+.theme-xbox .sa-ps5-community-card {
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 170ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 170ms ease,
+    background 170ms ease;
+}
+
+.theme-xbox .sa-ps5-community-tg {
+  background: linear-gradient(135deg, rgba(10, 44, 24, 0.85) 0%, rgba(5, 22, 12, 0.92) 100%);
+  border-color: rgba(110, 231, 85, 0.36);
+}
+
+.theme-xbox .sa-ps5-community-discord {
+  background: linear-gradient(135deg, rgba(18, 42, 34, 0.85) 0%, rgba(7, 22, 16, 0.92) 100%);
+  border-color: rgba(110, 231, 85, 0.32);
+}
+
+.theme-xbox .sa-ps5-community-card:hover,
+.theme-xbox .sa-ps5-community-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: #7cf25c;
+  box-shadow:
+    0 0 0 2px #7cf25c,
+    0 0 22px rgba(82, 224, 66, 0.45),
+    0 16px 32px rgba(0, 14, 4, 0.65);
+}
+
+/* Inputs, Selects & Textareas in Xbox Mode */
+.theme-xbox input,
+.theme-xbox select,
+.theme-xbox textarea {
+  border-radius: 6px;
+  background-color: rgba(6, 20, 9, 0.88);
+  border-color: rgba(110, 231, 85, 0.25);
+}
+
+.theme-xbox input:focus,
+.theme-xbox select:focus,
+.theme-xbox textarea:focus {
+  border-color: #7cf25c;
+  box-shadow: 0 0 0 2px rgba(110, 231, 85, 0.32);
+}
+
+/* Xbox Scrollbars */
+html.theme-xbox ::-webkit-scrollbar-track {
+  background: #040e06;
+}
+
+html.theme-xbox ::-webkit-scrollbar-thumb {
+  background: rgba(82, 224, 66, 0.36);
+  border-radius: 4px;
+}
+
+html.theme-xbox ::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 242, 92, 0.68);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .theme-ps5 .sa-app-shell::before {
+  .theme-ps5 .sa-app-shell::before,
+  .theme-ps5 .sa-app-shell::after,
+  .theme-xbox .sa-app-shell::before,
+  .theme-xbox .sa-app-shell::after,
+  .sa-ps5-eq-bar-1,
+  .sa-ps5-eq-bar-2,
+  .sa-ps5-eq-bar-3 {
     animation: none;
   }
 
   .theme-ps5 [role="button"],
-  .theme-ps5 [role="button"] img {
+  .theme-ps5 [role="button"] img,
+  .theme-ps5 .sa-ps5-community-card,
+  .theme-ps5 .sa-ps5-compat-badge,
+  .theme-xbox [role="button"],
+  .theme-xbox [role="button"] img,
+  .theme-xbox .sa-ps5-community-card,
+  .theme-xbox .sa-ps5-compat-badge {
     transition: none;
   }
 }

@@ -1,23 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
+  AlertTriangle,
+  ArrowUpDown,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Cpu,
   Download,
+  EyeOff,
+  Gpu,
+  HardDrive,
+  Laptop,
+  Layers,
+  MemoryStick,
   Play,
-  Star,
+  RefreshCw,
   Users,
 } from 'lucide-react';
 import type { GameItem, SheetCatalogData } from '../types';
 import { getStudioTotalCount, sortStudiosByTop } from '../utils/parsers';
+import { evaluateCanRunGame, type CanRunEvaluation } from '../services/canRunIt';
+import type { SystemHardwareSpecs } from '../services/systemSpecs';
 import { GameCover } from './GameCover';
 import { resolveSheetRefItem } from './ExtrasView';
 import { SectionSourceBadge } from './SectionBadge';
 import { StudioEmblem } from './StudiosView';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface StoreViewProps {
   catalog: SheetCatalogData;
   favorites: Set<string>;
+  systemSpecs?: SystemHardwareSpecs;
+  isRefreshingSpecs?: boolean;
+  language?: AppLanguage;
+  onRefreshSpecs?: () => void;
   onToggleFavorite: (id: string) => void;
   onSelectGame: (game: GameItem, initialTab?: 'overview' | 'trailer' | 'downloads') => void;
   onBrowseLatestInLibrary?: () => void;
@@ -25,16 +43,15 @@ interface StoreViewProps {
 }
 
 const POPULAR_PAGE_SIZE = 20;
+type PopularFilterMode = 'all' | 'hide-hv' | 'hide-games';
+type PopularSortMode = 'newest' | 'az';
 
 interface HorizontalSlideProps {
   title: string;
   items: GameItem[];
-  favorites: Set<string>;
-  onToggleFavorite: (id: string) => void;
   onSelectGame: (game: GameItem) => void;
   actionLabel?: string;
   onAction?: () => void;
-  showFavoriteButton?: boolean;
   isUpcoming?: boolean;
   autoSlide?: boolean;
   autoSlideIntervalMs?: number;
@@ -43,12 +60,9 @@ interface HorizontalSlideProps {
 function HorizontalGameSlide({
   title,
   items,
-  favorites,
-  onToggleFavorite,
   onSelectGame,
   actionLabel,
   onAction,
-  showFavoriteButton = true,
   isUpcoming = false,
   autoSlide = false,
   autoSlideIntervalMs = 4500,
@@ -118,31 +132,34 @@ function HorizontalGameSlide({
             <button
               type="button"
               onClick={onAction}
-              className="text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors mr-1 whitespace-nowrap cursor-pointer"
+              className="text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors me-1 whitespace-nowrap cursor-pointer"
             >
               {actionLabel}
             </button>
           )}
-          <button
-            type="button"
-            aria-label={`Scroll ${title} left`}
-            onClick={() => scrollByViewport(-1)}
-            className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            aria-label={`Scroll ${title} right`}
-            onClick={() => scrollByViewport(1)}
-            className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div dir="ltr" className="inline-flex items-center gap-2">
+            <button
+              type="button"
+              aria-label={`Scroll ${title} left`}
+              onClick={() => scrollByViewport(-1)}
+              className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Scroll ${title} right`}
+              onClick={() => scrollByViewport(1)}
+              className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       <div
+        dir="ltr"
         ref={scrollerRef}
         className="no-scrollbar flex gap-3 sm:gap-3.5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1"
       >
@@ -164,7 +181,6 @@ function HorizontalGameSlide({
             );
           }
 
-          const isFav = favorites.has(game.id);
           const metaLine = game.repackSize || 'Repack';
 
           return (
@@ -193,28 +209,6 @@ function HorizontalGameSlide({
                     NEW
                   </div>
                 )}
-
-                {showFavoriteButton && (
-                  <button
-                    type="button"
-                    aria-label={isFav ? `Unfavorite ${game.name}` : `Favorite ${game.name}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleFavorite(game.id);
-                    }}
-                    className={`absolute right-1.5 ${
-                      game.isNew ? 'top-7' : 'top-1.5'
-                    } p-1.5 rounded bg-black/65 hover:bg-black/90 transition-opacity cursor-pointer ${
-                      isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}
-                  >
-                    <Star
-                      className={`w-3.5 h-3.5 ${
-                        isFav ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-white/80'
-                      }`}
-                    />
-                  </button>
-                )}
               </div>
 
               <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
@@ -240,16 +234,27 @@ function HorizontalGameSlide({
 
 export function StoreView({
   catalog,
-  favorites,
-  onToggleFavorite,
+  systemSpecs,
+  isRefreshingSpecs = false,
+  language = 'en',
+  onRefreshSpecs,
   onSelectGame,
   onOpenStudiosPage,
 }: StoreViewProps) {
+  const tr = getTranslations(language);
+  const t = tr.store;
   const games = catalog.game;
   const [slideIndex, setSlideIndex] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
   const [popularPage, setPopularPage] = useState(0);
+  const [popularFilter, setPopularFilter] = useState<PopularFilterMode>('all');
+  const [popularSort, setPopularSort] = useState<PopularSortMode>('newest');
+  const [pcCompatTab, setPcCompatTab] = useState<'can-run' | 'cannot-run'>('can-run');
+  const [pcCompatScope, setPcCompatScope] = useState<
+    'all' | 'game' | 'hypervisor' | 'steamtools' | 'ps5' | 'architect'
+  >('all');
   const popularSectionRef = useRef<HTMLElement | null>(null);
+  const pcCompatScrollerRef = useRef<HTMLDivElement | null>(null);
 
   // Featured Hero Slides: prioritize latest releases with rich landscape screenshots
   const featuredGames = useMemo(() => {
@@ -299,57 +304,172 @@ export function StoreView({
     [games]
   );
 
-  // Most Popular Games resolved from Google Sheet `popularrepacks` tab (deduplicated, newest first)
-  const popularGames = useMemo(() => {
-    const rows = catalog.popularrepacks || [];
-    const seenTitle = new Set<string>();
-    const hypervisorTitles = new Set(
-      (catalog.hypervisor || []).map((h) => h.name.toLowerCase().trim()).filter(Boolean)
-    );
-    const resolved: { item: GameItem; hasHypervisor: boolean }[] = [];
+  // Can Run It — evaluate all catalog sections with hardware requirements against real PC specs
+  const pcCompatibilityData = useMemo(() => {
+    const emptyCounts = {
+      all: 0,
+      game: 0,
+      hypervisor: 0,
+      steamtools: 0,
+      ps5: 0,
+      architect: 0,
+    };
 
-    for (const row of rows) {
-      const rawIds = (row.rawFields['Game ID'] || '')
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
+    if (!systemSpecs) {
+      return {
+        canRun: [] as { item: GameItem; evalRes: CanRunEvaluation }[],
+        cannotRun: [] as { item: GameItem; evalRes: CanRunEvaluation }[],
+        scopeCounts: emptyCounts,
+      };
+    }
 
-      if (rawIds.length === 0) continue;
+    const combinedPool = [
+      ...(catalog.game || []),
+      ...(catalog.hypervisor || []),
+      ...(catalog.steamtools || []),
+      ...(catalog.ps5 || []),
+      ...(catalog.architect || []),
+    ];
 
-      const hasHypervisorRef = rawIds.some(
-        (tok) => /^h\d+$/i.test(tok) && resolveSheetRefItem(tok, catalog) !== null
-      );
+    const scopeCounts = { ...emptyCounts };
+    const canRun: { item: GameItem; evalRes: CanRunEvaluation }[] = [];
+    const cannotRun: { item: GameItem; evalRes: CanRunEvaluation }[] = [];
 
-      // Prefer primary `g#` game entry first, fallback to `h#`/`s#` if hypervisor-only
-      const sortedTokens = [...rawIds].sort((a, b) => {
-        const aRank = a.toLowerCase().startsWith('g') ? 0 : 1;
-        const bRank = b.toLowerCase().startsWith('g') ? 0 : 1;
-        return aRank - bRank;
-      });
+    for (const item of combinedPool) {
+      const evalRes = evaluateCanRunGame(item, systemSpecs);
+      if (!evalRes.hasRequirements || evalRes.status === 'unknown') continue;
 
-      for (const tok of sortedTokens) {
-        const target = resolveSheetRefItem(tok, catalog);
-        if (!target) continue;
-        const normName = target.name.toLowerCase().trim();
-        if (!seenTitle.has(normName)) {
-          seenTitle.add(normName);
-          const hasHypervisor =
-            target.tab === 'hypervisor' ||
-            hasHypervisorRef ||
-            hypervisorTitles.has(normName);
-          resolved.push({ item: target, hasHypervisor });
-          break;
-        }
+      scopeCounts.all += 1;
+      if (item.tab in scopeCounts) {
+        scopeCounts[item.tab as keyof typeof scopeCounts] += 1;
+      }
+
+      if (pcCompatScope !== 'all' && item.tab !== pcCompatScope) continue;
+
+      if (evalRes.status === 'can-run') {
+        canRun.push({ item, evalRes });
+      } else if (evalRes.status === 'cannot-run') {
+        cannotRun.push({ item, evalRes });
       }
     }
 
-    return resolved.sort(
-      (a, b) =>
-        Number(b.item.isNew) - Number(a.item.isNew) ||
-        b.item.dateTimestamp - a.item.dateTimestamp ||
-        Number(b.item.id) - Number(a.item.id)
-    );
+    const sortNewestFirst = (
+      a: { item: GameItem; evalRes: CanRunEvaluation },
+      b: { item: GameItem; evalRes: CanRunEvaluation }
+    ) =>
+      Number(b.item.isNew) - Number(a.item.isNew) ||
+      Number(b.item.isPinned) - Number(a.item.isPinned) ||
+      b.item.dateTimestamp - a.item.dateTimestamp ||
+      Number(b.item.id) - Number(a.item.id);
+
+    canRun.sort(sortNewestFirst);
+    cannotRun.sort(sortNewestFirst);
+
+    return { canRun, cannotRun, scopeCounts };
+  }, [catalog, pcCompatScope, systemSpecs]);
+
+  const activePcCompatList =
+    pcCompatTab === 'can-run'
+      ? pcCompatibilityData.canRun.slice(0, 30)
+      : pcCompatibilityData.cannotRun.slice(0, 30);
+
+  useEffect(() => {
+    pcCompatScrollerRef.current?.scrollTo({ left: 0 });
+  }, [pcCompatScope, pcCompatTab]);
+
+  const scrollPcCompat = (dir: -1 | 1) => {
+    const el = pcCompatScrollerRef.current;
+    if (!el) return;
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    if (maxScrollLeft <= 4) return;
+    const step = Math.max(280, Math.floor(el.clientWidth * 0.78));
+    if (dir === 1) {
+      if (el.scrollLeft >= maxScrollLeft - 12) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: step, behavior: 'smooth' });
+      }
+    } else {
+      if (el.scrollLeft <= 12) {
+        el.scrollTo({ left: maxScrollLeft, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: -step, behavior: 'smooth' });
+      }
+    }
+  };
+
+  // Most Popular Games resolved from ALL tokens inside Google Sheet `PopularRepacks`
+  // Deduplicated by `tab:id` so `g#` (Games) and `h#` (Hypervisor) remain distinct entries (e.g. 174 + 29 = 203)
+  const popularEntries = useMemo(() => {
+    const rows = catalog.popularrepacks || [];
+    const byKey = new Map<string, { item: GameItem; isHypervisor: boolean; sheetOrder: number }>();
+
+    rows.forEach((row, rowIdx) => {
+      const tokens = (row.rawFields['Game ID'] || '')
+        .split(/[,\s|]+/)
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      for (const tok of tokens) {
+        const target = resolveSheetRefItem(tok, catalog);
+        if (!target) continue;
+
+        const key = `${target.tab}:${target.id}`;
+        const existing = byKey.get(key);
+        if (!existing) {
+          byKey.set(key, {
+            item: target,
+            isHypervisor: target.tab === 'hypervisor',
+            sheetOrder: rowIdx,
+          });
+        } else {
+          existing.sheetOrder = Math.max(existing.sheetOrder, rowIdx);
+        }
+      }
+    });
+
+    return Array.from(byKey.values());
   }, [catalog]);
+
+  const popularFilterCounts = useMemo(() => {
+    let all = popularEntries.length;
+    let gamesOnly = 0;
+    let hvOnly = 0;
+    for (const entry of popularEntries) {
+      if (entry.isHypervisor) hvOnly++;
+      else gamesOnly++;
+    }
+    return { all, gamesOnly, hvOnly };
+  }, [popularEntries]);
+
+  const popularGames = useMemo(() => {
+    const filtered = popularEntries.filter((entry) => {
+      if (popularFilter === 'hide-hv') return !entry.isHypervisor;
+      if (popularFilter === 'hide-games') return entry.isHypervisor;
+      return true;
+    });
+
+    return [...filtered]
+      .map((entry) => ({
+        item: entry.item,
+        hasHypervisor: entry.isHypervisor,
+        sheetOrder: entry.sheetOrder,
+      }))
+      .sort((a, b) => {
+        if (popularSort === 'az') {
+          return (
+            a.item.name.localeCompare(b.item.name) ||
+            Number(a.hasHypervisor) - Number(b.hasHypervisor)
+          );
+        }
+        return (
+          Number(b.item.isNew) - Number(a.item.isNew) ||
+          b.item.dateTimestamp - a.item.dateTimestamp ||
+          b.sheetOrder - a.sheetOrder ||
+          Number(b.item.id) - Number(a.item.id)
+        );
+      });
+  }, [popularEntries, popularFilter, popularSort]);
 
   const totalPopularPages = Math.max(1, Math.ceil(popularGames.length / POPULAR_PAGE_SIZE));
   const safePopularPage = Math.min(popularPage, totalPopularPages - 1);
@@ -357,6 +477,10 @@ export function StoreView({
     const start = safePopularPage * POPULAR_PAGE_SIZE;
     return popularGames.slice(start, start + POPULAR_PAGE_SIZE);
   }, [popularGames, safePopularPage]);
+  const nextPopularPageCount = Math.min(
+    POPULAR_PAGE_SIZE,
+    Math.max(0, popularGames.length - (safePopularPage + 1) * POPULAR_PAGE_SIZE)
+  );
 
   // Top 10 Studios from Google Sheet `profil` tab
   const topStudios = useMemo(
@@ -433,7 +557,7 @@ export function StoreView({
   if (!activeFeatured) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#1b222c] text-[#8b9bb4]">
-        No catalog items loaded.
+        {t.noCatalogLoaded}
       </div>
     );
   }
@@ -476,7 +600,7 @@ export function StoreView({
               </motion.div>
             </AnimatePresence>
 
-            <div className="sa-ps5-hero-scrim-x absolute inset-0 bg-gradient-to-r from-[#0c1016] via-[#0c1016]/85 to-[#0c1016]/25 pointer-events-none" />
+            <div className="sa-hero-scrim-x sa-ps5-hero-scrim-x absolute inset-0 bg-gradient-to-r from-[#0c1016] via-[#0c1016]/85 to-[#0c1016]/25 pointer-events-none" />
             <div className="sa-ps5-hero-scrim-y absolute inset-0 bg-gradient-to-t from-[#0c1016] via-transparent to-[#0c1016]/35 pointer-events-none" />
 
             <div className="relative z-10 w-full p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-end justify-between gap-5 sm:gap-6">
@@ -496,10 +620,10 @@ export function StoreView({
                   <div className="space-y-2.5 min-w-0">
                     <div className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#66c0f4]">
                       {[
-                        activeFeatured.isPinned ? 'Featured Spotlight' : 'Latest Release',
+                        activeFeatured.isPinned ? t.featuredSpotlight : t.latestRelease,
                         activeFeatured.repackBy,
                         activeFeatured.dateAdded
-                          ? new Date(activeFeatured.dateAdded).toLocaleDateString()
+                          ? new Date(activeFeatured.dateAdded).toLocaleDateString(tr.locale)
                           : '',
                       ]
                         .filter(Boolean)
@@ -530,7 +654,7 @@ export function StoreView({
                         className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[13px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                       >
                         <Download className="w-4 h-4" />
-                        <span>Download</span>
+                        <span>{t.download}</span>
                       </button>
 
                       {activeFeatured.embedTrailerUrl && (
@@ -540,7 +664,7 @@ export function StoreView({
                           className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#2a3441]/90 hover:bg-[#344050] border border-white/[0.1] text-[#e5e9f0] text-[13px] font-medium transition-colors whitespace-nowrap cursor-pointer"
                         >
                           <Play className="w-4 h-4 fill-current" />
-                          <span>Watch Trailer</span>
+                          <span>{t.watchTrailer}</span>
                         </button>
                       )}
                     </div>
@@ -548,11 +672,11 @@ export function StoreView({
                 </motion.div>
               </AnimatePresence>
 
-              {/* Right Column: Size Comparison + Animated Carousel Selector */}
+              {/* End Column: Size Comparison + Animated Carousel Selector */}
               <div className="flex flex-wrap sm:flex-row lg:flex-col items-center lg:items-end justify-between w-full lg:w-auto gap-3 shrink-0">
-                <div className="bg-[#0d1117]/85 backdrop-blur-md border border-white/[0.08] rounded px-3.5 py-2.5 text-left lg:text-right">
+                <div className="bg-[#0d1117]/85 backdrop-blur-md border border-white/[0.08] rounded px-3.5 py-2.5 text-start lg:text-end">
                   <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4]">
-                    Repack Size vs Original
+                    {t.repackVsOriginal}
                   </div>
                   <div className="mt-0.5 flex items-baseline gap-2.5 font-mono-tabular">
                     <span className="text-base lg:text-lg font-bold text-[#66c0f4]">
@@ -567,7 +691,7 @@ export function StoreView({
                 </div>
 
                 {featuredGames.length > 1 && (
-                  <div className="flex items-center gap-2">
+                  <div dir="ltr" className="flex items-center gap-2">
                     <button
                       type="button"
                       aria-label="Previous featured game"
@@ -617,12 +741,9 @@ export function StoreView({
 
         {/* 2. Upcoming Games Slide (Google Sheet: upcoming) */}
         <HorizontalGameSlide
-          title="Upcoming Games"
+          title={t.upcomingGames}
           items={upcomingGames}
-          favorites={favorites}
-          onToggleFavorite={onToggleFavorite}
           onSelectGame={(game) => onSelectGame(game, 'overview')}
-          showFavoriteButton={false}
           isUpcoming
           autoSlide
           autoSlideIntervalMs={4500}
@@ -630,104 +751,402 @@ export function StoreView({
 
         {/* 3. Recent Games Slide (Newest first in catalog) */}
         <HorizontalGameSlide
-          title="Recent Games"
+          title={t.recentGames}
           items={recentGames}
-          favorites={favorites}
-          onToggleFavorite={onToggleFavorite}
           onSelectGame={(game) => onSelectGame(game, 'overview')}
           autoSlide
           autoSlideIntervalMs={5200}
         />
 
-        {/* 4. Most Popular Games (Google Sheet: PopularRepacks — 20 per page + Next/See More) */}
-        {popularGames.length > 0 && (
-          <section ref={popularSectionRef} className="space-y-4">
+        {/* 3.5 Can Run It? — Real PC Compatibility Scanner (All Catalog Sections) */}
+        {systemSpecs && (
+          <section className="sa-ps5-panel rounded-xl bg-gradient-to-br from-[#131b26] via-[#10161f] to-[#0d1118] border border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
-                  Most Popular Games
-                </h2>
-                <div className="h-px flex-1 bg-white/[0.07]" />
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-lg bg-[#1a9fff]/15 border border-[#1a9fff]/35 text-[#66c0f4] flex items-center justify-center shrink-0">
+                  <Laptop className="w-4 h-4" />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white">
+                    {t.canRunTitle}
+                  </h2>
+                  <p className="text-[11.5px] text-[#8b9bb4]">{t.canRunSubtitle}</p>
+                </div>
               </div>
 
-              <div className="text-[12px] text-[#8b9bb4] font-mono-tabular whitespace-nowrap">
-                Page {safePopularPage + 1} / {totalPopularPages}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Scope Filter: All / Games / Hypervisor / SteamTools / PS5 / Tools */}
+                <div className="sa-ps5-pill-group inline-flex flex-wrap items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]">
+                  {(
+                    [
+                      { key: 'all', label: t.scopeAll },
+                      { key: 'game', label: t.scopeGames },
+                      { key: 'hypervisor', label: t.scopeHypervisor },
+                      { key: 'steamtools', label: t.scopeSteamTools },
+                      { key: 'ps5', label: t.scopePs5 },
+                      { key: 'architect', label: t.scopeTools },
+                    ] as const
+                  ).map((opt) => {
+                    const count = pcCompatibilityData.scopeCounts[opt.key];
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setPcCompatScope(opt.key)}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                          pcCompatScope === opt.key
+                            ? 'bg-[#1a9fff] text-white'
+                            : 'text-[#9fb0c7] hover:text-white'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {count > 0 && (
+                          <span className="text-[10.5px] font-mono-tabular opacity-80">
+                            ({count})
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Can Run (Green) vs Can't Run (Red) Toggle */}
+                <div className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]">
+                  <button
+                    type="button"
+                    data-active={pcCompatTab === 'can-run' ? 'true' : 'false'}
+                    onClick={() => setPcCompatTab('can-run')}
+                    className={`sa-ps5-toggle-pass inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-bold transition-colors cursor-pointer ${
+                      pcCompatTab === 'can-run'
+                        ? 'bg-emerald-600/85 text-white shadow-sm'
+                        : 'text-[#4ade80] hover:bg-emerald-500/10'
+                    }`}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>{t.canRunBtn}</span>
+                    <span className="font-mono-tabular opacity-90">
+                      ({pcCompatibilityData.canRun.length})
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    data-active={pcCompatTab === 'cannot-run' ? 'true' : 'false'}
+                    onClick={() => setPcCompatTab('cannot-run')}
+                    className={`sa-ps5-toggle-fail inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-bold transition-colors cursor-pointer ${
+                      pcCompatTab === 'cannot-run'
+                        ? 'bg-rose-600/85 text-white shadow-sm'
+                        : 'text-[#f87171] hover:bg-rose-500/10'
+                    }`}
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>{t.cannotRunBtn}</span>
+                    <span className="font-mono-tabular opacity-90">
+                      ({pcCompatibilityData.cannotRun.length})
+                    </span>
+                  </button>
+                </div>
+
+                <div dir="ltr" className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    aria-label="Scroll compatibility list left"
+                    onClick={() => scrollPcCompat(-1)}
+                    className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Scroll compatibility list right"
+                    onClick={() => scrollPcCompat(1)}
+                    className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Detected PC Specs Ribbon */}
+            <div className="sa-ps5-subpanel flex flex-wrap items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-[#0d1219] border border-white/[0.06] text-[11.5px]">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[#cbd5e1]">
+                <span className="inline-flex items-center gap-1.5">
+                  <Gpu className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
+                  <span className="text-[#8b9bb4]">{t.gpuLabel}:</span>
+                  <strong className="text-white font-semibold">{systemSpecs.gpuName}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
+                  <span className="text-[#8b9bb4]">{t.cpuLabel}:</span>
+                  <strong className="text-white font-semibold">{systemSpecs.cpuName}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <MemoryStick className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
+                  <span className="text-[#8b9bb4]">{t.ramLabel}:</span>
+                  <strong className="text-white font-semibold font-mono-tabular">
+                    {systemSpecs.ramIsApprox ? `${systemSpecs.ramGB} GB+` : `${systemSpecs.ramGB} GB`}
+                  </strong>
+                </span>
+                {systemSpecs.freeSpaceGB !== null && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <HardDrive className="w-3.5 h-3.5 text-[#66c0f4] shrink-0" />
+                    <span className="text-[#8b9bb4]">
+                      {t.freeDriveLabel} ({systemSpecs.spaceDrive}):
+                    </span>
+                    <strong className="text-white font-semibold font-mono-tabular">
+                      {systemSpecs.freeSpaceGB.toFixed(1)} GB
+                    </strong>
+                  </span>
+                )}
+              </div>
+
+              {onRefreshSpecs && (
+                <button
+                  type="button"
+                  onClick={onRefreshSpecs}
+                  disabled={isRefreshingSpecs}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1a222d] hover:bg-[#243040] border border-white/[0.08] text-[11px] font-semibold text-[#66c0f4] hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isRefreshingSpecs ? 'animate-spin' : ''}`} />
+                  <span>{t.scanPc}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Matching Cards Row */}
+            {activePcCompatList.length === 0 ? (
+              <div className="sa-ps5-subpanel py-8 text-center rounded bg-[#0e131b] border border-white/[0.05] text-[13px] text-[#8b9bb4]">
+                {pcCompatTab === 'cannot-run' ? t.canRunEmptyFail : t.canRunEmptyPass}
+              </div>
+            ) : (
+              <div
+                dir="ltr"
+                ref={pcCompatScrollerRef}
+                className="no-scrollbar flex gap-3 sm:gap-3.5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1"
+              >
+                {activePcCompatList.map(({ item, evalRes }) => {
+                  const isPass = evalRes.status === 'can-run';
+                  return (
+                    <div
+                      key={`compat-${item.tab}-${item.id}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onSelectGame(item, 'overview')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectGame(item, 'overview');
+                        }
+                      }}
+                      className={`snap-start shrink-0 w-[142px] sm:w-[164px] md:w-[176px] lg:w-[186px] group bg-[#18202b] hover:bg-[#212b3a] border rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff] ${
+                        isPass
+                          ? 'sa-ps5-card-pass border-emerald-500/25 hover:border-emerald-400/60'
+                          : 'sa-ps5-card-fail border-rose-500/35 hover:border-rose-400/75'
+                      }`}
+                    >
+                      <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+                        <GameCover
+                          src={item.coverImage}
+                          alt={item.name}
+                          imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                        />
+
+                        {(item.tab === 'hypervisor' ||
+                          item.tab === 'architect' ||
+                          item.tab === 'steamtools' ||
+                          item.tab === 'ps5') && (
+                          <SectionSourceBadge tab={item.tab} className="absolute left-1.5" />
+                        )}
+                      </div>
+
+                      <div className="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
+                        <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                          {item.name}
+                        </h3>
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-bold truncate ${
+                              isPass ? 'text-[#4ade80]' : 'text-[#f87171]'
+                            }`}
+                          >
+                            {isPass ? (
+                              <>
+                                <Check className="w-3 h-3 shrink-0" />
+                                <span>{t.canRunCardPass}</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertTriangle className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{evalRes.shortBadge}</span>
+                              </>
+                            )}
+                          </span>
+                          <span className="text-[10.5px] text-[#8b9bb4] font-mono-tabular shrink-0">
+                            {item.repackSize || item.tab}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 4. Most Popular Games (Google Sheet: PopularRepacks — all games, dynamic counter, HV/Game filter & pagination) */}
+        {popularEntries.length > 0 && (
+          <section ref={popularSectionRef} className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+                  {t.mostPopularGames}
+                </h2>
+                <span className="px-2 py-0.5 rounded bg-[#18202b] border border-white/[0.08] text-[12px] font-mono-tabular font-semibold text-[#66c0f4] shrink-0">
+                  {popularGames.length}
+                </span>
+                <div className="h-px flex-1 bg-white/[0.07] hidden sm:block" />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Visibility Filter: Show All / Hide HV / Hide Games */}
+                <div
+                  role="group"
+                  aria-label={t.mostPopularGames}
+                  className="sa-ps5-pill-group inline-flex items-center p-0.5 rounded bg-[#141a23] border border-white/[0.08]"
+                >
+                  <button
+                    type="button"
+                    aria-pressed={popularFilter === 'all'}
+                    onClick={() => {
+                      setPopularFilter('all');
+                      setPopularPage(0);
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                      popularFilter === 'all'
+                        ? 'bg-[#1a9fff] text-white shadow-sm'
+                        : 'text-[#9fb0c7] hover:text-white'
+                    }`}
+                  >
+                    <Layers className="w-3 h-3 shrink-0" />
+                    <span>{t.showAll}</span>
+                    <span className="font-mono-tabular opacity-80">({popularFilterCounts.all})</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={popularFilter === 'hide-hv'}
+                    onClick={() => {
+                      setPopularFilter('hide-hv');
+                      setPopularPage(0);
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                      popularFilter === 'hide-hv'
+                        ? 'bg-[#1a9fff] text-white shadow-sm'
+                        : 'text-[#9fb0c7] hover:text-white'
+                    }`}
+                  >
+                    <EyeOff className="w-3 h-3 shrink-0" />
+                    <span>{t.hideHv}</span>
+                    <span className="font-mono-tabular opacity-80">({popularFilterCounts.gamesOnly})</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={popularFilter === 'hide-games'}
+                    data-active={popularFilter === 'hide-games' ? 'true' : 'false'}
+                    onClick={() => {
+                      setPopularFilter('hide-games');
+                      setPopularPage(0);
+                    }}
+                    className={`sa-ps5-toggle-fail inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                      popularFilter === 'hide-games'
+                        ? 'bg-[#dc2626] text-white shadow-sm'
+                        : 'text-[#9fb0c7] hover:text-white'
+                    }`}
+                  >
+                    <EyeOff className="w-3 h-3 shrink-0" />
+                    <span>{t.hideGames}</span>
+                    <span className="font-mono-tabular opacity-80">({popularFilterCounts.hvOnly})</span>
+                  </button>
+                </div>
+
+                {/* Organization / Sort Selector */}
+                <div className="sa-ps5-pill-group inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#141a23] border border-white/[0.08] text-[11.5px] text-[#c6d4df]">
+                  <ArrowUpDown className="w-3 h-3 text-[#66c0f4] shrink-0" />
+                  <select
+                    aria-label={t.mostPopularGames}
+                    value={popularSort}
+                    onChange={(e) => {
+                      setPopularSort(e.target.value as PopularSortMode);
+                      setPopularPage(0);
+                    }}
+                    className="bg-transparent text-[#e5e9f0] font-medium focus:outline-none cursor-pointer"
+                  >
+                    <option value="newest" className="bg-[#141a23] text-white">
+                      {t.newestFirst}
+                    </option>
+                    <option value="az" className="bg-[#141a23] text-white">
+                      {t.nameAz}
+                    </option>
+                  </select>
+                </div>
+
+                <div className="text-[12px] text-[#8b9bb4] font-mono-tabular whitespace-nowrap ps-1">
+                  {t.pageOf} {safePopularPage + 1} / {totalPopularPages}
+                </div>
               </div>
             </div>
 
             {/* Responsive 20-game grid: 2 cols mobile, 4 cols small laptop, 5 cols standard/big laptop */}
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-5 gap-3.5 lg:gap-4">
-              {visiblePopularGames.map(({ item: game, hasHypervisor }) => {
-                const isFav = favorites.has(game.id);
-                return (
-                  <div
-                    key={`${game.tab}-${game.id}`}
-                    onClick={() => onSelectGame(game, 'overview')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelectGame(game, 'overview');
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    className="group bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
-                  >
-                    <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
-                      <GameCover
-                        src={game.coverImage}
-                        alt={game.name}
-                        imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                      />
-                      {game.isNew && (
-                        <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
-                          NEW
-                        </div>
-                      )}
-                      {hasHypervisor && (
-                        <SectionSourceBadge
-                          tab="hypervisor"
-                          hasTopRibbon={game.isNew}
-                          className="absolute left-1.5"
-                        />
-                      )}
-                      <button
-                        type="button"
-                        aria-label={isFav ? `Unfavorite ${game.name}` : `Favorite ${game.name}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleFavorite(game.id);
-                        }}
-                        className={`absolute right-1.5 ${
-                          game.isNew ? 'top-7' : 'top-1.5'
-                        } p-1.5 rounded bg-black/65 hover:bg-black/90 transition-opacity cursor-pointer ${
-                          isFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                        }`}
-                      >
-                        <Star
-                          className={`w-3.5 h-3.5 ${
-                            isFav ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-white/80'
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    <div className="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
-                      <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
-                        {game.name}
-                      </h3>
-                      <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b9bb4] font-mono-tabular">
-                        <span className="truncate">{game.repackSize || game.tab}</span>
-                        {game.originalSize && (
-                          <span className="line-through text-[#59677b] shrink-0">
-                            {game.originalSize}
-                          </span>
-                        )}
+              {visiblePopularGames.map(({ item: game, hasHypervisor }) => (
+                <div
+                  key={`${game.tab}-${game.id}`}
+                  onClick={() => onSelectGame(game, 'overview')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectGame(game, 'overview');
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className="group bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                >
+                  <div className="relative aspect-[2/3] bg-[#0f141b] overflow-hidden">
+                    <GameCover
+                      src={game.coverImage}
+                      alt={game.name}
+                      imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    />
+                    {game.isNew && (
+                      <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
+                        NEW
                       </div>
+                    )}
+                    {hasHypervisor && (
+                      <SectionSourceBadge
+                        tab="hypervisor"
+                        hasTopRibbon={game.isNew}
+                        className="absolute start-1.5"
+                      />
+                    )}
+                  </div>
+
+                  <div className="p-2.5 flex-1 flex flex-col justify-between gap-1.5">
+                    <h3 className="text-[12.5px] font-semibold text-[#e5e9f0] group-hover:text-white line-clamp-1">
+                      {game.name}
+                    </h3>
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-[#8b9bb4] font-mono-tabular">
+                      <span className="truncate">{game.repackSize || game.tab}</span>
+                      {game.originalSize && (
+                        <span className="line-through text-[#59677b] shrink-0">
+                          {game.originalSize}
+                        </span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
             {/* Pagination & See More Controls */}
@@ -740,8 +1159,8 @@ export function StoreView({
                     onClick={() => goToPopularPage(safePopularPage - 1)}
                     className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
                   >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    <span>Previous</span>
+                    <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+                    <span>{t.previous}</span>
                   </button>
 
                   {Array.from({ length: totalPopularPages }, (_, pageIdx) => (
@@ -765,8 +1184,8 @@ export function StoreView({
                     onClick={() => goToPopularPage(safePopularPage + 1)}
                     className="inline-flex items-center gap-1 px-3 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-white/[0.08] text-[12px] font-medium text-[#dce4ee] cursor-pointer"
                   >
-                    <span>Next</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>{t.next}</span>
+                    <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </button>
                 </div>
 
@@ -776,8 +1195,11 @@ export function StoreView({
                     onClick={() => goToPopularPage(safePopularPage + 1)}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                   >
-                    <span>See More · Next 20 Games</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <span>
+                      {t.seeMoreNext} {nextPopularPageCount}{' '}
+                      {nextPopularPageCount === 1 ? t.gameSingular : t.gamePlural}
+                    </span>
+                    <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                   </button>
                 ) : (
                   <button
@@ -785,7 +1207,7 @@ export function StoreView({
                     onClick={() => goToPopularPage(0)}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
                   >
-                    <span>Back to Page 1</span>
+                    <span>{t.backToPage1}</span>
                   </button>
                 )}
               </div>
@@ -799,7 +1221,7 @@ export function StoreView({
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
-                  Top Studios
+                  {t.topStudios}
                 </h2>
                 <div className="h-px flex-1 bg-white/[0.07]" />
               </div>
@@ -809,7 +1231,7 @@ export function StoreView({
                 onClick={onOpenStudiosPage}
                 className="text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
-                View All Studios
+                {t.viewAllStudios}
               </button>
             </div>
 
@@ -822,13 +1244,13 @@ export function StoreView({
                     key={`studio-${studio.id}`}
                     type="button"
                     title={studio.name}
-                    aria-label={`${studio.name} (${totalGames} Games)`}
+                    aria-label={`${studio.name} (${totalGames} ${t.gamePlural})`}
                     onClick={() => onSelectGame(studio, 'overview')}
                     className="group p-3 rounded bg-[#18202b] hover:bg-[#212b3a] border border-white/[0.06] hover:border-[#1a9fff]/55 transition-all duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                   >
                     <StudioEmblem studio={studio} />
                     <span className="text-[12px] font-semibold font-mono-tabular text-[#c6d4df] group-hover:text-white">
-                      {totalGames} {totalGames === 1 ? 'Game' : 'Games'}
+                      {totalGames} {totalGames === 1 ? t.gameSingular : t.gamePlural}
                     </span>
                   </button>
                 );
@@ -844,7 +1266,7 @@ export function StoreView({
             onMouseLeave={() => setTwoPlayersPaused(false)}
             onFocus={() => setTwoPlayersPaused(true)}
             onBlur={() => setTwoPlayersPaused(false)}
-            className="rounded-xl bg-gradient-to-br from-[#141d29] via-[#101721] to-[#0d121a] border border-white/[0.08] p-3.5 sm:p-5 space-y-3.5 shadow-xl"
+            className="sa-ps5-panel rounded-xl bg-gradient-to-br from-[#141d29] via-[#101721] to-[#0d121a] border border-white/[0.08] p-3.5 sm:p-5 space-y-3.5 shadow-xl"
           >
             <div className="flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
@@ -852,12 +1274,12 @@ export function StoreView({
                   <Users className="w-4 h-4" />
                 </span>
                 <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white truncate">
-                  Best games For Two Players
+                  {t.bestTwoPlayers}
                 </h2>
                 <div className="h-px flex-1 bg-white/[0.07] hidden sm:block" />
               </div>
 
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   type="button"
                   aria-label="Scroll Best games For Two Players left"
@@ -878,8 +1300,9 @@ export function StoreView({
             </div>
 
             <div
+              dir="ltr"
               ref={twoPlayersScrollerRef}
-              className="no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg overflow-hidden border border-white/[0.08] bg-[#0b0e14]"
+              className="sa-ps5-subpanel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg overflow-hidden border border-white/[0.08] bg-[#0b0e14]"
             >
               {twoPlayerGames.map((game) => (
                 <div

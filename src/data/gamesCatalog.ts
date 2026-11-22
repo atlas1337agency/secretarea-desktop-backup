@@ -1,5 +1,5 @@
 import type { GameItem, RawSheetRow, SheetCatalogData, SheetTabKey } from '../types';
-import { markLatestThreeNewGames, normalizeRow } from '../utils/parsers';
+import { isValidSheetRow, markLatestThreeNewGames, normalizeRow } from '../utils/parsers';
 import { GAMES_BATCH_1 } from './gamesBatch1';
 import { GAMES_BATCH_2 } from './gamesBatch2';
 import { GAMES_BATCH_3 } from './gamesBatch3';
@@ -24,7 +24,9 @@ export const GAMES_CATALOG: GameItem[] = markLatestThreeNewGames([
 function normalizeTabSnapshot(tab: SheetTabKey): GameItem[] {
   const map = extrasSnapshotRaw as Record<string, RawSheetRow[]>;
   const rows = Array.isArray(map[tab]) ? map[tab] : [];
-  return rows.map((row, idx) => normalizeRow(row, tab, idx));
+  return rows
+    .filter((row) => isValidSheetRow(row, tab))
+    .map((row, idx) => normalizeRow(row, tab, idx));
 }
 
 export const DEFAULT_CATALOG: SheetCatalogData = {

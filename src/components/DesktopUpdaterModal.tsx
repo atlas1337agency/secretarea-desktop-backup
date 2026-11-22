@@ -15,9 +15,11 @@ import {
   type DesktopUpdateState,
 } from '../services/desktopUpdater';
 
+import type { AppThemeMode } from '../services/launcherSettings';
+
 interface DesktopUpdaterUIProps {
   isOpen: boolean;
-  isPs5Theme?: boolean;
+  activeTheme?: AppThemeMode;
   state: DesktopUpdateState | null;
   onClose: () => void;
   onCheckForUpdates: () => void;
@@ -29,7 +31,7 @@ interface DesktopUpdaterUIProps {
 
 export function DesktopUpdaterModal({
   isOpen,
-  isPs5Theme = false,
+  activeTheme = 'default',
   state,
   onClose,
   onCheckForUpdates,
@@ -39,6 +41,8 @@ export function DesktopUpdaterModal({
   onOpenModal,
 }: DesktopUpdaterUIProps) {
   if (!state) return null;
+  const isPs5Theme = activeTheme === 'ps5';
+  const isXboxTheme = activeTheme === 'xbox';
 
   const isChecking = state.status === 'checking';
   const isDownloading = state.status === 'downloading';
@@ -67,6 +71,8 @@ export function DesktopUpdaterModal({
           className={`fixed bottom-4 right-4 z-[96] w-[340px] max-w-[calc(100vw-2rem)] rounded-lg border shadow-[0_18px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl p-4 transition-all ${
             isPs5Theme
               ? 'bg-[#04183d]/92 border-white/[0.18] text-white'
+              : isXboxTheme
+              ? 'bg-[#091f0d]/94 border-[#52e042]/35 text-[#ecfdf0]'
               : 'bg-[#171d26]/96 border-white/[0.12] text-[#e5e9f0]'
           }`}
         >
@@ -190,6 +196,8 @@ export function DesktopUpdaterModal({
             className={`w-full max-w-md rounded-xl border shadow-2xl overflow-hidden ${
               isPs5Theme
                 ? 'bg-[#031333]/95 border-white/[0.18] text-white'
+                : isXboxTheme
+                ? 'bg-[#081b0c]/96 border-[#52e042]/35 text-[#ecfdf0]'
                 : 'bg-[#151b24] border-white/[0.1] text-[#e5e9f0]'
             }`}
           >

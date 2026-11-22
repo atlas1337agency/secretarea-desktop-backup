@@ -6,7 +6,13 @@ import type {
   SheetCatalogData,
   SheetTabKey,
 } from '../types';
-import { ALL_SHEET_TABS, markLatestThreeNewGames, normalizeRow } from '../utils/parsers';
+import {
+  ALL_SHEET_TABS,
+  isUntitledPlaceholderName,
+  isValidSheetRow,
+  markLatestThreeNewGames,
+  normalizeRow,
+} from '../utils/parsers';
 
 export const DEFAULT_GAS_URL =
   'https://script.google.com/macros/s/AKfycbzS2jQfIave1KcB0_JdlE7Akv0y5i2HzR2N_Cy3vrCTs5q7r-Uv8duxrlv7lZiAKA3eiw/exec';
@@ -108,8 +114,14 @@ function hasAnyCellValue(row: RawSheetRow | null | undefined): boolean {
   );
 }
 
+function buildCacheBustedGasUrl(rawUrl: string): string {
+  const clean = rawUrl.trim();
+  const sep = clean.includes('?') ? '&' : '?';
+  return `${clean}${sep}_ts=${Date.now()}`;
+}
+
 export async function fetchCatalogFromGas(gasUrl: string): Promise<SheetCatalogData> {
-  const cleanUrl = gasUrl.trim();
+  const cleanUrl = buildCacheBustedGasUrl(gasUrl);
   const response = await fetch(cleanUrl, {
     method: 'GET',
     redirect: 'follow',
@@ -143,7 +155,7 @@ export async function fetchCatalogFromGas(gasUrl: string): Promise<SheetCatalogD
   for (const tab of ALL_SHEET_TABS) {
     const rows = Array.isArray(json[tab]) ? json[tab] : [];
     normalized[tab] = rows
-      .filter((r) => hasAnyCellValue(r))
+      .filter((r) => isValidSheetRow(r, tab as SheetTabKey))
       .map((row, idx) => normalizeRow(row, tab as SheetTabKey, idx));
   }
 
@@ -189,6 +201,33 @@ export async function saveCachedCatalog(catalog: SheetCatalogData): Promise<void
   }
 }
 
+const TITLED_CACHE_TABS = new Set<SheetTabKey>([
+  'game',
+  'hypervisor',
+  'steamtools',
+  'ps5',
+  'architect',
+  'extra',
+  'profil',
+  'upcoming',
+  'topgames',
+  'upcomingtrailers',
+  'bestgameseries',
+]);
+
+function sanitizeCachedCatalog(catalog: SheetCatalogData): SheetCatalogData {
+  const cleaned = { ...catalog };
+  for (const tab of ALL_SHEET_TABS) {
+    const list = Array.isArray(cleaned[tab]) ? cleaned[tab] : [];
+    if (TITLED_CACHE_TABS.has(tab)) {
+      cleaned[tab] = list.filter((item) => item && !isUntitledPlaceholderName(item.name));
+    } else {
+      cleaned[tab] = list;
+    }
+  }
+  return cleaned;
+}
+
 export async function loadCachedCatalog(): Promise<SheetCatalogData | null> {
   try {
     const db = await openCatalogDb();
@@ -199,7 +238,7 @@ export async function loadCachedCatalog(): Promise<SheetCatalogData | null> {
       req.onerror = () => reject(req.error);
     });
     db.close();
-    return result;
+    return result ? sanitizeCachedCatalog(result) : null;
   } catch {
     return null;
   }

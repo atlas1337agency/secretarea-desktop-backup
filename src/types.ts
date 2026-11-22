@@ -166,7 +166,7 @@ export interface ItemRequestPayload {
   syncedToSheet?: boolean;
 }
 
-export type PrimarySection = 'store' | 'library' | 'extras' | 'requests' | 'studios';
+export type PrimarySection = 'store' | 'library' | 'extras' | 'requests' | 'studios' | 'settings';
 
 export type LibrarySectionTab =
   | 'game'

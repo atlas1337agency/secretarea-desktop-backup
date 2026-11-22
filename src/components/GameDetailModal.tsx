@@ -29,7 +29,6 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   Sparkles,
-  Star,
   Tag,
   ThumbsDown,
   ThumbsUp,
@@ -39,16 +38,27 @@ import {
 } from 'lucide-react';
 import type { GameItem, MirrorLink, SheetCatalogData } from '../types';
 import { isTruthyFlag } from '../utils/parsers';
+import { evaluateCanRunGame } from '../services/canRunIt';
+import type { SystemHardwareSpecs } from '../services/systemSpecs';
+import { CanRunItHeroBadge, CanRunItPanel } from './CanRunItPanel';
 import { GameCover } from './GameCover';
 import { resolveSheetRefItem } from './ExtrasView';
 import { HypervisorGuideModal } from './HypervisorGuideModal';
 import { SectionSourceBadge } from './SectionBadge';
+import type { AppLanguage } from '../services/launcherSettings';
+import { getTranslations } from '../i18n/translations';
 
 interface GameDetailModalProps {
   game: GameItem | null;
   catalog?: SheetCatalogData;
+  language?: AppLanguage;
   initialViewMode?: 'overview' | 'trailer' | 'downloads';
   favorites?: Set<string>;
+  systemSpecs?: SystemHardwareSpecs;
+  isRefreshingSpecs?: boolean;
+  onRefreshSpecs?: () => void;
+  onSaveCustomSpecs?: (next: SystemHardwareSpecs) => void;
+  onResetCustomSpecs?: () => void;
   onToggleFavorite: (id: string) => void;
   onJumpToItem?: (item: GameItem) => void;
   onClose: () => void;
@@ -113,12 +123,18 @@ function extractToolTitleTokens(name: string): string[] {
 export function GameDetailModal({
   game,
   catalog,
+  language = 'en',
   initialViewMode = 'overview',
   favorites,
-  onToggleFavorite,
+  systemSpecs,
+  isRefreshingSpecs = false,
+  onRefreshSpecs,
+  onSaveCustomSpecs,
+  onResetCustomSpecs,
   onJumpToItem,
   onClose,
 }: GameDetailModalProps) {
+  const t = getTranslations(language).detail;
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<Set<number>>(() => new Set());
   const [isRecPaused, setIsRecPaused] = useState(false);
@@ -127,8 +143,14 @@ export function GameDetailModal({
 
   const pageScrollRef = useRef<HTMLDivElement | null>(null);
   const mediaSectionRef = useRef<HTMLElement | null>(null);
+  const requirementsSectionRef = useRef<HTMLElement | null>(null);
   const downloadsSectionRef = useRef<HTMLElement | null>(null);
   const recommendedSliderRef = useRef<HTMLDivElement | null>(null);
+
+  const canRunEvaluation = useMemo(
+    () => (game && systemSpecs ? evaluateCanRunGame(game, systemSpecs) : null),
+    [game, systemSpecs]
+  );
 
   const mediaSlides = useMemo<MediaSlide[]>(() => {
     if (!game) return [];
@@ -417,8 +439,8 @@ export function GameDetailModal({
               onClick={onClose}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-semibold text-[#e5e9f0] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
+              <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
+              <span>{t.back}</span>
             </button>
 
             <div className="hidden sm:flex items-center gap-2 text-[12px] text-[#8b9bb4] min-w-0">
@@ -427,7 +449,7 @@ export function GameDetailModal({
                 onClick={onClose}
                 className="hover:text-white transition-colors cursor-pointer shrink-0"
               >
-                Home
+                {t.home}
               </button>
               <span className="text-[#4b5b70]">/</span>
               <span className="text-white font-semibold truncate">{game.name}</span>
@@ -437,7 +459,7 @@ export function GameDetailModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close game page"
+            aria-label={t.close}
             className="p-2 rounded bg-[#252f3d] hover:bg-[#313e50] text-[#aeb9c7] hover:text-white transition-colors cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
@@ -467,7 +489,7 @@ export function GameDetailModal({
           />
           <div
             aria-hidden="true"
-            className="sa-ps5-modal-scrim-x absolute inset-0 bg-gradient-to-r from-[#10151d]/95 via-[#10151d]/75 to-transparent"
+            className="sa-modal-scrim-x sa-ps5-modal-scrim-x absolute inset-0 bg-gradient-to-r from-[#10151d]/95 via-[#10151d]/75 to-transparent"
           />
 
           <div className="relative max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 lg:py-9">
@@ -503,7 +525,7 @@ export function GameDetailModal({
                           </span>
                         </div>
                         <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#8b9bb4]">
-                          Positive
+                          {t.positive}
                         </div>
                       </div>
                     )}
@@ -519,7 +541,7 @@ export function GameDetailModal({
                           </span>
                         </div>
                         <div className="mt-0.5 text-[10px] uppercase tracking-wider text-[#8b9bb4]">
-                          Negative
+                          {t.negative}
                         </div>
                       </div>
                     )}
@@ -540,17 +562,17 @@ export function GameDetailModal({
                     {isTools && game.isPinned && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-amber-500/20 border border-amber-400/50 text-amber-300 font-bold tracking-[0.08em]">
                         <Pin className="w-3 h-3" />
-                        <span>Pinned</span>
+                        <span>{t.pinned}</span>
                       </span>
                     )}
                     {isTools && game.isFree && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold tracking-[0.08em]">
                         <BadgeCheck className="w-3 h-3" />
-                        <span>Free</span>
+                        <span>{t.free}</span>
                       </span>
                     )}
                     <span className="text-[#4b5b70]">·</span>
-                    <span>{isTools ? 'Tools' : game.category || game.tab}</span>
+                    <span>{isTools ? t.tools : game.category || game.tab}</span>
                     {game.repackBy && (
                       <>
                         <span className="text-[#4b5b70]">·</span>
@@ -584,18 +606,22 @@ export function GameDetailModal({
                   </div>
                 </div>
 
-                {/* Key Release Numbers Strip */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-1 max-w-2xl">
+                {/* Key Release Numbers Strip + Compact Your PC Can Run It Badge */}
+                <div
+                  className={`grid grid-cols-2 gap-2.5 sm:gap-3 pt-1 ${
+                    canRunEvaluation ? 'sm:grid-cols-5 max-w-3xl' : 'sm:grid-cols-4 max-w-2xl'
+                  }`}
+                >
                   {isSteamTools ? (
                     <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
                       <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                        Game ID
+                        {t.gameId}
                       </div>
                       {steamGameId ? (
                         <button
                           type="button"
                           onClick={handleCopyGameId}
-                          title="Copy Game ID"
+                          title={t.gameId}
                           className="mt-0.5 inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] font-semibold font-mono-tabular text-[#66c0f4] hover:text-white transition-colors cursor-pointer max-w-full"
                         >
                           <span className="truncate">{steamGameId}</span>
@@ -614,7 +640,7 @@ export function GameDetailModal({
                   ) : (
                     <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
                       <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                        Version
+                        {t.version}
                       </div>
                       <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-white truncate">
                         {game.version || 'Latest'}
@@ -623,7 +649,7 @@ export function GameDetailModal({
                   )}
                   <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
                     <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      Original Size
+                      {t.originalSize}
                     </div>
                     <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-[#e5e9f0] font-mono-tabular truncate">
                       {game.originalSize || '—'}
@@ -631,7 +657,7 @@ export function GameDetailModal({
                   </div>
                   <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
                     <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      {isTools ? 'Download Size' : 'Repack Size'}
+                      {isTools ? t.downloadSize : t.repackSize}
                     </div>
                     <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-[#66c0f4] font-mono-tabular truncate">
                       {game.repackSize || '—'}
@@ -639,13 +665,25 @@ export function GameDetailModal({
                   </div>
                   <div className="p-2.5 sm:p-3 rounded bg-[#141b24]/90 border border-white/[0.08]">
                     <div className="text-[10px] uppercase tracking-[0.08em] text-[#8b9bb4] font-semibold">
-                      Download Channels
+                      {t.downloadChannels}
                     </div>
                     <div className="mt-0.5 text-[12.5px] sm:text-[13px] font-semibold text-white font-mono-tabular">
                       {groupedMirrors.length}{' '}
-                      {groupedMirrors.length === 1 ? 'Channel' : 'Channels'}
+                      {groupedMirrors.length === 1 ? t.channelSingular : t.channelPlural}
                     </div>
                   </div>
+                  {canRunEvaluation && (
+                    <CanRunItHeroBadge
+                      evaluation={canRunEvaluation}
+                      language={language}
+                      onClick={() =>
+                        requirementsSectionRef.current?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'start',
+                        })
+                      }
+                    />
+                  )}
                 </div>
 
                 {/* Primary Hero Action Buttons */}
@@ -661,7 +699,7 @@ export function GameDetailModal({
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[13px] font-semibold transition-colors cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Download Channels</span>
+                    <span>{t.downloadChannels}</span>
                   </button>
 
                   {(game.embedTrailerUrl || game.trailerUrl) && (
@@ -671,7 +709,7 @@ export function GameDetailModal({
                       className="inline-flex items-center gap-2 px-4 py-2.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.1] text-[#e5e9f0] hover:text-white text-[13px] font-semibold transition-colors cursor-pointer"
                     >
                       <Play className="w-4 h-4 text-[#66c0f4] fill-current" />
-                      <span>Watch Trailer</span>
+                      <span>{t.watchTrailer}</span>
                     </button>
                   )}
                 </div>
@@ -719,7 +757,7 @@ export function GameDetailModal({
             <div className="flex items-center gap-2">
               <PackageCheck className="w-4 h-4 text-[#66c0f4]" />
               <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                Release Details
+                {t.releaseDetails}
               </h2>
             </div>
 
@@ -728,7 +766,7 @@ export function GameDetailModal({
                 <div className="space-y-1">
                   <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                     <Hash className="w-3.5 h-3.5 text-[#66c0f4]" />
-                    <span>Game ID</span>
+                    <span>{t.gameId}</span>
                   </dt>
                   <dd className="text-white font-semibold font-mono-tabular">
                     {steamGameId ? (
@@ -753,7 +791,7 @@ export function GameDetailModal({
                 <div className="space-y-1">
                   <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                     <Tag className="w-3.5 h-3.5 text-[#66c0f4]" />
-                    <span>Version</span>
+                    <span>{t.version}</span>
                   </dt>
                   <dd className="text-white font-semibold">{game.version || '—'}</dd>
                 </div>
@@ -761,7 +799,7 @@ export function GameDetailModal({
               <div className="space-y-1">
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                   <HardDrive className="w-3.5 h-3.5 text-[#66c0f4]" />
-                  <span>Original Size</span>
+                  <span>{t.originalSize}</span>
                 </dt>
                 <dd className="text-[#e5e9f0] font-mono-tabular font-medium">
                   {game.originalSize || '—'}
@@ -770,7 +808,7 @@ export function GameDetailModal({
               <div className="space-y-1">
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                   <Download className="w-3.5 h-3.5 text-[#66c0f4]" />
-                  <span>{isTools ? 'Download Size' : 'Repack Size'}</span>
+                  <span>{isTools ? t.downloadSize : t.repackSize}</span>
                 </dt>
                 <dd className="font-semibold text-[#66c0f4] font-mono-tabular">
                   {game.repackSize || '—'}
@@ -781,12 +819,12 @@ export function GameDetailModal({
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <BadgeCheck className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>License</span>
+                      <span>{t.license}</span>
                     </dt>
                     <dd>
                       {game.isFree ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/45 text-emerald-300 text-[11.5px] font-semibold">
-                          Free
+                          {t.free}
                         </span>
                       ) : (
                         <span className="text-[#e5e9f0] font-medium">Full Package</span>
@@ -796,22 +834,22 @@ export function GameDetailModal({
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <Pin className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>Pinned</span>
+                      <span>{t.pinned}</span>
                     </dt>
                     <dd>
                       {game.isPinned ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 border border-amber-400/45 text-amber-300 text-[11.5px] font-semibold">
-                          Pinned
+                          {t.pinned}
                         </span>
                       ) : (
-                        <span className="text-[#8b9bb4]">Standard</span>
+                        <span className="text-[#8b9bb4]">{t.standard}</span>
                       )}
                     </dd>
                   </div>
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <Calendar className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>Date Added</span>
+                      <span>{t.dateAdded}</span>
                     </dt>
                     <dd className="text-[#e5e9f0] font-mono-tabular">
                       {game.dateAdded || '—'}
@@ -823,21 +861,21 @@ export function GameDetailModal({
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <UserCheck className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>Repacker</span>
+                      <span>{t.repacker}</span>
                     </dt>
                     <dd className="text-[#e5e9f0] font-medium">{game.repackBy || '—'}</dd>
                   </div>
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <Globe className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>Languages</span>
+                      <span>{t.languages}</span>
                     </dt>
                     <dd className="text-[#e5e9f0]">{game.languages || '—'}</dd>
                   </div>
                   <div className="space-y-1">
                     <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[#8b9bb4]">
                       <Gamepad2 className="w-3.5 h-3.5 text-[#66c0f4]" />
-                      <span>Genres</span>
+                      <span>{t.genres}</span>
                     </dt>
                     <dd className="text-[#e5e9f0]">{game.genreList.join(' · ') || '—'}</dd>
                   </div>
@@ -851,7 +889,7 @@ export function GameDetailModal({
             <section ref={mediaSectionRef} className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                  Trailer & Gallery
+                  {t.trailerGallery}
                 </h2>
                 <div className="flex items-center gap-2">
                   {trailerSlideIdx >= 0 && activeSlideIndex !== trailerSlideIdx && (
@@ -861,7 +899,7 @@ export function GameDetailModal({
                       className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors cursor-pointer"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Switch to Trailer</span>
+                      <span>{t.switchToTrailer}</span>
                     </button>
                   )}
                   {game.trailerUrl && !game.embedTrailerUrl && (
@@ -872,7 +910,7 @@ export function GameDetailModal({
                       className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-medium text-[#66c0f4] hover:text-white transition-colors"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Open Trailer</span>
+                      <span>{t.openTrailer}</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
@@ -881,12 +919,17 @@ export function GameDetailModal({
 
               {mediaSlides.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-3.5 items-start">
-                  <div className="lg:col-span-3 relative aspect-video bg-[#0b0e14] rounded overflow-hidden border border-white/[0.08]">
+                  <div
+                    dir="ltr"
+                    className="lg:col-span-3 relative aspect-video bg-[#0b0e14] rounded overflow-hidden border border-white/[0.08]"
+                  >
                     {activeSlide?.kind === 'trailer' && (
                       <iframe
+                        key={activeSlide.url}
                         src={activeSlide.url}
                         title={`${game.name} Trailer`}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         className="w-full h-full border-0"
                       />
@@ -941,7 +984,7 @@ export function GameDetailModal({
                   </div>
 
                   {mediaSlides.length > 1 && (
-                    <div className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[420px] pb-1 lg:pb-0 lg:pr-1">
+                    <div className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[420px] pb-1 lg:pb-0 lg:pe-1">
                       {mediaSlides.map((slide, idx) => {
                         const active = idx === activeSlideIndex;
                         return (
@@ -992,22 +1035,34 @@ export function GameDetailModal({
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#66c0f4]" />
                   <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                    Description
+                    {t.description}
                   </h2>
                 </div>
                 <p className="text-[13.5px] sm:text-[14px] leading-relaxed text-[#d4dde7] whitespace-pre-line">
-                  {game.description || 'No description provided in catalog.'}
+                  {game.description || t.noDescription}
                 </p>
               </section>
 
-              {/* System Requirements with Icons */}
-              <section className="space-y-3">
+              {/* System Requirements + Can Run It? Hardware Comparison */}
+              <section ref={requirementsSectionRef} className="space-y-3.5">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-[#66c0f4]" />
                   <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                    Requirements
+                    {t.requirementsAndCanRun}
                   </h2>
                 </div>
+
+                {canRunEvaluation && systemSpecs && (
+                  <CanRunItPanel
+                    evaluation={canRunEvaluation}
+                    specs={systemSpecs}
+                    language={language}
+                    isRefreshingSpecs={isRefreshingSpecs}
+                    onRefreshAutoSpecs={onRefreshSpecs}
+                    onSaveCustomSpecs={onSaveCustomSpecs}
+                    onResetCustomSpecs={onResetCustomSpecs}
+                  />
+                )}
 
                 {hasStructuredReqs ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1018,7 +1073,7 @@ export function GameDetailModal({
                         </div>
                         <div className="min-w-0">
                           <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
-                            OS
+                            {t.osLabel}
                           </div>
                           <div className="mt-1 text-[13px] text-[#dce4ee]">{os}</div>
                         </div>
@@ -1031,7 +1086,7 @@ export function GameDetailModal({
                         </div>
                         <div className="min-w-0">
                           <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
-                            Memory / RAM
+                            {t.ramLabel}
                           </div>
                           <div className="mt-1 text-[13px] text-[#dce4ee]">{ram}</div>
                         </div>
@@ -1044,7 +1099,7 @@ export function GameDetailModal({
                         </div>
                         <div className="min-w-0">
                           <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
-                            Processor / CPU
+                            {t.cpuLabel}
                           </div>
                           <div className="mt-1 text-[13px] text-[#dce4ee]">{cpu}</div>
                         </div>
@@ -1057,7 +1112,7 @@ export function GameDetailModal({
                         </div>
                         <div className="min-w-0">
                           <div className="text-[10.5px] uppercase tracking-wider text-[#66c0f4] font-semibold">
-                            Graphics / GPU
+                            {t.gpuLabel}
                           </div>
                           <div className="mt-1 text-[13px] text-[#dce4ee]">{gpu}</div>
                         </div>
@@ -1070,7 +1125,7 @@ export function GameDetailModal({
                       <HardDrive className="w-4 h-4" />
                     </div>
                     <div className="pt-0.5">
-                      {raw || 'No specific hardware requirements listed.'}
+                      {raw || t.noReqsListed}
                     </div>
                   </div>
                 )}
@@ -1086,7 +1141,7 @@ export function GameDetailModal({
                       <div className="flex items-center gap-2">
                         <Wrench className="w-4 h-4 text-[#66c0f4]" />
                         <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                          Tools
+                          {t.tools}
                         </h2>
                       </div>
                       {game.parsedTools.length > 0 ? (
@@ -1120,11 +1175,11 @@ export function GameDetailModal({
                         <div className="flex items-center gap-2">
                           <ListChecks className="w-4 h-4 text-[#66c0f4]" />
                           <h2 className="text-[12.5px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                            Steps
+                            {t.steps}
                           </h2>
                         </div>
                         <span className="text-[11px] font-mono-tabular text-[#8b9bb4]">
-                          {checkedSteps.size}/{game.parsedSteps.length} completed
+                          {checkedSteps.size}/{game.parsedSteps.length} {t.completed}
                         </span>
                       </div>
 
@@ -1163,7 +1218,7 @@ export function GameDetailModal({
                               {!isLast && (
                                 <span
                                   aria-hidden="true"
-                                  className="absolute left-[23px] top-10 bottom-[-14px] w-px bg-white/[0.09] pointer-events-none"
+                                  className="absolute start-[23px] top-10 bottom-[-14px] w-px bg-white/[0.09] pointer-events-none"
                                 />
                               )}
 
@@ -1202,7 +1257,7 @@ export function GameDetailModal({
                 {linkedCatalogItems.length > 0 && onJumpToItem && (
                   <div className="p-4 rounded bg-[#12171f] border border-white/[0.06] space-y-2.5">
                     <h2 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#66c0f4]">
-                      Linked Catalog Entries ({linkedCatalogItems.length})
+                      {t.linkedEntries} ({linkedCatalogItems.length})
                     </h2>
                     <div className="space-y-1.5 max-h-60 overflow-y-auto">
                       {linkedCatalogItems.map((linked) => (
@@ -1210,7 +1265,7 @@ export function GameDetailModal({
                           key={`${linked.tab}-${linked.id}`}
                           type="button"
                           onClick={() => onJumpToItem(linked)}
-                          className="w-full p-2 rounded bg-[#1a222d] hover:bg-[#243040] border border-white/[0.06] flex items-center gap-2.5 text-left transition-colors cursor-pointer"
+                          className="w-full p-2 rounded bg-[#1a222d] hover:bg-[#243040] border border-white/[0.06] flex items-center gap-2.5 text-start transition-colors cursor-pointer"
                         >
                           <div className="w-7 h-9 rounded-[2px] overflow-hidden bg-[#0b0e14] shrink-0">
                             <GameCover src={linked.coverImage} alt={linked.name} compact />
@@ -1238,17 +1293,17 @@ export function GameDetailModal({
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-4 h-4 text-[#f87171] shrink-0" />
                 <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#fca5a5]">
-                  What is a Hypervisor Bypass?
+                  {t.hvWarningTitle}
                 </h2>
               </div>
               <p className="text-[13.5px] text-[#e5e9f0] leading-relaxed">
-                Please read this article before proceeding with downloading and installation:
+                {t.hvWarningBody}
               </p>
               <div>
                 <button
                   type="button"
                   onClick={() => setIsHvGuideOpen(true)}
-                  className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#66c0f4] hover:text-white underline underline-offset-4 break-all text-left cursor-pointer"
+                  className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#66c0f4] hover:text-white underline underline-offset-4 break-all text-start cursor-pointer"
                 >
                   <span>https://fitgirl-repacks.site/hypervisor-guide/</span>
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
@@ -1300,7 +1355,7 @@ export function GameDetailModal({
               <div className="flex items-center gap-2">
                 <CloudDownload className="w-4 h-4 text-[#66c0f4]" />
                 <h2 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#8b9bb4]">
-                  Download Channels
+                  {t.downloadChannels}
                 </h2>
               </div>
 
@@ -1309,13 +1364,13 @@ export function GameDetailModal({
                   {game.isPinned && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10.5px] font-bold uppercase tracking-[0.06em]">
                       <Pin className="w-3 h-3" />
-                      <span>Pinned</span>
+                      <span>{t.pinned}</span>
                     </span>
                   )}
                   {game.isFree && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[10.5px] font-bold uppercase tracking-[0.06em]">
                       <BadgeCheck className="w-3 h-3" />
-                      <span>Free</span>
+                      <span>{t.free}</span>
                     </span>
                   )}
                 </div>
@@ -1324,7 +1379,7 @@ export function GameDetailModal({
 
             {groupedMirrors.length === 0 ? (
               <div className="p-4 rounded bg-[#12171f] border border-white/[0.06] text-[13px] text-[#8b9bb4]">
-                No download channels attached to this entry.
+                {t.noChannels}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1357,13 +1412,13 @@ export function GameDetailModal({
                           {isFeaturedDirect && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-[#1a9fff]/20 border border-[#1a9fff]/45 text-[#66c0f4] text-[10px] font-bold uppercase tracking-[0.06em]">
                               <Sparkles className="w-3 h-3" />
-                              <span>Recommended</span>
+                              <span>{t.recommendedTag}</span>
                             </span>
                           )}
                           {isTools && isFullDownloadChannel && game.isFree && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] bg-emerald-500/20 border border-emerald-400/45 text-emerald-300 text-[10px] font-bold uppercase tracking-[0.06em]">
                               <BadgeCheck className="w-3 h-3" />
-                              <span>Free Official</span>
+                              <span>{t.free}</span>
                             </span>
                           )}
                         </div>
@@ -1382,7 +1437,7 @@ export function GameDetailModal({
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors"
                               >
                                 <Magnet className="w-3.5 h-3.5" />
-                                <span>Download {mirror.label}</span>
+                                <span>{mirror.label}</span>
                                 <Download className="w-3.5 h-3.5" />
                               </a>
                             );
@@ -1422,22 +1477,18 @@ export function GameDetailModal({
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <h2 className="text-[15px] font-bold tracking-[0.06em] uppercase text-white">
-                    Recommended For You
+                    {t.recommendedForYou}
                   </h2>
                   <p className="text-[12px] text-[#8b9bb4] mt-0.5">
                     {isTools
-                      ? `Related tools matching "${game.name}"`
+                      ? game.name
                       : game.genreList.length > 0
-                      ? game.tab === 'hypervisor'
-                        ? `Similar Hypervisor games in ${game.genreList.slice(0, 3).join(' · ')}`
-                        : `Similar games in ${game.genreList.slice(0, 3).join(' · ')}`
-                      : game.tab === 'hypervisor'
-                      ? 'More Hypervisor releases in SecretArea'
-                      : 'More featured releases in SecretArea'}
+                      ? game.genreList.slice(0, 3).join(' · ')
+                      : game.category || 'SecretArea'}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div dir="ltr" className="flex items-center gap-1.5">
                   <button
                     type="button"
                     aria-label="Slide recommended games left"
@@ -1459,15 +1510,16 @@ export function GameDetailModal({
 
               <div
                 ref={recommendedSliderRef}
+                dir="ltr"
                 className="no-scrollbar flex gap-3 sm:gap-3.5 overflow-x-auto pb-1 scroll-smooth snap-x snap-mandatory"
               >
                 {recommendedGames.map((rec) => {
-                  const recFav = favorites ? favorites.has(rec.id) : false;
+                  const recEval = systemSpecs ? evaluateCanRunGame(rec, systemSpecs) : null;
                   const metaLine = [
                     rec.tab === 'architect'
-                      ? [rec.isFree ? 'Free' : '', rec.isPinned ? 'Pinned' : '', rec.version]
+                      ? [rec.isFree ? t.free : '', rec.isPinned ? t.pinned : '', rec.version]
                           .filter(Boolean)
-                          .join(' · ') || 'Tools'
+                          .join(' · ') || t.tools
                       : rec.genreList.slice(0, 2).join(' · ') || rec.category,
                     rec.repackSize || (rec.tab !== 'architect' ? rec.version : ''),
                   ]
@@ -1501,33 +1553,16 @@ export function GameDetailModal({
                           </div>
                         )}
 
-                        {(rec.tab === 'hypervisor' || rec.tab === 'architect') && (
+                        {(rec.tab === 'hypervisor' ||
+                          rec.tab === 'architect' ||
+                          rec.tab === 'ps5' ||
+                          rec.tab === 'steamtools') && (
                           <SectionSourceBadge
                             tab={rec.tab}
                             hasTopRibbon={rec.isNew}
-                            className="absolute left-1.5"
+                            className="absolute start-1.5"
                           />
                         )}
-
-                        <button
-                          type="button"
-                          aria-label={recFav ? `Unfavorite ${rec.name}` : `Favorite ${rec.name}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavorite(rec.id);
-                          }}
-                          className={`absolute right-1.5 ${
-                            rec.isNew ? 'top-7' : 'top-1.5'
-                          } p-1.5 rounded bg-black/65 hover:bg-black/90 transition-opacity cursor-pointer ${
-                            recFav ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                          }`}
-                        >
-                          <Star
-                            className={`w-3.5 h-3.5 ${
-                              recFav ? 'text-[#f59e0b] fill-[#f59e0b]' : 'text-white/80'
-                            }`}
-                          />
-                        </button>
                       </div>
 
                       <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
@@ -1535,6 +1570,19 @@ export function GameDetailModal({
                           {rec.name}
                         </h3>
                         <div className="text-[11px] text-[#8b9bb4] truncate">{metaLine}</div>
+                        {recEval && recEval.status !== 'unknown' && (
+                          <div
+                            className={`text-[10.5px] font-bold truncate ${
+                              recEval.status === 'can-run'
+                                ? 'text-[#4ade80]'
+                                : 'text-[#f87171]'
+                            }`}
+                          >
+                            {recEval.status === 'can-run'
+                              ? `✓ ${t.runsWell}`
+                              : `✕ ${recEval.shortBadge}`}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

@@ -38,10 +38,52 @@ interface SecretAreaUpdaterBridge {
   onStateChange: (callback: (state: DesktopUpdateState) => void) => () => void;
 }
 
+interface SecretAreaWindowBridge {
+  isFullscreen: () => Promise<boolean>;
+  setFullscreen: (flag: boolean) => Promise<boolean>;
+  onFullscreenChange: (callback: (isFullscreen: boolean) => void) => () => void;
+}
+
+export interface DesktopSystemSpecsPayload {
+  source: 'electron';
+  osName: string;
+  cpuName: string;
+  cpuCores: number;
+  cpuSpeedGhz: number;
+  gpuName: string;
+  gpuVramGB: number | null;
+  allGpus?: string[];
+  ramGB: number;
+  ramIsApprox?: boolean;
+  freeSpaceGB: number | null;
+  totalSpaceGB: number | null;
+  spaceDrive: string;
+  detectedAt: string;
+}
+
+export interface DesktopSettingsStatePayload {
+  startWithComputer: boolean;
+  isPackaged: boolean;
+  platform: string;
+  trayActive: boolean;
+}
+
+interface SecretAreaSettingsBridge {
+  getDesktopSettings: () => Promise<DesktopSettingsStatePayload | null>;
+  setStartWithComputer: (enabled: boolean) => Promise<DesktopSettingsStatePayload | null>;
+}
+
+interface SecretAreaSystemBridge {
+  getSpecs: (forceRefresh?: boolean) => Promise<DesktopSystemSpecsPayload | null>;
+}
+
 interface SecretAreaDesktopGlobal {
   isDesktop?: boolean;
   platform?: string;
   updater?: SecretAreaUpdaterBridge;
+  windowControls?: SecretAreaWindowBridge;
+  system?: SecretAreaSystemBridge;
+  settings?: SecretAreaSettingsBridge;
 }
 
 export function getDesktopUpdaterBridge(): SecretAreaUpdaterBridge | null {
@@ -53,6 +95,39 @@ export function getDesktopUpdaterBridge(): SecretAreaUpdaterBridge | null {
     return null;
   }
   return win.secretAreaDesktop.updater;
+}
+
+export function getDesktopWindowBridge(): SecretAreaWindowBridge | null {
+  if (typeof window === 'undefined') return null;
+  const win = window as unknown as {
+    secretAreaDesktop?: SecretAreaDesktopGlobal;
+  };
+  if (!win.secretAreaDesktop?.isDesktop || !win.secretAreaDesktop?.windowControls) {
+    return null;
+  }
+  return win.secretAreaDesktop.windowControls;
+}
+
+export function getDesktopSystemBridge(): SecretAreaSystemBridge | null {
+  if (typeof window === 'undefined') return null;
+  const win = window as unknown as {
+    secretAreaDesktop?: SecretAreaDesktopGlobal;
+  };
+  if (!win.secretAreaDesktop?.isDesktop || !win.secretAreaDesktop?.system) {
+    return null;
+  }
+  return win.secretAreaDesktop.system;
+}
+
+export function getDesktopSettingsBridge(): SecretAreaSettingsBridge | null {
+  if (typeof window === 'undefined') return null;
+  const win = window as unknown as {
+    secretAreaDesktop?: SecretAreaDesktopGlobal;
+  };
+  if (!win.secretAreaDesktop?.isDesktop || !win.secretAreaDesktop?.settings) {
+    return null;
+  }
+  return win.secretAreaDesktop.settings;
 }
 
 export function formatByteSize(bytes: number): string {

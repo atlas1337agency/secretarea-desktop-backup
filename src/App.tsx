@@ -31,12 +31,25 @@ import { ExtrasView } from './components/ExtrasView';
 import { StudiosView } from './components/StudiosView';
 import { StudioDetailModal } from './components/StudioDetailModal';
 import { RequestsView } from './components/RequestsView';
+import { SettingsView } from './components/SettingsView';
 import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
 import {
+  getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
+  getDesktopWindowBridge,
   type DesktopUpdateState,
 } from './services/desktopUpdater';
+import {
+  applyDocumentLanguageSettings,
+  DEFAULT_LAUNCHER_SETTINGS,
+  getActiveConsoleTheme,
+  loadLauncherSettings,
+  saveLauncherSettings,
+  type AppLanguage,
+  type LauncherSettings,
+} from './services/launcherSettings';
+import { getTranslations } from './i18n/translations';
 import {
   playPsBackSound,
   playPsBootChime,
@@ -45,6 +58,22 @@ import {
   startPsAmbientSound,
   stopPsAmbientSound,
 } from './utils/psSounds';
+import {
+  playXboxBackSound,
+  playXboxBootChime,
+  playXboxClickSound,
+  playXboxHoverSound,
+  startXboxAmbientSound,
+  stopXboxAmbientSound,
+} from './utils/xboxSounds';
+import {
+  detectAutoSystemSpecs,
+  detectBrowserSystemSpecs,
+  loadSavedCustomSystemSpecs,
+  saveCustomSystemSpecs,
+  type SystemHardwareSpecs,
+} from './services/systemSpecs';
+import { evaluateCanRunGame } from './services/canRunIt';
 
 interface ToastItem {
   id: string;
@@ -115,15 +144,95 @@ export default function App() {
   const [libraryTab, setLibraryTab] = useState<LibrarySectionTab>('game');
   const [searchQuery, setSearchQuery] = useState('');
   const [genreFilter, setGenreFilter] = useState('all');
+  const [canRunFilter, setCanRunFilter] = useState<'all' | 'can-run' | 'cannot-run'>('all');
   const [sortBy, setSortBy] = useState<SortOption>('smart');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const [systemSpecs, setSystemSpecs] = useState<SystemHardwareSpecs>(
+    () => loadSavedCustomSystemSpecs() || detectBrowserSystemSpecs()
+  );
+  const [isRefreshingSpecs, setIsRefreshingSpecs] = useState(false);
+
+  const [launcherSettings, setLauncherSettings] = useState<LauncherSettings>(() =>
+    loadLauncherSettings()
+  );
+  const [isUpdatingAutoLaunch, setIsUpdatingAutoLaunch] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const updaterBridge = useMemo(() => getDesktopUpdaterBridge(), []);
+  const windowBridge = useMemo(() => getDesktopWindowBridge(), []);
+  const settingsBridge = useMemo(() => getDesktopSettingsBridge(), []);
   const [desktopUpdateState, setDesktopUpdateState] = useState<DesktopUpdateState | null>(null);
   const [isUpdaterModalOpen, setIsUpdaterModalOpen] = useState(false);
+
+  const t = useMemo(() => getTranslations(launcherSettings.language), [launcherSettings.language]);
+
+  useEffect(() => {
+    applyDocumentLanguageSettings(launcherSettings.language);
+  }, [launcherSettings.language]);
+
+  useEffect(() => {
+    saveLauncherSettings(launcherSettings);
+  }, [launcherSettings]);
+
+  // Sync persisted Electron desktop auto-start tray setting on startup
+  useEffect(() => {
+    if (!settingsBridge) return;
+    let active = true;
+    void settingsBridge.getDesktopSettings().then((desktopSettings) => {
+      if (!active || !desktopSettings) return;
+      setLauncherSettings((prev) =>
+        prev.startWithComputer === desktopSettings.startWithComputer
+          ? prev
+          : { ...prev, startWithComputer: desktopSettings.startWithComputer }
+      );
+    });
+    return () => {
+      active = false;
+    };
+  }, [settingsBridge]);
+
+  // Automatically detect real PC/laptop specs when SecretArea.exe starts (unless custom override saved)
+  useEffect(() => {
+    const savedCustom = loadSavedCustomSystemSpecs();
+    if (savedCustom) return;
+    let active = true;
+    void detectAutoSystemSpecs(false).then((detected) => {
+      if (active) setSystemSpecs(detected);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleRefreshSystemSpecs = useCallback(async () => {
+    setIsRefreshingSpecs(true);
+    try {
+      saveCustomSystemSpecs(null);
+      const fresh = await detectAutoSystemSpecs(true);
+      setSystemSpecs(fresh);
+    } finally {
+      setIsRefreshingSpecs(false);
+    }
+  }, []);
+
+  const handleSaveCustomSystemSpecs = useCallback((next: SystemHardwareSpecs) => {
+    saveCustomSystemSpecs(next);
+    setSystemSpecs({ ...next, source: 'custom', ramIsApprox: false });
+  }, []);
+
+  const handleResetSystemSpecs = useCallback(async () => {
+    saveCustomSystemSpecs(null);
+    setIsRefreshingSpecs(true);
+    try {
+      const detected = await detectAutoSystemSpecs(true);
+      setSystemSpecs(detected);
+    } finally {
+      setIsRefreshingSpecs(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!updaterBridge) return;
@@ -181,28 +290,38 @@ export default function App() {
       ? desktopUpdateState.status
       : 'none';
 
-  // PS5 Theme activates directly with Fullscreen mode
-  const isPs5Theme = isFullscreen;
+  // Theme activates strictly from Settings (PS5, Xbox, or Default) — never forced by Fullscreen
+  const activeTheme = useMemo(
+    () => getActiveConsoleTheme(launcherSettings),
+    [launcherSettings]
+  );
 
   useEffect(() => {
-    document.documentElement.classList.toggle('theme-ps5', isPs5Theme);
-  }, [isPs5Theme]);
+    document.documentElement.classList.toggle('theme-ps5', activeTheme === 'ps5');
+    document.documentElement.classList.toggle('theme-xbox', activeTheme === 'xbox');
+  }, [activeTheme]);
 
-  // Ambient PS5 background music/soundscape while in Fullscreen PS5 mode
+  // Ambient console background music/soundscape based on active Settings theme
   useEffect(() => {
-    if (isPs5Theme && soundEnabled) {
+    if (activeTheme === 'ps5' && soundEnabled) {
+      stopXboxAmbientSound();
       startPsAmbientSound();
+    } else if (activeTheme === 'xbox' && soundEnabled) {
+      stopPsAmbientSound();
+      startXboxAmbientSound();
     } else {
       stopPsAmbientSound();
+      stopXboxAmbientSound();
     }
     return () => {
       stopPsAmbientSound();
+      stopXboxAmbientSound();
     };
-  }, [isPs5Theme, soundEnabled]);
+  }, [activeTheme, soundEnabled]);
 
-  // Global PlayStation hover & click sound effects while in Fullscreen PS5 mode
+  // Global console hover & click sound effects when PS5 or Xbox theme is active
   useEffect(() => {
-    if (!isPs5Theme || !soundEnabled) return;
+    if (activeTheme === 'default' || !soundEnabled) return;
 
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
@@ -217,15 +336,24 @@ export default function App() {
         ''
       ).toLowerCase();
 
-      if (
+      const isBackAction =
         label.includes('close') ||
         label.includes('exit') ||
         label.includes('back') ||
-        label.includes('cancel')
-      ) {
-        playPsBackSound();
+        label.includes('cancel');
+
+      if (activeTheme === 'xbox') {
+        if (isBackAction) {
+          playXboxBackSound();
+        } else {
+          playXboxClickSound();
+        }
       } else {
-        playPsClickSound();
+        if (isBackAction) {
+          playPsBackSound();
+        } else {
+          playPsClickSound();
+        }
       }
     };
 
@@ -236,7 +364,11 @@ export default function App() {
       if (!interactive) return;
       const related = e.relatedTarget as Node | null;
       if (related && interactive.contains(related)) return;
-      playPsHoverSound();
+      if (activeTheme === 'xbox') {
+        playXboxHoverSound();
+      } else {
+        playPsHoverSound();
+      }
     };
 
     document.addEventListener('click', handleGlobalClick, true);
@@ -245,33 +377,45 @@ export default function App() {
       document.removeEventListener('click', handleGlobalClick, true);
       document.removeEventListener('mouseover', handleGlobalHover, true);
     };
-  }, [isPs5Theme, soundEnabled]);
+  }, [activeTheme, soundEnabled]);
 
-  // Sync native Fullscreen changes (e.g., Escape key restores Default theme & stops background sound)
+  // Sync native Fullscreen changes without altering the active launcher theme
   useEffect(() => {
+    if (windowBridge) {
+      let active = true;
+      void windowBridge.isFullscreen().then((flag) => {
+        if (active) setIsFullscreen(flag);
+      });
+      const unsubscribe = windowBridge.onFullscreenChange((flag) => {
+        setIsFullscreen(flag);
+      });
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    }
+
     const handleFullscreenChange = () => {
-      const nativeFull = Boolean(document.fullscreenElement);
-      setIsFullscreen(nativeFull);
-      if (!nativeFull) {
-        stopPsAmbientSound();
-        if (soundEnabled) playPsBackSound();
-      }
+      setIsFullscreen(Boolean(document.fullscreenElement));
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [soundEnabled]);
+  }, [windowBridge]);
 
   const handleToggleFullscreen = useCallback(async () => {
+    if (windowBridge) {
+      const current = await windowBridge.isFullscreen();
+      const target = !current;
+      await windowBridge.setFullscreen(target);
+      setIsFullscreen(target);
+      return;
+    }
+
     const currentlyFullscreen = isFullscreen || Boolean(document.fullscreenElement);
 
     if (!currentlyFullscreen) {
       setIsFullscreen(true);
-      if (soundEnabled) {
-        playPsBootChime();
-        startPsAmbientSound();
-      }
-
       try {
         if (document.documentElement.requestFullscreen) {
           await document.documentElement.requestFullscreen();
@@ -288,10 +432,20 @@ export default function App() {
         }
       }
       setIsFullscreen(false);
-      stopPsAmbientSound();
-      if (soundEnabled) playPsBackSound();
     }
-  }, [isFullscreen, soundEnabled]);
+  }, [isFullscreen, windowBridge]);
+
+  // Allow Escape key to exit fullscreen when no modal is open
+  useEffect(() => {
+    if (!isFullscreen || selectedGame || selectedStudio || isUpdaterModalOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        void handleToggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen, selectedGame, selectedStudio, isUpdaterModalOpen, handleToggleFullscreen]);
 
   const notify = useCallback(
     (message: string, type: 'success' | 'info' | 'error' = 'info') => {
@@ -304,11 +458,91 @@ export default function App() {
     []
   );
 
-  const isBackgroundRefreshingRef = useRef(false);
+  const handleChangeLanguage = useCallback((language: AppLanguage) => {
+    setLauncherSettings((prev) => ({ ...prev, language }));
+  }, []);
 
-  const refreshCatalogSilently = useCallback(async (url: string) => {
+  const handleToggleStartWithComputer = useCallback(
+    async (enabled: boolean) => {
+      setLauncherSettings((prev) => ({ ...prev, startWithComputer: enabled }));
+      if (!settingsBridge) return;
+      setIsUpdatingAutoLaunch(true);
+      try {
+        const res = await settingsBridge.setStartWithComputer(enabled);
+        if (res) {
+          setLauncherSettings((prev) => ({
+            ...prev,
+            startWithComputer: res.startWithComputer,
+          }));
+        }
+      } catch {
+        setLauncherSettings((prev) => ({ ...prev, startWithComputer: !enabled }));
+        notify('Could not update Windows startup tray setting.', 'error');
+      } finally {
+        setIsUpdatingAutoLaunch(false);
+      }
+    },
+    [notify, settingsBridge]
+  );
+
+  const handleToggleCompactNavbar = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({ ...prev, compactNavbar: enabled }));
+  }, []);
+
+  const handleToggleAlwaysPs5Theme = useCallback(
+    (enabled: boolean) => {
+      setLauncherSettings((prev) => ({
+        ...prev,
+        alwaysPs5Theme: enabled,
+        alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
+      }));
+      if (enabled && soundEnabled) {
+        stopXboxAmbientSound();
+        playPsBootChime();
+      }
+    },
+    [soundEnabled]
+  );
+
+  const handleToggleAlwaysXboxTheme = useCallback(
+    (enabled: boolean) => {
+      setLauncherSettings((prev) => ({
+        ...prev,
+        alwaysXboxTheme: enabled,
+        alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
+      }));
+      if (enabled && soundEnabled) {
+        stopPsAmbientSound();
+        playXboxBootChime();
+      }
+    },
+    [soundEnabled]
+  );
+
+  const handleResetLauncherSettings = useCallback(async () => {
+    const defaults = { ...DEFAULT_LAUNCHER_SETTINGS };
+    setLauncherSettings(defaults);
+    if (settingsBridge) {
+      try {
+        await settingsBridge.setStartWithComputer(false);
+      } catch {
+        // Ignore desktop reset error cleanly
+      }
+    }
+    notify(getTranslations(defaults.language).settings.resetToast, 'info');
+  }, [notify, settingsBridge]);
+
+  const isBackgroundRefreshingRef = useRef(false);
+  const lastRefreshAttemptAtRef = useRef(0);
+
+  const refreshCatalogSilently = useCallback(async (url: string, force = false) => {
     const clean = url.trim();
     if (!clean || isBackgroundRefreshingRef.current) return;
+
+    const now = Date.now();
+    if (!force && now - lastRefreshAttemptAtRef.current < 3000) {
+      return;
+    }
 
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setIsOnline(false);
@@ -316,6 +550,7 @@ export default function App() {
       return;
     }
 
+    lastRefreshAttemptAtRef.current = now;
     isBackgroundRefreshingRef.current = true;
     try {
       const latest = await fetchCatalogFromGas(clean);
@@ -408,19 +643,32 @@ export default function App() {
     };
   }, [gasUrl, refreshCatalogSilently]);
 
-  // Quietly check for catalog updates on mount & every 60s when visible & online (only updates state if changed)
+  // Quietly check for catalog updates on mount, focus, visibility, and every 30s when visible & online
   useEffect(() => {
     if (!gasUrl || !isOnline) return;
-    void refreshCatalogSilently(gasUrl);
+    void refreshCatalogSilently(gasUrl, true);
+
+    const handleFocusOrVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshCatalogSilently(gasUrl);
+      }
+    };
+
+    window.addEventListener('focus', handleFocusOrVisible);
+    document.addEventListener('visibilitychange', handleFocusOrVisible);
     const intervalId = window.setInterval(() => {
       if (document.visibilityState === 'visible') {
         void refreshCatalogSilently(gasUrl);
       }
-    }, 60000);
-    return () => window.clearInterval(intervalId);
+    }, 30000);
+    return () => {
+      window.removeEventListener('focus', handleFocusOrVisible);
+      document.removeEventListener('visibilitychange', handleFocusOrVisible);
+      window.clearInterval(intervalId);
+    };
   }, [gasUrl, isOnline, refreshCatalogSilently]);
 
-  // Keep selectedGame synchronized with live catalog updates and URL ?game=<slug>
+  // Keep selectedGame and selectedStudio synchronized with live catalog updates and URL ?game=<slug>
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('game');
     setSelectedGame((prev) => {
@@ -441,11 +689,26 @@ export default function App() {
             prev.rawFields.launcher === sameEntry.rawFields.launcher;
           return isUnchanged ? prev : sameEntry;
         }
+        if (hasCompletedLiveSyncRef.current) {
+          updateGameUrlParam(null, true);
+          return null;
+        }
       }
       if (slug) {
         return findItemBySlug(catalog, slug) || prev;
       }
       return prev;
+    });
+
+    setSelectedStudio((prev) => {
+      if (!prev) return null;
+      const sameStudio = catalog.profil?.find((x) => x.id === prev.id);
+      if (sameStudio) {
+        return prev.name === sameStudio.name && prev.description === sameStudio.description
+          ? prev
+          : sameStudio;
+      }
+      return hasCompletedLiveSyncRef.current ? null : prev;
     });
   }, [catalog]);
 
@@ -526,6 +789,12 @@ export default function App() {
         if (!matchesSelectedGenre) continue;
       }
 
+      if (canRunFilter !== 'all') {
+        const evalRes = evaluateCanRunGame(item, systemSpecs);
+        if (canRunFilter === 'can-run' && evalRes.status !== 'can-run') continue;
+        if (canRunFilter === 'cannot-run' && evalRes.status !== 'cannot-run') continue;
+      }
+
       scoredMatches.push({ item, score });
     }
 
@@ -588,6 +857,8 @@ export default function App() {
     activeSectionItems,
     searchQuery,
     genreFilter,
+    canRunFilter,
+    systemSpecs,
     sortBy,
     favorites,
   ]);
@@ -613,6 +884,7 @@ export default function App() {
   const handleSelectLibraryTab = useCallback((tab: LibrarySectionTab) => {
     setLibraryTab(tab);
     setGenreFilter('all');
+    setCanRunFilter('all');
   }, []);
 
   const handleBrowseLatestInLibrary = () => {
@@ -627,13 +899,9 @@ export default function App() {
   };
 
   return (
-    <div
-      className={`sa-app-shell h-screen w-screen overflow-hidden flex flex-col bg-[#141921] text-[#e5e9f0] ${
-        isFullscreen ? 'fixed inset-0 z-[90]' : ''
-      }`}
-    >
+    <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#141921] text-[#e5e9f0]">
       <TopUtilityBar
-        isPs5Theme={isPs5Theme}
+        activeTheme={activeTheme}
         soundEnabled={soundEnabled}
         isFullscreen={isFullscreen}
         onToggleSound={() => setSoundEnabled((prev) => !prev)}
@@ -643,12 +911,15 @@ export default function App() {
         onOpenUpdates={
           updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
         }
+        language={launcherSettings.language}
       />
 
       <Navbar
         activeSection={activeSection}
         onSelectSection={setActiveSection}
-        isPs5Theme={isPs5Theme}
+        activeTheme={activeTheme}
+        compactNavbar={launcherSettings.compactNavbar}
+        language={launcherSettings.language}
       />
 
       {catalog.maintenance.some(
@@ -673,6 +944,7 @@ export default function App() {
               onGenreFilterChange={setGenreFilter}
               availableGenres={availableGenres}
               favorites={favorites}
+              language={launcherSettings.language}
               onSelectGame={(game) => handleOpenGame(game, 'overview')}
             />
             <LibraryView
@@ -685,12 +957,17 @@ export default function App() {
               onSortChange={setSortBy}
               genreFilter={genreFilter}
               onGenreFilterChange={setGenreFilter}
+              canRunFilter={canRunFilter}
+              onCanRunFilterChange={setCanRunFilter}
               onClearAllFilters={() => {
                 setSearchQuery('');
                 setGenreFilter('all');
+                setCanRunFilter('all');
               }}
               availableGenres={availableGenres}
               favorites={favorites}
+              systemSpecs={systemSpecs}
+              language={launcherSettings.language}
               onToggleFavorite={handleToggleFavorite}
               onSelectGame={(game) => handleOpenGame(game, 'overview')}
             />
@@ -701,6 +978,10 @@ export default function App() {
           <StoreView
             catalog={catalog}
             favorites={favorites}
+            systemSpecs={systemSpecs}
+            isRefreshingSpecs={isRefreshingSpecs}
+            language={launcherSettings.language}
+            onRefreshSpecs={handleRefreshSystemSpecs}
             onToggleFavorite={handleToggleFavorite}
             onSelectGame={handleOpenGame}
             onBrowseLatestInLibrary={handleBrowseLatestInLibrary}
@@ -711,6 +992,7 @@ export default function App() {
         {activeSection === 'studios' && (
           <StudiosView
             studios={catalog.profil}
+            language={launcherSettings.language}
             onSelectStudio={(studio) => handleOpenGame(studio, 'overview')}
             onBackHome={() => setActiveSection('store')}
           />
@@ -720,17 +1002,39 @@ export default function App() {
           <ExtrasView
             catalog={catalog}
             hasLiveUrl={Boolean(gasUrl)}
+            language={launcherSettings.language}
             onSelectItem={(item) => handleOpenGame(item, 'overview')}
           />
         )}
 
-        {activeSection === 'requests' && <RequestsView gasUrl={gasUrl} onNotify={notify} />}
+        {activeSection === 'requests' && (
+          <RequestsView
+            gasUrl={gasUrl}
+            language={launcherSettings.language}
+            onNotify={notify}
+          />
+        )}
+
+        {activeSection === 'settings' && (
+          <SettingsView
+            settings={launcherSettings}
+            isDesktopApp={Boolean(settingsBridge)}
+            isUpdatingAutoLaunch={isUpdatingAutoLaunch}
+            onChangeLanguage={handleChangeLanguage}
+            onToggleStartWithComputer={handleToggleStartWithComputer}
+            onToggleCompactNavbar={handleToggleCompactNavbar}
+            onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
+            onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
+            onResetDefaults={handleResetLauncherSettings}
+          />
+        )}
       </main>
 
       <StudioDetailModal
         studio={selectedStudio}
         catalog={catalog}
         favorites={favorites}
+        language={launcherSettings.language}
         disableEscape={Boolean(selectedGame)}
         onToggleFavorite={handleToggleFavorite}
         onSelectItem={(item) => handleOpenGame(item, 'overview')}
@@ -742,6 +1046,12 @@ export default function App() {
         catalog={catalog}
         initialViewMode={modalViewMode}
         favorites={favorites}
+        systemSpecs={systemSpecs}
+        isRefreshingSpecs={isRefreshingSpecs}
+        language={launcherSettings.language}
+        onRefreshSpecs={handleRefreshSystemSpecs}
+        onSaveCustomSpecs={handleSaveCustomSystemSpecs}
+        onResetCustomSpecs={handleResetSystemSpecs}
         onToggleFavorite={handleToggleFavorite}
         onJumpToItem={(item) => handleOpenGame(item, 'overview')}
         onClose={handleCloseGame}
@@ -750,7 +1060,7 @@ export default function App() {
       {updaterBridge && (
         <DesktopUpdaterModal
           isOpen={isUpdaterModalOpen}
-          isPs5Theme={isPs5Theme}
+          activeTheme={activeTheme}
           state={desktopUpdateState}
           onClose={() => setIsUpdaterModalOpen(false)}
           onCheckForUpdates={handleCheckForUpdates}
@@ -766,17 +1076,17 @@ export default function App() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-3.5 left-3.5 sm:bottom-4 sm:left-4 z-[85] pointer-events-none select-none"
+          className="fixed bottom-3.5 start-3.5 sm:bottom-4 sm:start-4 z-[85] pointer-events-none select-none"
         >
           {connectivityBadge === 'offline' ? (
             <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#7f1d1d]/95 border border-[#ef4444]/60 shadow-[0_10px_28px_rgba(0,0,0,0.55)] text-xs font-semibold text-[#fecaca] backdrop-blur-md">
               <WifiOff className="w-4 h-4 text-[#f87171] shrink-0" />
-              <span>Offline Mode</span>
+              <span>{t.topbar.offlineMode}</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#064e3b]/95 border border-[#10b981]/60 shadow-[0_10px_28px_rgba(0,0,0,0.55)] text-xs font-semibold text-[#a7f3d0] backdrop-blur-md">
               <Wifi className="w-4 h-4 text-[#34d399] shrink-0" />
-              <span>Online Mode</span>
+              <span>{t.topbar.onlineMode}</span>
             </div>
           )}
         </div>
@@ -784,7 +1094,7 @@ export default function App() {
 
       {/* Non-blocking Toast Stack */}
       {toasts.length > 0 && (
-        <div className="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 max-w-xs pointer-events-none">
+        <div className="fixed bottom-4 end-4 z-[70] flex flex-col gap-2 max-w-xs pointer-events-none">
           {toasts.map((toast) => (
             <div
               key={toast.id}

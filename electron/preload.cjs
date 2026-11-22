@@ -23,4 +23,28 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
       };
     },
   },
+  windowControls: {
+    isFullscreen: () => ipcRenderer.invoke('window:is-fullscreen'),
+    setFullscreen: (flag) => ipcRenderer.invoke('window:set-fullscreen', Boolean(flag)),
+    onFullscreenChange: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, isFullscreen) => {
+        callback(Boolean(isFullscreen));
+      };
+      ipcRenderer.on('window:fullscreen-changed', listener);
+      return () => {
+        ipcRenderer.removeListener('window:fullscreen-changed', listener);
+      };
+    },
+  },
+  system: {
+    getSpecs: (forceRefresh) => ipcRenderer.invoke('system:get-specs', Boolean(forceRefresh)),
+  },
+  settings: {
+    getDesktopSettings: () => ipcRenderer.invoke('settings:get-desktop'),
+    setStartWithComputer: (enabled) =>
+      ipcRenderer.invoke('settings:set-start-with-computer', Boolean(enabled)),
+  },
 });
