@@ -1,20 +1,38 @@
+import { useEffect, useState } from 'react';
 import {
   AppWindow,
   ArrowCounterClockwise,
+  ArrowSquareOut,
   Check,
+  CheckCircle,
   CursorClick,
   DownloadSimple,
+  FloppyDisk,
+  FolderOpen,
   Globe,
+  Info,
   Laptop,
+  Magnet,
+  MagnifyingGlass,
   Moon,
   MusicNotes,
+  PlugsConnected,
   Power,
   SpeakerHigh,
   SpeakerLow,
   SpeakerSlash,
+  Sparkle,
   Sun,
+  WarningCircle,
 } from '@phosphor-icons/react';
 import type { AppLanguage, LauncherSettings } from '../services/launcherSettings';
+import type {
+  QbitSetupState,
+  TorrentConnectionTestResult,
+  TorrentDetectionResult,
+  TorrentIntegrationConfig,
+} from '../types';
+import { DEFAULT_TORRENT_CONFIG, isLoopbackHost } from '../services/downloadManager';
 import { getTranslations, LANGUAGE_OPTIONS } from '../i18n/translations';
 import { Ps5Icon } from './SectionBadge';
 
@@ -22,6 +40,12 @@ interface SettingsViewProps {
   settings: LauncherSettings;
   isDesktopApp: boolean;
   isUpdatingAutoLaunch?: boolean;
+  downloadFolder?: string;
+  torrentConfig?: TorrentIntegrationConfig;
+  torrentConnected?: boolean;
+  torrentVersion?: string | null;
+  torrentWebApiVersion?: string | null;
+  torrentError?: string | null;
   onChangeLanguage: (language: AppLanguage) => void;
   onToggleStartWithComputer: (enabled: boolean) => void;
   onToggleEnableCanRunIt: (enabled: boolean) => void;
@@ -34,6 +58,17 @@ interface SettingsViewProps {
   onChangeSoundVolume: (volume: number) => void;
   onPreviewSoundVolume?: () => void;
   onResetDefaults: () => void;
+  onChooseDownloadFolder?: () => void;
+  onOpenDownloadFolder?: () => void;
+  onOpenExternal?: (url: string) => void;
+  onDetectTorrentClient?: () => Promise<TorrentDetectionResult | null>;
+  onSaveTorrentConfig?: (cfg: Partial<TorrentIntegrationConfig>) => Promise<void>;
+  onTestTorrentConnection?: (
+    cfg?: Partial<TorrentIntegrationConfig>
+  ) => Promise<TorrentConnectionTestResult | null>;
+  qbitSetupState?: QbitSetupState;
+  onOpenQbitSetupWizard?: () => void;
+  onReplayOnboarding?: () => void;
 }
 
 interface ToggleSwitchProps {
@@ -93,6 +128,12 @@ export function SettingsView({
   settings,
   isDesktopApp,
   isUpdatingAutoLaunch = false,
+  downloadFolder = '',
+  torrentConfig = DEFAULT_TORRENT_CONFIG,
+  torrentConnected = false,
+  torrentVersion = null,
+  torrentWebApiVersion = null,
+  torrentError = null,
   onChangeLanguage,
   onToggleStartWithComputer,
   onToggleEnableCanRunIt,
@@ -105,9 +146,138 @@ export function SettingsView({
   onChangeSoundVolume,
   onPreviewSoundVolume,
   onResetDefaults,
+  onChooseDownloadFolder,
+  onOpenDownloadFolder,
+  onOpenExternal,
+  onDetectTorrentClient,
+  onSaveTorrentConfig,
+  onTestTorrentConnection,
+  qbitSetupState,
+  onOpenQbitSetupWizard,
+  onReplayOnboarding,
 }: SettingsViewProps) {
   const t = getTranslations(settings.language).settings;
   const hasConsoleTheme = settings.alwaysPs5Theme || settings.alwaysXboxTheme;
+
+  const [draftTorrent, setDraftTorrent] = useState<TorrentIntegrationConfig>(torrentConfig);
+  const [isDetectingTorrent, setIsDetectingTorrent] = useState(false);
+  const [isTestingTorrent, setIsTestingTorrent] = useState(false);
+  const [isSavingTorrent, setIsSavingTorrent] = useState(false);
+  const [detectionResult, setDetectionResult] = useState<TorrentDetectionResult | null>(null);
+  const [testResult, setTestResult] = useState<TorrentConnectionTestResult | null>(null);
+  const [hostError, setHostError] = useState<string | null>(null);
+  const [showTorrentGuide, setShowTorrentGuide] = useState(!torrentConnected);
+
+  useEffect(() => {
+    setDraftTorrent((prev) => ({
+      ...torrentConfig,
+      password: prev.password,
+      apiKey: prev.apiKey || '',
+    }));
+  }, [
+    torrentConfig.enabled,
+    torrentConfig.host,
+    torrentConfig.port,
+    torrentConfig.username,
+    torrentConfig.hasSavedPassword,
+    torrentConfig.hasSavedApiKey,
+  ]);
+
+  const handleAutoDetectTorrent = async () => {
+    setIsDetectingTorrent(true);
+    setTestResult(null);
+    setHostError(null);
+    try {
+      if (!isDesktopApp || !onDetectTorrentClient) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        setTestResult({
+          ok: false,
+          message: t.torrentTestingWebPreviewMsg,
+          hint: t.torrentTestingWebPreviewHint,
+        });
+        return;
+      }
+      const detected = await onDetectTorrentClient();
+      setDetectionResult(detected);
+      if (detected) {
+        setDraftTorrent((prev) => ({
+          ...prev,
+          enabled: detected.installed ? true : prev.enabled,
+          host: detected.recommendedHost || '127.0.0.1',
+          port: detected.recommendedPort || prev.port || 8080,
+        }));
+      }
+    } finally {
+      setIsDetectingTorrent(false);
+    }
+  };
+
+  const handleTestTorrent = async () => {
+    if (!isLoopbackHost(draftTorrent.host)) {
+      setHostError(t.torrentLoopbackError);
+      return;
+    }
+    setHostError(null);
+    setIsTestingTorrent(true);
+    try {
+      if (!isDesktopApp || !onTestTorrentConnection) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        setTestResult({
+          ok: false,
+          message: t.torrentTestingWebPreviewMsg,
+          hint: t.torrentTestingWebPreviewHint,
+        });
+        return;
+      }
+      const result = await onTestTorrentConnection(draftTorrent);
+      setTestResult(
+        result || {
+          ok: false,
+          message: t.torrentStatusDisconnected,
+        }
+      );
+    } finally {
+      setIsTestingTorrent(false);
+    }
+  };
+
+  const handleSaveTorrent = async () => {
+    if (!onSaveTorrentConfig) return;
+    if (!isLoopbackHost(draftTorrent.host)) {
+      setHostError(t.torrentLoopbackError);
+      return;
+    }
+    setHostError(null);
+    setIsSavingTorrent(true);
+    try {
+      await onSaveTorrentConfig(draftTorrent);
+      setDraftTorrent((prev) => ({ ...prev, password: '', apiKey: '' }));
+    } finally {
+      setIsSavingTorrent(false);
+    }
+  };
+
+  const handleToggleTorrentEnabled = async (nextEnabled: boolean) => {
+    const safeHost = isLoopbackHost(draftTorrent.host) ? draftTorrent.host.trim() : '127.0.0.1';
+    const nextCfg = { ...draftTorrent, host: safeHost, enabled: nextEnabled };
+    setHostError(null);
+    setDraftTorrent(nextCfg);
+    if (onSaveTorrentConfig) {
+      await onSaveTorrentConfig(nextCfg);
+    }
+  };
+
+  const isVerifiedTorrentConnected =
+    isDesktopApp &&
+    !isTestingTorrent &&
+    (testResult?.ok === true || (torrentConnected && testResult?.ok !== false));
+
+  const effectiveTorrentVersion = testResult?.ok
+    ? testResult.version || torrentVersion
+    : torrentVersion;
+  const effectiveTorrentWebApiVersion = testResult?.ok
+    ? testResult.webApiVersion || torrentWebApiVersion
+    : torrentWebApiVersion;
 
   const VolumeIcon =
     settings.soundVolume <= 0
@@ -130,14 +300,27 @@ export function SettingsView({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onResetDefaults}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-[12px] font-semibold text-slate-700 hover:text-slate-900 dark:text-[#c6d4df] dark:hover:text-white transition-colors whitespace-nowrap cursor-pointer shrink-0"
-          >
-            <ArrowCounterClockwise className="w-3.5 h-3.5" />
-            <span>{t.resetDefaults}</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {onReplayOnboarding && (
+              <button
+                type="button"
+                onClick={onReplayOnboarding}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-500/10 hover:bg-sky-500/20 dark:bg-[#1a9fff]/15 dark:hover:bg-[#1a9fff]/25 border border-sky-500/30 dark:border-[#1a9fff]/35 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] transition-colors whitespace-nowrap cursor-pointer shrink-0"
+              >
+                <Sparkle className="w-3.5 h-3.5" />
+                <span>{t.replaySetupBtn}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onResetDefaults}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-[12px] font-semibold text-slate-700 hover:text-slate-900 dark:text-[#c6d4df] dark:hover:text-white transition-colors whitespace-nowrap cursor-pointer shrink-0"
+            >
+              <ArrowCounterClockwise className="w-3.5 h-3.5" />
+              <span>{t.resetDefaults}</span>
+            </button>
+          </div>
         </div>
 
         {/* 1. Language */}
@@ -597,6 +780,458 @@ export function SettingsView({
                 {settings.soundVolume}%
               </span>
             </div>
+          </div>
+        </section>
+
+        {/* 5. Downloads & Storage */}
+        <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-3.5 shadow-sm dark:shadow-lg">
+          <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+            <FolderOpen className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+            <h2 className="text-[14.5px] font-bold text-slate-900 dark:text-white tracking-tight">
+              {t.downloadSectionTitle}
+            </h2>
+          </div>
+
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1 min-w-0">
+              <div className="text-[13.5px] font-semibold text-slate-900 dark:text-white">
+                {t.downloadFolderTitle}
+              </div>
+              <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                {t.downloadFolderDesc}
+              </p>
+              {downloadFolder && (
+                <p
+                  dir="ltr"
+                  className="pt-1 text-[12px] font-mono-tabular text-[#0284c7] dark:text-[#66c0f4] break-all"
+                >
+                  {downloadFolder}
+                </p>
+              )}
+            </div>
+
+            {isDesktopApp && (
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onChooseDownloadFolder?.()}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  <span>{t.chooseFolderBtn}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenDownloadFolder?.()}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-slate-800 dark:text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <ArrowSquareOut className="w-4 h-4" />
+                  <span>{t.openFolderBtn}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 6. qBittorrent Integration (Web UI API v2) */}
+        <section
+          id="torrent-integration-settings"
+          className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-lg"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                <Magnet className="w-4.5 h-4.5" />
+              </span>
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 className="text-[14.5px] font-bold text-slate-900 dark:text-white tracking-tight">
+                    {t.torrentSectionTitle}
+                  </h2>
+
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    className={`inline-flex items-center gap-1.5 text-[11.5px] font-semibold ${
+                      isTestingTorrent
+                        ? 'text-[#0284c7] dark:text-[#66c0f4]'
+                        : isVerifiedTorrentConnected
+                        ? 'text-emerald-700 dark:text-[#4ade80]'
+                        : 'text-amber-700 dark:text-amber-300'
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`w-2 h-2 rounded-full ${
+                        isTestingTorrent
+                          ? 'bg-[#0284c7] dark:bg-[#38bdf8] animate-pulse'
+                          : isVerifiedTorrentConnected
+                          ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]'
+                          : 'bg-amber-500 dark:bg-amber-400'
+                      }`}
+                    />
+                    <span>
+                      {isTestingTorrent
+                        ? t.torrentStatusTesting
+                        : isVerifiedTorrentConnected
+                        ? t.torrentStatusConnected
+                        : t.torrentStatusDisconnected}
+                    </span>
+                    {isVerifiedTorrentConnected && effectiveTorrentVersion && (
+                      <span dir="ltr" className="font-mono-tabular opacity-85">
+                        · {effectiveTorrentVersion}
+                        {effectiveTorrentWebApiVersion
+                          ? ` (API ${effectiveTorrentWebApiVersion})`
+                          : ''}
+                      </span>
+                    )}
+                  </span>
+
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.1] text-slate-600 dark:text-[#9cb0c9]">
+                    {isDesktopApp ? t.modeDesktopBadge : t.modeWebPreviewBadge}
+                  </span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                  {t.torrentSectionDesc}
+                </p>
+              </div>
+            </div>
+
+            {onOpenQbitSetupWizard && (
+              <button
+                type="button"
+                onClick={onOpenQbitSetupWizard}
+                className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <DownloadSimple className="w-4 h-4" />
+                <span>{t.torrentManageSetupBtn}</span>
+                {qbitSetupState?.actionNeeded === 'update_available' && qbitSetupState.latestRelease?.version && (
+                  <span dir="ltr" className="font-mono-tabular opacity-90">
+                    (v{qbitSetupState.latestRelease.version})
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+
+          {!isDesktopApp && (
+            <div className="px-3.5 py-2.5 rounded-lg bg-sky-50 dark:bg-[#121a26] border border-sky-200 dark:border-[#1a9fff]/25 text-[12px] text-sky-900 dark:text-[#9fb0c7]">
+              {t.torrentWebNotice}
+            </div>
+          )}
+
+          {/* Enable Toggle */}
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-0.5 min-w-0">
+              <span
+                id="setting-torrent-sync"
+                className="block text-[13.5px] font-semibold text-slate-900 dark:text-white"
+              >
+                {t.torrentEnableTitle}
+              </span>
+              <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                {t.torrentEnableDesc}
+              </p>
+              {isDesktopApp && torrentConfig.enabled && (
+                <p
+                  className={`pt-1 text-[11.5px] font-medium ${
+                    torrentConnected
+                      ? 'text-emerald-700 dark:text-[#4ade80]'
+                      : 'text-amber-700 dark:text-amber-300'
+                  }`}
+                >
+                  {torrentConnected
+                    ? `✓ qBittorrent Web UI (${torrentConfig.host}:${torrentConfig.port})${
+                        torrentVersion ? ` · ${torrentVersion}` : ''
+                      }`
+                    : torrentError || `Waiting for qBittorrent Web UI (${torrentConfig.host}:${torrentConfig.port})`}
+                </p>
+              )}
+            </div>
+
+            <ToggleSwitch
+              checked={draftTorrent.enabled}
+              labelId="setting-torrent-sync"
+              onLabel={t.activeLabel}
+              offLabel={t.inactiveLabel}
+              onChange={handleToggleTorrentEnabled}
+            />
+          </div>
+
+          {/* Auto-Detect Feedback Banner */}
+          {detectionResult && (
+            <div
+              className={`p-3.5 rounded-lg border text-[12px] space-y-2 ${
+                detectionResult.installed
+                  ? 'bg-sky-50 dark:bg-[#122030] border-sky-200 dark:border-[#1a9fff]/35 text-slate-800 dark:text-[#d5e4f5]'
+                  : 'bg-amber-50 dark:bg-[#1e1a12] border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-200'
+              }`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="font-semibold flex items-center gap-2">
+                    <Info className="w-4 h-4 shrink-0" />
+                    <span>
+                      {detectionResult.installed
+                        ? detectionResult.clientName
+                        : t.torrentNotInstalledTitle}
+                      {detectionResult.installed && detectionResult.openWebUiPorts.length > 0 && (
+                        <span dir="ltr" className="ms-2 font-mono-tabular">
+                          (Open Web UI port: {detectionResult.openWebUiPorts.join(', ')})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  {detectionResult.executablePath && (
+                    <div dir="ltr" className="font-mono-tabular text-[11.5px] opacity-80 break-all">
+                      {detectionResult.executablePath}
+                    </div>
+                  )}
+                  {!detectionResult.installed && (
+                    <p className="opacity-90 leading-relaxed">{t.torrentNotInstalledDesc}</p>
+                  )}
+                </div>
+
+                {!detectionResult.installed && (
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {isDesktopApp && onOpenQbitSetupWizard && (
+                      <button
+                        type="button"
+                        onClick={onOpenQbitSetupWizard}
+                        className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <DownloadSimple className="w-3.5 h-3.5" />
+                        <span>{t.torrentManageSetupBtn}</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onOpenExternal?.(
+                          detectionResult.downloadUrl || 'https://www.qbittorrent.org/download'
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-slate-800 dark:text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <ArrowSquareOut className="w-3.5 h-3.5" />
+                      <span>{t.torrentDownloadBtn}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Test Connection Result Banner */}
+          {testResult && (
+            <div
+              className={`p-3.5 rounded-lg border text-[12px] space-y-1 ${
+                testResult.ok
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-200'
+                  : 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-500/40 text-rose-900 dark:text-rose-200'
+              }`}
+            >
+              <div className="font-semibold flex items-center gap-2">
+                {testResult.ok ? (
+                  <CheckCircle weight="fill" className="w-4 h-4 shrink-0" />
+                ) : (
+                  <WarningCircle weight="fill" className="w-4 h-4 shrink-0" />
+                )}
+                <span>
+                  {testResult.message}
+                  {testResult.version ? ` (${testResult.version})` : ''}
+                  {testResult.webApiVersion ? ` · WebAPI ${testResult.webApiVersion}` : ''}
+                  {typeof testResult.activeCount === 'number'
+                    ? ` · ${testResult.activeCount} torrents`
+                    : ''}
+                </span>
+              </div>
+              {testResult.hint && <p className="opacity-90 leading-relaxed">{testResult.hint}</p>}
+            </div>
+          )}
+
+          {/* qBittorrent WebUI Credentials Form */}
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="torrent-host-input"
+                  className="block text-[12px] font-semibold text-slate-700 dark:text-[#c6d4df]"
+                >
+                  {t.torrentHostLabel}
+                </label>
+                <input
+                  id="torrent-host-input"
+                  type="text"
+                  dir="ltr"
+                  value={draftTorrent.host}
+                  onChange={(e) => {
+                    const nextHost = e.target.value;
+                    setDraftTorrent((prev) => ({ ...prev, host: nextHost }));
+                    if (hostError && isLoopbackHost(nextHost)) {
+                      setHostError(null);
+                    }
+                  }}
+                  placeholder="127.0.0.1"
+                  className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="torrent-port-input"
+                  className="block text-[12px] font-semibold text-slate-700 dark:text-[#c6d4df]"
+                >
+                  {t.torrentPortLabel}
+                </label>
+                <input
+                  id="torrent-port-input"
+                  type="number"
+                  dir="ltr"
+                  min={1}
+                  max={65535}
+                  value={draftTorrent.port}
+                  onChange={(e) =>
+                    setDraftTorrent((prev) => ({
+                      ...prev,
+                      port: Number(e.target.value) || 8080,
+                    }))
+                  }
+                  className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="torrent-username-input"
+                  className="block text-[12px] font-semibold text-slate-700 dark:text-[#c6d4df]"
+                >
+                  {t.torrentUsernameLabel}
+                </label>
+                <input
+                  id="torrent-username-input"
+                  type="text"
+                  dir="ltr"
+                  value={draftTorrent.username}
+                  onChange={(e) =>
+                    setDraftTorrent((prev) => ({ ...prev, username: e.target.value }))
+                  }
+                  placeholder="admin"
+                  className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="torrent-password-input"
+                  className="block text-[12px] font-semibold text-slate-700 dark:text-[#c6d4df]"
+                >
+                  {t.torrentPasswordLabel}
+                </label>
+                <input
+                  id="torrent-password-input"
+                  type="password"
+                  dir="ltr"
+                  value={draftTorrent.password}
+                  onChange={(e) =>
+                    setDraftTorrent((prev) => ({ ...prev, password: e.target.value }))
+                  }
+                  placeholder={
+                    torrentConfig.hasSavedPassword ? t.torrentPasswordSavedPlaceholder : '••••••••'
+                  }
+                  className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-2 lg:col-span-4 space-y-1.5">
+                <label
+                  htmlFor="torrent-apikey-input"
+                  className="block text-[12px] font-semibold text-slate-700 dark:text-[#c6d4df]"
+                >
+                  {t.torrentApiKeyLabel}
+                </label>
+                <input
+                  id="torrent-apikey-input"
+                  type="password"
+                  dir="ltr"
+                  value={draftTorrent.apiKey || ''}
+                  onChange={(e) =>
+                    setDraftTorrent((prev) => ({ ...prev, apiKey: e.target.value }))
+                  }
+                  placeholder={
+                    torrentConfig.hasSavedApiKey
+                      ? t.torrentApiKeySavedPlaceholder
+                      : t.torrentApiKeyPlaceholder
+                  }
+                  className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {hostError ? (
+              <p className="text-[12px] text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                <WarningCircle className="w-4 h-4 shrink-0" />
+                <span>{hostError}</span>
+              </p>
+            ) : (
+              <p className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4]">
+                {t.torrentLoopbackNotice}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowTorrentGuide((prev) => !prev)}
+                className="text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline cursor-pointer"
+              >
+                {t.torrentGuideTitle}
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isDetectingTorrent}
+                  onClick={handleAutoDetectTorrent}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-white disabled:opacity-60 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <MagnifyingGlass className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
+                  <span>
+                    {isDetectingTorrent ? t.torrentDetectingBtn : t.torrentAutoDetectBtn}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isTestingTorrent}
+                  onClick={handleTestTorrent}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-semibold disabled:opacity-60 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <PlugsConnected className="w-4 h-4" />
+                  <span>{isTestingTorrent ? t.torrentTestingBtn : t.torrentTestBtn}</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isSavingTorrent}
+                  onClick={handleSaveTorrent}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <FloppyDisk className="w-4 h-4" />
+                  <span>{isSavingTorrent ? t.torrentSavingBtn : t.torrentSaveBtn}</span>
+                </button>
+              </div>
+            </div>
+
+            {showTorrentGuide && (
+              <ol className="pt-2 border-t border-slate-200 dark:border-white/[0.08] space-y-1.5 text-[12px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
+                <li>{t.torrentGuideStep1}</li>
+                <li>{t.torrentGuideStep2}</li>
+                <li>{t.torrentGuideStep3}</li>
+                <li>{t.torrentGuideStep4}</li>
+                <li>{t.torrentGuideStep5}</li>
+              </ol>
+            )}
           </div>
         </section>
       </div>

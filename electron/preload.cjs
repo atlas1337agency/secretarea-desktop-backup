@@ -46,5 +46,61 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
     getDesktopSettings: () => ipcRenderer.invoke('settings:get-desktop'),
     setStartWithComputer: (enabled) =>
       ipcRenderer.invoke('settings:set-start-with-computer', Boolean(enabled)),
+    completeOnboarding: (completed = true) =>
+      ipcRenderer.invoke('settings:complete-onboarding', Boolean(completed)),
+  },
+  downloads: {
+    getState: () => ipcRenderer.invoke('downloads:get-state'),
+    start: (payload) => ipcRenderer.invoke('downloads:start', payload),
+    addTorrentFile: () => ipcRenderer.invoke('downloads:add-torrent-file'),
+    pause: (id) => ipcRenderer.invoke('downloads:pause', id),
+    resume: (id) => ipcRenderer.invoke('downloads:resume', id),
+    cancel: (id) => ipcRenderer.invoke('downloads:cancel', id),
+    retry: (id) => ipcRenderer.invoke('downloads:retry', id),
+    remove: (id, deleteFiles) => ipcRenderer.invoke('downloads:remove', id, Boolean(deleteFiles)),
+    clearCompleted: () => ipcRenderer.invoke('downloads:clear-completed'),
+    chooseFolder: () => ipcRenderer.invoke('downloads:choose-folder'),
+    openFolder: (id) => ipcRenderer.invoke('downloads:open-folder', id),
+    openFile: (id) => ipcRenderer.invoke('downloads:open-file', id),
+    openExternal: (url) => ipcRenderer.invoke('downloads:open-external', url),
+    detectTorrentClient: () => ipcRenderer.invoke('downloads:detect-torrent'),
+    saveTorrentConfig: (cfg) => ipcRenderer.invoke('downloads:save-torrent-config', cfg),
+    testTorrentConnection: (cfg) => ipcRenderer.invoke('downloads:test-torrent-connection', cfg),
+    onUpdated: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, snapshot) => {
+        callback(snapshot);
+      };
+      ipcRenderer.on('downloads:updated', listener);
+      return () => {
+        ipcRenderer.removeListener('downloads:updated', listener);
+      };
+    },
+  },
+  qbitSetup: {
+    getState: () => ipcRenderer.invoke('qbit-setup:get-state'),
+    checkStatus: () => ipcRenderer.invoke('qbit-setup:check'),
+    refreshLocal: () => ipcRenderer.invoke('qbit-setup:refresh-local'),
+    startInstall: (userConfirmed) =>
+      ipcRenderer.invoke('qbit-setup:install', { userConfirmed: Boolean(userConfirmed) }),
+    launchClient: () => ipcRenderer.invoke('qbit-setup:launch-client'),
+    dismiss: () => ipcRenderer.invoke('qbit-setup:dismiss'),
+    generatePassword: () => ipcRenderer.invoke('qbit-setup:generate-password'),
+    openOfficialDownload: () => ipcRenderer.invoke('qbit-setup:open-official'),
+    onStateChange: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, state) => {
+        callback(state);
+      };
+      ipcRenderer.on('qbit-setup:status', listener);
+      return () => {
+        ipcRenderer.removeListener('qbit-setup:status', listener);
+      };
+    },
   },
 });
+

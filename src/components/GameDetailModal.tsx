@@ -16,6 +16,7 @@ import {
   DownloadSimple,
   FileText,
   FilmStrip,
+  FolderOpen,
   GameController,
   Globe,
   GraphicsCard,
@@ -30,7 +31,9 @@ import {
   Memory,
   Monitor,
   Package,
+  Pause,
   Play,
+  Prohibit,
   PushPin,
   SealCheck,
   ShieldWarning,
@@ -45,7 +48,7 @@ import {
   Wrench,
   X,
 } from '@phosphor-icons/react';
-import type { GameItem, MirrorLink, SheetCatalogData } from '../types';
+import type { DownloadTask, GameItem, MirrorLink, SheetCatalogData } from '../types';
 import { isTruthyFlag } from '../utils/parsers';
 import { evaluateCanRunGame } from '../services/canRunIt';
 import type { SystemHardwareSpecs } from '../services/systemSpecs';
@@ -56,6 +59,11 @@ import { HypervisorGuideModal } from './HypervisorGuideModal';
 import { getSectionVisualMeta, SectionSourceBadge } from './SectionBadge';
 import type { AppLanguage } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
+import {
+  formatBytes,
+  formatDownloadSpeed,
+  formatEta,
+} from '../services/downloadManager';
 
 interface GameDetailModalProps {
   game: GameItem | null;
@@ -66,6 +74,14 @@ interface GameDetailModalProps {
   systemSpecs?: SystemHardwareSpecs;
   canRunItEnabled?: boolean;
   isRefreshingSpecs?: boolean;
+  isDesktopApp?: boolean;
+  downloadTasks?: DownloadTask[];
+  onStartDownload?: (mirror: MirrorLink, game: GameItem) => void;
+  onPauseDownload?: (id: string) => void;
+  onResumeDownload?: (id: string) => void;
+  onCancelDownload?: (id: string) => void;
+  onOpenDownloadFolder?: (id?: string) => void;
+  onOpenDownloadsTab?: () => void;
   onRefreshSpecs?: () => void;
   onSaveCustomSpecs?: (next: SystemHardwareSpecs) => void;
   onResetCustomSpecs?: () => void;
@@ -139,6 +155,14 @@ export function GameDetailModal({
   systemSpecs,
   canRunItEnabled = true,
   isRefreshingSpecs = false,
+  isDesktopApp = false,
+  downloadTasks = [],
+  onStartDownload,
+  onPauseDownload,
+  onResumeDownload,
+  onCancelDownload,
+  onOpenDownloadFolder,
+  onOpenDownloadsTab,
   onRefreshSpecs,
   onSaveCustomSpecs,
   onResetCustomSpecs,
@@ -1987,6 +2011,145 @@ export function GameDetailModal({
               </div>
             )}
 
+            {/* Inline Active / Recent Downloads for This Title */}
+            {(() => {
+              const mirrorUrlSet = new Set(game.mirrors.map((m) => m.url));
+              const titleTasks = downloadTasks.filter(
+                (task) => task.gameId === game.id || mirrorUrlSet.has(task.url)
+              );
+              if (titleTasks.length === 0) return null;
+              const dlText = tr.downloads;
+
+              return (
+                <div className="rounded-xl p-3.5 sm:p-4 bg-sky-50/75 dark:bg-[#111c2b] border border-sky-200 dark:border-[#1a9fff]/30 space-y-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[12.5px] font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
+                      <span>{dlText.detailActiveTitle}</span>
+                    </span>
+                    {onOpenDownloadsTab && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenDownloadsTab();
+                        }}
+                        className="text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                      >
+                        {dlText.detailManageBtn}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {titleTasks.slice(0, 4).map((task) => {
+                      const pct = Math.max(0, Math.min(100, task.progress || 0));
+                      const isActive =
+                        task.status === 'downloading' ||
+                        task.status === 'resolving' ||
+                        task.status === 'queued';
+                      const isPaused = task.status === 'paused';
+                      const isCompleted = task.status === 'completed';
+
+                      return (
+                        <div
+                          key={task.id}
+                          className="p-2.5 sm:p-3 rounded-lg bg-white dark:bg-[#162130] border border-slate-200 dark:border-white/[0.08] space-y-2"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
+                            <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[260px] sm:max-w-md">
+                              {task.fileName || task.title}
+                            </span>
+
+                            <div className="flex flex-wrap items-center gap-2 font-mono-tabular text-[11.5px] text-slate-600 dark:text-[#9cb0c9]">
+                              {task.totalBytes > 0 && (
+                                <span dir="ltr">
+                                  {formatBytes(task.downloadedBytes)} / {formatBytes(task.totalBytes)}
+                                </span>
+                              )}
+                              {task.status === 'downloading' && (
+                                <span dir="ltr" className="text-[#0284c7] dark:text-[#38bdf8] font-semibold">
+                                  ↓ {formatDownloadSpeed(task.speedBytesPerSec)}
+                                  {(task.source === 'qbittorrent' ||
+                                    (task.uploadSpeedBytesPerSec || 0) > 0) && (
+                                    <> · ↑ {formatDownloadSpeed(task.uploadSpeedBytesPerSec || 0)}</>
+                                  )}{' '}
+                                  · ETA {formatEta(task.etaSeconds)}
+                                </span>
+                              )}
+                              <span className="font-bold text-slate-800 dark:text-white">
+                                {pct.toFixed(pct > 0 && pct < 100 ? 1 : 0)}%
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-[#0d1219] overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                isCompleted
+                                  ? 'bg-emerald-500'
+                                  : isPaused
+                                  ? 'bg-amber-500'
+                                  : task.status === 'failed'
+                                  ? 'bg-rose-500'
+                                  : 'bg-[#0284c7] dark:bg-[#38bdf8]'
+                              }`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+
+                          {isDesktopApp && (
+                            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                              {isActive && task.canPauseResume && onPauseDownload && (
+                                <button
+                                  type="button"
+                                  onClick={() => onPauseDownload(task.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 text-[11.5px] font-semibold text-amber-800 dark:text-amber-300 cursor-pointer"
+                                >
+                                  <Pause weight="fill" className="w-3 h-3" />
+                                  <span>{dlText.actionPause}</span>
+                                </button>
+                              )}
+                              {isPaused && task.canPauseResume && onResumeDownload && (
+                                <button
+                                  type="button"
+                                  onClick={() => onResumeDownload(task.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] text-white text-[11.5px] font-semibold cursor-pointer"
+                                >
+                                  <Play weight="fill" className="w-3 h-3" />
+                                  <span>{dlText.actionResume}</span>
+                                </button>
+                              )}
+                              {(isActive || isPaused) && onCancelDownload && (
+                                <button
+                                  type="button"
+                                  onClick={() => onCancelDownload(task.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-rose-50 dark:bg-white/[0.06] dark:hover:bg-rose-500/20 text-[11.5px] font-semibold text-slate-700 dark:text-[#c7d4e5] cursor-pointer"
+                                >
+                                  <Prohibit className="w-3 h-3" />
+                                  <span>{dlText.actionCancel}</span>
+                                </button>
+                              )}
+                              {onOpenDownloadFolder && (
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenDownloadFolder(task.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] text-[11.5px] font-semibold text-slate-700 dark:text-[#dce4ee] cursor-pointer"
+                                >
+                                  <FolderOpen className="w-3 h-3" />
+                                  <span>{dlText.actionOpenFolder}</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             {groupedMirrors.length === 0 ? (
               <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-[13.5px] text-slate-600 dark:bg-[#141c28] dark:border-white/[0.08] dark:text-[#8b9bb4]">
                 {t.noChannels}
@@ -2085,18 +2248,35 @@ export function GameDetailModal({
                                   key={mirrorKey}
                                   className="w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden shadow-[0_8px_22px_rgba(2,132,199,0.24)] hover:shadow-[0_12px_28px_rgba(26,159,255,0.36)] hover:-translate-y-0.5 transition-all duration-200"
                                 >
-                                  <a
-                                    href={mirror.url}
-                                    className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors"
-                                  >
-                                    <span
-                                      aria-hidden="true"
-                                      className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 group-hover:translate-x-[360%] transition-transform duration-700 ease-out"
-                                    />
-                                    <Magnet className="w-4 h-4 shrink-0" />
-                                    <span className="truncate">{mirror.label}</span>
-                                    <DownloadSimple className="w-3.5 h-3.5 shrink-0 opacity-90 group-hover:translate-y-0.5 transition-transform" />
-                                  </a>
+                                  {isDesktopApp && onStartDownload ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => onStartDownload(mirror, game)}
+                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors cursor-pointer"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 group-hover:translate-x-[360%] transition-transform duration-700 ease-out"
+                                      />
+                                      <Magnet className="w-4 h-4 shrink-0" />
+                                      <span className="truncate">{mirror.label}</span>
+                                      <DownloadSimple className="w-3.5 h-3.5 shrink-0 opacity-90 group-hover:translate-y-0.5 transition-transform" />
+                                    </button>
+                                  ) : (
+                                    <a
+                                      href={mirror.url}
+                                      onClick={() => onStartDownload?.(mirror, game)}
+                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12 group-hover:translate-x-[360%] transition-transform duration-700 ease-out"
+                                      />
+                                      <Magnet className="w-4 h-4 shrink-0" />
+                                      <span className="truncate">{mirror.label}</span>
+                                      <DownloadSimple className="w-3.5 h-3.5 shrink-0 opacity-90 group-hover:translate-y-0.5 transition-transform" />
+                                    </a>
+                                  )}
 
                                   <button
                                     type="button"
@@ -2120,18 +2300,47 @@ export function GameDetailModal({
                                 key={mirrorKey}
                                 className="group w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden bg-white hover:bg-sky-50/75 border border-slate-200 hover:border-[#0284c7]/55 dark:bg-[#192331] dark:hover:bg-[#1e2b3d] dark:border-white/[0.09] dark:hover:border-[#38bdf8]/55 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                               >
-                                <a
-                                  href={mirror.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors"
-                                >
-                                  <span className="flex items-center gap-2 min-w-0">
-                                    <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
-                                    <span className="truncate">{mirror.label}</span>
-                                  </span>
-                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
-                                </a>
+                                {isDesktopApp && onStartDownload ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => onStartDownload(mirror, game)}
+                                    title={tr.downloads.detailStartInApp}
+                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors cursor-pointer text-start"
+                                  >
+                                    <span className="flex items-center gap-2 min-w-0">
+                                      <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
+                                      <span className="truncate">{mirror.label}</span>
+                                    </span>
+                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                                  </button>
+                                ) : (
+                                  <a
+                                    href={mirror.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => onStartDownload?.(mirror, game)}
+                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors"
+                                  >
+                                    <span className="flex items-center gap-2 min-w-0">
+                                      <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
+                                      <span className="truncate">{mirror.label}</span>
+                                    </span>
+                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                                  </a>
+                                )}
+
+                                {isDesktopApp && (
+                                  <a
+                                    href={mirror.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={tr.downloads.detailOpenExternal}
+                                    aria-label={`${tr.downloads.detailOpenExternal}: ${mirror.label}`}
+                                    className="px-2.5 border-s border-slate-200/85 dark:border-white/[0.08] flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-sky-100/70 dark:text-[#7f91a8] dark:hover:text-[#38bdf8] dark:hover:bg-white/[0.06] transition-colors shrink-0"
+                                  >
+                                    <ArrowSquareOut className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
 
                                 <button
                                   type="button"

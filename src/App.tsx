@@ -17,11 +17,17 @@ import {
 } from './services/sheetsApi';
 import { precacheCatalogImages } from './services/imageCache';
 import type {
+  DownloadManagerSnapshot,
   GameItem,
   LibrarySectionTab,
+  MirrorLink,
   PrimarySection,
+  QbitSetupState,
   SheetCatalogData,
   SortOption,
+  TorrentConnectionTestResult,
+  TorrentDetectionResult,
+  TorrentIntegrationConfig,
 } from './types';
 import {
   ALL_SHEET_TABS,
@@ -37,9 +43,15 @@ import { ExtrasView } from './components/ExtrasView';
 import { StudiosView } from './components/StudiosView';
 import { StudioDetailModal } from './components/StudioDetailModal';
 import { RequestsView } from './components/RequestsView';
+import { DownloadsView } from './components/DownloadsView';
 import { SettingsView } from './components/SettingsView';
 import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
+import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
+import {
+  FirstLaunchOnboarding,
+  type OnboardingThemeChoice,
+} from './components/FirstLaunchOnboarding';
 import {
   getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
@@ -47,12 +59,29 @@ import {
   type DesktopUpdateState,
 } from './services/desktopUpdater';
 import {
+  buildMirrorDownloadPayload,
+  createWebFallbackTask,
+  EMPTY_DOWNLOAD_SNAPSHOT,
+  getDesktopDownloadsBridge,
+  loadWebFallbackSnapshot,
+  saveWebFallbackTasks,
+  saveWebFallbackTorrentConfig,
+  type StartDownloadPayload,
+} from './services/downloadManager';
+import {
+  EMPTY_QBIT_SETUP_STATE,
+  getDesktopQbitSetupBridge,
+  QBIT_OFFICIAL_DOWNLOAD_URL,
+} from './services/qbitSetup';
+import {
   applyDocumentLanguageSettings,
   applyDocumentThemeSettings,
   DEFAULT_LAUNCHER_SETTINGS,
   getActiveConsoleTheme,
+  isLocalOnboardingCompleted,
   loadLauncherSettings,
   saveLauncherSettings,
+  setLocalOnboardingCompleted,
   type AppLanguage,
   type LauncherSettings,
 } from './services/launcherSettings';
@@ -173,8 +202,22 @@ export default function App() {
   const updaterBridge = useMemo(() => getDesktopUpdaterBridge(), []);
   const windowBridge = useMemo(() => getDesktopWindowBridge(), []);
   const settingsBridge = useMemo(() => getDesktopSettingsBridge(), []);
+  const downloadsBridge = useMemo(() => getDesktopDownloadsBridge(), []);
+  const qbitSetupBridge = useMemo(() => getDesktopQbitSetupBridge(), []);
   const [desktopUpdateState, setDesktopUpdateState] = useState<DesktopUpdateState | null>(null);
   const [isUpdaterModalOpen, setIsUpdaterModalOpen] = useState(false);
+  const [downloadSnapshot, setDownloadSnapshot] = useState<DownloadManagerSnapshot>(() =>
+    getDesktopDownloadsBridge() ? EMPTY_DOWNLOAD_SNAPSHOT : loadWebFallbackSnapshot()
+  );
+  const [qbitSetupState, setQbitSetupState] = useState<QbitSetupState>(EMPTY_QBIT_SETUP_STATE);
+  const [isQbitSetupModalOpen, setIsQbitSetupModalOpen] = useState(false);
+  const hasAutoPromptedQbitRef = useRef(false);
+  const [onboardingPhase, setOnboardingPhase] = useState<'checking' | 'active' | 'completed'>(() => {
+    if (isLocalOnboardingCompleted()) return 'completed';
+    return getDesktopSettingsBridge() ? 'checking' : 'active';
+  });
+  const onboardingPhaseRef = useRef(onboardingPhase);
+  onboardingPhaseRef.current = onboardingPhase;
 
   const t = useMemo(() => getTranslations(launcherSettings.language), [launcherSettings.language]);
 
@@ -186,22 +229,83 @@ export default function App() {
     saveLauncherSettings(launcherSettings);
   }, [launcherSettings]);
 
-  // Sync persisted Electron desktop auto-start tray setting on startup
+  // Sync persisted Electron desktop settings & first-launch onboarding completion state on startup
   useEffect(() => {
     if (!settingsBridge) return;
     let active = true;
-    void settingsBridge.getDesktopSettings().then((desktopSettings) => {
-      if (!active || !desktopSettings) return;
-      setLauncherSettings((prev) =>
-        prev.startWithComputer === desktopSettings.startWithComputer
-          ? prev
-          : { ...prev, startWithComputer: desktopSettings.startWithComputer }
-      );
-    });
+    void settingsBridge
+      .getDesktopSettings()
+      .then((desktopSettings) => {
+        if (!active) return;
+        if (!desktopSettings) {
+          setOnboardingPhase((prev) => (prev === 'checking' ? 'active' : prev));
+          return;
+        }
+        setLauncherSettings((prev) =>
+          prev.startWithComputer === desktopSettings.startWithComputer
+            ? prev
+            : { ...prev, startWithComputer: desktopSettings.startWithComputer }
+        );
+        if (desktopSettings.onboardingCompleted) {
+          setLocalOnboardingCompleted(true);
+          setOnboardingPhase('completed');
+        } else if (!isLocalOnboardingCompleted()) {
+          setOnboardingPhase('active');
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setOnboardingPhase((prev) => (prev === 'checking' ? 'active' : prev));
+        }
+      });
     return () => {
       active = false;
     };
   }, [settingsBridge]);
+
+  // Sync Electron Download Manager snapshot + live progress updates
+  useEffect(() => {
+    if (!downloadsBridge) return;
+    let active = true;
+    void downloadsBridge.getState().then((snapshot) => {
+      if (active && snapshot) {
+        setDownloadSnapshot(snapshot);
+      }
+    });
+    const unsubscribe = downloadsBridge.onUpdated((snapshot) => {
+      if (active && snapshot) {
+        setDownloadSnapshot(snapshot);
+      }
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [downloadsBridge]);
+
+  // Sync automated qBittorrent installation & version management state + first-launch wizard
+  useEffect(() => {
+    if (!qbitSetupBridge) return;
+    let active = true;
+    const applySetupState = (next: QbitSetupState | null) => {
+      if (!active || !next) return;
+      setQbitSetupState(next);
+      if (
+        next.shouldPromptOnFirstLaunch &&
+        !hasAutoPromptedQbitRef.current &&
+        onboardingPhaseRef.current === 'completed'
+      ) {
+        hasAutoPromptedQbitRef.current = true;
+        setIsQbitSetupModalOpen(true);
+      }
+    };
+    void qbitSetupBridge.getState().then(applySetupState);
+    const unsubscribe = qbitSetupBridge.onStateChange(applySetupState);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [qbitSetupBridge]);
 
   // Automatically detect real PC/laptop specs when SecretArea.exe starts (unless custom override saved)
   useEffect(() => {
@@ -617,6 +721,315 @@ export default function App() {
     notify(getTranslations(defaults.language).settings.resetToast, 'info');
   }, [notify, settingsBridge]);
 
+  const handleStartDownloadPayload = useCallback(
+    async (payload: StartDownloadPayload) => {
+      if (downloadsBridge) {
+        try {
+          const task = await downloadsBridge.start(payload);
+          const refreshed = await downloadsBridge.getState();
+          if (refreshed) setDownloadSnapshot(refreshed);
+          notify(`${t.downloads.startedToast}: ${task.title}`, 'success');
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : t.downloads.failedToast;
+          notify(msg, 'error');
+        }
+        return;
+      }
+
+      const fallbackTask = createWebFallbackTask(payload);
+      setDownloadSnapshot((prev) => {
+        const nextTasks = [fallbackTask, ...prev.tasks].slice(0, 60);
+        saveWebFallbackTasks(nextTasks);
+        return { ...prev, tasks: nextTasks };
+      });
+    },
+    [downloadsBridge, notify, t.downloads.failedToast, t.downloads.startedToast]
+  );
+
+  const handleAddTorrentFile = useCallback(async () => {
+    if (!downloadsBridge) return;
+    try {
+      const task = await downloadsBridge.addTorrentFile();
+      if (!task) return;
+      const refreshed = await downloadsBridge.getState();
+      if (refreshed) setDownloadSnapshot(refreshed);
+      notify(`${t.downloads.startedToast}: ${task.title}`, 'success');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t.downloads.failedToast;
+      notify(msg, 'error');
+    }
+  }, [downloadsBridge, notify, t.downloads.failedToast, t.downloads.startedToast]);
+
+  const handleStartMirrorDownload = useCallback(
+    (mirror: MirrorLink, game: GameItem) => {
+      const payload = buildMirrorDownloadPayload(mirror, game);
+      void handleStartDownloadPayload(payload);
+    },
+    [handleStartDownloadPayload]
+  );
+
+  const handlePauseDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.pause(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleResumeDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.resume(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleCancelDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.cancel(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleRetryDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.retry(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleRemoveDownload = useCallback(
+    async (id: string, deleteFiles = false) => {
+      if (downloadsBridge) {
+        const next = await downloadsBridge.remove(id, deleteFiles);
+        if (next) setDownloadSnapshot(next);
+        return;
+      }
+      setDownloadSnapshot((prev) => {
+        const nextTasks = prev.tasks.filter((item) => item.id !== id);
+        saveWebFallbackTasks(nextTasks);
+        return { ...prev, tasks: nextTasks };
+      });
+    },
+    [downloadsBridge]
+  );
+
+  const handleClearCompletedDownloads = useCallback(async () => {
+    if (downloadsBridge) {
+      const next = await downloadsBridge.clearCompleted();
+      if (next) setDownloadSnapshot(next);
+      return;
+    }
+    setDownloadSnapshot((prev) => {
+      saveWebFallbackTasks([]);
+      return { ...prev, tasks: [] };
+    });
+  }, [downloadsBridge]);
+
+  const handleChooseDownloadFolder = useCallback(async () => {
+    if (!downloadsBridge) return;
+    const next = await downloadsBridge.chooseFolder();
+    if (next) setDownloadSnapshot(next);
+  }, [downloadsBridge]);
+
+  const handleOpenDownloadFolder = useCallback(
+    async (id?: string) => {
+      if (!downloadsBridge) return;
+      await downloadsBridge.openFolder(id);
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenDownloadedFile = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      await downloadsBridge.openFile(id);
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenExternalUrl = useCallback(
+    async (url: string) => {
+      if (downloadsBridge) {
+        await downloadsBridge.openExternal(url);
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.click();
+    },
+    [downloadsBridge]
+  );
+
+  const handleDetectTorrentClient =
+    useCallback(async (): Promise<TorrentDetectionResult | null> => {
+      if (!downloadsBridge) return null;
+      return downloadsBridge.detectTorrentClient();
+    }, [downloadsBridge]);
+
+  const handleSaveTorrentConfig = useCallback(
+    async (cfg: Partial<TorrentIntegrationConfig>) => {
+      if (downloadsBridge) {
+        const next = await downloadsBridge.saveTorrentConfig(cfg);
+        if (next) setDownloadSnapshot(next);
+        notify(t.settings.torrentSavedToast, 'success');
+        return;
+      }
+      saveWebFallbackTorrentConfig(cfg);
+      setDownloadSnapshot((prev) => ({
+        ...prev,
+        torrentConfig: { ...prev.torrentConfig, ...cfg, password: '', apiKey: '' },
+      }));
+      notify(t.settings.torrentSavedToast, 'success');
+    },
+    [downloadsBridge, notify, t.settings.torrentSavedToast]
+  );
+
+  const handleTestTorrentConnection = useCallback(
+    async (
+      cfg?: Partial<TorrentIntegrationConfig>
+    ): Promise<TorrentConnectionTestResult | null> => {
+      if (!downloadsBridge) return null;
+      const result = await downloadsBridge.testTorrentConnection(cfg);
+      const refreshed = await downloadsBridge.getState().catch(() => null);
+      if (refreshed) setDownloadSnapshot(refreshed);
+      return result;
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenTorrentSettings = useCallback(() => {
+    setActiveSection('settings');
+    window.setTimeout(() => {
+      document.getElementById('torrent-integration-settings')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 80);
+  }, []);
+
+  const handleOpenQbitSetupWizard = useCallback(() => {
+    setIsQbitSetupModalOpen(true);
+    if (qbitSetupBridge) {
+      void qbitSetupBridge.checkStatus().then((next) => {
+        if (next) setQbitSetupState(next);
+      });
+    }
+  }, [qbitSetupBridge]);
+
+  const handleRecheckQbitSetup = useCallback(async () => {
+    if (!qbitSetupBridge) return;
+    const next = await qbitSetupBridge.checkStatus();
+    if (next) setQbitSetupState(next);
+  }, [qbitSetupBridge]);
+
+  const handleStartQbitInstall = useCallback(
+    async (userConfirmed: boolean) => {
+      if (!qbitSetupBridge) return;
+      const next = await qbitSetupBridge.startInstall(userConfirmed);
+      if (next) setQbitSetupState(next);
+    },
+    [qbitSetupBridge]
+  );
+
+  const handleLaunchQbitClient = useCallback(async () => {
+    if (!qbitSetupBridge) return;
+    const res = await qbitSetupBridge.launchClient();
+    if (!res?.ok && res?.error) {
+      notify(res.error, 'error');
+    }
+  }, [qbitSetupBridge, notify]);
+
+  const handleDismissQbitSetup = useCallback(() => {
+    if (!qbitSetupBridge) return;
+    void qbitSetupBridge.dismiss().then((next) => {
+      if (next) setQbitSetupState(next);
+    });
+  }, [qbitSetupBridge]);
+
+  const handleGenerateQbitPassword = useCallback(async (): Promise<string> => {
+    if (qbitSetupBridge) {
+      return qbitSetupBridge.generatePassword();
+    }
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
+    const arr = new Uint8Array(16);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr, (b) => chars[b % chars.length]).join('');
+  }, [qbitSetupBridge]);
+
+  const handleSaveAndVerifyQbitWebUi = useCallback(
+    async (cfg: Partial<TorrentIntegrationConfig>): Promise<TorrentConnectionTestResult | null> => {
+      await handleSaveTorrentConfig(cfg);
+      const res = await handleTestTorrentConnection(cfg);
+      if (qbitSetupBridge) {
+        const refreshed = await qbitSetupBridge.refreshLocal().catch(() => null);
+        if (refreshed) setQbitSetupState(refreshed);
+      }
+      return res;
+    },
+    [handleSaveTorrentConfig, handleTestTorrentConnection, qbitSetupBridge]
+  );
+
+  const handleOpenOfficialQbitDownload = useCallback(() => {
+    if (qbitSetupBridge) {
+      void qbitSetupBridge.openOfficialDownload();
+      return;
+    }
+    void handleOpenExternalUrl(QBIT_OFFICIAL_DOWNLOAD_URL);
+  }, [qbitSetupBridge, handleOpenExternalUrl]);
+
+  const handleSelectOnboardingTheme = useCallback(
+    (choice: OnboardingThemeChoice) => {
+      if (choice === 'light') {
+        handleToggleLightMode(true);
+      } else if (choice === 'ps5') {
+        handleToggleAlwaysPs5Theme(true);
+      } else if (choice === 'xbox') {
+        handleToggleAlwaysXboxTheme(true);
+      } else {
+        setLauncherSettings((prev) => ({
+          ...prev,
+          lightMode: false,
+          alwaysPs5Theme: false,
+          alwaysXboxTheme: false,
+        }));
+        stopPsAmbientSound();
+        stopXboxAmbientSound();
+      }
+    },
+    [handleToggleLightMode, handleToggleAlwaysPs5Theme, handleToggleAlwaysXboxTheme]
+  );
+
+  const handleCompleteOnboarding = useCallback(
+    (destination: 'store' | 'settings') => {
+      setLocalOnboardingCompleted(true);
+      hasAutoPromptedQbitRef.current = true;
+      setOnboardingPhase('completed');
+      setActiveSection(destination);
+      if (settingsBridge?.completeOnboarding) {
+        void settingsBridge.completeOnboarding(true);
+      }
+      if (qbitSetupBridge) {
+        void qbitSetupBridge.dismiss().then((next) => {
+          if (next) setQbitSetupState(next);
+        });
+      }
+    },
+    [settingsBridge, qbitSetupBridge]
+  );
+
+  const handleReplayOnboarding = useCallback(() => {
+    setOnboardingPhase('active');
+  }, []);
+
   const isBackgroundRefreshingRef = useRef(false);
   const lastRefreshAttemptAtRef = useRef(0);
 
@@ -1012,6 +1425,48 @@ export default function App() {
     launcherSettings.soundVolume > 0 &&
     (launcherSettings.ambientMusicEnabled || launcherSettings.uiClickSoundsEnabled);
 
+  const activeDownloadsCount = useMemo(
+    () =>
+      downloadSnapshot.tasks.filter(
+        (task) =>
+          task.status === 'downloading' ||
+          task.status === 'resolving' ||
+          task.status === 'queued'
+      ).length,
+    [downloadSnapshot.tasks]
+  );
+
+  if (onboardingPhase === 'checking') {
+    return (
+      <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[#f4f6f9] dark:bg-[#0e141b]">
+        <div className="w-9 h-9 rounded-full border-2 border-[#0284c7] dark:border-[#38bdf8] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (onboardingPhase === 'active') {
+    return (
+      <FirstLaunchOnboarding
+        isDesktopApp={Boolean(settingsBridge || qbitSetupBridge || downloadsBridge)}
+        desktopVersion={desktopUpdateState?.currentVersion || null}
+        settings={launcherSettings}
+        activeTheme={activeTheme}
+        setupState={qbitSetupState}
+        torrentConfig={downloadSnapshot.torrentConfig}
+        torrentConnected={downloadSnapshot.torrentConnected}
+        onSelectTheme={handleSelectOnboardingTheme}
+        onChangeLanguage={handleChangeLanguage}
+        onRecheckQbit={handleRecheckQbitSetup}
+        onStartQbitInstall={handleStartQbitInstall}
+        onLaunchQbitClient={handleLaunchQbitClient}
+        onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
+        onGenerateQbitPassword={handleGenerateQbitPassword}
+        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+        onCompleteOnboarding={handleCompleteOnboarding}
+      />
+    );
+  }
+
   return (
     <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#141921] dark:text-[#e5e9f0]">
       <TopUtilityBar
@@ -1034,6 +1489,7 @@ export default function App() {
         activeTheme={activeTheme}
         compactNavbar={launcherSettings.compactNavbar}
         language={launcherSettings.language}
+        activeDownloadsCount={activeDownloadsCount}
       />
 
       {catalog.maintenance.some(
@@ -1135,11 +1591,40 @@ export default function App() {
           />
         )}
 
+        {activeSection === 'downloads' && (
+          <DownloadsView
+            snapshot={downloadSnapshot}
+            isDesktopApp={Boolean(downloadsBridge)}
+            freeSpaceGB={systemSpecs.freeSpaceGB ?? null}
+            language={launcherSettings.language}
+            onStartDownload={handleStartDownloadPayload}
+            onAddTorrentFile={handleAddTorrentFile}
+            onPauseDownload={handlePauseDownload}
+            onResumeDownload={handleResumeDownload}
+            onCancelDownload={handleCancelDownload}
+            onRetryDownload={handleRetryDownload}
+            onRemoveDownload={handleRemoveDownload}
+            onClearCompleted={handleClearCompletedDownloads}
+            onChooseFolder={handleChooseDownloadFolder}
+            onOpenFolder={handleOpenDownloadFolder}
+            onOpenFile={handleOpenDownloadedFile}
+            onOpenExternal={handleOpenExternalUrl}
+            onOpenTorrentSettings={handleOpenTorrentSettings}
+            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+          />
+        )}
+
         {activeSection === 'settings' && (
           <SettingsView
             settings={launcherSettings}
-            isDesktopApp={Boolean(settingsBridge)}
+            isDesktopApp={Boolean(settingsBridge || downloadsBridge)}
             isUpdatingAutoLaunch={isUpdatingAutoLaunch}
+            downloadFolder={downloadSnapshot.downloadFolder}
+            torrentConfig={downloadSnapshot.torrentConfig}
+            torrentConnected={downloadSnapshot.torrentConnected}
+            torrentVersion={downloadSnapshot.torrentVersion}
+            torrentWebApiVersion={downloadSnapshot.torrentWebApiVersion}
+            torrentError={downloadSnapshot.torrentError}
             onChangeLanguage={handleChangeLanguage}
             onToggleStartWithComputer={handleToggleStartWithComputer}
             onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
@@ -1152,6 +1637,15 @@ export default function App() {
             onChangeSoundVolume={handleChangeSoundVolume}
             onPreviewSoundVolume={handlePreviewSoundVolume}
             onResetDefaults={handleResetLauncherSettings}
+            onChooseDownloadFolder={handleChooseDownloadFolder}
+            onOpenDownloadFolder={() => handleOpenDownloadFolder()}
+            onOpenExternal={handleOpenExternalUrl}
+            onDetectTorrentClient={handleDetectTorrentClient}
+            onSaveTorrentConfig={handleSaveTorrentConfig}
+            onTestTorrentConnection={handleTestTorrentConnection}
+            qbitSetupState={qbitSetupState}
+            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+            onReplayOnboarding={handleReplayOnboarding}
           />
         )}
       </main>
@@ -1175,7 +1669,15 @@ export default function App() {
         systemSpecs={systemSpecs}
         canRunItEnabled={launcherSettings.enableCanRunIt}
         isRefreshingSpecs={isRefreshingSpecs}
+        isDesktopApp={Boolean(downloadsBridge)}
         language={launcherSettings.language}
+        downloadTasks={downloadSnapshot.tasks}
+        onStartDownload={handleStartMirrorDownload}
+        onPauseDownload={handlePauseDownload}
+        onResumeDownload={handleResumeDownload}
+        onCancelDownload={handleCancelDownload}
+        onOpenDownloadFolder={handleOpenDownloadFolder}
+        onOpenDownloadsTab={() => setActiveSection('downloads')}
         onRefreshSpecs={handleRefreshSystemSpecs}
         onSaveCustomSpecs={handleSaveCustomSystemSpecs}
         onResetCustomSpecs={handleResetSystemSpecs}
@@ -1197,6 +1699,24 @@ export default function App() {
           onOpenModal={() => setIsUpdaterModalOpen(true)}
         />
       )}
+
+      <QbitSetupWizardModal
+        isOpen={isQbitSetupModalOpen}
+        isDesktopApp={Boolean(qbitSetupBridge || downloadsBridge)}
+        language={launcherSettings.language}
+        setupState={qbitSetupState}
+        torrentConfig={downloadSnapshot.torrentConfig}
+        torrentConnected={downloadSnapshot.torrentConnected}
+        onClose={() => setIsQbitSetupModalOpen(false)}
+        onDismissFirstLaunch={handleDismissQbitSetup}
+        onRecheck={handleRecheckQbitSetup}
+        onStartInstall={handleStartQbitInstall}
+        onLaunchClient={handleLaunchQbitClient}
+        onOpenOfficialDownload={handleOpenOfficialQbitDownload}
+        onGeneratePassword={handleGenerateQbitPassword}
+        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+        onOpenSettings={handleOpenTorrentSettings}
+      />
 
       {/* Persistent Offline Mode / Auto-hiding Online Mode Badge */}
       {connectivityBadge !== 'hidden' && (

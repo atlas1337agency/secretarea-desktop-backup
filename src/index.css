@@ -1082,6 +1082,58 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   background: rgba(124, 242, 92, 0.68);
 }
 
+/* ==========================================================================
+   First-Launch Onboarding & Celebratory Launch Animations (Compositor-Only)
+   ========================================================================== */
+@keyframes sa-onboard-step-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes sa-onboard-ring-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.84);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sa-onboard-launch-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+
+.sa-onboard-step-in {
+  animation: sa-onboard-step-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sa-onboard-ring-pop {
+  animation: sa-onboard-ring-pop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sa-onboard-launch-out {
+  animation: sa-onboard-launch-out 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-ps5 .sa-app-shell::before,
   .theme-ps5 .sa-app-shell::after,
@@ -1089,7 +1141,10 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   .theme-xbox .sa-app-shell::after,
   .sa-ps5-eq-bar-1,
   .sa-ps5-eq-bar-2,
-  .sa-ps5-eq-bar-3 {
+  .sa-ps5-eq-bar-3,
+  .sa-onboard-step-in,
+  .sa-onboard-ring-pop,
+  .sa-onboard-launch-out {
     animation: none;
   }
 

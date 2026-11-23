@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import {
   Books,
   ChatTeardropText,
+  DownloadSimple,
   Gear,
   House,
   List,
@@ -19,6 +20,7 @@ interface NavbarProps {
   activeTheme?: AppThemeMode;
   compactNavbar?: boolean;
   language?: AppLanguage;
+  activeDownloadsCount?: number;
 }
 
 export function Navbar({
@@ -27,6 +29,7 @@ export function Navbar({
   activeTheme = 'default',
   compactNavbar = false,
   language = 'en',
+  activeDownloadsCount = 0,
 }: NavbarProps) {
   const [logoError, setLogoError] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,9 +43,16 @@ export function Navbar({
     id: PrimarySection;
     label: string;
     icon: ComponentType<{ className?: string }>;
+    count?: number;
   }[] = [
     { id: 'store', label: t.nav.home, icon: House },
     { id: 'library', label: t.nav.library, icon: Books },
+    {
+      id: 'downloads',
+      label: t.nav.downloads,
+      icon: DownloadSimple,
+      count: activeDownloadsCount > 0 ? activeDownloadsCount : undefined,
+    },
     { id: 'extras', label: t.nav.extras, icon: Stack },
     { id: 'requests', label: t.nav.requests, icon: ChatTeardropText },
     { id: 'settings', label: t.nav.settings, icon: Gear },
@@ -177,6 +187,11 @@ export function Navbar({
                   >
                     <Icon className={compactNavbar ? 'w-4.5 h-4.5 shrink-0' : 'w-4 h-4 shrink-0'} />
                     {!compactNavbar && <span>{item.label}</span>}
+                    {typeof item.count === 'number' && !compactNavbar && (
+                      <span className="font-mono-tabular text-[11px] font-bold opacity-90">
+                        ({item.count})
+                      </span>
+                    )}
                   </button>
                 );
               }
@@ -202,6 +217,11 @@ export function Navbar({
                   >
                     <Icon className={compactNavbar ? 'w-4.5 h-4.5 shrink-0' : 'w-4 h-4 shrink-0'} />
                     {!compactNavbar && <span>{item.label}</span>}
+                    {typeof item.count === 'number' && !compactNavbar && (
+                      <span className="font-mono-tabular text-[11px] font-bold opacity-90">
+                        ({item.count})
+                      </span>
+                    )}
                   </button>
                 );
               }
@@ -234,6 +254,11 @@ export function Navbar({
                       }`}
                     />
                     {!compactNavbar && <span>{item.label}</span>}
+                    {typeof item.count === 'number' && !compactNavbar && (
+                      <span className="font-mono-tabular text-[11.5px] font-bold text-[#0284c7] dark:text-[#38bdf8]">
+                        ({item.count})
+                      </span>
+                    )}
                   </span>
 
                   {isActive && (
@@ -344,6 +369,11 @@ export function Navbar({
                     <span className="flex items-center gap-3 min-w-0">
                       <Icon className="w-4.5 h-4.5 shrink-0" />
                       <span className="truncate">{item.label}</span>
+                      {typeof item.count === 'number' && (
+                        <span className="font-mono-tabular text-[12px] font-bold opacity-85">
+                          ({item.count})
+                        </span>
+                      )}
                     </span>
                     {isActive && (
                       <span

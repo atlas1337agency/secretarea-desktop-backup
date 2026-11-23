@@ -111,3 +111,26 @@ export function applyDocumentThemeSettings(settings: LauncherSettings): void {
   html.classList.toggle('theme-xbox', consoleTheme === 'xbox');
   html.style.colorScheme = isDark ? 'dark' : 'light';
 }
+
+const ONBOARDING_STORAGE_KEY = 'secretarea_onboarding_completed_v1';
+
+export function isLocalOnboardingCompleted(): boolean {
+  try {
+    return localStorage.getItem(ONBOARDING_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setLocalOnboardingCompleted(completed: boolean): void {
+  try {
+    if (completed) {
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+    } else {
+      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore storage failures cleanly
+  }
+}
+

@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { execFile } = require('child_process');
+const { createDownloadManager } = require('./downloadManager.cjs');
+const { createQbitSetupManager } = require('./qbitSetupManager.cjs');
 
 const GITHUB_OWNER = 'secretarea1337';
 const GITHUB_REPO = 'secretarea-desktop';
@@ -16,6 +18,8 @@ if (!gotSingleInstanceLock) {
 let mainWindow = null;
 let appTray = null;
 let isQuitting = false;
+let downloadManager = null;
+let qbitSetupManager = null;
 
 function readPackageVersion() {
   if (app.isPackaged) {
@@ -360,6 +364,12 @@ function registerUpdaterIpc() {
     if (!isTrustedSender(event)) return null;
     return applyStartWithComputerSetting(Boolean(enabled));
   });
+
+  ipcMain.handle('settings:complete-onboarding', (event, completed = true) => {
+    if (!isTrustedSender(event)) return null;
+    writeDesktopLauncherSettings({ onboardingCompleted: Boolean(completed) });
+    return getDesktopSettingsPayload();
+  });
 }
 
 function getLauncherSettingsPath() {
@@ -374,6 +384,7 @@ function readDesktopLauncherSettings() {
     }
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     return {
+      ...(parsed && typeof parsed === 'object' ? parsed : {}),
       startWithComputer: Boolean(parsed?.startWithComputer),
     };
   } catch {
@@ -384,8 +395,18 @@ function readDesktopLauncherSettings() {
 function writeDesktopLauncherSettings(next) {
   try {
     const filePath = getLauncherSettingsPath();
+    const existing = readDesktopLauncherSettings();
+    const merged = {
+      ...existing,
+      ...(next && typeof next === 'object' ? next : {}),
+      startWithComputer: Boolean(
+        next && typeof next.startWithComputer === 'boolean'
+          ? next.startWithComputer
+          : existing.startWithComputer
+      ),
+    };
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify({ startWithComputer: Boolean(next.startWithComputer) }, null, 2), 'utf8');
+    fs.writeFileSync(filePath, JSON.stringify(merged, null, 2), 'utf8');
   } catch {
     // ignore disk write errors
   }
@@ -487,6 +508,7 @@ function getDesktopSettingsPayload() {
   }
   return {
     startWithComputer,
+    onboardingCompleted: Boolean(persisted.onboardingCompleted),
     isPackaged: app.isPackaged,
     platform: process.platform,
     trayActive: Boolean(appTray && !appTray.isDestroyed()),
@@ -919,6 +941,24 @@ app.whenReady().then(() => {
   configureAutoUpdater();
   registerUpdaterIpc();
 
+  downloadManager = createDownloadManager({
+    getMainWindow: () => mainWindow,
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+  });
+  downloadManager.init();
+  downloadManager.registerIpc(ipcMain, isTrustedSender);
+
+  qbitSetupManager = createQbitSetupManager({
+    getMainWindow: () => mainWindow,
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+    getDownloadSnapshot: () => downloadManager.getSnapshot(),
+    testTorrentConnection: () => downloadManager.testTorrentConnection(),
+  });
+  qbitSetupManager.registerIpc(ipcMain, isTrustedSender);
+  qbitSetupManager.initStartupCheck();
+
   const persisted = readDesktopLauncherSettings();
   const launchInTray = isTrayLaunchRequested();
   if (persisted.startWithComputer || launchInTray) {
@@ -938,6 +978,12 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  if (qbitSetupManager) {
+    qbitSetupManager.shutdown();
+  }
+  if (downloadManager) {
+    downloadManager.shutdown();
+  }
 });
 
 app.on('window-all-closed', () => {

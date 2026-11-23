@@ -166,7 +166,14 @@ export interface ItemRequestPayload {
   syncedToSheet?: boolean;
 }
 
-export type PrimarySection = 'store' | 'library' | 'extras' | 'requests' | 'studios' | 'settings';
+export type PrimarySection =
+  | 'store'
+  | 'library'
+  | 'extras'
+  | 'downloads'
+  | 'requests'
+  | 'studios'
+  | 'settings';
 
 export type LibrarySectionTab =
   | 'game'
@@ -185,4 +192,174 @@ export type SortOption =
   | 'size-asc'
   | 'size-desc'
   | 'mirrors';
+
+export type DownloadSourceType = 'direct' | 'mediafire' | 'mega' | 'qbittorrent' | 'browser';
+
+export type DownloadStatus =
+  | 'queued'
+  | 'resolving'
+  | 'downloading'
+  | 'paused'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+export interface DownloadTask {
+  id: string;
+  title: string;
+  fileName: string;
+  url: string;
+  resolvedUrl?: string;
+  source: DownloadSourceType;
+  channelGroup: string;
+  coverImage?: string;
+  gameId?: string;
+  gameTab?: SheetTabKey;
+  status: DownloadStatus;
+  progress: number;
+  downloadedBytes: number;
+  totalBytes: number;
+  speedBytesPerSec: number;
+  uploadSpeedBytesPerSec?: number;
+  etaSeconds: number | null;
+  savePath: string;
+  canPauseResume: boolean;
+  torrentHash?: string;
+  torrentPeers?: number;
+  torrentPeersTotal?: number;
+  torrentSeeds?: number;
+  torrentSeedsTotal?: number;
+  torrentRatio?: number;
+  torrentStateRaw?: string;
+  error?: string | null;
+  createdAt: number;
+  updatedAt: number;
+  completedAt?: number | null;
+}
+
+export interface TorrentIntegrationConfig {
+  enabled: boolean;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  apiKey?: string;
+  hasSavedPassword?: boolean;
+  hasSavedApiKey?: boolean;
+  pollIntervalMs?: number;
+}
+
+export interface TorrentDetectionResult {
+  installed: boolean;
+  clientName: string;
+  executablePath: string | null;
+  openWebUiPorts: number[];
+  recommendedHost: string;
+  recommendedPort: number;
+  isRunning: boolean;
+  downloadUrl: string;
+}
+
+export interface TorrentConnectionTestResult {
+  ok: boolean;
+  version?: string;
+  webApiVersion?: string;
+  activeCount?: number;
+  authMethod?: 'cookie' | 'api-key' | 'localhost-bypass';
+  message: string;
+  hint?: string;
+}
+
+export interface DownloadManagerSnapshot {
+  tasks: DownloadTask[];
+  downloadFolder: string;
+  maxConcurrent: number;
+  torrentConfig: TorrentIntegrationConfig;
+  torrentConnected: boolean;
+  torrentVersion?: string | null;
+  torrentWebApiVersion?: string | null;
+  torrentError?: string | null;
+}
+
+export type QbitSetupStage =
+  | 'idle'
+  | 'checking_dependencies'
+  | 'detecting_qbit'
+  | 'fetching_release'
+  | 'ready'
+  | 'downloading'
+  | 'verifying'
+  | 'installing'
+  | 'configuring'
+  | 'waiting_for_close'
+  | 'completed'
+  | 'error';
+
+export type QbitSetupActionNeeded =
+  | 'install_required'
+  | 'update_available'
+  | 'up_to_date'
+  | 'newer_installed'
+  | 'close_required_for_update'
+  | 'unknown_latest';
+
+export interface QbitReleaseInfo {
+  version: string;
+  tagName: string;
+  publishedAt: string | null;
+  releaseUrl: string;
+  assetName: string;
+  assetUrl: string;
+  assetSizeBytes: number;
+  expectedSha256: string | null;
+  source: 'github_api' | 'official_website' | 'unavailable';
+}
+
+export interface QbitVerificationInfo {
+  sha256Actual: string | null;
+  sha256Expected: string | null;
+  sha256Verified: boolean;
+  signatureStatus: string;
+  publisher: string | null;
+  signatureVerified: boolean;
+}
+
+export interface QbitWebUiConfigInfo {
+  iniPath: string | null;
+  configFound: boolean;
+  webUiEnabled: boolean;
+  address: string;
+  port: number;
+  username: string;
+  isLoopbackOnly: boolean;
+}
+
+export interface QbitSetupState {
+  stage: QbitSetupStage;
+  actionNeeded: QbitSetupActionNeeded | null;
+  platformSupported: boolean;
+  installed: boolean;
+  installedVersion: string | null;
+  executablePath: string | null;
+  isRunning: boolean;
+  latestRelease: QbitReleaseInfo | null;
+  releaseError: string | null;
+  releaseErrorCode: 'offline' | 'rate_limited' | 'asset_missing' | 'http_error' | null;
+  downloadProgress: {
+    percent: number;
+    downloadedBytes: number;
+    totalBytes: number;
+    speedBytesPerSec: number;
+    etaSeconds: number | null;
+  } | null;
+  verification: QbitVerificationInfo | null;
+  webUiConfig: QbitWebUiConfigInfo;
+  webUiVerifiedConnected: boolean;
+  error: string | null;
+  statusMessage: string;
+  officialDownloadUrl: string;
+  shouldPromptOnFirstLaunch: boolean;
+  firstLaunchDismissed: boolean;
+  lastCheckedAt: number | null;
+}
 

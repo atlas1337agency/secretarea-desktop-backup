@@ -63,6 +63,7 @@ export interface DesktopSystemSpecsPayload {
 
 export interface DesktopSettingsStatePayload {
   startWithComputer: boolean;
+  onboardingCompleted?: boolean;
   isPackaged: boolean;
   platform: string;
   trayActive: boolean;
@@ -71,6 +72,7 @@ export interface DesktopSettingsStatePayload {
 interface SecretAreaSettingsBridge {
   getDesktopSettings: () => Promise<DesktopSettingsStatePayload | null>;
   setStartWithComputer: (enabled: boolean) => Promise<DesktopSettingsStatePayload | null>;
+  completeOnboarding?: (completed?: boolean) => Promise<DesktopSettingsStatePayload | null>;
 }
 
 interface SecretAreaSystemBridge {
