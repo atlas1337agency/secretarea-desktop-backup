@@ -1083,6 +1083,70 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================================================
+   Custom Default Theme Builder (.theme-custom)
+   ========================================================================== */
+html.theme-custom,
+html.theme-custom body {
+  background-color: var(--sa-bg-canvas, #0e141b);
+}
+
+.theme-custom .sa-app-shell {
+  background-color: var(--sa-bg-canvas, #0e141b);
+  background-image:
+    radial-gradient(85% 55% at 50% -8%, var(--sa-accent-soft, rgba(26, 159, 255, 0.14)) 0%, transparent 72%);
+}
+
+.theme-custom .sa-ps5-panel,
+.theme-custom [class*="bg-[#171d25]"],
+.theme-custom [class*="bg-[#151c25]"] {
+  background-color: var(--sa-bg-surface);
+  border-color: var(--sa-border-subtle);
+  border-radius: var(--sa-card-radius, 12px);
+  backdrop-filter: var(--sa-panel-blur, blur(14px));
+}
+
+.theme-custom .sa-ps5-subpanel,
+.theme-custom [class*="bg-[#12171f]"],
+.theme-custom [class*="bg-[#10161e]"] {
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  border-radius: calc(var(--sa-card-radius, 12px) * 0.78);
+}
+
+.theme-custom button[class*="bg-[#1a9fff]"],
+.theme-custom button[class*="bg-[#0284c7]"],
+.theme-custom a[class*="bg-[#1a9fff]"],
+.theme-custom a[class*="bg-[#0284c7]"] {
+  background-color: var(--sa-accent, #1a9fff);
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+.theme-custom button[class*="bg-[#1a9fff]"]:hover,
+.theme-custom button[class*="bg-[#0284c7]"]:hover,
+.theme-custom a[class*="bg-[#1a9fff]"]:hover,
+.theme-custom a[class*="bg-[#0284c7]"]:hover {
+  background-color: var(--sa-accent-hover, #38adff);
+}
+
+.theme-custom .sa-ps5-subpanel[aria-pressed="true"],
+.theme-custom .sa-custom-accent-ring {
+  border-color: var(--sa-accent, #1a9fff);
+  box-shadow: 0 0 0 1px var(--sa-accent-ring, rgba(26, 159, 255, 0.42)), 0 10px 26px var(--sa-accent-soft, rgba(26, 159, 255, 0.14));
+}
+
+.theme-custom button:not([role="switch"]) {
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+.theme-custom .sa-custom-accent-text {
+  color: var(--sa-accent, #1a9fff);
+}
+
+.theme-custom .sa-custom-accent-bg {
+  background-color: var(--sa-accent, #1a9fff);
+}
+
+/* ==========================================================================
    First-Launch Onboarding & Celebratory Launch Animations (Compositor-Only)
    ========================================================================== */
 @keyframes sa-onboard-step-in {
@@ -1122,6 +1186,32 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   }
 }
 
+@keyframes sa-welcome-aura-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate3d(18px, -12px, 0) scale(1.06);
+    opacity: 0.94;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+}
+
+@keyframes sa-welcome-stagger {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 .sa-onboard-step-in {
   animation: sa-onboard-step-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -1134,6 +1224,22 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   animation: sa-onboard-launch-out 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.sa-welcome-aura {
+  animation: sa-welcome-aura-drift 14s ease-in-out infinite;
+}
+
+.sa-welcome-stagger-1 {
+  animation: sa-welcome-stagger 320ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
+}
+
+.sa-welcome-stagger-2 {
+  animation: sa-welcome-stagger 340ms cubic-bezier(0.16, 1, 0.3, 1) 110ms both;
+}
+
+.sa-welcome-stagger-3 {
+  animation: sa-welcome-stagger 360ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-ps5 .sa-app-shell::before,
   .theme-ps5 .sa-app-shell::after,
@@ -1144,7 +1250,11 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   .sa-ps5-eq-bar-3,
   .sa-onboard-step-in,
   .sa-onboard-ring-pop,
-  .sa-onboard-launch-out {
+  .sa-onboard-launch-out,
+  .sa-welcome-aura,
+  .sa-welcome-stagger-1,
+  .sa-welcome-stagger-2,
+  .sa-welcome-stagger-3 {
     animation: none;
   }
 

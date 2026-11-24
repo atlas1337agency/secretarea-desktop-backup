@@ -28,6 +28,14 @@ export interface DesktopUpdateState {
   lastCheckedAt: string | null;
 }
 
+export interface DesktopReleaseNotesPayload {
+  version: string;
+  releaseName: string;
+  notes: string;
+  publishedAt: string | null;
+  source: 'github' | 'updater';
+}
+
 interface SecretAreaUpdaterBridge {
   getVersion: () => Promise<string>;
   getState: () => Promise<DesktopUpdateState | null>;
@@ -35,6 +43,7 @@ interface SecretAreaUpdaterBridge {
   downloadUpdate: () => Promise<DesktopUpdateState | null>;
   postponeUpdate: () => Promise<DesktopUpdateState | null>;
   installUpdate: () => Promise<void>;
+  getReleaseNotes?: (version?: string) => Promise<DesktopReleaseNotesPayload | null>;
   onStateChange: (callback: (state: DesktopUpdateState) => void) => () => void;
 }
 
@@ -63,7 +72,10 @@ export interface DesktopSystemSpecsPayload {
 
 export interface DesktopSettingsStatePayload {
   startWithComputer: boolean;
+  closeBehavior?: 'minimize-to-tray' | 'exit';
   onboardingCompleted?: boolean;
+  lastOnboardedVersion?: string | null;
+  appVersion?: string;
   isPackaged: boolean;
   platform: string;
   trayActive: boolean;
@@ -72,7 +84,13 @@ export interface DesktopSettingsStatePayload {
 interface SecretAreaSettingsBridge {
   getDesktopSettings: () => Promise<DesktopSettingsStatePayload | null>;
   setStartWithComputer: (enabled: boolean) => Promise<DesktopSettingsStatePayload | null>;
-  completeOnboarding?: (completed?: boolean) => Promise<DesktopSettingsStatePayload | null>;
+  setCloseBehavior?: (
+    behavior: 'minimize-to-tray' | 'exit'
+  ) => Promise<DesktopSettingsStatePayload | null>;
+  exitApplication?: () => Promise<{ ok: boolean } | null>;
+  completeOnboarding?: (
+    payload?: boolean | { completed?: boolean; version?: string }
+  ) => Promise<DesktopSettingsStatePayload | null>;
 }
 
 interface SecretAreaSystemBridge {

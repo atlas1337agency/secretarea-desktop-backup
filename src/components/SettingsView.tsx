@@ -18,15 +18,22 @@ import {
   MusicNotes,
   PlugsConnected,
   Power,
+  Sparkle,
   SpeakerHigh,
   SpeakerLow,
   SpeakerSlash,
-  Sparkle,
   Sun,
   WarningCircle,
 } from '@phosphor-icons/react';
-import type { AppLanguage, LauncherSettings } from '../services/launcherSettings';
+import {
+  getAppVersionString,
+  type AppLanguage,
+  type CustomThemeConfig,
+  type LauncherSettings,
+} from '../services/launcherSettings';
 import type {
+  CloseBehaviorMode,
+  PresentMonSetupState,
   QbitSetupState,
   TorrentConnectionTestResult,
   TorrentDetectionResult,
@@ -34,11 +41,13 @@ import type {
 } from '../types';
 import { DEFAULT_TORRENT_CONFIG, isLoopbackHost } from '../services/downloadManager';
 import { getTranslations, LANGUAGE_OPTIONS } from '../i18n/translations';
+import { CustomThemeBuilder } from './CustomThemeBuilder';
 import { Ps5Icon } from './SectionBadge';
 
 interface SettingsViewProps {
   settings: LauncherSettings;
   isDesktopApp: boolean;
+  desktopVersion?: string | null;
   isUpdatingAutoLaunch?: boolean;
   downloadFolder?: string;
   torrentConfig?: TorrentIntegrationConfig;
@@ -48,11 +57,15 @@ interface SettingsViewProps {
   torrentError?: string | null;
   onChangeLanguage: (language: AppLanguage) => void;
   onToggleStartWithComputer: (enabled: boolean) => void;
+  onChangeCloseBehavior?: (behavior: CloseBehaviorMode) => void;
+  onExitApplication?: () => void;
   onToggleEnableCanRunIt: (enabled: boolean) => void;
   onToggleCompactNavbar: (enabled: boolean) => void;
   onToggleLightMode: (enabled: boolean) => void;
   onToggleAlwaysPs5Theme: (enabled: boolean) => void;
   onToggleAlwaysXboxTheme: (enabled: boolean) => void;
+  onUpdateCustomTheme: (patch: Partial<CustomThemeConfig>) => void;
+  onResetCustomTheme: () => void;
   onToggleAmbientMusic: (enabled: boolean) => void;
   onToggleUiClickSounds: (enabled: boolean) => void;
   onChangeSoundVolume: (volume: number) => void;
@@ -68,6 +81,13 @@ interface SettingsViewProps {
   ) => Promise<TorrentConnectionTestResult | null>;
   qbitSetupState?: QbitSetupState;
   onOpenQbitSetupWizard?: () => void;
+  presentMonSetupState?: PresentMonSetupState;
+  onOpenPresentMonManager?: () => void;
+  onCheckPresentMonUpdates?: () => Promise<void> | void;
+  onStartPresentMonInstallOrUpdate?: (
+    userConfirmed: boolean,
+    mode?: 'auto' | 'install' | 'update' | 'repair' | 'reinstall'
+  ) => Promise<void> | void;
   onReplayOnboarding?: () => void;
 }
 
@@ -124,9 +144,60 @@ function ToggleSwitch({
   );
 }
 
+function ExitAppInlineConfirmButton({
+  label,
+  confirmLabel,
+  cancelLabel,
+  onConfirmExit,
+}: {
+  label: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onConfirmExit: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="px-3.5 py-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/35 text-rose-700 dark:text-rose-300 text-[12px] font-semibold transition-colors shrink-0 inline-flex items-center gap-1.5"
+      >
+        <Power className="w-3.5 h-3.5" />
+        <span>{label}</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 shrink-0">
+      <button
+        type="button"
+        onClick={() => {
+          setConfirming(false);
+          onConfirmExit();
+        }}
+        className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[12px] font-bold transition-colors inline-flex items-center gap-1.5"
+      >
+        <Power className="w-3.5 h-3.5" />
+        <span>{confirmLabel}</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirming(false)}
+        className="px-3 py-2 rounded-lg bg-slate-200 dark:bg-[#1e2633] hover:bg-slate-300 dark:hover:bg-[#273142] text-slate-700 dark:text-[#cbd5e1] text-[12px] font-semibold transition-colors"
+      >
+        {cancelLabel}
+      </button>
+    </div>
+  );
+}
+
 export function SettingsView({
   settings,
   isDesktopApp,
+  desktopVersion = null,
   isUpdatingAutoLaunch = false,
   downloadFolder = '',
   torrentConfig = DEFAULT_TORRENT_CONFIG,
@@ -136,11 +207,15 @@ export function SettingsView({
   torrentError = null,
   onChangeLanguage,
   onToggleStartWithComputer,
+  onChangeCloseBehavior,
+  onExitApplication,
   onToggleEnableCanRunIt,
   onToggleCompactNavbar,
   onToggleLightMode,
   onToggleAlwaysPs5Theme,
   onToggleAlwaysXboxTheme,
+  onUpdateCustomTheme,
+  onResetCustomTheme,
   onToggleAmbientMusic,
   onToggleUiClickSounds,
   onChangeSoundVolume,
@@ -154,10 +229,17 @@ export function SettingsView({
   onTestTorrentConnection,
   qbitSetupState,
   onOpenQbitSetupWizard,
+  presentMonSetupState,
+  onOpenPresentMonManager,
+  onCheckPresentMonUpdates,
+  onStartPresentMonInstallOrUpdate,
   onReplayOnboarding,
 }: SettingsViewProps) {
-  const t = getTranslations(settings.language).settings;
+  const tr = getTranslations(settings.language);
+  const t = tr.settings;
+  const tp = tr.presentMonSetup;
   const hasConsoleTheme = settings.alwaysPs5Theme || settings.alwaysXboxTheme;
+  const currentVersion = desktopVersion || getAppVersionString();
 
   const [draftTorrent, setDraftTorrent] = useState<TorrentIntegrationConfig>(torrentConfig);
   const [isDetectingTorrent, setIsDetectingTorrent] = useState(false);
@@ -292,20 +374,28 @@ export function SettingsView({
         {/* Page Heading */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.08]">
           <div className="space-y-1 min-w-0">
-            <h1 className="font-display text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {t.pageTitle}
-            </h1>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="font-display text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {t.pageTitle}
+              </h1>
+              <span
+                dir="ltr"
+                className="text-[11.5px] font-mono-tabular font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-white/[0.07] border border-slate-300/70 dark:border-white/[0.1] text-slate-700 dark:text-[#9cb0c9]"
+              >
+                v{currentVersion}
+              </span>
+            </div>
             <p className="text-[12.5px] text-slate-600 dark:text-[#8b9bb4]">
               {t.pageSubtitle}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {onReplayOnboarding && (
+            {!isDesktopApp && onReplayOnboarding && (
               <button
                 type="button"
                 onClick={onReplayOnboarding}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-500/10 hover:bg-sky-500/20 dark:bg-[#1a9fff]/15 dark:hover:bg-[#1a9fff]/25 border border-sky-500/30 dark:border-[#1a9fff]/35 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] transition-colors whitespace-nowrap cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-sky-50 hover:bg-sky-100 dark:bg-[#1a9fff]/15 dark:hover:bg-[#1a9fff]/25 border border-sky-200 dark:border-[#1a9fff]/35 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] transition-colors whitespace-nowrap cursor-pointer shrink-0"
               >
                 <Sparkle className="w-3.5 h-3.5" />
                 <span>{t.replaySetupBtn}</span>
@@ -447,6 +537,101 @@ export function SettingsView({
               offLabel={t.inactiveLabel}
               onChange={onToggleStartWithComputer}
             />
+          </div>
+
+          {/* Application Closing Behavior */}
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="w-8 h-8 rounded-lg bg-slate-200/80 dark:bg-[#1a2433] border border-slate-300/70 dark:border-white/[0.08] text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0 mt-0.5">
+                <AppWindow className="w-4 h-4" />
+              </span>
+              <div className="space-y-0.5 min-w-0">
+                <span className="block text-[13.5px] font-semibold text-slate-900 dark:text-white">
+                  {t.closeBehaviorTitle}
+                </span>
+                <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                  {t.closeBehaviorDesc}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => onChangeCloseBehavior?.('minimize-to-tray')}
+                className={`px-3 py-2 rounded-lg text-[12px] font-semibold border transition-colors text-start flex items-center gap-2 ${
+                  settings.closeBehavior === 'minimize-to-tray'
+                    ? 'bg-[#0284c7]/15 dark:bg-[#66c0f4]/15 border-[#0284c7] dark:border-[#66c0f4] text-[#0369a1] dark:text-white'
+                    : 'bg-white dark:bg-[#161c26] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-[#b8c4d4] hover:bg-slate-100 dark:hover:bg-[#1d2532]'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    settings.closeBehavior === 'minimize-to-tray'
+                      ? 'bg-[#0284c7] dark:bg-[#66c0f4]'
+                      : 'bg-slate-400 dark:bg-[#5c6b7f]'
+                  }`}
+                />
+                <span>{t.closeBehaviorMinimizeTray}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onChangeCloseBehavior?.('exit')}
+                className={`px-3 py-2 rounded-lg text-[12px] font-semibold border transition-colors text-start flex items-center gap-2 ${
+                  settings.closeBehavior === 'exit'
+                    ? 'bg-[#0284c7]/15 dark:bg-[#66c0f4]/15 border-[#0284c7] dark:border-[#66c0f4] text-[#0369a1] dark:text-white'
+                    : 'bg-white dark:bg-[#161c26] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-[#b8c4d4] hover:bg-slate-100 dark:hover:bg-[#1d2532]'
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    settings.closeBehavior === 'exit'
+                      ? 'bg-[#0284c7] dark:bg-[#66c0f4]'
+                      : 'bg-slate-400 dark:bg-[#5c6b7f]'
+                  }`}
+                />
+                <span>{t.closeBehaviorExit}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Explicit Full Application Shutdown */}
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                <Power className="w-4 h-4" />
+              </span>
+              <div className="space-y-0.5 min-w-0">
+                <span className="block text-[13.5px] font-semibold text-slate-900 dark:text-white">
+                  {t.exitAppTitle}
+                </span>
+                <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                  {t.exitAppDesc}
+                </p>
+                {!isDesktopApp && (
+                  <p className="text-[11px] text-[#0284c7] dark:text-[#66c0f4]/85">
+                    {t.exitAppWebHint}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {isDesktopApp && onExitApplication ? (
+              <ExitAppInlineConfirmButton
+                label={t.exitAppBtn}
+                confirmLabel={t.exitAppConfirmBtn}
+                cancelLabel={t.exitAppCancelBtn}
+                onConfirmExit={onExitApplication}
+              />
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="px-3.5 py-2 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-500/60 text-[12px] font-semibold cursor-not-allowed shrink-0"
+              >
+                {t.exitAppBtn}
+              </button>
+            )}
           </div>
 
           {/* Can Run It Toggle */}
@@ -650,6 +835,15 @@ export function SettingsView({
               onChange={onToggleAlwaysXboxTheme}
             />
           </div>
+
+          {/* Custom Default Theme Builder */}
+          <CustomThemeBuilder
+            language={settings.language}
+            customTheme={settings.customTheme}
+            hasConsoleThemeActive={hasConsoleTheme}
+            onUpdateCustomTheme={onUpdateCustomTheme}
+            onResetCustomTheme={onResetCustomTheme}
+          />
         </section>
 
         {/* 4. Audio & Soundscape */}
@@ -1234,6 +1428,202 @@ export function SettingsView({
             )}
           </div>
         </section>
+
+        {/* 7. Intel PresentMon (FPS & Frame Time Engine) */}
+        <section
+          id="presentmon-dependency-settings"
+          className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-lg"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                <Sparkle className="w-4.5 h-4.5" />
+              </span>
+              <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 className="text-[14.5px] font-bold text-slate-900 dark:text-white tracking-tight">
+                    {tp.sectionTitle}
+                  </h2>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-2 py-0.5 rounded-md border ${
+                      presentMonSetupState?.installed && presentMonSetupState.healthy
+                        ? presentMonSetupState.actionNeeded === 'update_available'
+                          ? 'bg-sky-500/12 border-sky-500/30 text-[#0284c7] dark:text-[#38bdf8]'
+                          : 'bg-emerald-500/12 border-emerald-500/30 text-emerald-700 dark:text-[#4ade80]'
+                        : presentMonSetupState?.actionNeeded === 'repair_required'
+                        ? 'bg-rose-500/12 border-rose-500/30 text-rose-700 dark:text-rose-300'
+                        : 'bg-amber-500/12 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                    }`}
+                  >
+                    {presentMonSetupState?.stage === 'checking'
+                      ? tp.statusChecking
+                      : presentMonSetupState?.actionNeeded === 'repair_required'
+                      ? tp.statusRepairRequired
+                      : presentMonSetupState?.actionNeeded === 'update_available'
+                      ? tp.statusUpdateAvailable
+                      : presentMonSetupState?.installed && presentMonSetupState.healthy
+                      ? presentMonSetupState.actionNeeded === 'newer_installed'
+                        ? tp.statusNewerInstalled
+                        : tp.statusReady
+                      : presentMonSetupState?.declinedForVersion
+                      ? tp.statusDeclined
+                      : tp.statusNotInstalled}
+                  </span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                  {tp.sectionSubtitle}
+                </p>
+              </div>
+            </div>
+
+            {onOpenPresentMonManager && (
+              <button
+                type="button"
+                onClick={onOpenPresentMonManager}
+                className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <DownloadSimple className="w-4 h-4" />
+                <span>{tp.managePresentMonBtn}</span>
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sa-ps5-subpanel p-3 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07]">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-[#8b9bb4]">
+                {tp.installedVersionLabel}
+              </div>
+              <div dir="ltr" className="mt-0.5 text-[13.5px] font-bold font-mono-tabular text-slate-900 dark:text-white">
+                {presentMonSetupState?.installedVersion
+                  ? `v${presentMonSetupState.installedVersion}`
+                  : tp.notInstalledValue}
+              </div>
+            </div>
+
+            <div className="sa-ps5-subpanel p-3 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07]">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-[#8b9bb4]">
+                {tp.latestVersionLabel}
+              </div>
+              <div dir="ltr" className="mt-0.5 text-[13.5px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
+                {presentMonSetupState?.latestRelease?.version
+                  ? `v${presentMonSetupState.latestRelease.version}`
+                  : tr.hardware.naValue}
+              </div>
+            </div>
+
+            <div className="sa-ps5-subpanel p-3 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] min-w-0">
+              <div className="text-[11px] font-semibold text-slate-500 dark:text-[#8b9bb4]">
+                {tp.installPathLabel}
+              </div>
+              <div
+                dir="ltr"
+                title={presentMonSetupState?.executablePath || undefined}
+                className="mt-0.5 text-[12px] font-mono-tabular text-slate-700 dark:text-[#cbd5e1] truncate"
+              >
+                {presentMonSetupState?.executablePath || tp.notInstalledValue}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={() =>
+                onOpenExternal?.(
+                  presentMonSetupState?.officialReleasesUrl ||
+                    'https://github.com/GameTechDev/PresentMon/releases/latest'
+                )
+              }
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline cursor-pointer"
+            >
+              <ArrowSquareOut className="w-3.5 h-3.5" />
+              <span>{tp.officialReleasesBtn}</span>
+            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {isDesktopApp && onCheckPresentMonUpdates && (
+                <button
+                  type="button"
+                  disabled={presentMonSetupState?.stage === 'checking'}
+                  onClick={() => void onCheckPresentMonUpdates()}
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white disabled:opacity-55 transition-colors cursor-pointer"
+                >
+                  <ArrowCounterClockwise
+                    className={`w-3.5 h-3.5 ${
+                      presentMonSetupState?.stage === 'checking' ? 'motion-safe:animate-spin' : ''
+                    }`}
+                  />
+                  <span>
+                    {presentMonSetupState?.stage === 'checking'
+                      ? tp.checkingBtn
+                      : tp.checkUpdatesBtn}
+                  </span>
+                </button>
+              )}
+
+              {isDesktopApp &&
+                onStartPresentMonInstallOrUpdate &&
+                presentMonSetupState?.actionNeeded === 'update_available' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenPresentMonManager?.();
+                      void onStartPresentMonInstallOrUpdate(true, 'update');
+                    }}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors cursor-pointer"
+                  >
+                    <DownloadSimple className="w-3.5 h-3.5" />
+                    <span>{tp.updateNowBtn}</span>
+                  </button>
+                )}
+
+              {isDesktopApp &&
+                onStartPresentMonInstallOrUpdate &&
+                presentMonSetupState?.actionNeeded === 'repair_required' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenPresentMonManager?.();
+                      void onStartPresentMonInstallOrUpdate(true, 'repair');
+                    }}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[12px] font-semibold transition-colors cursor-pointer"
+                  >
+                    <span>{tp.repairBtn}</span>
+                  </button>
+                )}
+
+              {isDesktopApp &&
+                onStartPresentMonInstallOrUpdate &&
+                presentMonSetupState?.installed && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenPresentMonManager?.();
+                      void onStartPresentMonInstallOrUpdate(true, 'reinstall');
+                    }}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors cursor-pointer"
+                  >
+                    <span>{tp.reinstallBtn}</span>
+                  </button>
+                )}
+
+              {isDesktopApp &&
+                onStartPresentMonInstallOrUpdate &&
+                !presentMonSetupState?.installed && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenPresentMonManager?.()}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-semibold transition-colors cursor-pointer"
+                  >
+                    <DownloadSimple className="w-3.5 h-3.5" />
+                    <span>{tp.enablePresentMonBtn}</span>
+                  </button>
+                )}
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );

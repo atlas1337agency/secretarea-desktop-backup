@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import {
   ArrowSquareOut,
   ArrowsIn,
   Clock,
   CornersOut,
+  Cpu,
   DownloadSimple,
+  Gear,
   SpeakerHigh,
   SpeakerSlash,
   SpinnerGap,
 } from '@phosphor-icons/react';
+import type { PrimarySection } from '../types';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
   activeTheme: AppThemeMode;
+  activeSection: PrimarySection;
+  onSelectSection: (section: PrimarySection) => void;
+  activeDownloadsCount?: number;
   soundEnabled: boolean;
   isFullscreen: boolean;
   onToggleSound: () => void;
@@ -26,6 +32,9 @@ interface TopUtilityBarProps {
 
 export function TopUtilityBar({
   activeTheme,
+  activeSection,
+  onSelectSection,
+  activeDownloadsCount = 0,
   soundEnabled,
   isFullscreen,
   onToggleSound,
@@ -61,6 +70,22 @@ export function TopUtilityBar({
     minute: '2-digit',
     second: '2-digit',
   });
+
+  const utilityNavItems: {
+    id: PrimarySection;
+    label: string;
+    icon: ComponentType<{ className?: string }>;
+    count?: number;
+  }[] = [
+    {
+      id: 'downloads',
+      label: t.nav.downloads,
+      icon: DownloadSimple,
+      count: activeDownloadsCount > 0 ? activeDownloadsCount : undefined,
+    },
+    { id: 'hardware', label: t.nav.hardwareMonitor, icon: Cpu },
+    { id: 'settings', label: t.nav.settings, icon: Gear },
+  ];
 
   return (
     <div
@@ -136,9 +161,9 @@ export function TopUtilityBar({
         </a>
       </div>
 
-      {/* Right Zone: Desktop Version / Updates + Sound + Fullscreen Icon */}
-      <div className="flex items-center justify-end gap-1.5 sm:gap-2 flex-1 min-w-0">
-        {desktopVersion && onOpenUpdates && (
+      {/* Right Zone: Desktop Version / Updates + Sound + Utility Nav (Downloads, Hardware Monitor, Settings) + Fullscreen */}
+      <div className="flex items-center justify-end gap-1.5 flex-1 min-w-0">
+        {desktopVersion && onOpenUpdates ? (
           <button
             type="button"
             onClick={onOpenUpdates}
@@ -182,7 +207,20 @@ export function TopUtilityBar({
               />
             )}
           </button>
-        )}
+        ) : desktopVersion ? (
+          <span
+            dir="ltr"
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold font-mono-tabular shrink-0 ${
+              isPs5Theme
+                ? 'rounded-full bg-white/[0.08] text-white/85 border border-white/[0.14]'
+                : isXboxTheme
+                ? 'rounded-md bg-[#122b15] text-[#d5f8d9] border border-[#52e042]/25'
+                : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-[#1a222d] dark:text-[#9cb0c9] dark:border-white/[0.08]'
+            }`}
+          >
+            v{desktopVersion}
+          </span>
+        ) : null}
 
         {hasConsoleAudio && (
           <button
@@ -238,6 +276,62 @@ export function TopUtilityBar({
             )}
           </button>
         )}
+
+        {/* Quick Utility Navigation (Downloads, Hardware Monitor, Settings) next to Fullscreen */}
+        <nav
+          aria-label="Utility navigation"
+          className="hidden sm:inline-flex items-center gap-1 shrink-0"
+        >
+          <span
+            aria-hidden="true"
+            className={`h-4 w-px mx-0.5 ${
+              hasConsoleAudio ? 'bg-white/15' : 'bg-slate-200 dark:bg-white/[0.08]'
+            }`}
+          />
+          {utilityNavItems.map((item) => {
+            const isActive = activeSection === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                title={item.label}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                  isPs5Theme
+                    ? isActive
+                      ? 'rounded-full bg-white/[0.22] border-white/[0.4] text-white font-semibold shadow-[0_0_12px_rgba(96,178,255,0.35)]'
+                      : 'rounded-full bg-white/[0.08] hover:bg-white/[0.18] border-white/[0.14] text-white/80 hover:text-white font-medium'
+                    : isXboxTheme
+                    ? isActive
+                      ? 'rounded-md bg-[#107C10]/85 border-[#6ee755]/85 text-white font-semibold shadow-[0_0_12px_rgba(82,224,66,0.3)]'
+                      : 'rounded-md bg-[#122b15] hover:bg-[#193b1c] border-[#52e042]/28 hover:border-[#6ee755]/70 text-[#ccecd0] hover:text-white font-medium'
+                    : isActive
+                    ? 'rounded bg-sky-500/[0.14] border-sky-500/35 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:border-[#38bdf8]/40 dark:text-[#38bdf8] font-semibold'
+                    : 'rounded bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.08] dark:text-[#c7d5e8] dark:hover:text-white font-medium'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xl:inline">{item.label}</span>
+                {typeof item.count === 'number' && (
+                  <span
+                    className={`font-mono-tabular text-[10.5px] font-bold ${
+                      isPs5Theme
+                        ? 'text-white'
+                        : isXboxTheme
+                        ? 'text-[#6ee755]'
+                        : 'text-[#0284c7] dark:text-[#38bdf8]'
+                    }`}
+                  >
+                    ({item.count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
         <button
           type="button"

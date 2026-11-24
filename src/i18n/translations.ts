@@ -47,6 +47,7 @@ export interface LauncherTranslations {
     downloads: string;
     extras: string;
     requests: string;
+    hardwareMonitor: string;
     settings: string;
     switchLight: string;
     switchDark: string;
@@ -154,6 +155,45 @@ export interface LauncherTranslations {
     torrentSavedToast: string;
     torrentManageSetupBtn: string;
     replaySetupBtn: string;
+    closeBehaviorTitle: string;
+    closeBehaviorDesc: string;
+    closeBehaviorMinimizeTray: string;
+    closeBehaviorExit: string;
+    exitAppTitle: string;
+    exitAppDesc: string;
+    exitAppBtn: string;
+    exitAppConfirmBtn: string;
+    exitAppCancelBtn: string;
+    exitAppWebHint: string;
+  };
+  customTheme: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    enableLabel: string;
+    surfaceLabel: string;
+    surfaceMidnight: string;
+    surfaceObsidian: string;
+    surfaceAbyss: string;
+    surfaceDaylight: string;
+    accentColorLabel: string;
+    customHexLabel: string;
+    buttonStyleLabel: string;
+    btnRounded: string;
+    btnPill: string;
+    btnSharp: string;
+    cardRadiusLabel: string;
+    cardSharp: string;
+    cardMedium: string;
+    cardSoft: string;
+    glassBlurLabel: string;
+    glassBlurDesc: string;
+    previewLabel: string;
+    previewTitle: string;
+    previewPrimaryBtn: string;
+    previewSecondaryBtn: string;
+    resetBtn: string;
+    consoleOverrideNote: string;
+    summaryCustomPrefix: string;
   };
   downloads: {
     pageTitle: string;
@@ -497,6 +537,61 @@ export interface LauncherTranslations {
     openSettingsBtn: string;
     webPreviewNotice: string;
   };
+  presentMonSetup: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    modalTitleInstall: string;
+    modalTitleUpdate: string;
+    modalTitleRepair: string;
+    modalTitleManage: string;
+    modalSubtitle: string;
+    benefitsHeading: string;
+    benefit1: string;
+    benefit2: string;
+    benefit3: string;
+    stepChecking: string;
+    stepDownloading: string;
+    stepVerifying: string;
+    stepInstalling: string;
+    stepCompleted: string;
+    stepCancelled: string;
+    statusReady: string;
+    statusNotInstalled: string;
+    statusUpdateAvailable: string;
+    statusRepairRequired: string;
+    statusNewerInstalled: string;
+    statusDeclined: string;
+    statusChecking: string;
+    statusWebPreview: string;
+    installedVersionLabel: string;
+    latestVersionLabel: string;
+    downloadSizeLabel: string;
+    installPathLabel: string;
+    sourceLabel: string;
+    notInstalledValue: string;
+    allowInstallBtn: string;
+    notNowBtn: string;
+    updateNowBtn: string;
+    laterBtn: string;
+    repairBtn: string;
+    reinstallBtn: string;
+    checkUpdatesBtn: string;
+    checkingBtn: string;
+    cancelDownloadBtn: string;
+    retryBtn: string;
+    doneBtn: string;
+    officialReleasesBtn: string;
+    enablePresentMonBtn: string;
+    managePresentMonBtn: string;
+    shaVerifiedLabel: string;
+    sigVerifiedLabel: string;
+    consentNote: string;
+    runningConflictMsg: string;
+    corruptedIssuePrefix: string;
+    declinedBannerTitle: string;
+    declinedBannerDesc: string;
+    lookupErrorMsg: string;
+  };
   onboarding: {
     stepWelcome: string;
     stepAppearance: string;
@@ -562,6 +657,244 @@ export interface LauncherTranslations {
     changeLaterHint: string;
     enterAppBtn: string;
     openSettingsPageBtn: string;
+    whatIsSecretAreaTitle: string;
+    whatIsSecretAreaBody: string;
+    whatIsSecretAreaPoint1: string;
+    whatIsSecretAreaPoint2: string;
+    whatIsSecretAreaPoint3: string;
+    stepGuideLabel: string;
+    step1Guide: string;
+    step2Guide: string;
+    step3Guide: string;
+    step4Guide: string;
+    step5Guide: string;
+    platformHint: string;
+  };
+  updater: {
+    title: string;
+    subtitle: string;
+    currentVersionLabel: string;
+    checkBtn: string;
+    checkingBtn: string;
+    upToDateMsg: string;
+    checkingMsg: string;
+    newVersionAvailable: string;
+    whatsNewTitle: string;
+    whatsNewCountSuffix: string;
+    categoryFeature: string;
+    categoryImprovement: string;
+    categoryFix: string;
+    downloadUpdateBtn: string;
+    downloadingPrefix: string;
+    readyToInstall: string;
+    readyToInstallDesc: string;
+    installRestartBtn: string;
+    postponeBtn: string;
+    laterBtn: string;
+    detailsBtn: string;
+    toastUpdateAvailable: string;
+    toastUpdateReady: string;
+    toastDownloading: string;
+    installedVersionLabel: string;
+    restartHint: string;
+    lastCheckedLabel: string;
+    errorFallback: string;
+    preparingDownload: string;
+  };
+  hardware: {
+    pageTitle: string;
+    pageSubtitle: string;
+    startMonitoring: string;
+    stopMonitoring: string;
+    refreshNow: string;
+    statusActive: string;
+    statusStopped: string;
+    statusWebPreview: string;
+    intervalLabel: string;
+    interval1s: string;
+    interval1500ms: string;
+    interval2s: string;
+    interval3s: string;
+    interval5s: string;
+    naValue: string;
+    unsupportedHint: string;
+    webPreviewTitle: string;
+    webPreviewBody: string;
+    sectionOverview: string;
+    sectionPerformance: string;
+    sectionDetails: string;
+    cpuTitle: string;
+    gpuTitle: string;
+    ramTitle: string;
+    storageTitle: string;
+    networkTitle: string;
+    modelLabel: string;
+    manufacturerLabel: string;
+    usageLabel: string;
+    temperatureLabel: string;
+    clockSpeedLabel: string;
+    coresThreadsLabel: string;
+    coresUnit: string;
+    threadsUnit: string;
+    powerLabel: string;
+    perCoreUsageLabel: string;
+    vramLabel: string;
+    fanSpeedLabel: string;
+    noGpuDetected: string;
+    totalRamLabel: string;
+    usedRamLabel: string;
+    availableRamLabel: string;
+    memoryTypeLabel: string;
+    memorySpeedLabel: string;
+    driveTypeLabel: string;
+    capacityLabel: string;
+    usedSpaceLabel: string;
+    freeSpaceLabel: string;
+    readSpeedLabel: string;
+    writeSpeedLabel: string;
+    noStorageDetected: string;
+    activeInterfaceLabel: string;
+    linkStateLabel: string;
+    linkSpeedLabel: string;
+    downloadSpeedLabel: string;
+    uploadSpeedLabel: string;
+    totalRxLabel: string;
+    totalTxLabel: string;
+    noNetworkDetected: string;
+    uptimeLabel: string;
+    hostLabel: string;
+    chartCpuRamTitle: string;
+    chartGpuTempTitle: string;
+    chartNetworkTitle: string;
+    chartCpuLoad: string;
+    chartRamLoad: string;
+    chartGpuLoad: string;
+    chartCpuTemp: string;
+    chartGpuTemp: string;
+    chartNetDownload: string;
+    chartNetUpload: string;
+    peakLabel: string;
+    avgLabel: string;
+    lastUpdatedLabel: string;
+    tabOverview: string;
+    tabGaming: string;
+    tabTechnologies: string;
+    tabCleaner: string;
+    cpuSeriesLabel: string;
+    cpuGenerationLabel: string;
+    ramChannelsLabel: string;
+    ramSlotsLabel: string;
+    gamingTitle: string;
+    gamingSubtitle: string;
+    gamingSelectProcess: string;
+    gamingAllProcesses: string;
+    gamingRefreshProcesses: string;
+    gamingPingHost: string;
+    gamingStartSession: string;
+    gamingStopSession: string;
+    gamingSessionActive: string;
+    gamingSessionDuration: string;
+    gamingPresentMonMissingTitle: string;
+    gamingPresentMonMissingDesc: string;
+    gamingPresentMonReady: string;
+    gamingFpsCurrent: string;
+    gamingFpsAvg: string;
+    gamingFps1Low: string;
+    gamingFps01Low: string;
+    gamingFpsMax: string;
+    gamingFrameTimeAvg: string;
+    gamingFrameTimeP95: string;
+    gamingFramePacing: string;
+    gamingSpikes: string;
+    gamingStutters: string;
+    gamingDroppedFrames: string;
+    gamingFrameTimeChartTitle: string;
+    gamingNetworkLatencyTitle: string;
+    gamingPingLabel: string;
+    gamingPacketLossLabel: string;
+    gamingInputLatencyLabel: string;
+    gamingThrottlingLabel: string;
+    gamingThrottlingDetected: string;
+    gamingThrottlingNormal: string;
+    gamingBottleneckTitle: string;
+    gamingBottleneckWarming: string;
+    gamingHistoryTitle: string;
+    gamingHistoryEmpty: string;
+    gamingClearHistory: string;
+    gamingCompareTitle: string;
+    gamingCompareSelectA: string;
+    gamingCompareSelectB: string;
+    techTitle: string;
+    techSubtitle: string;
+    techStatusSupported: string;
+    techStatusDetected: string;
+    techStatusActive: string;
+    techStatusUnsupported: string;
+    techStatusUnavailable: string;
+    techStatusRequiresGame: string;
+    techStatusRequiresDriver: string;
+    techArchitectureLabel: string;
+    techDriverLabel: string;
+    techRebarLabel: string;
+    displayTitle: string;
+    displayPrimaryLabel: string;
+    displayResolutionLabel: string;
+    displayRefreshRateLabel: string;
+    displayConnectionLabel: string;
+    displayActiveGpuLabel: string;
+    displayDirectXLabel: string;
+    displayHagsLabel: string;
+    displayGameModeLabel: string;
+    displayHdrLabel: string;
+    displayVrrLabel: string;
+    laptopTitle: string;
+    laptopBatteryLabel: string;
+    laptopPowerStateLabel: string;
+    laptopPluggedIn: string;
+    laptopOnBattery: string;
+    laptopCharging: string;
+    laptopHealthLabel: string;
+    laptopPowerPlanLabel: string;
+    laptopHybridGpuLabel: string;
+    laptopDesktopNotice: string;
+    cleanerTitle: string;
+    cleanerSubtitle: string;
+    cleanerSafetyBannerTitle: string;
+    cleanerSafetyBannerDesc: string;
+    cleanerScanBtn: string;
+    cleanerScanningBtn: string;
+    cleanerCleanBtn: string;
+    cleanerCleaningBtn: string;
+    cleanerSelectSafeDefaults: string;
+    cleanerEstimatedTotal: string;
+    cleanerOptInBadge: string;
+    cleanerOptInWarningDesc: string;
+    cleanerPathsLabel: string;
+    cleanerConfirmTitle: string;
+    cleanerConfirmDesc: string;
+    cleanerConfirmAction: string;
+    cleanerCancelAction: string;
+    cleanerProgressCleaning: string;
+    cleanerReportTitle: string;
+    cleanerReportFreed: string;
+    cleanerReportRemoved: string;
+    cleanerReportSkipped: string;
+    cleanerCatOldTempTitle: string;
+    cleanerCatOldTempDesc: string;
+    cleanerCatUserTempTitle: string;
+    cleanerCatUserTempDesc: string;
+    cleanerCatAppCacheTitle: string;
+    cleanerCatAppCacheDesc: string;
+    cleanerCatSecretAreaCacheTitle: string;
+    cleanerCatSecretAreaCacheDesc: string;
+    cleanerCatThumbnailTitle: string;
+    cleanerCatThumbnailDesc: string;
+    cleanerCatShaderTitle: string;
+    cleanerCatShaderDesc: string;
+    cleanerCatRecycleTitle: string;
+    cleanerCatRecycleDesc: string;
+    cleanerCatBrowserTitle: string;
+    cleanerCatBrowserDesc: string;
   };
 }
 
@@ -573,6 +906,7 @@ const EN: LauncherTranslations = {
     downloads: 'Downloads',
     extras: 'Extras',
     requests: 'Requests',
+    hardwareMonitor: 'Hardware Monitor',
     settings: 'Settings',
     switchLight: 'Switch to Light mode',
     switchDark: 'Switch to Dark mode',
@@ -680,6 +1014,45 @@ const EN: LauncherTranslations = {
     torrentSavedToast: 'qBittorrent settings saved',
     torrentManageSetupBtn: 'Auto Install / Update qBittorrent',
     replaySetupBtn: 'Welcome Setup',
+    closeBehaviorTitle: 'Application Closing Behavior',
+    closeBehaviorDesc: 'Choose whether clicking the window close button minimizes SecretArea to the system tray or exits completely.',
+    closeBehaviorMinimizeTray: 'Minimize to System Tray',
+    closeBehaviorExit: 'Exit Application Completely',
+    exitAppTitle: 'Full Shutdown',
+    exitAppDesc: 'Immediately stop background hardware/gaming monitors, tray icon, and close SecretArea completely.',
+    exitAppBtn: 'Exit Application Completely',
+    exitAppConfirmBtn: 'Confirm Full Exit',
+    exitAppCancelBtn: 'Cancel',
+    exitAppWebHint: 'Full application shutdown is only available in the SecretArea.exe Desktop App.',
+  },
+  customTheme: {
+    sectionTitle: 'Custom Theme Builder',
+    sectionSubtitle: 'Design your default SecretArea palette, accent color, button geometry, and card surface.',
+    enableLabel: 'Enable Custom Default Theme',
+    surfaceLabel: 'Base Surface',
+    surfaceMidnight: 'Midnight Slate',
+    surfaceObsidian: 'Pure Obsidian',
+    surfaceAbyss: 'Deep Abyss',
+    surfaceDaylight: 'Clean Daylight',
+    accentColorLabel: 'Accent Color',
+    customHexLabel: 'Custom Hex',
+    buttonStyleLabel: 'Button Style',
+    btnRounded: 'Rounded',
+    btnPill: 'Pill',
+    btnSharp: 'Sharp',
+    cardRadiusLabel: 'Card Corners',
+    cardSharp: 'Sharp',
+    cardMedium: 'Balanced',
+    cardSoft: 'Soft',
+    glassBlurLabel: 'Frosted Glass Blur',
+    glassBlurDesc: 'Subtle translucent blur on panels and cards',
+    previewLabel: 'Live Preview',
+    previewTitle: 'SecretArea Custom Look',
+    previewPrimaryBtn: 'Primary Action',
+    previewSecondaryBtn: 'Secondary',
+    resetBtn: 'Reset Custom Theme',
+    consoleOverrideNote: 'Note: Turning Custom Theme on automatically switches out of PS5/Xbox console theme.',
+    summaryCustomPrefix: 'Custom',
   },
   downloads: {
     pageTitle: 'Download Manager',
@@ -1023,6 +1396,61 @@ const EN: LauncherTranslations = {
     openSettingsBtn: 'Open Settings',
     webPreviewNotice: 'Automatic installation runs inside SecretArea.exe Desktop App on Windows. In Web Preview, use the official link below.',
   },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (FPS & Frame Time Engine)',
+    sectionSubtitle: 'Automatic detection, official GitHub release updates, and integrity verification for real ETW gaming telemetry.',
+    modalTitleInstall: 'Enable Gaming Performance Monitoring',
+    modalTitleUpdate: 'Update Intel PresentMon',
+    modalTitleRepair: 'Repair PresentMon Installation',
+    modalTitleManage: 'Intel PresentMon Dependency Manager',
+    modalSubtitle: 'Official Intel PresentMon ETW telemetry engine managed automatically by SecretArea Desktop.',
+    benefitsHeading: 'What PresentMon enables in SecretArea',
+    benefit1: 'Accurate real-time FPS, 1% Low & 0.1% Low FPS via zero-injection ETW',
+    benefit2: 'Frame time pacing, spike & stutter detection, and display latency capture',
+    benefit3: 'Hardware correlation & multi-sample CPU/GPU bottleneck diagnosis',
+    stepChecking: 'Checking PresentMon installation & latest GitHub release...',
+    stepDownloading: 'Downloading official PresentMon x64 binary...',
+    stepVerifying: 'Verifying SHA-256 checksum & Intel Authenticode signature...',
+    stepInstalling: 'Installing & verifying CLI compatibility...',
+    stepCompleted: 'PresentMon is installed, verified, and ready for FPS monitoring.',
+    stepCancelled: 'Download cancelled cleanly. No files were changed.',
+    statusReady: 'Installed & Ready',
+    statusNotInstalled: 'Not Installed',
+    statusUpdateAvailable: 'Update Available',
+    statusRepairRequired: 'Repair Needed',
+    statusNewerInstalled: 'Up to Date (Newer Local Build)',
+    statusDeclined: 'Disabled by User (Optional)',
+    statusChecking: 'Checking...',
+    statusWebPreview: 'Windows Desktop Only',
+    installedVersionLabel: 'Installed Version',
+    latestVersionLabel: 'Latest Official',
+    downloadSizeLabel: 'Download Size',
+    installPathLabel: 'Install Location',
+    sourceLabel: 'Official Source',
+    notInstalledValue: 'Not installed',
+    allowInstallBtn: 'Allow & Install',
+    notNowBtn: 'Not Now',
+    updateNowBtn: 'Update Now',
+    laterBtn: 'Later',
+    repairBtn: 'Repair Installation',
+    reinstallBtn: 'Reinstall PresentMon',
+    checkUpdatesBtn: 'Check for Updates',
+    checkingBtn: 'Checking...',
+    cancelDownloadBtn: 'Cancel',
+    retryBtn: 'Retry',
+    doneBtn: 'Done',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Install / Enable PresentMon',
+    managePresentMonBtn: 'Manage PresentMon',
+    shaVerifiedLabel: 'SHA-256 Digest Verified',
+    sigVerifiedLabel: 'Intel Corporation Signature Verified',
+    consentNote: 'SecretArea never downloads or installs PresentMon without your explicit approval. Assets are fetched exclusively over HTTPS from GitHub Releases and verified via SHA-256 and Intel Authenticode signature.',
+    runningConflictMsg: 'Another PresentMon process is running on your PC. Close it cleanly, then click Retry or Check for Updates.',
+    corruptedIssuePrefix: 'Detected installation issue',
+    declinedBannerTitle: 'PresentMon FPS monitoring was skipped',
+    declinedBannerDesc: 'SecretArea continues working normally with CPU, GPU, RAM, storage, and ping telemetry. You can install PresentMon anytime to unlock live FPS & frame time graphs.',
+    lookupErrorMsg: 'Unable to check GitHub Releases for the latest PresentMon version right now.',
+  },
   onboarding: {
     stepWelcome: 'Welcome',
     stepAppearance: 'Theme & Language',
@@ -1088,6 +1516,244 @@ const EN: LauncherTranslations = {
     changeLaterHint: 'You can change any theme, language, download folder, or qBittorrent integration setting anytime from the Settings page.',
     enterAppBtn: 'Enter SecretArea Desktop',
     openSettingsPageBtn: 'Review in Settings',
+    whatIsSecretAreaTitle: 'What is SecretArea?',
+    whatIsSecretAreaBody: 'SecretArea is an all-in-one Windows game hub, PC compatibility checker, and download manager built to keep your entire library organized in one clean workspace.',
+    whatIsSecretAreaPoint1: 'Browse curated Games, Hypervisor, SteamTools, PS5, and Extras catalogs with instant "Can Run It" checks against your PC specs.',
+    whatIsSecretAreaPoint2: 'Download directly with built-in resume support for Direct links, MediaFire, Mega, and in-app browser captures, plus optional qBittorrent sync.',
+    whatIsSecretAreaPoint3: 'Switch anytime between Dark, Light, PlayStation 5, Xbox Nexus, or your own Custom Theme in English, French, Spanish, or RTL Arabic.',
+    stepGuideLabel: 'What this step does',
+    step1Guide: 'This quick 5-step walkthrough introduces SecretArea and helps you configure visual style, language, and optional torrent tools before opening the main app.',
+    step2Guide: 'Pick a preset theme (Dark, Light, PS5, Xbox) or open the Custom Theme Builder to tune colors, buttons, and corners. Select your interface language below — everything previews immediately.',
+    step3Guide: 'SecretArea scans your computer to check if qBittorrent is already installed so your current setup stays untouched. If it is missing, you can auto-install the official release or skip this step.',
+    step4Guide: 'Connect SecretArea to qBittorrent local Web UI (127.0.0.1 only) so magnet links and .torrent files show live speed, seeds, peers, ETA, and ratio right inside SecretArea.',
+    step5Guide: 'Review the summary of choices you just configured. All of these options stay unlocked anytime inside the Settings page.',
+    platformHint: 'Adaptive desktop & compact viewport UI',
+  },
+  updater: {
+    title: 'About & Updates',
+    subtitle: 'SecretArea Desktop App',
+    currentVersionLabel: 'Current Installed Version',
+    checkBtn: 'Check for Updates',
+    checkingBtn: 'Checking...',
+    upToDateMsg: "You're using the latest version.",
+    checkingMsg: 'Checking GitHub Releases for a newer version...',
+    newVersionAvailable: 'New Version Available',
+    whatsNewTitle: "What's New in This Update",
+    whatsNewCountSuffix: 'changes',
+    categoryFeature: 'New',
+    categoryImprovement: 'Improved',
+    categoryFix: 'Fixed',
+    downloadUpdateBtn: 'Download Update',
+    downloadingPrefix: 'Downloading',
+    readyToInstall: 'is ready to install',
+    readyToInstallDesc: 'Click Install and Restart to update from your previous version now, or postpone to keep using SecretArea and finish updating when you close the app.',
+    installRestartBtn: 'Install and Restart',
+    postponeBtn: 'Postpone',
+    laterBtn: 'Later',
+    detailsBtn: "What's New",
+    toastUpdateAvailable: 'Update Available',
+    toastUpdateReady: 'Update Ready',
+    toastDownloading: 'Downloading',
+    installedVersionLabel: 'Installed version',
+    restartHint: 'Restart SecretArea to finish installing.',
+    lastCheckedLabel: 'Last checked',
+    errorFallback: 'Unable to check for updates right now.',
+    preparingDownload: 'Preparing download...',
+  },
+  hardware: {
+    pageTitle: 'Hardware Monitor',
+    pageSubtitle: 'Real-time system telemetry, temperatures, storage throughput, and network performance.',
+    startMonitoring: 'Start Monitoring',
+    stopMonitoring: 'Stop Monitoring',
+    refreshNow: 'Refresh Snapshot',
+    statusActive: 'Monitoring Active',
+    statusStopped: 'Monitoring Paused',
+    statusWebPreview: 'Web Preview',
+    intervalLabel: 'Refresh Interval',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/A',
+    unsupportedHint: 'Sensor unsupported or unavailable on this system',
+    webPreviewTitle: 'Desktop Telemetry Required',
+    webPreviewBody: 'Web Preview cannot access low-level OS hardware sensors directly. Launch the SecretArea Desktop app to read live CPU, GPU, RAM, storage, and network telemetry.',
+    sectionOverview: 'System Overview',
+    sectionPerformance: 'Live Performance',
+    sectionDetails: 'Hardware Details',
+    cpuTitle: 'Processor (CPU)',
+    gpuTitle: 'Graphics (GPU)',
+    ramTitle: 'Memory (RAM)',
+    storageTitle: 'Storage Drives',
+    networkTitle: 'Network Activity',
+    modelLabel: 'Model',
+    manufacturerLabel: 'Manufacturer',
+    usageLabel: 'Usage',
+    temperatureLabel: 'Temperature',
+    clockSpeedLabel: 'Clock Speed',
+    coresThreadsLabel: 'Cores / Threads',
+    coresUnit: 'Cores',
+    threadsUnit: 'Threads',
+    powerLabel: 'Power Draw',
+    perCoreUsageLabel: 'Logical Thread Load',
+    vramLabel: 'VRAM Usage',
+    fanSpeedLabel: 'Fan Speed',
+    noGpuDetected: 'No GPU telemetry reported by this host.',
+    totalRamLabel: 'Total RAM',
+    usedRamLabel: 'Used RAM',
+    availableRamLabel: 'Available RAM',
+    memoryTypeLabel: 'Memory Type',
+    memorySpeedLabel: 'Memory Speed',
+    driveTypeLabel: 'Drive Type',
+    capacityLabel: 'Total Capacity',
+    usedSpaceLabel: 'Used Space',
+    freeSpaceLabel: 'Free Space',
+    readSpeedLabel: 'Read Speed',
+    writeSpeedLabel: 'Write Speed',
+    noStorageDetected: 'No storage drives reported by this host.',
+    activeInterfaceLabel: 'Active Interface',
+    linkStateLabel: 'Link State',
+    linkSpeedLabel: 'Link Speed',
+    downloadSpeedLabel: 'Download Speed',
+    uploadSpeedLabel: 'Upload Speed',
+    totalRxLabel: 'Total Received',
+    totalTxLabel: 'Total Sent',
+    noNetworkDetected: 'No active network interface detected.',
+    uptimeLabel: 'System Uptime',
+    hostLabel: 'Host',
+    chartCpuRamTitle: 'CPU & RAM Utilization (%)',
+    chartGpuTempTitle: 'GPU Load (%) & Temperatures (°C)',
+    chartNetworkTitle: 'Network Throughput',
+    chartCpuLoad: 'CPU Load',
+    chartRamLoad: 'RAM Load',
+    chartGpuLoad: 'GPU Load',
+    chartCpuTemp: 'CPU Temp',
+    chartGpuTemp: 'GPU Temp',
+    chartNetDownload: 'Download',
+    chartNetUpload: 'Upload',
+    peakLabel: 'Peak',
+    avgLabel: 'Avg',
+    lastUpdatedLabel: 'Last sample',
+    tabOverview: 'System Telemetry',
+    tabGaming: 'Gaming & Bottlenecks',
+    tabTechnologies: 'GPU Tech, Display & Laptop',
+    tabCleaner: 'PC Cleaner',
+    cpuSeriesLabel: 'Series',
+    cpuGenerationLabel: 'Generation',
+    ramChannelsLabel: 'Channel Mode',
+    ramSlotsLabel: 'Populated Slots',
+    gamingTitle: 'Gaming Performance Monitor',
+    gamingSubtitle: 'Session-based FPS & frame-time capture (via PresentMon ETW), ping monitoring, hardware correlation, and multi-sample bottleneck analysis.',
+    gamingSelectProcess: 'Target Game / Process',
+    gamingAllProcesses: 'Foreground Active Window',
+    gamingRefreshProcesses: 'Refresh Processes',
+    gamingPingHost: 'Latency Probe Host',
+    gamingStartSession: 'Start Gaming Session',
+    gamingStopSession: 'Stop Gaming Session',
+    gamingSessionActive: 'Session Active',
+    gamingSessionDuration: 'Duration',
+    gamingPresentMonMissingTitle: 'PresentMon ETW Not Installed — FPS Metrics Show N/A',
+    gamingPresentMonMissingDesc: 'SecretArea never fakes or injects overlays into games. Place Intel PresentMon CLI (PresentMon.exe) in resources/bin/PresentMon.exe or install it under %LOCALAPPDATA%\\Intel\\PresentMon to enable real DX11/DX12/Vulkan/OpenGL FPS, 1% Low, and Frame Time capture.',
+    gamingPresentMonReady: 'PresentMon ETW Ready',
+    gamingFpsCurrent: 'Current FPS',
+    gamingFpsAvg: 'Average FPS',
+    gamingFps1Low: '1% Low FPS',
+    gamingFps01Low: '0.1% Low FPS',
+    gamingFpsMax: 'Max FPS',
+    gamingFrameTimeAvg: 'Avg Frame Time',
+    gamingFrameTimeP95: 'P95 Frame Time',
+    gamingFramePacing: 'Frame Pacing Stability',
+    gamingSpikes: 'Frame Spikes',
+    gamingStutters: 'Stutters (>2.2x)',
+    gamingDroppedFrames: 'Dropped Frames',
+    gamingFrameTimeChartTitle: 'Real-Time Frame Time History (ms)',
+    gamingNetworkLatencyTitle: 'Network & Thermal Telemetry',
+    gamingPingLabel: 'ICMP Ping',
+    gamingPacketLossLabel: 'Packet Loss',
+    gamingInputLatencyLabel: 'Input Latency',
+    gamingThrottlingLabel: 'Thermal Throttling',
+    gamingThrottlingDetected: 'Throttling Detected',
+    gamingThrottlingNormal: 'Nominal Temps',
+    gamingBottleneckTitle: 'Multi-Sample Bottleneck Analysis',
+    gamingBottleneckWarming: 'Collecting multi-sample rolling baseline (requires at least 5 consecutive samples to prevent false alerts)...',
+    gamingHistoryTitle: 'Local Gaming Session History',
+    gamingHistoryEmpty: 'No saved gaming sessions yet. Start and stop a session to record FPS, thermal, and bottleneck metrics.',
+    gamingClearHistory: 'Clear History',
+    gamingCompareTitle: 'Compare Two Sessions',
+    gamingCompareSelectA: 'Session A',
+    gamingCompareSelectB: 'Session B',
+    techTitle: 'Graphics Technologies & Hardware Capabilities',
+    techSubtitle: 'Verified GPU architecture support matrix across NVIDIA, AMD, and Intel. Game-level features are marked honestly without fake global activation.',
+    techStatusSupported: 'Supported',
+    techStatusDetected: 'Detected',
+    techStatusActive: 'Active',
+    techStatusUnsupported: 'Unsupported',
+    techStatusUnavailable: 'Unavailable',
+    techStatusRequiresGame: 'Requires Game Integration',
+    techStatusRequiresDriver: 'Requires Driver / SDK',
+    techArchitectureLabel: 'Architecture',
+    techDriverLabel: 'Driver Version',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Display & Windows Gaming Settings',
+    displayPrimaryLabel: 'Primary Display',
+    displayResolutionLabel: 'Resolution',
+    displayRefreshRateLabel: 'Refresh Rate',
+    displayConnectionLabel: 'Connection Type',
+    displayActiveGpuLabel: 'Active Rendering GPU',
+    displayDirectXLabel: 'DirectX Capability',
+    displayHagsLabel: 'Hardware-Accelerated GPU Scheduling',
+    displayGameModeLabel: 'Windows Game Mode',
+    displayHdrLabel: 'HDR Support',
+    displayVrrLabel: 'VRR / Adaptive Sync',
+    laptopTitle: 'Laptop & Power Telemetry',
+    laptopBatteryLabel: 'Battery Charge',
+    laptopPowerStateLabel: 'Power Source',
+    laptopPluggedIn: 'AC Plugged In',
+    laptopOnBattery: 'On Battery',
+    laptopCharging: 'Charging',
+    laptopHealthLabel: 'Battery Health',
+    laptopPowerPlanLabel: 'Active Power Plan',
+    laptopHybridGpuLabel: 'Hybrid GPU Mode',
+    laptopDesktopNotice: 'No system battery detected — running in Desktop AC configuration.',
+    cleanerTitle: 'Safe PC Cleaner & Cache Optimizer',
+    cleanerSubtitle: 'Scan temporary folders first, inspect exact paths and byte counts, then confirm cleanup.',
+    cleanerSafetyBannerTitle: 'Strict Personal Data & Game File Protection',
+    cleanerSafetyBannerDesc: 'SecretArea NEVER scans or deletes Desktop, Documents, Downloads, Pictures, Videos, Game installs, Saves, Mods, Windows/System32, or browser passwords, bookmarks, cookies, and history. Locked files are safely skipped.',
+    cleanerScanBtn: 'Scan Safe Locations',
+    cleanerScanningBtn: 'Scanning...',
+    cleanerCleanBtn: 'Review & Clean Selected',
+    cleanerCleaningBtn: 'Cleaning...',
+    cleanerSelectSafeDefaults: 'Select Recommended Safe Defaults',
+    cleanerEstimatedTotal: 'Selected to Free',
+    cleanerOptInBadge: 'Opt-In Caution',
+    cleanerOptInWarningDesc: 'Opt-in category (unchecked by default). Clearing shader cache may cause temporary stutter while games recompile shaders; Recycle Bin permanently removes trashed files.',
+    cleanerPathsLabel: 'Target Paths',
+    cleanerConfirmTitle: 'Confirm PC Cleanup',
+    cleanerConfirmDesc: 'Review the selected temporary and cache categories below before permanently removing files.',
+    cleanerConfirmAction: 'Confirm & Clean Files',
+    cleanerCancelAction: 'Cancel',
+    cleanerProgressCleaning: 'Cleaning selected caches...',
+    cleanerReportTitle: 'Cleanup Completed',
+    cleanerReportFreed: 'Space Freed',
+    cleanerReportRemoved: 'Files Removed',
+    cleanerReportSkipped: 'Locked Files Skipped',
+    cleanerCatOldTempTitle: 'Old System Temporary Files (>48h)',
+    cleanerCatOldTempDesc: 'Expired system temp files under Windows\\Temp or /tmp older than 48 hours.',
+    cleanerCatUserTempTitle: 'User Temp Folder',
+    cleanerCatUserTempDesc: 'User application temporary files inside %TEMP%.',
+    cleanerCatAppCacheTitle: 'App Temporary Caches',
+    cleanerCatAppCacheDesc: 'Safe crash dumps, temp logs, and non-user updater caches.',
+    cleanerCatSecretAreaCacheTitle: 'SecretArea Launcher Cache',
+    cleanerCatSecretAreaCacheDesc: 'Internal Chromium HTTP cache, GPU cache, and temp downloads inside SecretArea.',
+    cleanerCatThumbnailTitle: 'Windows Explorer Thumbnail Cache',
+    cleanerCatThumbnailDesc: 'Explorer thumbcache_*.db files (Windows rebuilds automatically).',
+    cleanerCatShaderTitle: 'DirectX / GPU Shader Cache',
+    cleanerCatShaderDesc: 'Compiled D3DSCache & GPU vendor shader caches. Games will rebuild shaders on next launch.',
+    cleanerCatRecycleTitle: 'Windows Recycle Bin',
+    cleanerCatRecycleDesc: 'Permanently empties items currently sitting in the Recycle Bin.',
+    cleanerCatBrowserTitle: 'Browser HTTP Cache Only (No History/Cookies)',
+    cleanerCatBrowserDesc: 'Clears ONLY Cache / Code Cache folders in Edge, Chrome, or Firefox. Preserves logins, cookies, bookmarks, and history.',
   },
 };
 
@@ -1099,6 +1765,7 @@ const FR: LauncherTranslations = {
     downloads: 'Téléchargements',
     extras: 'Extras',
     requests: 'Demandes',
+    hardwareMonitor: 'Moniteur matériel',
     settings: 'Paramètres',
     switchLight: 'Passer en mode clair',
     switchDark: 'Passer en mode sombre',
@@ -1206,6 +1873,45 @@ const FR: LauncherTranslations = {
     torrentSavedToast: 'Paramètres qBittorrent enregistrés',
     torrentManageSetupBtn: 'Installer / Mettre à jour qBittorrent',
     replaySetupBtn: 'Assistant de bienvenue',
+    closeBehaviorTitle: 'Comportement à la fermeture',
+    closeBehaviorDesc: 'Choisissez si le bouton de fermeture réduit SecretArea dans la zone de notification ou ferme complètement l’application.',
+    closeBehaviorMinimizeTray: 'Réduire dans la zone de notification',
+    closeBehaviorExit: 'Quitter complètement l’application',
+    exitAppTitle: 'Fermeture complète',
+    exitAppDesc: 'Arrête immédiatement les moniteurs matériels/gaming, retire l’icône de la barre d’état et ferme SecretArea.',
+    exitAppBtn: 'Quitter complètement',
+    exitAppConfirmBtn: 'Confirmer la fermeture',
+    exitAppCancelBtn: 'Annuler',
+    exitAppWebHint: 'La fermeture complète s’applique uniquement dans SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'Créateur de thème personnalisé',
+    sectionSubtitle: 'Personnalisez votre palette par défaut, la couleur d’accentuation, les boutons et le style des cartes.',
+    enableLabel: 'Activer le thème personnalisé',
+    surfaceLabel: 'Surface de base',
+    surfaceMidnight: 'Ardoise Nuit',
+    surfaceObsidian: 'Obsidienne Pure',
+    surfaceAbyss: 'Abysse Profond',
+    surfaceDaylight: 'Clair Lumineux',
+    accentColorLabel: 'Couleur d’accentuation',
+    customHexLabel: 'Hex personnalisé',
+    buttonStyleLabel: 'Forme des boutons',
+    btnRounded: 'Arrondi',
+    btnPill: 'Pilule',
+    btnSharp: 'Net',
+    cardRadiusLabel: 'Coins des cartes',
+    cardSharp: 'Anguleux',
+    cardMedium: 'Équilibré',
+    cardSoft: 'Doux',
+    glassBlurLabel: 'Flou vitré',
+    glassBlurDesc: 'Effet de flou translucide sur les panneaux',
+    previewLabel: 'Aperçu en direct',
+    previewTitle: 'Style personnalisé SecretArea',
+    previewPrimaryBtn: 'Action principale',
+    previewSecondaryBtn: 'Secondaire',
+    resetBtn: 'Réinitialiser le thème',
+    consoleOverrideNote: 'Note : activer le thème personnalisé désactive les thèmes console PS5 / Xbox.',
+    summaryCustomPrefix: 'Personnalisé',
   },
   downloads: {
     pageTitle: 'Gestionnaire de téléchargements',
@@ -1549,6 +2255,61 @@ const FR: LauncherTranslations = {
     openSettingsBtn: 'Ouvrir les paramètres',
     webPreviewNotice: 'L’installation automatique s’exécute dans SecretArea.exe sur Windows. Utilisez le lien officiel ci-dessous en aperçu Web.',
   },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (Moteur FPS et Frame Time)',
+    sectionSubtitle: 'Détection automatique, mises à jour officielles via GitHub Releases et vérification cryptographique.',
+    modalTitleInstall: 'Activer la surveillance des performances en jeu',
+    modalTitleUpdate: 'Mettre à jour Intel PresentMon',
+    modalTitleRepair: 'Réparer l’installation PresentMon',
+    modalTitleManage: 'Gestionnaire Intel PresentMon',
+    modalSubtitle: 'Moteur officiel de télémétrie ETW géré automatiquement par SecretArea Desktop.',
+    benefitsHeading: 'Fonctionnalités débloquées avec PresentMon',
+    benefit1: 'Mesure précise des FPS, 1% Low et 0.1% Low sans aucune injection en jeu',
+    benefit2: 'Analyse du temps d’image (frame time), saccades et latence d’affichage',
+    benefit3: 'Corrélation matérielle CPU/GPU et diagnostic des goulots d’étranglement',
+    stepChecking: 'Vérification locale et recherche de la dernière version GitHub...',
+    stepDownloading: 'Téléchargement du binaire officiel PresentMon x64...',
+    stepVerifying: 'Vérification SHA-256 et signature numérique Intel...',
+    stepInstalling: 'Installation et test de compatibilité CLI...',
+    stepCompleted: 'PresentMon est installé, vérifié et prêt pour le suivi FPS.',
+    stepCancelled: 'Téléchargement annulé proprement.',
+    statusReady: 'Installé et prêt',
+    statusNotInstalled: 'Non installé',
+    statusUpdateAvailable: 'Mise à jour disponible',
+    statusRepairRequired: 'Réparation requise',
+    statusNewerInstalled: 'À jour (version locale plus récente)',
+    statusDeclined: 'Ignoré par l’utilisateur',
+    statusChecking: 'Vérification...',
+    statusWebPreview: 'Windows Desktop uniquement',
+    installedVersionLabel: 'Version installée',
+    latestVersionLabel: 'Dernière officielle',
+    downloadSizeLabel: 'Taille du téléchargement',
+    installPathLabel: 'Emplacement',
+    sourceLabel: 'Source officielle',
+    notInstalledValue: 'Non installé',
+    allowInstallBtn: 'Autoriser et installer',
+    notNowBtn: 'Pas maintenant',
+    updateNowBtn: 'Mettre à jour',
+    laterBtn: 'Plus tard',
+    repairBtn: 'Réparer l’installation',
+    reinstallBtn: 'Réinstaller PresentMon',
+    checkUpdatesBtn: 'Vérifier les mises à jour',
+    checkingBtn: 'Vérification...',
+    cancelDownloadBtn: 'Annuler',
+    retryBtn: 'Réessayer',
+    doneBtn: 'Terminer',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Installer / Activer PresentMon',
+    managePresentMonBtn: 'Gérer PresentMon',
+    shaVerifiedLabel: 'Empreinte SHA-256 vérifiée',
+    sigVerifiedLabel: 'Signature Intel Corporation vérifiée',
+    consentNote: 'SecretArea ne télécharge ni n’installe jamais PresentMon sans votre accord. Les fichiers proviennent exclusivement de GitHub Releases en HTTPS avec vérification SHA-256 et signature Intel.',
+    runningConflictMsg: 'Un processus PresentMon est actif. Fermez-le puis réessayez.',
+    corruptedIssuePrefix: 'Problème détecté',
+    declinedBannerTitle: 'Suivi FPS PresentMon désactivé',
+    declinedBannerDesc: 'SecretArea reste 100% fonctionnel (CPU, GPU, RAM, stockage, ping). Vous pouvez installer PresentMon à tout moment.',
+    lookupErrorMsg: 'Impossible de consulter GitHub Releases pour PresentMon actuellement.',
+  },
   onboarding: {
     stepWelcome: 'Bienvenue',
     stepAppearance: 'Thème et langue',
@@ -1614,6 +2375,244 @@ const FR: LauncherTranslations = {
     changeLaterHint: 'Vous pouvez modifier le thème, la langue, le dossier ou les paramètres qBittorrent à tout moment dans la page Paramètres.',
     enterAppBtn: 'Entrer dans SecretArea',
     openSettingsPageBtn: 'Ouvrir les Paramètres',
+    whatIsSecretAreaTitle: 'Qu’est-ce que SecretArea ?',
+    whatIsSecretAreaBody: 'SecretArea est un lanceur Windows tout-en-un qui regroupe un catalogue de jeux et d’outils, la vérification de compatibilité PC et un gestionnaire de téléchargements.',
+    whatIsSecretAreaPoint1: 'Parcourez Jeux, Hypervisor, SteamTools, PS5 et Extras avec la vérification matérielle « Can Run It » adaptée à votre PC.',
+    whatIsSecretAreaPoint2: 'Téléchargez rapidement via liens directs, MediaFire, Mega et navigateur intégré, ou synchronisez avec qBittorrent.',
+    whatIsSecretAreaPoint3: 'Basculez à tout moment entre Sombre, Clair, PS5, Xbox Nexus ou votre Thème personnalisé en 4 langues dont l’arabe RTL.',
+    stepGuideLabel: 'Explication de cette étape',
+    step1Guide: 'Cet assistant rapide en 5 étapes présente SecretArea et vous aide à régler l’apparence, la langue et l’option qBittorrent avant l’ouverture.',
+    step2Guide: 'Choisissez un thème prêt à l’emploi ou utilisez le Créateur de thème personnalisé (couleurs, boutons, arrondis) et votre langue : l’aperçu est immédiat.',
+    step3Guide: 'SecretArea vérifie si qBittorrent est déjà installé afin de préserver votre configuration. S’il est absent, vous pouvez l’installer ou passer cette étape.',
+    step4Guide: 'Connectez SecretArea à la Web UI locale (127.0.0.1 uniquement) pour afficher vitesse, sources, pairs, ETA et ratio des magnets et .torrent.',
+    step5Guide: 'Vérifiez le récapitulatif de vos choix ci-dessous. Tous ces réglages restent modifiables à tout moment dans les Paramètres.',
+    platformHint: 'Interface réactive petit et grand écran',
+  },
+  updater: {
+    title: 'À propos & Mises à jour',
+    subtitle: 'SecretArea Desktop',
+    currentVersionLabel: 'Version installée actuelle',
+    checkBtn: 'Rechercher des mises à jour',
+    checkingBtn: 'Recherche...',
+    upToDateMsg: 'Vous utilisez déjà la dernière version.',
+    checkingMsg: 'Vérification des nouvelles versions sur GitHub Releases...',
+    newVersionAvailable: 'Nouvelle version disponible',
+    whatsNewTitle: 'Nouveautés de cette version',
+    whatsNewCountSuffix: 'nouveautés',
+    categoryFeature: 'Nouveau',
+    categoryImprovement: 'Amélioré',
+    categoryFix: 'Corrigé',
+    downloadUpdateBtn: 'Télécharger la mise à jour',
+    downloadingPrefix: 'Téléchargement',
+    readyToInstall: 'est prête à être installée',
+    readyToInstallDesc: 'Cliquez sur Installer et redémarrer pour appliquer la mise à jour maintenant, ou reportez pour continuer à utiliser SecretArea.',
+    installRestartBtn: 'Installer et redémarrer',
+    postponeBtn: 'Plus tard',
+    laterBtn: 'Plus tard',
+    detailsBtn: 'Nouveautés',
+    toastUpdateAvailable: 'Mise à jour disponible',
+    toastUpdateReady: 'Mise à jour prête',
+    toastDownloading: 'Téléchargement',
+    installedVersionLabel: 'Version installée',
+    restartHint: 'Redémarrez SecretArea pour terminer l’installation.',
+    lastCheckedLabel: 'Dernière vérification',
+    errorFallback: 'Impossible de vérifier les mises à jour pour le moment.',
+    preparingDownload: 'Préparation du téléchargement...',
+  },
+  hardware: {
+    pageTitle: 'Moniteur matériel',
+    pageSubtitle: 'Télémétrie système en temps réel : températures, disques, mémoire et réseau.',
+    startMonitoring: 'Démarrer le suivi',
+    stopMonitoring: 'Arrêter le suivi',
+    refreshNow: 'Actualiser',
+    statusActive: 'Suivi actif',
+    statusStopped: 'Suivi en pause',
+    statusWebPreview: 'Aperçu Web',
+    intervalLabel: 'Intervalle',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/D',
+    unsupportedHint: 'Capteur non pris en charge sur ce système',
+    webPreviewTitle: 'Application Bureau requise',
+    webPreviewBody: 'L’aperçu Web ne peut pas lire les capteurs matériels du système. Lancez SecretArea Desktop pour afficher la télémétrie CPU, GPU, RAM, stockage et réseau.',
+    sectionOverview: 'Vue d’ensemble',
+    sectionPerformance: 'Performances en direct',
+    sectionDetails: 'Détails du matériel',
+    cpuTitle: 'Processeur (CPU)',
+    gpuTitle: 'Carte graphique (GPU)',
+    ramTitle: 'Mémoire (RAM)',
+    storageTitle: 'Disques de stockage',
+    networkTitle: 'Activité réseau',
+    modelLabel: 'Modèle',
+    manufacturerLabel: 'Fabricant',
+    usageLabel: 'Utilisation',
+    temperatureLabel: 'Température',
+    clockSpeedLabel: 'Fréquence',
+    coresThreadsLabel: 'Cœurs / Threads',
+    coresUnit: 'Cœurs',
+    threadsUnit: 'Threads',
+    powerLabel: 'Consommation',
+    perCoreUsageLabel: 'Charge par thread logique',
+    vramLabel: 'VRAM utilisée',
+    fanSpeedLabel: 'Ventilateur',
+    noGpuDetected: 'Aucune donnée GPU détectée sur cet hôte.',
+    totalRamLabel: 'RAM totale',
+    usedRamLabel: 'RAM utilisée',
+    availableRamLabel: 'RAM disponible',
+    memoryTypeLabel: 'Type mémoire',
+    memorySpeedLabel: 'Fréquence RAM',
+    driveTypeLabel: 'Type',
+    capacityLabel: 'Capacité totale',
+    usedSpaceLabel: 'Espace utilisé',
+    freeSpaceLabel: 'Espace libre',
+    readSpeedLabel: 'Vitesse lecture',
+    writeSpeedLabel: 'Vitesse écriture',
+    noStorageDetected: 'Aucun lecteur de stockage détecté.',
+    activeInterfaceLabel: 'Interface active',
+    linkStateLabel: 'État du lien',
+    linkSpeedLabel: 'Débit du lien',
+    downloadSpeedLabel: 'Téléchargement',
+    uploadSpeedLabel: 'Envoi',
+    totalRxLabel: 'Total reçu',
+    totalTxLabel: 'Total envoyé',
+    noNetworkDetected: 'Aucune interface réseau active détectée.',
+    uptimeLabel: 'Temps d’activité',
+    hostLabel: 'Hôte',
+    chartCpuRamTitle: 'Charge CPU et RAM (%)',
+    chartGpuTempTitle: 'Charge GPU (%) et Températures (°C)',
+    chartNetworkTitle: 'Débit réseau',
+    chartCpuLoad: 'Charge CPU',
+    chartRamLoad: 'Charge RAM',
+    chartGpuLoad: 'Charge GPU',
+    chartCpuTemp: 'Temp. CPU',
+    chartGpuTemp: 'Temp. GPU',
+    chartNetDownload: 'Réception',
+    chartNetUpload: 'Émission',
+    peakLabel: 'Pic',
+    avgLabel: 'Moy.',
+    lastUpdatedLabel: 'Dernière mesure',
+    tabOverview: 'Télémétrie système',
+    tabGaming: 'Jeux & Goulets',
+    tabTechnologies: 'Tech GPU, Écran & Portable',
+    tabCleaner: 'Nettoyeur PC',
+    cpuSeriesLabel: 'Série',
+    cpuGenerationLabel: 'Génération',
+    ramChannelsLabel: 'Canaux mémoire',
+    ramSlotsLabel: 'Emplacements utilisés',
+    gamingTitle: 'Moniteur de performances en jeu',
+    gamingSubtitle: 'Capture FPS et temps d’image par session (via PresentMon ETW), latence réseau, corrélation matérielle et analyse multi-échantillons des goulets d’étranglement.',
+    gamingSelectProcess: 'Jeu / Processus cible',
+    gamingAllProcesses: 'Fenêtre active au premier plan',
+    gamingRefreshProcesses: 'Actualiser les processus',
+    gamingPingHost: 'Hôte de test Ping',
+    gamingStartSession: 'Démarrer la session',
+    gamingStopSession: 'Arrêter la session',
+    gamingSessionActive: 'Session active',
+    gamingSessionDuration: 'Durée',
+    gamingPresentMonMissingTitle: 'PresentMon ETW absent — FPS affichés en N/D',
+    gamingPresentMonMissingDesc: 'SecretArea ne simule jamais les FPS et n’injecte aucun overlay. Placez PresentMon.exe dans resources/bin/PresentMon.exe ou %LOCALAPPDATA%\\Intel\\PresentMon pour capturer les vrais FPS, 1% Low et Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW prêt',
+    gamingFpsCurrent: 'FPS actuels',
+    gamingFpsAvg: 'FPS moyens',
+    gamingFps1Low: 'FPS 1% Low',
+    gamingFps01Low: 'FPS 0.1% Low',
+    gamingFpsMax: 'FPS max',
+    gamingFrameTimeAvg: 'Frame Time moy.',
+    gamingFrameTimeP95: 'Frame Time P95',
+    gamingFramePacing: 'Stabilité du pacing',
+    gamingSpikes: 'Pics de latence',
+    gamingStutters: 'Micro-saccades',
+    gamingDroppedFrames: 'Images perdues',
+    gamingFrameTimeChartTitle: 'Historique Frame Time en direct (ms)',
+    gamingNetworkLatencyTitle: 'Réseau & Thermique en jeu',
+    gamingPingLabel: 'Ping ICMP',
+    gamingPacketLossLabel: 'Perte de paquets',
+    gamingInputLatencyLabel: 'Latence d’entrée',
+    gamingThrottlingLabel: 'Bridal thermique',
+    gamingThrottlingDetected: 'Limitation détectée',
+    gamingThrottlingNormal: 'Températures normales',
+    gamingBottleneckTitle: 'Analyse des goulets multi-échantillons',
+    gamingBottleneckWarming: 'Collecte de la ligne de base (minimum 5 échantillons consécutifs requis pour éviter les faux positifs)...',
+    gamingHistoryTitle: 'Historique local des sessions',
+    gamingHistoryEmpty: 'Aucune session enregistrée. Démarrez puis arrêtez une session pour conserver vos statistiques.',
+    gamingClearHistory: 'Effacer l’historique',
+    gamingCompareTitle: 'Comparer deux sessions',
+    gamingCompareSelectA: 'Session A',
+    gamingCompareSelectB: 'Session B',
+    techTitle: 'Technologies graphiques et capacités matérielles',
+    techSubtitle: 'Matrice de compatibilité GPU NVIDIA, AMD et Intel. Les fonctions dépendant des jeux ne sont jamais marquées actives à tort.',
+    techStatusSupported: 'Compatible',
+    techStatusDetected: 'Détecté',
+    techStatusActive: 'Actif',
+    techStatusUnsupported: 'Non pris en charge',
+    techStatusUnavailable: 'Indisponible',
+    techStatusRequiresGame: 'Requiert intégration jeu',
+    techStatusRequiresDriver: 'Requiert pilote / SDK',
+    techArchitectureLabel: 'Architecture',
+    techDriverLabel: 'Version pilote',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Écran et réglages jeu Windows',
+    displayPrimaryLabel: 'Écran principal',
+    displayResolutionLabel: 'Résolution',
+    displayRefreshRateLabel: 'Fréquence',
+    displayConnectionLabel: 'Connexion',
+    displayActiveGpuLabel: 'GPU de rendu actif',
+    displayDirectXLabel: 'DirectX',
+    displayHagsLabel: 'Planification GPU matérielle (HAGS)',
+    displayGameModeLabel: 'Mode Jeu Windows',
+    displayHdrLabel: 'HDR',
+    displayVrrLabel: 'VRR / Sync adaptative',
+    laptopTitle: 'Batterie et alimentation portable',
+    laptopBatteryLabel: 'Niveau batterie',
+    laptopPowerStateLabel: 'Alimentation',
+    laptopPluggedIn: 'Secteur branché',
+    laptopOnBattery: 'Sur batterie',
+    laptopCharging: 'En charge',
+    laptopHealthLabel: 'Santé batterie',
+    laptopPowerPlanLabel: 'Mode d’alimentation',
+    laptopHybridGpuLabel: 'Mode GPU hybride',
+    laptopDesktopNotice: 'Aucune batterie détectée — configuration PC fixe sur secteur.',
+    cleanerTitle: 'Nettoyeur PC sécurisé',
+    cleanerSubtitle: 'Analysez d’abord les dossiers temporaires, vérifiez les chemins exacts, puis confirmez le nettoyage.',
+    cleanerSafetyBannerTitle: 'Protection stricte des fichiers personnels et jeux',
+    cleanerSafetyBannerDesc: 'SecretArea ne touche JAMAIS au Bureau, Documents, Téléchargements, Images, Vidéos, jeux, sauvegardes, mods, Windows/System32, ni aux mots de passe, favoris, cookies ou historique des navigateurs.',
+    cleanerScanBtn: 'Analyser les zones sûres',
+    cleanerScanningBtn: 'Analyse...',
+    cleanerCleanBtn: 'Vérifier et nettoyer',
+    cleanerCleaningBtn: 'Nettoyage...',
+    cleanerSelectSafeDefaults: 'Sélection recommandée',
+    cleanerEstimatedTotal: 'Espace sélectionné',
+    cleanerOptInBadge: 'Optionnel',
+    cleanerOptInWarningDesc: 'Catégorie optionnelle (décochée par défaut). Vider le cache de shaders peut provoquer une compilation au prochain lancement.',
+    cleanerPathsLabel: 'Chemins ciblés',
+    cleanerConfirmTitle: 'Confirmer le nettoyage',
+    cleanerConfirmDesc: 'Vérifiez les catégories sélectionnées avant de supprimer définitivement ces fichiers temporaires.',
+    cleanerConfirmAction: 'Confirmer et nettoyer',
+    cleanerCancelAction: 'Annuler',
+    cleanerProgressCleaning: 'Nettoyage en cours...',
+    cleanerReportTitle: 'Nettoyage terminé',
+    cleanerReportFreed: 'Espace libéré',
+    cleanerReportRemoved: 'Fichiers supprimés',
+    cleanerReportSkipped: 'Fichiers verrouillés ignorés',
+    cleanerCatOldTempTitle: 'Anciens fichiers Temp (>48h)',
+    cleanerCatOldTempDesc: 'Fichiers temporaires système de plus de 48 heures.',
+    cleanerCatUserTempTitle: 'Dossier Temp utilisateur',
+    cleanerCatUserTempDesc: 'Fichiers temporaires dans %TEMP%.',
+    cleanerCatAppCacheTitle: 'Caches temporaires système',
+    cleanerCatAppCacheDesc: 'Journaux temporaires et vidages d’erreur sûrs.',
+    cleanerCatSecretAreaCacheTitle: 'Cache SecretArea',
+    cleanerCatSecretAreaCacheDesc: 'Cache HTTP/GPU interne et téléchargements temporaires de SecretArea.',
+    cleanerCatThumbnailTitle: 'Cache de miniatures Windows',
+    cleanerCatThumbnailDesc: 'Fichiers thumbcache_*.db de l’Explorateur Windows.',
+    cleanerCatShaderTitle: 'Cache Shaders DirectX / GPU',
+    cleanerCatShaderDesc: 'Caches de shaders D3DSCache et pilotes GPU.',
+    cleanerCatRecycleTitle: 'Corbeille Windows',
+    cleanerCatRecycleDesc: 'Vide définitivement les éléments de la Corbeille.',
+    cleanerCatBrowserTitle: 'Cache HTTP navigateur uniquement',
+    cleanerCatBrowserDesc: 'Supprime uniquement le cache HTTP/Code d’Edge, Chrome ou Firefox (conserve connexions, cookies et historique).',
   },
 };
 
@@ -1625,6 +2624,7 @@ const ES: LauncherTranslations = {
     downloads: 'Descargas',
     extras: 'Extras',
     requests: 'Solicitudes',
+    hardwareMonitor: 'Monitor de hardware',
     settings: 'Ajustes',
     switchLight: 'Cambiar a modo claro',
     switchDark: 'Cambiar a modo oscuro',
@@ -1732,6 +2732,45 @@ const ES: LauncherTranslations = {
     torrentSavedToast: 'Configuración de qBittorrent guardada',
     torrentManageSetupBtn: 'Instalar / Actualizar qBittorrent',
     replaySetupBtn: 'Asistente inicial',
+    closeBehaviorTitle: 'Comportamiento al cerrar',
+    closeBehaviorDesc: 'Elige si al cerrar la ventana SecretArea se minimiza a la bandeja del sistema o se cierra por completo.',
+    closeBehaviorMinimizeTray: 'Minimizar a la bandeja',
+    closeBehaviorExit: 'Cerrar aplicación por completo',
+    exitAppTitle: 'Cierre completo',
+    exitAppDesc: 'Detiene inmediatamente los monitores de hardware y juego, quita el icono de la bandeja y cierra SecretArea.',
+    exitAppBtn: 'Cerrar por completo',
+    exitAppConfirmBtn: 'Confirmar cierre total',
+    exitAppCancelBtn: 'Cancelar',
+    exitAppWebHint: 'El cierre completo solo está disponible en SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'Creador de tema personalizado',
+    sectionSubtitle: 'Diseña tu tema predeterminado eligiendo superficie, colores de acento, botones y bordes.',
+    enableLabel: 'Activar tema personalizado',
+    surfaceLabel: 'Superficie base',
+    surfaceMidnight: 'Pizarra Nocturna',
+    surfaceObsidian: 'Obsidiana Pura',
+    surfaceAbyss: 'Abismo Profundo',
+    surfaceDaylight: 'Luz Diurna',
+    accentColorLabel: 'Color de acento',
+    customHexLabel: 'Hex personalizado',
+    buttonStyleLabel: 'Estilo de botones',
+    btnRounded: 'Redondeado',
+    btnPill: 'Píldora',
+    btnSharp: 'Recto',
+    cardRadiusLabel: 'Esquinas de tarjetas',
+    cardSharp: 'Marcadas',
+    cardMedium: 'Equilibradas',
+    cardSoft: 'Suaves',
+    glassBlurLabel: 'Desenfoque cristal',
+    glassBlurDesc: 'Efecto translúcido sutil en paneles y tarjetas',
+    previewLabel: 'Vista previa en vivo',
+    previewTitle: 'Estilo personalizado SecretArea',
+    previewPrimaryBtn: 'Acción principal',
+    previewSecondaryBtn: 'Secundario',
+    resetBtn: 'Restablecer tema',
+    consoleOverrideNote: 'Nota: activar el tema personalizado desactiva el tema de consola PS5 / Xbox.',
+    summaryCustomPrefix: 'Personalizado',
   },
   downloads: {
     pageTitle: 'Gestor de descargas',
@@ -2075,6 +3114,61 @@ const ES: LauncherTranslations = {
     openSettingsBtn: 'Abrir Ajustes',
     webPreviewNotice: 'La instalación automática funciona en SecretArea.exe para Windows. En la vista Web usa el enlace oficial.',
   },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (Motor de FPS y Frame Time)',
+    sectionSubtitle: 'Detección automática, actualizaciones desde GitHub Releases y verificación SHA-256 y de firma Intel.',
+    modalTitleInstall: 'Activar monitorización de rendimiento en juegos',
+    modalTitleUpdate: 'Actualizar Intel PresentMon',
+    modalTitleRepair: 'Reparar instalación de PresentMon',
+    modalTitleManage: 'Gestor de dependencias Intel PresentMon',
+    modalSubtitle: 'Motor oficial de telemetría ETW gestionado automáticamente por SecretArea Desktop.',
+    benefitsHeading: 'Qué habilita PresentMon en SecretArea',
+    benefit1: 'FPS en tiempo real, 1% Low y 0.1% Low mediante ETW sin inyección en juegos',
+    benefit2: 'Registro de frame time, picos, tirones y latencia de visualización',
+    benefit3: 'Correlación CPU/GPU y diagnóstico de cuellos de botella por sesión',
+    stepChecking: 'Comprobando instalación y última versión oficial en GitHub...',
+    stepDownloading: 'Descargando binario oficial PresentMon x64...',
+    stepVerifying: 'Verificando resumen SHA-256 y firma de Intel...',
+    stepInstalling: 'Instalando y validando compatibilidad CLI...',
+    stepCompleted: 'PresentMon está instalado, verificado y listo para capturar FPS.',
+    stepCancelled: 'Descarga cancelada limpiamente.',
+    statusReady: 'Instalado y listo',
+    statusNotInstalled: 'No instalado',
+    statusUpdateAvailable: 'Actualización disponible',
+    statusRepairRequired: 'Reparación necesaria',
+    statusNewerInstalled: 'Actualizado (compilación local más reciente)',
+    statusDeclined: 'Omitido por el usuario',
+    statusChecking: 'Comprobando...',
+    statusWebPreview: 'Solo Windows Desktop',
+    installedVersionLabel: 'Versión instalada',
+    latestVersionLabel: 'Última oficial',
+    downloadSizeLabel: 'Tamaño de descarga',
+    installPathLabel: 'Ruta de instalación',
+    sourceLabel: 'Fuente oficial',
+    notInstalledValue: 'No instalado',
+    allowInstallBtn: 'Permitir e instalar',
+    notNowBtn: 'Ahora no',
+    updateNowBtn: 'Actualizar ahora',
+    laterBtn: 'Más tarde',
+    repairBtn: 'Reparar instalación',
+    reinstallBtn: 'Reinstalar PresentMon',
+    checkUpdatesBtn: 'Buscar actualizaciones',
+    checkingBtn: 'Comprobando...',
+    cancelDownloadBtn: 'Cancelar',
+    retryBtn: 'Reintentar',
+    doneBtn: 'Listo',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Instalar / Activar PresentMon',
+    managePresentMonBtn: 'Gestionar PresentMon',
+    shaVerifiedLabel: 'SHA-256 verificado',
+    sigVerifiedLabel: 'Firma de Intel Corporation verificada',
+    consentNote: 'SecretArea nunca descarga ni instala PresentMon sin tu aprobación explícita. Los archivos se descargan solo por HTTPS desde GitHub Releases y se verifican por SHA-256 y firma Intel.',
+    runningConflictMsg: 'Hay otro proceso PresentMon abierto. Ciérralo y vuelve a intentarlo.',
+    corruptedIssuePrefix: 'Problema detectado',
+    declinedBannerTitle: 'Monitorización FPS con PresentMon omitida',
+    declinedBannerDesc: 'SecretArea sigue funcionando normalmente con métricas de CPU, GPU, RAM, disco y ping. Puedes instalar PresentMon cuando quieras.',
+    lookupErrorMsg: 'No se pudo consultar GitHub Releases para PresentMon en este momento.',
+  },
   onboarding: {
     stepWelcome: 'Bienvenida',
     stepAppearance: 'Tema e idioma',
@@ -2140,6 +3234,244 @@ const ES: LauncherTranslations = {
     changeLaterHint: 'Puedes cambiar el tema, idioma, carpeta de descargas o ajustes de qBittorrent cuando quieras desde la página Ajustes.',
     enterAppBtn: 'Entrar en SecretArea',
     openSettingsPageBtn: 'Ver en Ajustes',
+    whatIsSecretAreaTitle: '¿Qué es SecretArea?',
+    whatIsSecretAreaBody: 'SecretArea es un centro de juegos y herramientas todo en uno para Windows con comprobación automática de requisitos de PC y gestor de descargas integrado.',
+    whatIsSecretAreaPoint1: 'Explora catálogos de Juegos, Hypervisor, SteamTools, PS5 y Extras con análisis instantáneo «Can Run It» para tu equipo.',
+    whatIsSecretAreaPoint2: 'Descarga con pausa y reanudación en enlaces directos, MediaFire, Mega y navegador integrado, además de sincronización opcional con qBittorrent.',
+    whatIsSecretAreaPoint3: 'Personaliza la apariencia en modo Oscuro, Claro, PS5, Xbox Nexus o con tu Tema Personalizado en 4 idiomas.',
+    stepGuideLabel: 'Qué hace este paso',
+    step1Guide: 'Este asistente rápido de 5 pasos presenta qué es SecretArea y te permite dejar listos tu tema, idioma y motor torrent opcional.',
+    step2Guide: 'Elige un tema base o usa el Creador de tema personalizado para ajustar colores, botones y bordes junto con tu idioma en tiempo real.',
+    step3Guide: 'SecretArea analiza tu equipo para saber si qBittorrent ya está instalado y conservar tu configuración actual, o instalar la versión oficial.',
+    step4Guide: 'Conecta SecretArea con la Web UI local (solo 127.0.0.1) para ver velocidad DL/UL, semillas, pares, ETA y ratio en enlaces magnet y .torrent.',
+    step5Guide: 'Revisa el resumen de tu configuración inicial. Todos estos ajustes se pueden modificar en cualquier momento desde Ajustes.',
+    platformHint: 'Diseño adaptable a pantallas pequeñas y grandes',
+  },
+  updater: {
+    title: 'Acerca de y Actualizaciones',
+    subtitle: 'SecretArea Desktop',
+    currentVersionLabel: 'Versión instalada actual',
+    checkBtn: 'Buscar actualizaciones',
+    checkingBtn: 'Buscando...',
+    upToDateMsg: 'Ya tienes la última versión instalada.',
+    checkingMsg: 'Comprobando nuevas versiones en GitHub Releases...',
+    newVersionAvailable: 'Nueva versión disponible',
+    whatsNewTitle: 'Qué hay de nuevo en esta actualización',
+    whatsNewCountSuffix: 'cambios',
+    categoryFeature: 'Nuevo',
+    categoryImprovement: 'Mejorado',
+    categoryFix: 'Corregido',
+    downloadUpdateBtn: 'Descargar actualización',
+    downloadingPrefix: 'Descargando',
+    readyToInstall: 'está lista para instalar',
+    readyToInstallDesc: 'Pulsa Instalar y reiniciar para actualizar desde tu versión anterior ahora, o posponer para seguir usando SecretArea.',
+    installRestartBtn: 'Instalar y reiniciar',
+    postponeBtn: 'Posponer',
+    laterBtn: 'Más tarde',
+    detailsBtn: 'Novedades',
+    toastUpdateAvailable: 'Actualización disponible',
+    toastUpdateReady: 'Actualización lista',
+    toastDownloading: 'Descargando',
+    installedVersionLabel: 'Versión instalada',
+    restartHint: 'Reinicia SecretArea para completar la instalación.',
+    lastCheckedLabel: 'Última comprobación',
+    errorFallback: 'No se pudo comprobar si hay actualizaciones ahora.',
+    preparingDownload: 'Preparando descarga...',
+  },
+  hardware: {
+    pageTitle: 'Monitor de hardware',
+    pageSubtitle: 'Telemetría del sistema en tiempo real: temperaturas, discos, memoria y red.',
+    startMonitoring: 'Iniciar monitoreo',
+    stopMonitoring: 'Detener monitoreo',
+    refreshNow: 'Actualizar',
+    statusActive: 'Monitoreo activo',
+    statusStopped: 'Monitoreo pausado',
+    statusWebPreview: 'Vista web',
+    intervalLabel: 'Intervalo',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/D',
+    unsupportedHint: 'Sensor no compatible en este sistema',
+    webPreviewTitle: 'Se requiere la app de escritorio',
+    webPreviewBody: 'La vista previa web no puede leer sensores del hardware. Abre SecretArea Desktop para ver CPU, GPU, RAM, almacenamiento y red en tiempo real.',
+    sectionOverview: 'Resumen del sistema',
+    sectionPerformance: 'Rendimiento en vivo',
+    sectionDetails: 'Detalles del hardware',
+    cpuTitle: 'Procesador (CPU)',
+    gpuTitle: 'Gráficos (GPU)',
+    ramTitle: 'Memoria (RAM)',
+    storageTitle: 'Almacenamiento',
+    networkTitle: 'Actividad de red',
+    modelLabel: 'Modelo',
+    manufacturerLabel: 'Fabricante',
+    usageLabel: 'Uso',
+    temperatureLabel: 'Temperatura',
+    clockSpeedLabel: 'Frecuencia',
+    coresThreadsLabel: 'Núcleos / Hilos',
+    coresUnit: 'Núcleos',
+    threadsUnit: 'Hilos',
+    powerLabel: 'Consumo',
+    perCoreUsageLabel: 'Carga por hilo lógico',
+    vramLabel: 'Uso de VRAM',
+    fanSpeedLabel: 'Ventilador',
+    noGpuDetected: 'No se detectó telemetría de GPU.',
+    totalRamLabel: 'RAM total',
+    usedRamLabel: 'RAM usada',
+    availableRamLabel: 'RAM disponible',
+    memoryTypeLabel: 'Tipo de memoria',
+    memorySpeedLabel: 'Velocidad',
+    driveTypeLabel: 'Tipo',
+    capacityLabel: 'Capacidad total',
+    usedSpaceLabel: 'Espacio usado',
+    freeSpaceLabel: 'Espacio libre',
+    readSpeedLabel: 'Lectura',
+    writeSpeedLabel: 'Escritura',
+    noStorageDetected: 'No se detectaron unidades de almacenamiento.',
+    activeInterfaceLabel: 'Interfaz activa',
+    linkStateLabel: 'Estado',
+    linkSpeedLabel: 'Velocidad de enlace',
+    downloadSpeedLabel: 'Descarga',
+    uploadSpeedLabel: 'Subida',
+    totalRxLabel: 'Total recibido',
+    totalTxLabel: 'Total enviado',
+    noNetworkDetected: 'No hay interfaz de red activa.',
+    uptimeLabel: 'Tiempo activo',
+    hostLabel: 'Equipo',
+    chartCpuRamTitle: 'Uso de CPU y RAM (%)',
+    chartGpuTempTitle: 'Carga GPU (%) y Temperaturas (°C)',
+    chartNetworkTitle: 'Actividad de red',
+    chartCpuLoad: 'Uso CPU',
+    chartRamLoad: 'Uso RAM',
+    chartGpuLoad: 'Uso GPU',
+    chartCpuTemp: 'Temp. CPU',
+    chartGpuTemp: 'Temp. GPU',
+    chartNetDownload: 'Descarga',
+    chartNetUpload: 'Subida',
+    peakLabel: 'Pico',
+    avgLabel: 'Prom.',
+    lastUpdatedLabel: 'Última lectura',
+    tabOverview: 'Telemetría del sistema',
+    tabGaming: 'Juegos y cuellos de botella',
+    tabTechnologies: 'Tecnologías GPU, Pantalla y Portátil',
+    tabCleaner: 'Limpiador de PC',
+    cpuSeriesLabel: 'Serie',
+    cpuGenerationLabel: 'Generación',
+    ramChannelsLabel: 'Canales RAM',
+    ramSlotsLabel: 'Ranuras activas',
+    gamingTitle: 'Monitor de rendimiento en juegos',
+    gamingSubtitle: 'Captura de FPS y Frame Time por sesión (PresentMon ETW), ping real, correlación de hardware y análisis multimuestra.',
+    gamingSelectProcess: 'Juego / Proceso objetivo',
+    gamingAllProcesses: 'Ventana activa en primer plano',
+    gamingRefreshProcesses: 'Actualizar procesos',
+    gamingPingHost: 'Host de prueba Ping',
+    gamingStartSession: 'Iniciar sesión',
+    gamingStopSession: 'Detener sesión',
+    gamingSessionActive: 'Sesión activa',
+    gamingSessionDuration: 'Duración',
+    gamingPresentMonMissingTitle: 'PresentMon ETW no instalado — FPS en N/D',
+    gamingPresentMonMissingDesc: 'SecretArea nunca simula FPS ni inyecta overlays. Coloca PresentMon.exe en resources/bin/PresentMon.exe o %LOCALAPPDATA%\\Intel\\PresentMon para leer FPS reales, 1% Low y Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW listo',
+    gamingFpsCurrent: 'FPS actuales',
+    gamingFpsAvg: 'FPS promedio',
+    gamingFps1Low: 'FPS 1% Low',
+    gamingFps01Low: 'FPS 0.1% Low',
+    gamingFpsMax: 'FPS máximos',
+    gamingFrameTimeAvg: 'Frame Time prom.',
+    gamingFrameTimeP95: 'Frame Time P95',
+    gamingFramePacing: 'Estabilidad de pacing',
+    gamingSpikes: 'Picos',
+    gamingStutters: 'Tirones',
+    gamingDroppedFrames: 'Cuadros perdidos',
+    gamingFrameTimeChartTitle: 'Historial de Frame Time en vivo (ms)',
+    gamingNetworkLatencyTitle: 'Red y estado térmico',
+    gamingPingLabel: 'Ping ICMP',
+    gamingPacketLossLabel: 'Pérdida de paquetes',
+    gamingInputLatencyLabel: 'Latencia de entrada',
+    gamingThrottlingLabel: 'Estrangulamiento térmico',
+    gamingThrottlingDetected: 'Throttling detectado',
+    gamingThrottlingNormal: 'Temperaturas normales',
+    gamingBottleneckTitle: 'Análisis de cuellos de botella multimuestra',
+    gamingBottleneckWarming: 'Recopilando muestras base (se requieren al menos 5 muestras consecutivas)...',
+    gamingHistoryTitle: 'Historial local de sesiones',
+    gamingHistoryEmpty: 'Aún no hay sesiones guardadas. Inicia y detén una sesión para registrar métricas.',
+    gamingClearHistory: 'Borrar historial',
+    gamingCompareTitle: 'Comparar dos sesiones',
+    gamingCompareSelectA: 'Sesión A',
+    gamingCompareSelectB: 'Sesión B',
+    techTitle: 'Tecnologías gráficas y capacidades del hardware',
+    techSubtitle: 'Compatibilidad verificada de NVIDIA, AMD e Intel. Las funciones por juego nunca se muestran como activas globalmente sin confirmación.',
+    techStatusSupported: 'Compatible',
+    techStatusDetected: 'Detectado',
+    techStatusActive: 'Activo',
+    techStatusUnsupported: 'No compatible',
+    techStatusUnavailable: 'No disponible',
+    techStatusRequiresGame: 'Requiere soporte del juego',
+    techStatusRequiresDriver: 'Requiere driver / SDK',
+    techArchitectureLabel: 'Arquitectura',
+    techDriverLabel: 'Versión de driver',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Pantalla y ajustes de juego Windows',
+    displayPrimaryLabel: 'Pantalla principal',
+    displayResolutionLabel: 'Resolución',
+    displayRefreshRateLabel: 'Frecuencia',
+    displayConnectionLabel: 'Conexión',
+    displayActiveGpuLabel: 'GPU de renderizado',
+    displayDirectXLabel: 'DirectX',
+    displayHagsLabel: 'Programación GPU por hardware (HAGS)',
+    displayGameModeLabel: 'Modo de juego Windows',
+    displayHdrLabel: 'HDR',
+    displayVrrLabel: 'VRR / Sync adaptativa',
+    laptopTitle: 'Batería y energía de portátil',
+    laptopBatteryLabel: 'Batería',
+    laptopPowerStateLabel: 'Fuente de energía',
+    laptopPluggedIn: 'Conectado a corriente',
+    laptopOnBattery: 'Con batería',
+    laptopCharging: 'Cargando',
+    laptopHealthLabel: 'Salud de batería',
+    laptopPowerPlanLabel: 'Plan de energía',
+    laptopHybridGpuLabel: 'Modo GPU híbrida',
+    laptopDesktopNotice: 'No se detectó batería — funcionando en modo escritorio.',
+    cleanerTitle: 'Limpiador seguro de PC',
+    cleanerSubtitle: 'Escanea carpetas temporales primero, revisa rutas exactas y confirma la limpieza.',
+    cleanerSafetyBannerTitle: 'Protección estricta de archivos personales y juegos',
+    cleanerSafetyBannerDesc: 'SecretArea NUNCA borra Escritorio, Documentos, Descargas, Imágenes, Vídeos, juegos, partidas, mods, System32 ni contraseñas, marcadores, cookies o historial del navegador.',
+    cleanerScanBtn: 'Escanear ubicaciones seguras',
+    cleanerScanningBtn: 'Escaneando...',
+    cleanerCleanBtn: 'Revisar y limpiar',
+    cleanerCleaningBtn: 'Limpiando...',
+    cleanerSelectSafeDefaults: 'Seleccionar recomendados',
+    cleanerEstimatedTotal: 'Espacio seleccionado',
+    cleanerOptInBadge: 'Opcional',
+    cleanerOptInWarningDesc: 'Categoría opcional (desmarcada por defecto). Limpiar caché de shaders puede requerir recompilación al abrir juegos.',
+    cleanerPathsLabel: 'Rutas analizadas',
+    cleanerConfirmTitle: 'Confirmar limpieza',
+    cleanerConfirmDesc: 'Revisa las categorías seleccionadas antes de eliminar estos archivos temporales.',
+    cleanerConfirmAction: 'Confirmar y limpiar',
+    cleanerCancelAction: 'Cancelar',
+    cleanerProgressCleaning: 'Limpiando cachés seleccionadas...',
+    cleanerReportTitle: 'Limpieza completada',
+    cleanerReportFreed: 'Espacio liberado',
+    cleanerReportRemoved: 'Archivos eliminados',
+    cleanerReportSkipped: 'Archivos en uso omitidos',
+    cleanerCatOldTempTitle: 'Temporales antiguos (>48h)',
+    cleanerCatOldTempDesc: 'Archivos temporales del sistema con más de 48 horas.',
+    cleanerCatUserTempTitle: 'Carpeta Temp de usuario',
+    cleanerCatUserTempDesc: 'Archivos temporales de aplicaciones en %TEMP%.',
+    cleanerCatAppCacheTitle: 'Cachés temporales de apps',
+    cleanerCatAppCacheDesc: 'Volcados de error y registros temporales seguros.',
+    cleanerCatSecretAreaCacheTitle: 'Caché de SecretArea',
+    cleanerCatSecretAreaCacheDesc: 'Caché HTTP/GPU y descargas temporales de SecretArea.',
+    cleanerCatThumbnailTitle: 'Caché de miniaturas de Windows',
+    cleanerCatThumbnailDesc: 'Archivos thumbcache_*.db del explorador.',
+    cleanerCatShaderTitle: 'Caché de Shaders DirectX / GPU',
+    cleanerCatShaderDesc: 'Cachés compiladas D3DSCache y de controladores GPU.',
+    cleanerCatRecycleTitle: 'Papelera de reciclaje',
+    cleanerCatRecycleDesc: 'Vacía permanentemente la Papelera de Windows.',
+    cleanerCatBrowserTitle: 'Solo caché HTTP del navegador',
+    cleanerCatBrowserDesc: 'Elimina únicamente Cache / Code Cache de Edge, Chrome o Firefox sin tocar sesiones, cookies ni historial.',
   },
 };
 
@@ -2151,6 +3483,7 @@ const AR: LauncherTranslations = {
     downloads: 'التنزيلات',
     extras: 'إضافات',
     requests: 'الطلبات',
+    hardwareMonitor: 'مراقب العتاد',
     settings: 'الإعدادات',
     switchLight: 'التبديل إلى الوضع الفاتح',
     switchDark: 'التبديل إلى الوضع الداكن',
@@ -2257,7 +3590,46 @@ const AR: LauncherTranslations = {
     modeWebPreviewBadge: 'معاينة الويب',
     torrentSavedToast: 'تم حفظ إعدادات qBittorrent',
     torrentManageSetupBtn: 'تثبيت / تحديث qBittorrent تلقائياً',
-    replaySetupBtn: 'معالج الترحيب',
+    replaySetupBtn: 'إعداد الترحيب',
+    closeBehaviorTitle: 'سلوك إغلاق التطبيق',
+    closeBehaviorDesc: 'اختر ما إذا كان إغلاق النافذة يصغّر SecretArea إلى شريط النظام (Tray) أو يغلق التطبيق بالكامل.',
+    closeBehaviorMinimizeTray: 'تصغير إلى شريط النظام',
+    closeBehaviorExit: 'إغلاق التطبيق بالكامل',
+    exitAppTitle: 'إغلاق كامل للتطبيق',
+    exitAppDesc: 'إيقاف مراقبة العتاد والألعاب وأيقونة شريط النظام وإغلاق SecretArea بالكامل فوراً.',
+    exitAppBtn: 'إغلاق التطبيق بالكامل',
+    exitAppConfirmBtn: 'تأكيد الإغلاق الكامل',
+    exitAppCancelBtn: 'إلغاء',
+    exitAppWebHint: 'الإغلاق الكامل متاح فقط داخل تطبيق سطح المكتب SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'منشئ المظهر المخصص',
+    sectionSubtitle: 'صمّم مظهرك الافتراضي باختيار ألوان الخلفية ولون التمييز وشكل الأزرار والبطاقات.',
+    enableLabel: 'تفعيل المظهر المخصص كافتراضي',
+    surfaceLabel: 'خلفية الواجهة',
+    surfaceMidnight: 'أردواز ليلي',
+    surfaceObsidian: 'أسود عميق',
+    surfaceAbyss: 'أزرق عميق',
+    surfaceDaylight: 'نهاري مشرق',
+    accentColorLabel: 'لون التمييز الأساسي',
+    customHexLabel: 'لون مخصص Hex',
+    buttonStyleLabel: 'نمط الأزرار',
+    btnRounded: 'دائري لطيف',
+    btnPill: 'كبسولة ناعمة',
+    btnSharp: 'حواف حادة',
+    cardRadiusLabel: 'استدارة البطاقات',
+    cardSharp: 'حادة',
+    cardMedium: 'متوازنة',
+    cardSoft: 'ناعمة',
+    glassBlurLabel: 'تأثير الزجاج الضبابي',
+    glassBlurDesc: 'ضبابية خفيفة وشفافة للوحات والبطاقات',
+    previewLabel: 'معاينة فورية',
+    previewTitle: 'مظهر SecretArea المخصص',
+    previewPrimaryBtn: 'زر أساسي',
+    previewSecondaryBtn: 'زر ثانوي',
+    resetBtn: 'إعادة ضبط المظهر المخصص',
+    consoleOverrideNote: 'ملاحظة: تفعيل المظهر المخصص يلغي مؤقتاً مظهر كونسول PS5 / Xbox.',
+    summaryCustomPrefix: 'مخصص',
   },
   downloads: {
     pageTitle: 'مدير التنزيلات',
@@ -2601,6 +3973,61 @@ const AR: LauncherTranslations = {
     openSettingsBtn: 'فتح الإعدادات',
     webPreviewNotice: 'يعمل التثبيت التلقائي داخل تطبيق سطح المكتب SecretArea.exe على ويندوز فقط.',
   },
+  presentMonSetup: {
+    sectionTitle: 'أداة Intel PresentMon (محرك قياس FPS ووقت الإطار)',
+    sectionSubtitle: 'كشف تلقائي، تحديثات رسمية من GitHub Releases، وتحقق أمني من التوقيع الرقمي وبصمة SHA-256.',
+    modalTitleInstall: 'تفعيل مراقبة أداء الألعاب',
+    modalTitleUpdate: 'تحديث Intel PresentMon',
+    modalTitleRepair: 'إصلاح تثبيت PresentMon',
+    modalTitleManage: 'مدير أداة Intel PresentMon',
+    modalSubtitle: 'محرك قياس ETW الرسمي من Intel بإدارة تلقائية كاملة داخل SecretArea لسطح المكتب.',
+    benefitsHeading: 'ما يقدمه PresentMon داخل SecretArea',
+    benefit1: 'قياس حقيقي لمعدل الإطارات FPS و 1% Low و 0.1% Low عبر ETW بدون حقن في الألعاب',
+    benefit2: 'مراقبة وقت الإطار Frame Time واكتشاف التقطيع والتهنيج ووقت الاستجابة',
+    benefit3: 'تحليل اختناقات المعالج وكرت الشاشة CPU/GPU أثناء جلسات اللعب',
+    stepChecking: 'جارٍ فحص التثبيت الحالي والبحث عن أحدث إصدار رسمي على GitHub...',
+    stepDownloading: 'جارٍ تنزيل ملف PresentMon x64 الرسمي...',
+    stepVerifying: 'جارٍ التحقق من بصمة SHA-256 وتوقيع شركة Intel الرقمي...',
+    stepInstalling: 'جارٍ التثبيت وفحص توافق أوامر التشغيل...',
+    stepCompleted: 'تم تثبيت PresentMon والتحقق منه بنجاح وهو جاهز لمراقبة FPS.',
+    stepCancelled: 'تم إلغاء التنزيل بأمان دون أي تعديل على ملفاتك.',
+    statusReady: 'مثبت وجاهز',
+    statusNotInstalled: 'غير مثبت',
+    statusUpdateAvailable: 'يتوفر تحديث جديد',
+    statusRepairRequired: 'يحتاج إلى إصلاح',
+    statusNewerInstalled: 'محدث (إصدار محلي أحدث)',
+    statusDeclined: 'معطل باختيار المستخدم (اختياري)',
+    statusChecking: 'جارٍ الفحص...',
+    statusWebPreview: 'متاح لتطبيق ويندوز فقط',
+    installedVersionLabel: 'الإصدار المثبت',
+    latestVersionLabel: 'أحدث إصدار رسمي',
+    downloadSizeLabel: 'حجم التنزيل',
+    installPathLabel: 'مسار التثبيت',
+    sourceLabel: 'المصدر الرسمي',
+    notInstalledValue: 'غير مثبت',
+    allowInstallBtn: 'السماح والتثبيت',
+    notNowBtn: 'ليس الآن',
+    updateNowBtn: 'تحديث الآن',
+    laterBtn: 'لاحقاً',
+    repairBtn: 'إصلاح التثبيت',
+    reinstallBtn: 'إعادة تثبيت PresentMon',
+    checkUpdatesBtn: 'التحقق من التحديثات',
+    checkingBtn: 'جارٍ الفحص...',
+    cancelDownloadBtn: 'إلغاء',
+    retryBtn: 'إعادة المحاولة',
+    doneBtn: 'تم',
+    officialReleasesBtn: 'إصدارات GitHub الرسمية',
+    enablePresentMonBtn: 'تثبيت / تفعيل PresentMon',
+    managePresentMonBtn: 'إدارة PresentMon',
+    shaVerifiedLabel: 'تم التحقق من بصمة SHA-256',
+    sigVerifiedLabel: 'تم التحقق من توقيع Intel Corporation الرقمي',
+    consentNote: 'لا يقوم SecretArea بتنزيل أو تثبيت PresentMon أبداً بدون موافقتك الصريحة. يتم جلب الملفات حصرياً عبر HTTPS من GitHub Releases مع التحقق من SHA-256 وتوقيع Intel.',
+    runningConflictMsg: 'توجد نسخة أخرى من PresentMon تعمل حالياً على جهازك. أغلقها ثم اضغط إعادة المحاولة.',
+    corruptedIssuePrefix: 'مشكلة مكتشفة',
+    declinedBannerTitle: 'تم تأجيل تفعيل مراقبة FPS عبر PresentMon',
+    declinedBannerDesc: 'يستمر SecretArea بالعمل بشكل كامل لمراقبة المعالج وكرت الشاشة والرام والتخزين والبنغ. يمكنك تثبيت PresentMon في أي وقت.',
+    lookupErrorMsg: 'تعذر الوصول إلى GitHub Releases للتحقق من أحدث إصدار لـ PresentMon حالياً.',
+  },
   onboarding: {
     stepWelcome: 'الترحيب',
     stepAppearance: 'المظهر واللغة',
@@ -2666,6 +4093,244 @@ const AR: LauncherTranslations = {
     changeLaterHint: 'يمكنك تغيير المظهر، اللغة، مجلد التنزيل، أو إعدادات qBittorrent في أي وقت من صفحة الإعدادات.',
     enterAppBtn: 'الدخول إلى SecretArea',
     openSettingsPageBtn: 'مراجعة في الإعدادات',
+    whatIsSecretAreaTitle: 'ما هو برنامج SecretArea؟',
+    whatIsSecretAreaBody: 'SecretArea هو مشغّل ألعاب وأدوات متكامل لنظام ويندوز يجمع بين استعراض الكتالوج، فحص توافق مواصفات الجهاز، ومدير تنزيلات سريع في مكان واحد.',
+    whatIsSecretAreaPoint1: 'تصفح أقسام الألعاب و Hypervisor و SteamTools و PS5 والإضافات مع فحص «هل يعمل على جهازك؟» تلقائياً وفق مواصفات حاسوبك.',
+    whatIsSecretAreaPoint2: 'نزّل بسرعة عالية مع دعم الإيقاف والاستئناف للروابط المباشرة و MediaFire و Mega والمتصفح المدمج، بالإضافة إلى ربط اختياري مع qBittorrent.',
+    whatIsSecretAreaPoint3: 'خصّص التجربة بين الوضع الداكن والفاتح و PS5 و Xbox Nexus أو منشئ المظهر المخصص، مع دعم العربية RTL بالكامل.',
+    stepGuideLabel: 'ماذا تفعل في هذه الخطوة؟',
+    step1Guide: 'يعرّفك هذا الدليل السريع من 5 خطوات على برنامج SecretArea ويساعدك في ضبط المظهر واللغة ومحرك التحميل الاختياري قبل الدخول للتطبيق.',
+    step2Guide: 'اختر مظهراً جاهزاً أو افتح منشئ المظهر المخصص لتعديل الألوان والأزرار والحواف مع اختيار لغة الواجهة — وتظهر النتيجة فوراً أمامك.',
+    step3Guide: 'يفحص SecretArea جهازك للتحقق مما إذا كان qBittorrent مثبتاً مسبقاً للحفاظ على إعداداتك دون مساس، أو تثبيت النسخة الرسمية بضغطة زر عند الحاجة.',
+    step4Guide: 'اربط SecretArea بواجهة الويب المحلية (127.0.0.1 فقط) لمتابعة روابط Magnet وملفات .torrent بالسرعة والبذور والأقران والوقت المتبقي مباشرة.',
+    step5Guide: 'راجع ملخص الاختيارات التي قمت بضبطها الآن. ويمكنك تعديل أي إعداد منها لاحقاً في أي وقت من صفحة الإعدادات.',
+    platformHint: 'تصميم متجاوب للشاشات الصغيرة والكبيرة',
+  },
+  updater: {
+    title: 'حول التطبيق والتحديثات',
+    subtitle: 'تطبيق سطح المكتب SecretArea',
+    currentVersionLabel: 'الإصدار المثبت حالياً',
+    checkBtn: 'التحقق من التحديثات',
+    checkingBtn: 'جارٍ التحقق...',
+    upToDateMsg: 'أنت تستخدم أحدث إصدار بالفعل.',
+    checkingMsg: 'جارٍ فحص GitHub Releases للبحث عن إصدار أحدث...',
+    newVersionAvailable: 'يتوفر إصدار جديد',
+    whatsNewTitle: 'ما الجديد في هذا التحديث',
+    whatsNewCountSuffix: 'تحديثات',
+    categoryFeature: 'جديد',
+    categoryImprovement: 'تحسين',
+    categoryFix: 'إصلاح',
+    downloadUpdateBtn: 'تنزيل التحديث',
+    downloadingPrefix: 'جارٍ التنزيل',
+    readyToInstall: 'جاهز للتثبيت الآن',
+    readyToInstallDesc: 'اضغط التثبيت وإعادة التشغيل لتحديث نسختك السابقة الآن، أو قم بالتأجيل لمواصلة العمل وتثبيت التحديث عند إغلاق التطبيق.',
+    installRestartBtn: 'تثبيت وإعادة التشغيل',
+    postponeBtn: 'تأجيل',
+    laterBtn: 'لاحقاً',
+    detailsBtn: 'ما الجديد',
+    toastUpdateAvailable: 'يتوفر تحديث جديد',
+    toastUpdateReady: 'التحديث جاهز',
+    toastDownloading: 'جارٍ التنزيل',
+    installedVersionLabel: 'الإصدار المثبت',
+    restartHint: 'أعد تشغيل SecretArea لإكمال التثبيت.',
+    lastCheckedLabel: 'آخر فحص',
+    errorFallback: 'تعذر التحقق من التحديثات حالياً.',
+    preparingDownload: 'جارٍ تجهيز التنزيل...',
+  },
+  hardware: {
+    pageTitle: 'مراقب العتاد',
+    pageSubtitle: 'قراءات حية لأداء المعالج والرسوميات والذاكرة والتخزين والشبكة ودرجات الحرارة.',
+    startMonitoring: 'بدء المراقبة',
+    stopMonitoring: 'إيقاف المراقبة',
+    refreshNow: 'تحديث الآن',
+    statusActive: 'المراقبة نشطة',
+    statusStopped: 'المراقبة متوقفة',
+    statusWebPreview: 'معاينة الويب',
+    intervalLabel: 'معدل التحديث',
+    interval1s: '1ث',
+    interval1500ms: '1.5ث',
+    interval2s: '2ث',
+    interval3s: '3ث',
+    interval5s: '5ث',
+    naValue: 'غير متاح',
+    unsupportedHint: 'الحساس غير مدعوم أو غير متاح على هذا النظام',
+    webPreviewTitle: 'يتطلب تطبيق سطح المكتب',
+    webPreviewBody: 'لا يمكن لمعاينة الويب الوصول إلى مستشعرات العتاد مباشرة. شغّل تطبيق SecretArea Desktop لقراءة بيانات المعالج وكرت الشاشة والذاكرة والأقراص والشبكة.',
+    sectionOverview: 'نظرة عامة على النظام',
+    sectionPerformance: 'الأداء المباشر',
+    sectionDetails: 'تفاصيل العتاد',
+    cpuTitle: 'المعالج (CPU)',
+    gpuTitle: 'بطاقة الرسوميات (GPU)',
+    ramTitle: 'الذاكرة العشوائية (RAM)',
+    storageTitle: 'أقراص التخزين',
+    networkTitle: 'نشاط الشبكة',
+    modelLabel: 'الطراز',
+    manufacturerLabel: 'الشركة المصنّعة',
+    usageLabel: 'الاستهلاك',
+    temperatureLabel: 'درجة الحرارة',
+    clockSpeedLabel: 'التردد',
+    coresThreadsLabel: 'الأنوية / المسارات',
+    coresUnit: 'أنوية',
+    threadsUnit: 'مسارات',
+    powerLabel: 'استهلاك الطاقة',
+    perCoreUsageLabel: 'حمل المسارات المنطقية',
+    vramLabel: 'ذاكرة الفيديو VRAM',
+    fanSpeedLabel: 'سرعة المروحة',
+    noGpuDetected: 'لم يتم رصد قراءات كرت الشاشة على هذا الجهاز.',
+    totalRamLabel: 'إجمالي الذاكرة',
+    usedRamLabel: 'المستخدم',
+    availableRamLabel: 'المتاح',
+    memoryTypeLabel: 'نوع الذاكرة',
+    memorySpeedLabel: 'تردد الذاكرة',
+    driveTypeLabel: 'نوع القرص',
+    capacityLabel: 'السعة الإجمالية',
+    usedSpaceLabel: 'المساحة المستخدمة',
+    freeSpaceLabel: 'المساحة الحرة',
+    readSpeedLabel: 'سرعة القراءة',
+    writeSpeedLabel: 'سرعة الكتابة',
+    noStorageDetected: 'لم يتم رصد أقراص تخزين.',
+    activeInterfaceLabel: 'المحول النشط',
+    linkStateLabel: 'حالة الاتصال',
+    linkSpeedLabel: 'سرعة الرابط',
+    downloadSpeedLabel: 'سرعة التنزيل',
+    uploadSpeedLabel: 'سرعة الرفع',
+    totalRxLabel: 'إجمالي المستلم',
+    totalTxLabel: 'إجمالي المرسل',
+    noNetworkDetected: 'لا يوجد محول شبكة نشط.',
+    uptimeLabel: 'مدة التشغيل',
+    hostLabel: 'الجهاز',
+    chartCpuRamTitle: 'نسبة استخدام المعالج والذاكرة (%)',
+    chartGpuTempTitle: 'حمل كرت الشاشة (%) ودرجات الحرارة (°C)',
+    chartNetworkTitle: 'معدل نقل الشبكة',
+    chartCpuLoad: 'حمل المعالج',
+    chartRamLoad: 'حمل الذاكرة',
+    chartGpuLoad: 'حمل الرسوميات',
+    chartCpuTemp: 'حرارة المعالج',
+    chartGpuTemp: 'حرارة كرت الشاشة',
+    chartNetDownload: 'التنزيل',
+    chartNetUpload: 'الرفع',
+    peakLabel: 'الذروة',
+    avgLabel: 'المتوسط',
+    lastUpdatedLabel: 'آخر قراءة',
+    tabOverview: 'مراقبة العتاد',
+    tabGaming: 'أداء الألعاب والاختناق',
+    tabTechnologies: 'تقنيات الرسوميات والشاشة',
+    tabCleaner: 'تنظيف الجهاز الآمن',
+    cpuSeriesLabel: 'السلسلة',
+    cpuGenerationLabel: 'الجيل',
+    ramChannelsLabel: 'القنوات',
+    ramSlotsLabel: 'المنافذ المستخدمة',
+    gamingTitle: 'مركز مراقبة أداء الألعاب',
+    gamingSubtitle: 'قياس الإطارات (FPS) وزمن الإطار عبر PresentMon ETW دون حقن، مع قياس Ping وتحليل اختناق العتاد متعدد العينات.',
+    gamingSelectProcess: 'اللعبة أو العملية المستهدفة',
+    gamingAllProcesses: 'النافذة النشطة حالياً',
+    gamingRefreshProcesses: 'تحديث العمليات',
+    gamingPingHost: 'عنوان قياس Ping',
+    gamingStartSession: 'بدء جلسة مراقبة',
+    gamingStopSession: 'إيقاف الجلسة',
+    gamingSessionActive: 'الجلسة نشطة',
+    gamingSessionDuration: 'المدة',
+    gamingPresentMonMissingTitle: 'أداة PresentMon ETW غير مثبتة — قراءات FPS غير متاحة',
+    gamingPresentMonMissingDesc: 'لا يقوم SecretArea بتزييف الإطارات أو حقن الألعاب أبداً. ضع PresentMon.exe في resources/bin/PresentMon.exe أو %LOCALAPPDATA%\\Intel\\PresentMon لالتقاط FPS الحقيقي و 1% Low و Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW جاهز',
+    gamingFpsCurrent: 'FPS الحالي',
+    gamingFpsAvg: 'متوسط FPS',
+    gamingFps1Low: '1% Low FPS',
+    gamingFps01Low: '0.1% Low FPS',
+    gamingFpsMax: 'أعلى FPS',
+    gamingFrameTimeAvg: 'متوسط زمن الإطار',
+    gamingFrameTimeP95: 'زمن الإطار P95',
+    gamingFramePacing: 'استقرار الإطارات',
+    gamingSpikes: 'القفزات المفاجئة',
+    gamingStutters: 'التقطيع (Stutters)',
+    gamingDroppedFrames: 'إطارات مفقودة',
+    gamingFrameTimeChartTitle: 'مخطط زمن الإطار الحي (مللي ثانية)',
+    gamingNetworkLatencyTitle: 'الشبكة والحالة الحرارية',
+    gamingPingLabel: 'زمن الاستجابة Ping',
+    gamingPacketLossLabel: 'فقدان الحزم',
+    gamingInputLatencyLabel: 'زمن استجابة الإدخال',
+    gamingThrottlingLabel: 'الاختناق الحراري',
+    gamingThrottlingDetected: 'تم رصد اختناق حراري',
+    gamingThrottlingNormal: 'الحرارة ضمن الحد الآمن',
+    gamingBottleneckTitle: 'تحليل اختناق الأداء (Bottleneck)',
+    gamingBottleneckWarming: 'جارٍ جمع 5 عينات متتالية على الأقل قبل إصدار تحليل الاختناق لضمان الدقة...',
+    gamingHistoryTitle: 'سجل جلسات اللعب المحفوظة',
+    gamingHistoryEmpty: 'لا توجد جلسات محفوظة بعد. ابدأ جلسة وأنهِها لحفظ الأداء والحرارة.',
+    gamingClearHistory: 'مسح السجل',
+    gamingCompareTitle: 'مقارنة جلستين',
+    gamingCompareSelectA: 'الجلسة الأولى',
+    gamingCompareSelectB: 'الجلسة الثانية',
+    techTitle: 'تقنيات كروت الشاشة وقدرات النظام',
+    techSubtitle: 'مصفوفة الدعم الفعلية لتقنيات NVIDIA و AMD و Intel مع التوضيح الدقيق لما يتطلب دعماً داخل اللعبة.',
+    techStatusSupported: 'مدعوم',
+    techStatusDetected: 'تم الرصد',
+    techStatusActive: 'مفعّل',
+    techStatusUnsupported: 'غير مدعوم',
+    techStatusUnavailable: 'غير متاح',
+    techStatusRequiresGame: 'يتطلب دعم اللعبة',
+    techStatusRequiresDriver: 'يتطلب تعريف / SDK',
+    techArchitectureLabel: 'المعمارية',
+    techDriverLabel: 'إصدار التعريف',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'الشاشة وإعدادات الألعاب في ويندوز',
+    displayPrimaryLabel: 'الشاشة الأساسية',
+    displayResolutionLabel: 'الدقة',
+    displayRefreshRateLabel: 'معدل التحديث',
+    displayConnectionLabel: 'نوع التوصيل',
+    displayActiveGpuLabel: 'كرت الشاشة النشط',
+    displayDirectXLabel: 'دعم DirectX',
+    displayHagsLabel: 'جدولة GPU المسرّعة (HAGS)',
+    displayGameModeLabel: 'وضع الألعاب في ويندوز',
+    displayHdrLabel: 'دعم HDR',
+    displayVrrLabel: 'معدل التحديث المتغير VRR',
+    laptopTitle: 'بطارية اللابتوب وإدارة الطاقة',
+    laptopBatteryLabel: 'نسبة الشحن',
+    laptopPowerStateLabel: 'مصدر الطاقة',
+    laptopPluggedIn: 'متصل بالشاحن',
+    laptopOnBattery: 'على البطارية',
+    laptopCharging: 'جارٍ الشحن',
+    laptopHealthLabel: 'صحة البطارية',
+    laptopPowerPlanLabel: 'خطة الطاقة النشطة',
+    laptopHybridGpuLabel: 'وضع الرسوميات الهجين',
+    laptopDesktopNotice: 'لم يتم رصد بطارية — يعمل الجهاز ككمبيوتر مكتبي.',
+    cleanerTitle: 'منظف الجهاز الآمن والذاكرة المؤقتة',
+    cleanerSubtitle: 'افحص الملفات المؤقتة أولاً، راجع المسارات والأحجام الدقيقة، ثم أكّد التنظيف بأمان.',
+    cleanerSafetyBannerTitle: 'حماية صارمة للملفات الشخصية والألعاب',
+    cleanerSafetyBannerDesc: 'لا يقترب SecretArea أبداً من سطح المكتب أو المستندات أو التنزيلات أو الصور أو الفيديو أو الألعاب أو ملفات الحفظ أو المودات أو النظام أو كلمات مرور وسجل المتصفح.',
+    cleanerScanBtn: 'فحص المسارات الآمنة',
+    cleanerScanningBtn: 'جارٍ الفحص...',
+    cleanerCleanBtn: 'مراجعة وتنظيف المحدد',
+    cleanerCleaningBtn: 'جارٍ التنظيف...',
+    cleanerSelectSafeDefaults: 'تحديد الآمن الموصى به',
+    cleanerEstimatedTotal: 'المساحة المتوقعة',
+    cleanerOptInBadge: 'اختياري بحذر',
+    cleanerOptInWarningDesc: 'خيار إضافي غير محدد تلقائياً. حذف كاش التظليل قد يسبب تقطيعاً مؤقتاً لإعادة البناء، وإفراغ سلة المحذوفات نهائي.',
+    cleanerPathsLabel: 'المسارات المشمولة',
+    cleanerConfirmTitle: 'تأكيد تنظيف الجهاز',
+    cleanerConfirmDesc: 'راجع الفئات المحددة أدناه قبل حذف الملفات المؤقتة نهائياً.',
+    cleanerConfirmAction: 'تأكيد وتنفيذ التنظيف',
+    cleanerCancelAction: 'إلغاء',
+    cleanerProgressCleaning: 'جارٍ تنظيف المسارات المحددة...',
+    cleanerReportTitle: 'اكتمل التنظيف بنجاح',
+    cleanerReportFreed: 'المساحة المحررة',
+    cleanerReportRemoved: 'الملفات المحذوفة',
+    cleanerReportSkipped: 'ملفات مقيدة تم تخطيها',
+    cleanerCatOldTempTitle: 'ملفات النظام المؤقتة القديمة (>48 ساعة)',
+    cleanerCatOldTempDesc: 'الملفات المؤقتة الأقدم من 48 ساعة في مجلد النظام المؤقت.',
+    cleanerCatUserTempTitle: 'مجلد المستخدم المؤقت',
+    cleanerCatUserTempDesc: 'الملفات المؤقتة لتطبيقات المستخدم داخل %TEMP%.',
+    cleanerCatAppCacheTitle: 'ذاكرة التطبيقات المؤقتة',
+    cleanerCatAppCacheDesc: 'تقارير الأعطال والملفات المؤقتة الآمنة.',
+    cleanerCatSecretAreaCacheTitle: 'ذاكرة SecretArea المؤقتة',
+    cleanerCatSecretAreaCacheDesc: 'كاش المتصفح والرسوميات الداخلي لتطبيق SecretArea فقط.',
+    cleanerCatThumbnailTitle: 'كاش صور المصغرات في ويندوز',
+    cleanerCatThumbnailDesc: 'ملفات thumbcache_*.db التي يعيد ويندوز بناءها تلقائياً.',
+    cleanerCatShaderTitle: 'كاش تظليل DirectX وبطاقة الشاشة',
+    cleanerCatShaderDesc: 'ملفات D3DSCache وكاش التعريفات. ستعيد الألعاب بناءه تلقائياً.',
+    cleanerCatRecycleTitle: 'سلة المحذوفات',
+    cleanerCatRecycleDesc: 'إفراغ سلة المحذوفات في ويندوز بشكل نهائي.',
+    cleanerCatBrowserTitle: 'كاش المتصفح المؤقت فقط (دون السجل)',
+    cleanerCatBrowserDesc: 'يحذف كاش HTTP في Edge و Chrome و Firefox فقط مع الحفاظ الكامل على الحسابات والكوكيز والمفضلة والسجل.',
   },
 };
 

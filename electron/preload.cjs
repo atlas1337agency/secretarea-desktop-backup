@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
     downloadUpdate: () => ipcRenderer.invoke('updater:download'),
     postponeUpdate: () => ipcRenderer.invoke('updater:postpone'),
     installUpdate: () => ipcRenderer.invoke('updater:install'),
+    getReleaseNotes: (version) => ipcRenderer.invoke('updater:get-release-notes', version),
     onStateChange: (callback) => {
       if (typeof callback !== 'function') {
         return () => {};
@@ -46,8 +47,11 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
     getDesktopSettings: () => ipcRenderer.invoke('settings:get-desktop'),
     setStartWithComputer: (enabled) =>
       ipcRenderer.invoke('settings:set-start-with-computer', Boolean(enabled)),
-    completeOnboarding: (completed = true) =>
-      ipcRenderer.invoke('settings:complete-onboarding', Boolean(completed)),
+    setCloseBehavior: (behavior) =>
+      ipcRenderer.invoke('settings:set-close-behavior', behavior),
+    exitApplication: () => ipcRenderer.invoke('app:exit-completely'),
+    completeOnboarding: (payload = true) =>
+      ipcRenderer.invoke('settings:complete-onboarding', payload),
   },
   downloads: {
     getState: () => ipcRenderer.invoke('downloads:get-state'),
@@ -99,6 +103,90 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
       ipcRenderer.on('qbit-setup:status', listener);
       return () => {
         ipcRenderer.removeListener('qbit-setup:status', listener);
+      };
+    },
+  },
+  hardwareMonitor: {
+    getSnapshot: () => ipcRenderer.invoke('hardware:get-snapshot'),
+    start: (intervalMs) => ipcRenderer.invoke('hardware:start', intervalMs),
+    stop: () => ipcRenderer.invoke('hardware:stop'),
+    setInterval: (intervalMs) => ipcRenderer.invoke('hardware:set-interval', intervalMs),
+    onUpdate: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, snapshot) => {
+        callback(snapshot);
+      };
+      ipcRenderer.on('hardware:update', listener);
+      return () => {
+        ipcRenderer.removeListener('hardware:update', listener);
+      };
+    },
+  },
+  gamingMonitor: {
+    listProcesses: () => ipcRenderer.invoke('gaming:list-processes'),
+    checkPresentMon: () => ipcRenderer.invoke('gaming:check-presentmon'),
+    getState: () => ipcRenderer.invoke('gaming:get-state'),
+    startSession: (opts) => ipcRenderer.invoke('gaming:start-session', opts),
+    stopSession: () => ipcRenderer.invoke('gaming:stop-session'),
+    getHistory: () => ipcRenderer.invoke('gaming:get-history'),
+    clearHistory: () => ipcRenderer.invoke('gaming:clear-history'),
+    setPingHost: (host) => ipcRenderer.invoke('gaming:set-ping-host', host),
+    onUpdate: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, state) => {
+        callback(state);
+      };
+      ipcRenderer.on('gaming:update', listener);
+      return () => {
+        ipcRenderer.removeListener('gaming:update', listener);
+      };
+    },
+  },
+  presentMonSetup: {
+    getState: () => ipcRenderer.invoke('presentmon-setup:get-state'),
+    checkStatus: (opts) => ipcRenderer.invoke('presentmon-setup:check', opts || {}),
+    startInstall: (userConfirmed, mode) =>
+      ipcRenderer.invoke('presentmon-setup:install', {
+        userConfirmed: Boolean(userConfirmed),
+        mode: mode || 'auto',
+      }),
+    cancel: () => ipcRenderer.invoke('presentmon-setup:cancel'),
+    dismiss: (declinePermanently) =>
+      ipcRenderer.invoke('presentmon-setup:dismiss', {
+        declinePermanently: Boolean(declinePermanently),
+      }),
+    openOfficialReleases: () => ipcRenderer.invoke('presentmon-setup:open-official'),
+    onStateChange: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, state) => {
+        callback(state);
+      };
+      ipcRenderer.on('presentmon-setup:status', listener);
+      return () => {
+        ipcRenderer.removeListener('presentmon-setup:status', listener);
+      };
+    },
+  },
+  pcCleaner: {
+    scan: () => ipcRenderer.invoke('cleaner:scan'),
+    clean: (payload) => ipcRenderer.invoke('cleaner:clean', payload),
+    cancel: () => ipcRenderer.invoke('cleaner:cancel'),
+    onProgress: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, progress) => {
+        callback(progress);
+      };
+      ipcRenderer.on('cleaner:progress', listener);
+      return () => {
+        ipcRenderer.removeListener('cleaner:progress', listener);
       };
     },
   },

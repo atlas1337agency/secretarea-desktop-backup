@@ -17,10 +17,12 @@ import {
 } from './services/sheetsApi';
 import { precacheCatalogImages } from './services/imageCache';
 import type {
+  CloseBehaviorMode,
   DownloadManagerSnapshot,
   GameItem,
   LibrarySectionTab,
   MirrorLink,
+  PresentMonSetupState,
   PrimarySection,
   QbitSetupState,
   SheetCatalogData,
@@ -44,10 +46,12 @@ import { StudiosView } from './components/StudiosView';
 import { StudioDetailModal } from './components/StudioDetailModal';
 import { RequestsView } from './components/RequestsView';
 import { DownloadsView } from './components/DownloadsView';
+import { HardwareMonitorView } from './components/HardwareMonitorView';
 import { SettingsView } from './components/SettingsView';
 import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
 import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
+import { PresentMonSetupModal } from './components/PresentMonSetupModal';
 import {
   FirstLaunchOnboarding,
   type OnboardingThemeChoice,
@@ -56,6 +60,7 @@ import {
   getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
   getDesktopWindowBridge,
+  type DesktopReleaseNotesPayload,
   type DesktopUpdateState,
 } from './services/desktopUpdater';
 import {
@@ -74,15 +79,23 @@ import {
   QBIT_OFFICIAL_DOWNLOAD_URL,
 } from './services/qbitSetup';
 import {
+  EMPTY_PRESENTMON_SETUP_STATE,
+  getDesktopPresentMonSetupBridge,
+  PRESENTMON_OFFICIAL_RELEASES_URL,
+} from './services/presentMonSetup';
+import {
   applyDocumentLanguageSettings,
   applyDocumentThemeSettings,
+  DEFAULT_CUSTOM_THEME,
   DEFAULT_LAUNCHER_SETTINGS,
   getActiveConsoleTheme,
+  getAppVersionString,
   isLocalOnboardingCompleted,
   loadLauncherSettings,
   saveLauncherSettings,
   setLocalOnboardingCompleted,
   type AppLanguage,
+  type CustomThemeConfig,
   type LauncherSettings,
 } from './services/launcherSettings';
 import { getTranslations } from './i18n/translations';
@@ -204,6 +217,7 @@ export default function App() {
   const settingsBridge = useMemo(() => getDesktopSettingsBridge(), []);
   const downloadsBridge = useMemo(() => getDesktopDownloadsBridge(), []);
   const qbitSetupBridge = useMemo(() => getDesktopQbitSetupBridge(), []);
+  const presentMonSetupBridge = useMemo(() => getDesktopPresentMonSetupBridge(), []);
   const [desktopUpdateState, setDesktopUpdateState] = useState<DesktopUpdateState | null>(null);
   const [isUpdaterModalOpen, setIsUpdaterModalOpen] = useState(false);
   const [downloadSnapshot, setDownloadSnapshot] = useState<DownloadManagerSnapshot>(() =>
@@ -212,9 +226,20 @@ export default function App() {
   const [qbitSetupState, setQbitSetupState] = useState<QbitSetupState>(EMPTY_QBIT_SETUP_STATE);
   const [isQbitSetupModalOpen, setIsQbitSetupModalOpen] = useState(false);
   const hasAutoPromptedQbitRef = useRef(false);
+  const [presentMonSetupState, setPresentMonSetupState] = useState<PresentMonSetupState>(
+    EMPTY_PRESENTMON_SETUP_STATE
+  );
+  const [isPresentMonModalOpen, setIsPresentMonModalOpen] = useState(false);
+  const hasAutoPromptedPresentMonRef = useRef(false);
+  const isDesktopApp = Boolean(settingsBridge || qbitSetupBridge || downloadsBridge);
+  const [resolvedAppVersion, setResolvedAppVersion] = useState<string>(() =>
+    getAppVersionString()
+  );
+  const [fetchedUpdateReleaseNotes, setFetchedUpdateReleaseNotes] =
+    useState<DesktopReleaseNotesPayload | null>(null);
   const [onboardingPhase, setOnboardingPhase] = useState<'checking' | 'active' | 'completed'>(() => {
-    if (isLocalOnboardingCompleted()) return 'completed';
-    return getDesktopSettingsBridge() ? 'checking' : 'active';
+    if (getDesktopSettingsBridge()) return 'checking';
+    return isLocalOnboardingCompleted() ? 'completed' : 'active';
   });
   const onboardingPhaseRef = useRef(onboardingPhase);
   onboardingPhaseRef.current = onboardingPhase;
@@ -229,7 +254,7 @@ export default function App() {
     saveLauncherSettings(launcherSettings);
   }, [launcherSettings]);
 
-  // Sync persisted Electron desktop settings & first-launch onboarding completion state on startup
+  // Sync persisted Electron desktop settings & first-install-only Welcome Setup
   useEffect(() => {
     if (!settingsBridge) return;
     let active = true;
@@ -237,19 +262,39 @@ export default function App() {
       .getDesktopSettings()
       .then((desktopSettings) => {
         if (!active) return;
+        const currentVer = desktopSettings?.appVersion?.trim() || getAppVersionString();
+        setResolvedAppVersion(currentVer);
+
         if (!desktopSettings) {
-          setOnboardingPhase((prev) => (prev === 'checking' ? 'active' : prev));
+          setOnboardingPhase(isLocalOnboardingCompleted() ? 'completed' : 'active');
           return;
         }
+
+        const nextCloseBehavior: CloseBehaviorMode =
+          desktopSettings.closeBehavior === 'minimize-to-tray'
+            ? 'minimize-to-tray'
+            : desktopSettings.closeBehavior === 'exit'
+            ? 'exit'
+            : desktopSettings.startWithComputer
+            ? 'minimize-to-tray'
+            : 'exit';
+
         setLauncherSettings((prev) =>
-          prev.startWithComputer === desktopSettings.startWithComputer
+          prev.startWithComputer === desktopSettings.startWithComputer &&
+          prev.closeBehavior === nextCloseBehavior
             ? prev
-            : { ...prev, startWithComputer: desktopSettings.startWithComputer }
+            : {
+                ...prev,
+                startWithComputer: desktopSettings.startWithComputer,
+                closeBehavior: nextCloseBehavior,
+              }
         );
-        if (desktopSettings.onboardingCompleted) {
+
+        const desktopCompleted = Boolean(desktopSettings.onboardingCompleted);
+        if (desktopCompleted || isLocalOnboardingCompleted()) {
           setLocalOnboardingCompleted(true);
           setOnboardingPhase('completed');
-        } else if (!isLocalOnboardingCompleted()) {
+        } else {
           setOnboardingPhase('active');
         }
       })
@@ -262,6 +307,39 @@ export default function App() {
       active = false;
     };
   }, [settingsBridge]);
+
+  // Fetch GitHub release notes when a newer update version is available or ready to install
+  useEffect(() => {
+    const availableVer = desktopUpdateState?.availableVersion?.trim();
+    const shouldFetch =
+      Boolean(availableVer) &&
+      !desktopUpdateState?.releaseNotes &&
+      (desktopUpdateState?.status === 'available' ||
+        desktopUpdateState?.status === 'downloading' ||
+        desktopUpdateState?.status === 'downloaded');
+
+    if (!shouldFetch || !availableVer || !updaterBridge?.getReleaseNotes) return;
+
+    let active = true;
+    void updaterBridge
+      .getReleaseNotes(availableVer)
+      .then((payload) => {
+        if (active && payload) {
+          setFetchedUpdateReleaseNotes(payload);
+        }
+      })
+      .catch(() => {
+        // Fallback cleanly to built-in localized changelog parser
+      });
+    return () => {
+      active = false;
+    };
+  }, [
+    desktopUpdateState?.availableVersion,
+    desktopUpdateState?.releaseNotes,
+    desktopUpdateState?.status,
+    updaterBridge,
+  ]);
 
   // Sync Electron Download Manager snapshot + live progress updates
   useEffect(() => {
@@ -306,6 +384,42 @@ export default function App() {
       unsubscribe();
     };
   }, [qbitSetupBridge]);
+
+  // Sync automated Intel PresentMon dependency detection, version checks, & permission modal
+  useEffect(() => {
+    if (!presentMonSetupBridge) return;
+    let active = true;
+    const applyPresentMonState = (next: PresentMonSetupState | null) => {
+      if (!active || !next) return;
+      setPresentMonSetupState(next);
+      if (
+        next.shouldPrompt &&
+        !hasAutoPromptedPresentMonRef.current &&
+        onboardingPhaseRef.current === 'completed'
+      ) {
+        hasAutoPromptedPresentMonRef.current = true;
+        setIsPresentMonModalOpen(true);
+      }
+    };
+    void presentMonSetupBridge.getState().then(applyPresentMonState);
+    const unsubscribe = presentMonSetupBridge.onStateChange(applyPresentMonState);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [presentMonSetupBridge]);
+
+  // Open pending PresentMon permission prompt once onboarding transitions to completed
+  useEffect(() => {
+    if (
+      onboardingPhase === 'completed' &&
+      presentMonSetupState.shouldPrompt &&
+      !hasAutoPromptedPresentMonRef.current
+    ) {
+      hasAutoPromptedPresentMonRef.current = true;
+      setIsPresentMonModalOpen(true);
+    }
+  }, [onboardingPhase, presentMonSetupState.shouldPrompt]);
 
   // Automatically detect real PC/laptop specs when SecretArea.exe starts (unless custom override saved)
   useEffect(() => {
@@ -614,6 +728,34 @@ export default function App() {
     [notify, settingsBridge]
   );
 
+  const handleChangeCloseBehavior = useCallback(
+    async (behavior: CloseBehaviorMode) => {
+      setLauncherSettings((prev) => ({ ...prev, closeBehavior: behavior }));
+      if (!settingsBridge?.setCloseBehavior) return;
+      try {
+        const res = await settingsBridge.setCloseBehavior(behavior);
+        if (res?.closeBehavior) {
+          setLauncherSettings((prev) => ({
+            ...prev,
+            closeBehavior: res.closeBehavior === 'minimize-to-tray' ? 'minimize-to-tray' : 'exit',
+          }));
+        }
+      } catch {
+        notify('Could not save application closing behavior.', 'error');
+      }
+    },
+    [notify, settingsBridge]
+  );
+
+  const handleExitApplication = useCallback(async () => {
+    if (!settingsBridge?.exitApplication) return;
+    try {
+      await settingsBridge.exitApplication();
+    } catch {
+      notify('Could not exit application cleanly.', 'error');
+    }
+  }, [notify, settingsBridge]);
+
   const handleToggleEnableCanRunIt = useCallback((enabled: boolean) => {
     setLauncherSettings((prev) => ({ ...prev, enableCanRunIt: enabled }));
     if (!enabled) {
@@ -631,6 +773,7 @@ export default function App() {
       lightMode: enabled,
       alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
       alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
+      customTheme: { ...prev.customTheme, enabled: false },
     }));
     if (enabled) {
       stopPsAmbientSound();
@@ -645,6 +788,7 @@ export default function App() {
         alwaysPs5Theme: enabled,
         alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
         lightMode: enabled ? false : prev.lightMode,
+        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
       if (
         enabled &&
@@ -666,6 +810,7 @@ export default function App() {
         alwaysXboxTheme: enabled,
         alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
         lightMode: enabled ? false : prev.lightMode,
+        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
       if (
         enabled &&
@@ -679,6 +824,35 @@ export default function App() {
     },
     [soundEnabled, launcherSettings.uiClickSoundsEnabled, launcherSettings.soundVolume]
   );
+
+  const handleUpdateCustomTheme = useCallback((patch: Partial<CustomThemeConfig>) => {
+    setLauncherSettings((prev) => {
+      const nextCustom: CustomThemeConfig = {
+        ...prev.customTheme,
+        ...patch,
+      };
+      const activatingCustom = nextCustom.enabled;
+      return {
+        ...prev,
+        alwaysPs5Theme: activatingCustom ? false : prev.alwaysPs5Theme,
+        alwaysXboxTheme: activatingCustom ? false : prev.alwaysXboxTheme,
+        lightMode: activatingCustom ? nextCustom.surfaceStyle === 'daylight' : prev.lightMode,
+        customTheme: nextCustom,
+      };
+    });
+    if (patch.enabled) {
+      stopPsAmbientSound();
+      stopXboxAmbientSound();
+    }
+  }, []);
+
+  const handleResetCustomTheme = useCallback(() => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      lightMode: false,
+      customTheme: { ...DEFAULT_CUSTOM_THEME, enabled: false },
+    }));
+  }, []);
 
   const handleToggleAmbientMusic = useCallback((enabled: boolean) => {
     setLauncherSettings((prev) => ({ ...prev, ambientMusicEnabled: enabled }));
@@ -714,6 +888,7 @@ export default function App() {
     if (settingsBridge) {
       try {
         await settingsBridge.setStartWithComputer(false);
+        await settingsBridge.setCloseBehavior?.(defaults.closeBehavior);
       } catch {
         // Ignore desktop reset error cleanly
       }
@@ -986,6 +1161,58 @@ export default function App() {
     void handleOpenExternalUrl(QBIT_OFFICIAL_DOWNLOAD_URL);
   }, [qbitSetupBridge, handleOpenExternalUrl]);
 
+  const handleOpenPresentMonManager = useCallback(() => {
+    setIsPresentMonModalOpen(true);
+    if (presentMonSetupBridge) {
+      void presentMonSetupBridge.checkStatus({ force: true }).then((next) => {
+        if (next) setPresentMonSetupState(next);
+      });
+    }
+  }, [presentMonSetupBridge]);
+
+  const handleCheckPresentMonUpdates = useCallback(async () => {
+    if (!presentMonSetupBridge) return;
+    const next = await presentMonSetupBridge.checkStatus({ force: true });
+    if (next) setPresentMonSetupState(next);
+  }, [presentMonSetupBridge]);
+
+  const handleStartPresentMonInstallOrUpdate = useCallback(
+    async (
+      userConfirmed: boolean,
+      mode: 'auto' | 'install' | 'update' | 'repair' | 'reinstall' = 'auto'
+    ) => {
+      if (!presentMonSetupBridge) return;
+      const next = await presentMonSetupBridge.startInstall(userConfirmed, mode);
+      if (next) setPresentMonSetupState(next);
+    },
+    [presentMonSetupBridge]
+  );
+
+  const handleCancelPresentMonOperation = useCallback(() => {
+    if (!presentMonSetupBridge) return;
+    void presentMonSetupBridge.cancel().then((next) => {
+      if (next) setPresentMonSetupState(next);
+    });
+  }, [presentMonSetupBridge]);
+
+  const handleDismissPresentMonPrompt = useCallback(
+    (declinePermanently: boolean) => {
+      if (!presentMonSetupBridge) return;
+      void presentMonSetupBridge.dismiss(declinePermanently).then((next) => {
+        if (next) setPresentMonSetupState(next);
+      });
+    },
+    [presentMonSetupBridge]
+  );
+
+  const handleOpenOfficialPresentMonReleases = useCallback(() => {
+    if (presentMonSetupBridge) {
+      void presentMonSetupBridge.openOfficialReleases();
+      return;
+    }
+    void handleOpenExternalUrl(PRESENTMON_OFFICIAL_RELEASES_URL);
+  }, [presentMonSetupBridge, handleOpenExternalUrl]);
+
   const handleSelectOnboardingTheme = useCallback(
     (choice: OnboardingThemeChoice) => {
       if (choice === 'light') {
@@ -1000,6 +1227,7 @@ export default function App() {
           lightMode: false,
           alwaysPs5Theme: false,
           alwaysXboxTheme: false,
+          customTheme: { ...prev.customTheme, enabled: false },
         }));
         stopPsAmbientSound();
         stopXboxAmbientSound();
@@ -1015,7 +1243,10 @@ export default function App() {
       setOnboardingPhase('completed');
       setActiveSection(destination);
       if (settingsBridge?.completeOnboarding) {
-        void settingsBridge.completeOnboarding(true);
+        void settingsBridge.completeOnboarding({
+          completed: true,
+          version: resolvedAppVersion,
+        });
       }
       if (qbitSetupBridge) {
         void qbitSetupBridge.dismiss().then((next) => {
@@ -1023,12 +1254,14 @@ export default function App() {
         });
       }
     },
-    [settingsBridge, qbitSetupBridge]
+    [resolvedAppVersion, settingsBridge, qbitSetupBridge]
   );
 
+  // Welcome Setup preview trigger — allowed only in Google AI Studio / Web Preview, hidden in Desktop app
   const handleReplayOnboarding = useCallback(() => {
+    if (isDesktopApp) return;
     setOnboardingPhase('active');
-  }, []);
+  }, [isDesktopApp]);
 
   const isBackgroundRefreshingRef = useRef(false);
   const lastRefreshAttemptAtRef = useRef(0);
@@ -1447,14 +1680,16 @@ export default function App() {
   if (onboardingPhase === 'active') {
     return (
       <FirstLaunchOnboarding
-        isDesktopApp={Boolean(settingsBridge || qbitSetupBridge || downloadsBridge)}
-        desktopVersion={desktopUpdateState?.currentVersion || null}
+        isDesktopApp={isDesktopApp}
+        desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
         settings={launcherSettings}
         activeTheme={activeTheme}
         setupState={qbitSetupState}
         torrentConfig={downloadSnapshot.torrentConfig}
         torrentConnected={downloadSnapshot.torrentConnected}
         onSelectTheme={handleSelectOnboardingTheme}
+        onUpdateCustomTheme={handleUpdateCustomTheme}
+        onResetCustomTheme={handleResetCustomTheme}
         onChangeLanguage={handleChangeLanguage}
         onRecheckQbit={handleRecheckQbitSetup}
         onStartQbitInstall={handleStartQbitInstall}
@@ -1471,11 +1706,14 @@ export default function App() {
     <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#141921] dark:text-[#e5e9f0]">
       <TopUtilityBar
         activeTheme={activeTheme}
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        activeDownloadsCount={activeDownloadsCount}
         soundEnabled={effectiveSoundEnabled}
         isFullscreen={isFullscreen}
         onToggleSound={() => setSoundEnabled((prev) => !prev)}
         onToggleFullscreen={handleToggleFullscreen}
-        desktopVersion={desktopUpdateState?.currentVersion || null}
+        desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
         updateBadgeStatus={updateBadgeStatus}
         onOpenUpdates={
           updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
@@ -1614,10 +1852,20 @@ export default function App() {
           />
         )}
 
+        {activeSection === 'hardware' && (
+          <HardwareMonitorView
+            isDesktopApp={isDesktopApp}
+            language={launcherSettings.language}
+            presentMonSetupState={presentMonSetupState}
+            onOpenPresentMonManager={handleOpenPresentMonManager}
+          />
+        )}
+
         {activeSection === 'settings' && (
           <SettingsView
             settings={launcherSettings}
-            isDesktopApp={Boolean(settingsBridge || downloadsBridge)}
+            isDesktopApp={isDesktopApp}
+            desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
             isUpdatingAutoLaunch={isUpdatingAutoLaunch}
             downloadFolder={downloadSnapshot.downloadFolder}
             torrentConfig={downloadSnapshot.torrentConfig}
@@ -1627,11 +1875,15 @@ export default function App() {
             torrentError={downloadSnapshot.torrentError}
             onChangeLanguage={handleChangeLanguage}
             onToggleStartWithComputer={handleToggleStartWithComputer}
+            onChangeCloseBehavior={handleChangeCloseBehavior}
+            onExitApplication={handleExitApplication}
             onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
             onToggleCompactNavbar={handleToggleCompactNavbar}
             onToggleLightMode={handleToggleLightMode}
             onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
             onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
+            onUpdateCustomTheme={handleUpdateCustomTheme}
+            onResetCustomTheme={handleResetCustomTheme}
             onToggleAmbientMusic={handleToggleAmbientMusic}
             onToggleUiClickSounds={handleToggleUiClickSounds}
             onChangeSoundVolume={handleChangeSoundVolume}
@@ -1645,7 +1897,11 @@ export default function App() {
             onTestTorrentConnection={handleTestTorrentConnection}
             qbitSetupState={qbitSetupState}
             onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
-            onReplayOnboarding={handleReplayOnboarding}
+            presentMonSetupState={presentMonSetupState}
+            onOpenPresentMonManager={handleOpenPresentMonManager}
+            onCheckPresentMonUpdates={handleCheckPresentMonUpdates}
+            onStartPresentMonInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+            onReplayOnboarding={!isDesktopApp ? handleReplayOnboarding : undefined}
           />
         )}
       </main>
@@ -1690,7 +1946,9 @@ export default function App() {
         <DesktopUpdaterModal
           isOpen={isUpdaterModalOpen}
           activeTheme={activeTheme}
+          language={launcherSettings.language}
           state={desktopUpdateState}
+          fetchedReleaseNotes={fetchedUpdateReleaseNotes}
           onClose={() => setIsUpdaterModalOpen(false)}
           onCheckForUpdates={handleCheckForUpdates}
           onDownloadUpdate={handleDownloadUpdate}
@@ -1716,6 +1974,19 @@ export default function App() {
         onGeneratePassword={handleGenerateQbitPassword}
         onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
         onOpenSettings={handleOpenTorrentSettings}
+      />
+
+      <PresentMonSetupModal
+        isOpen={isPresentMonModalOpen}
+        isDesktopApp={Boolean(presentMonSetupBridge || downloadsBridge)}
+        language={launcherSettings.language}
+        setupState={presentMonSetupState}
+        onClose={() => setIsPresentMonModalOpen(false)}
+        onDismiss={handleDismissPresentMonPrompt}
+        onCheckUpdates={handleCheckPresentMonUpdates}
+        onStartInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+        onCancelOperation={handleCancelPresentMonOperation}
+        onOpenOfficialReleases={handleOpenOfficialPresentMonReleases}
       />
 
       {/* Persistent Offline Mode / Auto-hiding Online Mode Badge */}

@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import {
   Books,
   ChatTeardropText,
+  Cpu,
   DownloadSimple,
   Gear,
   House,
@@ -47,14 +48,23 @@ export function Navbar({
   }[] = [
     { id: 'store', label: t.nav.home, icon: House },
     { id: 'library', label: t.nav.library, icon: Books },
+    { id: 'extras', label: t.nav.extras, icon: Stack },
+    { id: 'requests', label: t.nav.requests, icon: ChatTeardropText },
+  ];
+
+  const mobileUtilityItems: {
+    id: PrimarySection;
+    label: string;
+    icon: ComponentType<{ className?: string }>;
+    count?: number;
+  }[] = [
     {
       id: 'downloads',
       label: t.nav.downloads,
       icon: DownloadSimple,
       count: activeDownloadsCount > 0 ? activeDownloadsCount : undefined,
     },
-    { id: 'extras', label: t.nav.extras, icon: Stack },
-    { id: 'requests', label: t.nav.requests, icon: ChatTeardropText },
+    { id: 'hardware', label: t.nav.hardwareMonitor, icon: Cpu },
     { id: 'settings', label: t.nav.settings, icon: Gear },
   ];
 
@@ -152,14 +162,14 @@ export function Navbar({
           {/* Zone 2: Desktop / Tablet Primary Navigation */}
           <nav
             aria-label="Primary navigation"
-            className={`hidden md:flex items-center justify-center min-w-0 ${
+            className={`hidden md:flex items-center justify-center min-w-0 overflow-x-auto no-scrollbar ${
               isDefaultTheme
                 ? compactNavbar
                   ? 'gap-1 lg:gap-1.5'
-                  : 'gap-0.5 lg:gap-1.5 xl:gap-2.5'
+                  : 'gap-0.5 lg:gap-1 xl:gap-2'
                 : compactNavbar
-                ? 'gap-2 lg:gap-3.5'
-                : 'gap-3 lg:gap-5 xl:gap-7'
+                ? 'gap-1.5 lg:gap-3'
+                : 'gap-1 lg:gap-2.5 xl:gap-4'
             }`}
           >
             {navItems.map((item) => {
@@ -175,14 +185,14 @@ export function Navbar({
                     aria-label={item.label}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => handleSelectNav(item.id)}
-                    className={`relative inline-flex items-center justify-center gap-1.5 text-[12.5px] lg:text-[13px] tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7cc4ff] ${
+                    className={`relative inline-flex items-center justify-center gap-1.5 text-[11.5px] lg:text-[12.5px] xl:text-[13px] tracking-[0.04em] lg:tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7cc4ff] ${
                       isActive
                         ? compactNavbar
                           ? 'p-2.5 bg-white/[0.16] border border-white/[0.34] font-bold text-white shadow-[0_0_18px_rgba(96,178,255,0.38)]'
-                          : 'px-3.5 py-2 bg-white/[0.15] border border-white/[0.3] font-bold text-white shadow-[0_0_18px_rgba(96,178,255,0.35)]'
+                          : 'px-2.5 lg:px-3.5 py-1.5 lg:py-2 bg-white/[0.15] border border-white/[0.3] font-bold text-white shadow-[0_0_18px_rgba(96,178,255,0.35)]'
                         : compactNavbar
                         ? 'p-2.5 font-medium text-white/65 hover:text-white hover:bg-white/[0.08]'
-                        : 'px-3 py-2 font-medium text-white/65 hover:text-white hover:bg-white/[0.08]'
+                        : 'px-2 lg:px-3 py-1.5 lg:py-2 font-medium text-white/65 hover:text-white hover:bg-white/[0.08]'
                     }`}
                   >
                     <Icon className={compactNavbar ? 'w-4.5 h-4.5 shrink-0' : 'w-4 h-4 shrink-0'} />
@@ -205,14 +215,14 @@ export function Navbar({
                     aria-label={item.label}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => handleSelectNav(item.id)}
-                    className={`relative inline-flex items-center justify-center gap-1.5 text-[12.5px] lg:text-[13px] tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee755] ${
+                    className={`relative inline-flex items-center justify-center gap-1.5 text-[11.5px] lg:text-[12.5px] xl:text-[13px] tracking-[0.04em] lg:tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee755] ${
                       isActive
                         ? compactNavbar
                           ? 'p-2.5 bg-[#107C10]/85 border border-[#6ee755]/85 font-bold text-white shadow-[0_0_16px_rgba(82,224,66,0.35)]'
-                          : 'px-3.5 py-2 bg-[#107C10]/85 border border-[#6ee755]/85 font-bold text-white shadow-[0_0_16px_rgba(82,224,66,0.32)]'
+                          : 'px-2.5 lg:px-3.5 py-1.5 lg:py-2 bg-[#107C10]/85 border border-[#6ee755]/85 font-bold text-white shadow-[0_0_16px_rgba(82,224,66,0.32)]'
                         : compactNavbar
                         ? 'p-2.5 font-medium text-[#b5d6b8] hover:text-white hover:bg-[#107C10]/30'
-                        : 'px-3 py-2 font-medium text-[#b5d6b8] hover:text-white hover:bg-[#107C10]/30'
+                        : 'px-2 lg:px-3 py-1.5 lg:py-2 font-medium text-[#b5d6b8] hover:text-white hover:bg-[#107C10]/30'
                     }`}
                   >
                     <Icon className={compactNavbar ? 'w-4.5 h-4.5 shrink-0' : 'w-4 h-4 shrink-0'} />
@@ -238,8 +248,8 @@ export function Navbar({
                   className="relative h-14 sm:h-[60px] flex items-center shrink-0 group cursor-pointer focus-visible:outline-none"
                 >
                   <span
-                    className={`inline-flex items-center justify-center gap-1.5 lg:gap-2 rounded-lg text-[12.5px] lg:text-[13.5px] whitespace-nowrap transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-[#0284c7] dark:group-focus-visible:ring-[#38bdf8] ${
-                      compactNavbar ? 'w-10 h-10' : 'px-2.5 lg:px-3.5 py-2'
+                    className={`inline-flex items-center justify-center gap-1 lg:gap-2 rounded-lg text-[11.5px] lg:text-[12.5px] xl:text-[13px] whitespace-nowrap transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-[#0284c7] dark:group-focus-visible:ring-[#38bdf8] ${
+                      compactNavbar ? 'w-10 h-10' : 'px-1.5 lg:px-2.5 xl:px-3 py-2'
                     } ${
                       isActive
                         ? 'font-semibold text-[#0284c7] dark:text-[#38bdf8] bg-sky-500/[0.08] dark:bg-[#38bdf8]/[0.1]'
@@ -264,7 +274,7 @@ export function Navbar({
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-2.5 bottom-0 h-[2.5px] rounded-t-full bg-[#0284c7] dark:bg-[#38bdf8]"
+                      className="absolute inset-x-2 bottom-0 h-[2.5px] rounded-t-full bg-[#0284c7] dark:bg-[#38bdf8]"
                     />
                   )}
                 </button>
@@ -273,12 +283,12 @@ export function Navbar({
           </nav>
 
           {/* Zone 3: Console Glyphs & Mobile Menu Button */}
-          <div className="flex items-center justify-end gap-2 shrink-0 md:min-w-[84px]">
+          <div className="flex items-center justify-end gap-2 shrink-0 lg:min-w-[84px]">
             {isPs5Theme && (
               <div
                 aria-hidden="true"
                 dir="ltr"
-                className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-[#8ec5ff]/75 px-2"
+                className="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest text-[#8ec5ff]/75 px-2"
               >
                 <span>△</span>
                 <span>○</span>
@@ -343,51 +353,63 @@ export function Navbar({
             }`}
           >
             <nav aria-label="Mobile navigation" className="p-3 space-y-1">
-              {navItems.map((item) => {
+              {[...navItems, ...mobileUtilityItems].map((item, idx) => {
                 const isActive = activeSection === item.id;
                 const Icon = item.icon;
                 return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    aria-current={isActive ? 'page' : undefined}
-                    onClick={() => handleSelectNav(item.id)}
-                    className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-[14px] transition-colors cursor-pointer ${
-                      isPs5Theme
-                        ? isActive
-                          ? 'bg-white/[0.16] border border-white/[0.28] font-bold text-white'
-                          : 'font-medium text-white/75 hover:bg-white/[0.08] hover:text-white'
-                        : isXboxTheme
-                        ? isActive
-                          ? 'bg-[#107C10]/75 border border-[#6ee755]/75 font-bold text-white'
-                          : 'font-medium text-[#b5d6b8] hover:bg-[#107C10]/30 hover:text-white'
-                        : isActive
-                        ? 'bg-sky-500/[0.1] dark:bg-[#38bdf8]/[0.12] text-[#0284c7] dark:text-[#38bdf8] font-semibold'
-                        : 'font-medium text-slate-700 hover:bg-slate-100 dark:text-[#c7d4e5] dark:hover:bg-white/[0.06] dark:hover:text-white'
-                    }`}
-                  >
-                    <span className="flex items-center gap-3 min-w-0">
-                      <Icon className="w-4.5 h-4.5 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                      {typeof item.count === 'number' && (
-                        <span className="font-mono-tabular text-[12px] font-bold opacity-85">
-                          ({item.count})
-                        </span>
-                      )}
-                    </span>
-                    {isActive && (
-                      <span
-                        aria-hidden="true"
-                        className={`w-1.5 h-5 rounded-full shrink-0 ${
+                  <div key={item.id}>
+                    {idx === navItems.length && (
+                      <div
+                        className={`my-2 border-t ${
                           isPs5Theme
-                            ? 'bg-white'
+                            ? 'border-white/[0.12]'
                             : isXboxTheme
-                            ? 'bg-[#6ee755]'
-                            : 'bg-[#0284c7] dark:bg-[#38bdf8]'
+                            ? 'border-[#52e042]/20'
+                            : 'border-slate-200 dark:border-white/[0.08]'
                         }`}
                       />
                     )}
-                  </button>
+                    <button
+                      type="button"
+                      aria-current={isActive ? 'page' : undefined}
+                      onClick={() => handleSelectNav(item.id)}
+                      className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-[14px] transition-colors cursor-pointer ${
+                        isPs5Theme
+                          ? isActive
+                            ? 'bg-white/[0.16] border border-white/[0.28] font-bold text-white'
+                            : 'font-medium text-white/75 hover:bg-white/[0.08] hover:text-white'
+                          : isXboxTheme
+                          ? isActive
+                            ? 'bg-[#107C10]/75 border border-[#6ee755]/75 font-bold text-white'
+                            : 'font-medium text-[#b5d6b8] hover:bg-[#107C10]/30 hover:text-white'
+                          : isActive
+                          ? 'bg-sky-500/[0.1] dark:bg-[#38bdf8]/[0.12] text-[#0284c7] dark:text-[#38bdf8] font-semibold'
+                          : 'font-medium text-slate-700 hover:bg-slate-100 dark:text-[#c7d4e5] dark:hover:bg-white/[0.06] dark:hover:text-white'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3 min-w-0">
+                        <Icon className="w-4.5 h-4.5 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                        {typeof item.count === 'number' && (
+                          <span className="font-mono-tabular text-[12px] font-bold opacity-85">
+                            ({item.count})
+                          </span>
+                        )}
+                      </span>
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className={`w-1.5 h-5 rounded-full shrink-0 ${
+                            isPs5Theme
+                              ? 'bg-white'
+                              : isXboxTheme
+                              ? 'bg-[#6ee755]'
+                              : 'bg-[#0284c7] dark:bg-[#38bdf8]'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  </div>
                 );
               })}
             </nav>

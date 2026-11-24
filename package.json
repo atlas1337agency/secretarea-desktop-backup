@@ -1,7 +1,7 @@
 {
   "name": "secretarea",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "SecretArea Desktop Game Launcher",
   "repository": "https://github.com/secretarea1337/secretarea-desktop",
   "type": "module",
@@ -68,6 +68,7 @@
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "systeminformation": "^5.33.24",
     "vite": "^8.3.0"
   },
   "devDependencies": {

@@ -6,6 +6,7 @@ import {
   ArrowSquareOut,
   Check,
   CheckCircle,
+  Desktop,
   DownloadSimple,
   Eye,
   EyeSlash,
@@ -29,10 +30,17 @@ import type {
   TorrentConnectionTestResult,
   TorrentIntegrationConfig,
 } from '../types';
-import type { AppLanguage, AppThemeMode, LauncherSettings } from '../services/launcherSettings';
+import {
+  getAppVersionString,
+  type AppLanguage,
+  type AppThemeMode,
+  type CustomThemeConfig,
+  type LauncherSettings,
+} from '../services/launcherSettings';
 import { getTranslations, LANGUAGE_OPTIONS } from '../i18n/translations';
 import { formatBytes, formatDownloadSpeed, formatEta } from '../services/downloadManager';
 import { QBIT_OFFICIAL_LOGO_URL } from '../services/qbitSetup';
+import { CustomThemeBuilder } from './CustomThemeBuilder';
 import { Ps5Icon } from './SectionBadge';
 
 export type OnboardingThemeChoice = 'dark' | 'light' | 'ps5' | 'xbox';
@@ -52,6 +60,8 @@ interface FirstLaunchOnboardingProps {
   torrentConfig: TorrentIntegrationConfig;
   torrentConnected: boolean;
   onSelectTheme: (choice: OnboardingThemeChoice) => void;
+  onUpdateCustomTheme: (patch: Partial<CustomThemeConfig>) => void;
+  onResetCustomTheme: () => void;
   onChangeLanguage: (language: AppLanguage) => void;
   onRecheckQbit: () => Promise<void> | void;
   onStartQbitInstall: (userConfirmed: boolean) => Promise<void> | void;
@@ -105,6 +115,8 @@ export function FirstLaunchOnboarding({
   torrentConfig,
   torrentConnected,
   onSelectTheme,
+  onUpdateCustomTheme,
+  onResetCustomTheme,
   onChangeLanguage,
   onRecheckQbit,
   onStartQbitInstall,
@@ -119,6 +131,7 @@ export function FirstLaunchOnboarding({
   const tq = tr.qbitSetup;
   const ts = tr.settings;
   const isRtl = settings.language === 'ar';
+  const currentVersion = desktopVersion || getAppVersionString();
 
   const [step, setStep] = useState<OnboardingStepId>('welcome');
   const [brandLogoFailed, setBrandLogoFailed] = useState(false);
@@ -334,14 +347,18 @@ export function FirstLaunchOnboarding({
     );
   };
 
-  const activeThemeLabel =
-    currentThemeChoice === 'ps5'
-      ? t.themePs5Name
-      : currentThemeChoice === 'xbox'
-      ? t.themeXboxName
-      : currentThemeChoice === 'light'
-      ? t.themeLightName
-      : t.themeDarkName;
+  const isCustomThemeActive =
+    activeTheme === 'default' && Boolean(settings.customTheme?.enabled);
+
+  const activeThemeLabel = isCustomThemeActive
+    ? `${tr.customTheme.summaryCustomPrefix} (${settings.customTheme.accentColor.toUpperCase()})`
+    : currentThemeChoice === 'ps5'
+    ? t.themePs5Name
+    : currentThemeChoice === 'xbox'
+    ? t.themeXboxName
+    : currentThemeChoice === 'light'
+    ? t.themeLightName
+    : t.themeDarkName;
 
   const activeLanguageLabel =
     LANGUAGE_OPTIONS.find((l) => l.code === settings.language)?.nativeName || 'English';
@@ -510,99 +527,180 @@ export function FirstLaunchOnboarding({
 
       {/* Main Centered Onboarding Canvas */}
       <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex flex-col justify-center">
-        {/* ======================== STEP 1: WELCOME ======================== */}
+        {/* ======================== STEP 1: MODERN WELCOME / WHAT'S NEW ======================== */}
         {step === 'welcome' && (
           <section
             key="step-welcome"
-            className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel relative rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
-            <div className="p-6 sm:p-10 lg:p-12 space-y-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-200 dark:border-white/[0.08] pb-8">
-                <div className="space-y-3 max-w-2xl">
-                  <div className="flex items-center gap-2 text-[12.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
-                    <span>{t.welcomeEyebrow}</span>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-slate-500 dark:text-[#8b9bb4] font-normal">
-                      {t.firstTimeNotice}
-                    </span>
+            {/* Subtle GPU-friendly radial aura */}
+            <div
+              aria-hidden="true"
+              className="sa-welcome-aura pointer-events-none absolute -top-28 -end-24 w-72 h-72 sm:w-96 sm:h-96 rounded-full blur-3xl opacity-75"
+              style={{
+                background: isXboxTheme
+                  ? 'radial-gradient(circle, rgba(82,224,66,0.22) 0%, transparent 70%)'
+                  : isCustomThemeActive
+                  ? `radial-gradient(circle, ${settings.customTheme.accentColor}38 0%, transparent 70%)`
+                  : 'radial-gradient(circle, rgba(26,159,255,0.22) 0%, transparent 70%)',
+              }}
+            />
+
+            <div className="relative z-10 p-5 sm:p-8 lg:p-11 space-y-7">
+              <div className="grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-7 lg:gap-10 items-start">
+                {/* Left Hero Column */}
+                <div className="space-y-6">
+                  <div className="sa-welcome-stagger-1 flex items-center gap-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center p-2.5 shrink-0 shadow-sm">
+                      {!brandLogoFailed ? (
+                        <img
+                          src="./img/logo01.png"
+                          alt="SecretArea Emblem"
+                          onError={() => setBrandLogoFailed(true)}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <Shield
+                          weight="duotone"
+                          className="w-10 h-10 text-[#0284c7] dark:text-[#38bdf8]"
+                        />
+                      )}
+                    </div>
+
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                        <span>{t.welcomeEyebrow}</span>
+                        <span aria-hidden="true">·</span>
+                        <span dir="ltr" className="font-mono-tabular">
+                          v{currentVersion}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4]">
+                        {t.firstTimeNotice}
+                      </p>
+                    </div>
                   </div>
 
-                  <h1 className="font-display text-3xl sm:text-4xl lg:text-[42px] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.12] [text-wrap:balance]">
-                    {t.welcomeTitle}
-                  </h1>
+                  <div className="sa-welcome-stagger-2 space-y-3">
+                    <h1 className="font-display text-3xl sm:text-4xl lg:text-[42px] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1] [text-wrap:balance]">
+                      {t.welcomeTitle}
+                    </h1>
 
-                  <p className="text-[15px] sm:text-[16px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
-                    {t.welcomeSubtitle}
-                  </p>
+                    <p className="text-[14.5px] sm:text-[15.5px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed max-w-xl">
+                      {t.welcomeSubtitle}
+                    </p>
+                  </div>
+
+                  {/* Three Clean Setup Steps Summary */}
+                  <div className="sa-welcome-stagger-3 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-200 dark:border-white/[0.08]">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
+                        <Palette className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <span>{t.welcomeFeature1Title}</span>
+                      </div>
+                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                        {t.welcomeFeature1Desc}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
+                        <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <span>{t.welcomeFeature2Title}</span>
+                      </div>
+                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                        {t.welcomeFeature2Desc}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-[#4ade80] shrink-0" />
+                        <span>{t.welcomeFeature3Title}</span>
+                      </div>
+                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                        {t.welcomeFeature3Desc}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center p-3 shrink-0 self-start md:self-center">
-                  {!brandLogoFailed ? (
-                    <img
-                      src="./img/logo01.png"
-                      alt="SecretArea Emblem"
-                      onError={() => setBrandLogoFailed(true)}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <Shield
-                      weight="duotone"
-                      className="w-12 h-12 text-[#0284c7] dark:text-[#38bdf8]"
-                    />
-                  )}
+                {/* Right Column: What is SecretArea? Visitor Overview */}
+                <div className="sa-welcome-stagger-2 sa-ps5-subpanel rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.08] p-5 sm:p-6 space-y-4">
+                  <div className="space-y-1.5 pb-3.5 border-b border-slate-200 dark:border-white/[0.07]">
+                    <div className="flex items-center gap-2 text-[14.5px] font-bold text-slate-900 dark:text-white">
+                      <Sparkle weight="duotone" className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                      <span>{t.whatIsSecretAreaTitle}</span>
+                    </div>
+                    <p className="text-[13px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
+                      {t.whatIsSecretAreaBody}
+                    </p>
+                  </div>
+
+                  <ul className="space-y-3.5">
+                    <li className="flex items-start gap-3">
+                      <span className="w-7 h-7 rounded-lg bg-[#0284c7]/10 dark:bg-[#1a9fff]/15 text-[#0284c7] dark:text-[#38bdf8] flex items-center justify-center shrink-0 mt-0.5">
+                        <Desktop className="w-4 h-4" />
+                      </span>
+                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
+                        {t.whatIsSecretAreaPoint1}
+                      </p>
+                    </li>
+
+                    <li className="flex items-start gap-3">
+                      <span className="w-7 h-7 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-[#4ade80] flex items-center justify-center shrink-0 mt-0.5">
+                        <DownloadSimple className="w-4 h-4" />
+                      </span>
+                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
+                        {t.whatIsSecretAreaPoint2}
+                      </p>
+                    </li>
+
+                    <li className="flex items-start gap-3">
+                      <span className="w-7 h-7 rounded-lg bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-300 flex items-center justify-center shrink-0 mt-0.5">
+                        <Palette className="w-4 h-4" />
+                      </span>
+                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
+                        {t.whatIsSecretAreaPoint3}
+                      </p>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
-              {/* Three Editorial Step Previews */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[14px] font-bold text-slate-900 dark:text-white">
-                    <Palette className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-                    <span>{t.welcomeFeature1Title}</span>
-                  </div>
-                  <p className="text-[13px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                    {t.welcomeFeature1Desc}
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[14px] font-bold text-slate-900 dark:text-white">
-                    <DownloadSimple className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-                    <span>{t.welcomeFeature2Title}</span>
-                  </div>
-                  <p className="text-[13px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                    {t.welcomeFeature2Desc}
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[14px] font-bold text-slate-900 dark:text-white">
-                    <ShieldCheck className="w-4.5 h-4.5 text-emerald-600 dark:text-[#4ade80] shrink-0" />
-                    <span>{t.welcomeFeature3Title}</span>
-                  </div>
-                  <p className="text-[13px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                    {t.welcomeFeature3Desc}
-                  </p>
-                </div>
+              {/* Visitor Step Guide */}
+              <div className="p-3.5 rounded-xl bg-sky-50/80 dark:bg-[#111a26] border border-sky-200/80 dark:border-[#1a9fff]/20 text-[12.5px] text-sky-950 dark:text-[#bdd7f2] leading-relaxed">
+                <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                  {t.stepGuideLabel}:
+                </span>
+                <span>{t.step1Guide}</span>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleLaunchIntoDesktop('store')}
-                  className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <span>{t.skipAllBtn}</span>
-                </button>
+              {/* Action Row */}
+              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[12px] text-slate-500 dark:text-[#8b9bb4]">
+                  <Desktop className="w-4 h-4 shrink-0 text-[#0284c7] dark:text-[#38bdf8]" />
+                  <span>{t.platformHint}</span>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setStep('preferences')}
-                  className="inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[14px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <span>{t.getStartedBtn}</span>
-                  <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
-                </button>
+                <div className="flex flex-wrap items-center justify-end gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleLaunchIntoDesktop('store')}
+                    className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <span>{t.skipAllBtn}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep('preferences')}
+                    className="inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[14px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <span>{t.getStartedBtn}</span>
+                    <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -615,12 +713,20 @@ export function FirstLaunchOnboarding({
             className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
             <div className="p-6 sm:p-8 lg:p-10 space-y-7">
-              <div className="space-y-1.5 border-b border-slate-200 dark:border-white/[0.08] pb-5">
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white [text-wrap:balance]">
-                  {t.appearanceTitle}
-                </h2>
-                <p className="text-[14px] text-slate-600 dark:text-[#9cb0c9]">
-                  {t.appearanceSubtitle}
+              <div className="space-y-3 border-b border-slate-200 dark:border-white/[0.08] pb-5">
+                <div className="space-y-1.5">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white [text-wrap:balance]">
+                    {t.appearanceTitle}
+                  </h2>
+                  <p className="text-[14px] text-slate-600 dark:text-[#9cb0c9]">
+                    {t.appearanceSubtitle}
+                  </p>
+                </div>
+                <p className="p-3 rounded-lg bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
+                  <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                    {t.stepGuideLabel}:
+                  </span>
+                  <span>{t.step2Guide}</span>
                 </p>
               </div>
 
@@ -783,6 +889,16 @@ export function FirstLaunchOnboarding({
                 </div>
               </div>
 
+              {/* Custom Default Theme Builder (Colors, Surface, Buttons & Cards) */}
+              <CustomThemeBuilder
+                compact
+                language={settings.language}
+                customTheme={settings.customTheme}
+                hasConsoleThemeActive={isConsoleTheme}
+                onUpdateCustomTheme={onUpdateCustomTheme}
+                onResetCustomTheme={onResetCustomTheme}
+              />
+
               {/* Language Picker */}
               <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
@@ -905,6 +1021,13 @@ export function FirstLaunchOnboarding({
                     <span>{tq.recheckBtn}</span>
                   </button>
                 )}
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
+                <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                  {t.stepGuideLabel}:
+                </span>
+                <span>{t.step3Guide}</span>
               </div>
 
               {!isDesktopApp && (
@@ -1238,6 +1361,13 @@ export function FirstLaunchOnboarding({
                 )}
               </div>
 
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
+                <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                  {t.stepGuideLabel}:
+                </span>
+                <span>{t.step4Guide}</span>
+              </div>
+
               {isVerifiedConnected && (
                 <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-500/35 text-[13px] font-semibold text-emerald-800 dark:text-emerald-200 flex items-center gap-2.5">
                   <CheckCircle weight="fill" className="w-5 h-5 shrink-0" />
@@ -1528,9 +1658,15 @@ export function FirstLaunchOnboarding({
                 </div>
               </dl>
 
-              {/* Settings Reminder */}
-              <div className="max-w-2xl mx-auto p-3.5 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/25 text-[12.5px] text-sky-900 dark:text-[#b7d6f2] leading-relaxed">
-                {t.changeLaterHint}
+              {/* Settings Reminder & Step Guide */}
+              <div className="max-w-2xl mx-auto p-3.5 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/25 text-[12.5px] text-sky-900 dark:text-[#b7d6f2] leading-relaxed space-y-1">
+                <p>
+                  <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                    {t.stepGuideLabel}:
+                  </span>
+                  <span>{t.step5Guide}</span>
+                </p>
+                <p className="opacity-90">{t.changeLaterHint}</p>
               </div>
 
               {/* Primary Launch CTA */}
