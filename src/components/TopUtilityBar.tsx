@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import {
+  ArrowSquareOut,
+  ArrowsIn,
   Clock,
-  Download,
-  ExternalLink,
-  Loader2,
-  Maximize2,
-  Minimize2,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
+  CornersOut,
+  Cpu,
+  DownloadSimple,
+  Gear,
+  SpeakerHigh,
+  SpeakerSlash,
+  SpinnerGap,
+} from '@phosphor-icons/react';
+import type { PrimarySection } from '../types';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
   activeTheme: AppThemeMode;
+  activeSection: PrimarySection;
+  onSelectSection: (section: PrimarySection) => void;
+  activeDownloadsCount?: number;
   soundEnabled: boolean;
   isFullscreen: boolean;
   onToggleSound: () => void;
@@ -26,6 +32,9 @@ interface TopUtilityBarProps {
 
 export function TopUtilityBar({
   activeTheme,
+  activeSection,
+  onSelectSection,
+  activeDownloadsCount = 0,
   soundEnabled,
   isFullscreen,
   onToggleSound,
@@ -62,16 +71,33 @@ export function TopUtilityBar({
     second: '2-digit',
   });
 
+  const utilityNavItems: {
+    id: PrimarySection;
+    label: string;
+    icon: ComponentType<{ className?: string }>;
+    count?: number;
+  }[] = [
+    {
+      id: 'downloads',
+      label: t.nav.downloads,
+      icon: DownloadSimple,
+      count: activeDownloadsCount > 0 ? activeDownloadsCount : undefined,
+    },
+    { id: 'hardware', label: t.nav.hardwareMonitor, icon: Cpu },
+    { id: 'settings', label: t.nav.settings, icon: Gear },
+  ];
+
   return (
     <div
-      className={`sa-topbar relative z-30 h-9 shrink-0 px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-2 text-[11.5px] select-none border-b transition-colors duration-200 ${
+      className={`sa-topbar relative z-30 h-9 shrink-0 select-none border-b transition-colors duration-200 ${
         isPs5Theme
           ? 'bg-[#020f2b]/85 border-white/[0.12] text-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,6,20,0.45)]'
           : isXboxTheme
           ? 'bg-[#071509]/88 border-[#52e042]/22 text-[#e8f8ea] backdrop-blur-md shadow-[0_4px_20px_rgba(2,14,4,0.5)]'
-          : 'bg-[#101318] border-white/[0.06] text-[#9fb0c7]'
+          : 'bg-slate-50/95 border-slate-200/80 text-slate-600 dark:bg-[#0b0f16]/95 dark:border-white/[0.06] dark:text-[#9fb0c7]'
       }`}
     >
+      <div className="w-full max-w-[1600px] mx-auto h-full px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 text-[11.5px]">
       {/* Left Zone: Live Date & Time */}
       <div className="flex items-center gap-1.5 min-w-0 flex-1 font-mono-tabular">
         <Clock
@@ -80,7 +106,7 @@ export function TopUtilityBar({
               ? 'text-[#7cc4ff]'
               : isXboxTheme
               ? 'text-[#6ee755]'
-              : 'text-[#66c0f4]'
+              : 'text-[#0284c7] dark:text-[#66c0f4]'
           }`}
         />
         <span
@@ -89,12 +115,17 @@ export function TopUtilityBar({
               ? 'text-white/75 font-light'
               : isXboxTheme
               ? 'text-[#b7dab9] font-normal'
-              : 'text-[#b8c7dc]'
+              : 'text-slate-600 dark:text-[#b8c7dc]'
           }`}
         >
           {formattedDate}
         </span>
-        <span className="hidden sm:inline text-white/25" aria-hidden="true">
+        <span
+          className={`hidden sm:inline ${
+            hasConsoleAudio ? 'text-white/25' : 'text-slate-300 dark:text-white/25'
+          }`}
+          aria-hidden="true"
+        >
           ·
         </span>
         <span
@@ -103,7 +134,7 @@ export function TopUtilityBar({
               ? 'text-white font-light tracking-wider text-[12.5px]'
               : isXboxTheme
               ? 'text-white font-semibold tracking-wider text-[12px]'
-              : 'text-white/90 font-medium'
+              : 'text-slate-900 dark:text-white/90 font-medium'
           }`}
         >
           {formattedTime}
@@ -122,17 +153,17 @@ export function TopUtilityBar({
               ? 'text-white/90 hover:text-white drop-shadow-[0_1px_6px_rgba(0,118,255,0.45)]'
               : isXboxTheme
               ? 'text-[#dcfce0] hover:text-[#6ee755] drop-shadow-[0_1px_6px_rgba(82,224,66,0.35)]'
-              : 'text-[#d4e2f4] hover:text-[#1a9fff]'
+              : 'text-slate-800 hover:text-[#1a9fff] dark:text-[#d4e2f4] dark:hover:text-[#1a9fff]'
           }`}
         >
           <span>{t.topbar.webVersion}</span>
-          <ExternalLink className="w-3 h-3 opacity-75 shrink-0" />
+          <ArrowSquareOut className="w-3.5 h-3.5 opacity-80 shrink-0" />
         </a>
       </div>
 
-      {/* Right Zone: Desktop Version / Updates + Sound + Fullscreen Icon */}
-      <div className="flex items-center justify-end gap-1.5 sm:gap-2 flex-1 min-w-0">
-        {desktopVersion && onOpenUpdates && (
+      {/* Right Zone: Desktop Version / Updates + Sound + Utility Nav (Downloads, Hardware Monitor, Settings) + Fullscreen */}
+      <div className="flex items-center justify-end gap-1.5 flex-1 min-w-0">
+        {desktopVersion && onOpenUpdates ? (
           <button
             type="button"
             onClick={onOpenUpdates}
@@ -143,18 +174,18 @@ export function TopUtilityBar({
                 ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
                 : isXboxTheme
                 ? 'rounded-md bg-[#122b15] hover:bg-[#183b1c] text-[#e7fce9] border border-[#52e042]/30 hover:border-[#6ee755]/75'
-                : 'bg-[#1a222d] hover:bg-[#243040] text-[#c7d5e8] hover:text-white border border-white/[0.08]'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
             }`}
           >
             {updateBadgeStatus === 'checking' || updateBadgeStatus === 'downloading' ? (
-              <Loader2
-                className={`w-3 h-3 animate-spin shrink-0 ${
+              <SpinnerGap
+                className={`w-3.5 h-3.5 animate-spin shrink-0 ${
                   isXboxTheme ? 'text-[#6ee755]' : 'text-[#66c0f4]'
                 }`}
               />
             ) : updateBadgeStatus === 'available' || updateBadgeStatus === 'downloaded' ? (
-              <Download
-                className={`w-3 h-3 shrink-0 ${
+              <DownloadSimple
+                className={`w-3.5 h-3.5 shrink-0 ${
                   updateBadgeStatus === 'downloaded'
                     ? 'text-[#34d399]'
                     : isXboxTheme
@@ -176,7 +207,20 @@ export function TopUtilityBar({
               />
             )}
           </button>
-        )}
+        ) : desktopVersion ? (
+          <span
+            dir="ltr"
+            className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold font-mono-tabular shrink-0 ${
+              isPs5Theme
+                ? 'rounded-full bg-white/[0.08] text-white/85 border border-white/[0.14]'
+                : isXboxTheme
+                ? 'rounded-md bg-[#122b15] text-[#d5f8d9] border border-[#52e042]/25'
+                : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-[#1a222d] dark:text-[#9cb0c9] dark:border-white/[0.08]'
+            }`}
+          >
+            v{desktopVersion}
+          </span>
+        ) : null}
 
         {hasConsoleAudio && (
           <button
@@ -208,7 +252,7 @@ export function TopUtilityBar({
           >
             {soundEnabled ? (
               <>
-                <Volume2
+                <SpeakerHigh
                   className={`w-3.5 h-3.5 ${
                     isXboxTheme ? 'text-[#6ee755]' : 'text-[#7cc4ff]'
                   }`}
@@ -228,10 +272,66 @@ export function TopUtilityBar({
                 </span>
               </>
             ) : (
-              <VolumeX className="w-3.5 h-3.5 opacity-65" />
+              <SpeakerSlash className="w-3.5 h-3.5 opacity-65" />
             )}
           </button>
         )}
+
+        {/* Quick Utility Navigation (Downloads, Hardware Monitor, Settings) next to Fullscreen */}
+        <nav
+          aria-label="Utility navigation"
+          className="hidden sm:inline-flex items-center gap-1 shrink-0"
+        >
+          <span
+            aria-hidden="true"
+            className={`h-4 w-px mx-0.5 ${
+              hasConsoleAudio ? 'bg-white/15' : 'bg-slate-200 dark:bg-white/[0.08]'
+            }`}
+          />
+          {utilityNavItems.map((item) => {
+            const isActive = activeSection === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectSection(item.id)}
+                title={item.label}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                  isPs5Theme
+                    ? isActive
+                      ? 'rounded-full bg-white/[0.22] border-white/[0.4] text-white font-semibold shadow-[0_0_12px_rgba(96,178,255,0.35)]'
+                      : 'rounded-full bg-white/[0.08] hover:bg-white/[0.18] border-white/[0.14] text-white/80 hover:text-white font-medium'
+                    : isXboxTheme
+                    ? isActive
+                      ? 'rounded-md bg-[#107C10]/85 border-[#6ee755]/85 text-white font-semibold shadow-[0_0_12px_rgba(82,224,66,0.3)]'
+                      : 'rounded-md bg-[#122b15] hover:bg-[#193b1c] border-[#52e042]/28 hover:border-[#6ee755]/70 text-[#ccecd0] hover:text-white font-medium'
+                    : isActive
+                    ? 'rounded bg-sky-500/[0.14] border-sky-500/35 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:border-[#38bdf8]/40 dark:text-[#38bdf8] font-semibold'
+                    : 'rounded bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.08] dark:text-[#c7d5e8] dark:hover:text-white font-medium'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xl:inline">{item.label}</span>
+                {typeof item.count === 'number' && (
+                  <span
+                    className={`font-mono-tabular text-[10.5px] font-bold ${
+                      isPs5Theme
+                        ? 'text-white'
+                        : isXboxTheme
+                        ? 'text-[#6ee755]'
+                        : 'text-[#0284c7] dark:text-[#38bdf8]'
+                    }`}
+                  >
+                    ({item.count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
         <button
           type="button"
@@ -243,15 +343,16 @@ export function TopUtilityBar({
               ? 'rounded-full bg-white/[0.12] hover:bg-white/[0.24] text-white ring-1 ring-white/40 hover:ring-white/80 shadow-[0_0_14px_rgba(0,118,255,0.4)]'
               : isXboxTheme
               ? 'rounded-md bg-[#122b15] hover:bg-[#183c1d] text-[#e7fce9] border border-[#52e042]/40 hover:border-[#6ee755] shadow-[0_0_12px_rgba(82,224,66,0.22)]'
-              : 'bg-[#1a222d] hover:bg-[#243040] text-[#c7d5e8] hover:text-white border border-white/[0.08]'
+              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
           }`}
         >
           {isFullscreen ? (
-            <Minimize2 className="w-3.5 h-3.5" />
+            <ArrowsIn className="w-3.5 h-3.5" />
           ) : (
-            <Maximize2 className="w-3.5 h-3.5" />
+            <CornersOut className="w-3.5 h-3.5" />
           )}
         </button>
+      </div>
       </div>
     </div>
   );

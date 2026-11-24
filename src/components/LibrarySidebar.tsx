@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  CaretDown,
+  CaretUp,
   Check,
-  ChevronDown,
-  ChevronUp,
-  FolderKanban,
+  FolderSimpleStar,
   Star,
   Tag,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import type { GameItem, LibrarySectionTab } from '../types';
 import { LIBRARY_SECTIONS } from '../utils/parsers';
 import { GameCover } from './GameCover';
@@ -75,13 +75,13 @@ export function LibrarySidebar({
   const ActiveIcon = activeVisual.icon;
 
   return (
-    <aside className="w-full lg:w-[272px] xl:w-[288px] shrink-0 bg-[#171d25] border-b lg:border-b-0 lg:border-e border-white/[0.06] flex flex-col lg:h-full select-none">
+    <aside className="w-full lg:w-[272px] xl:w-[288px] shrink-0 bg-white dark:bg-[#171d25] border-b lg:border-b-0 lg:border-e border-slate-200 dark:border-white/[0.06] flex flex-col lg:h-full select-none">
       {/* Section Dropdown (with Icons) + Genres Dropdown Only */}
-      <div className="p-3 space-y-3 border-b border-white/[0.05]">
+      <div className="p-3 space-y-3 border-b border-slate-200 dark:border-white/[0.05]">
         {/* Section Switcher Dropdown with Icons */}
         <div className="space-y-1.5 relative" ref={dropdownRef}>
-          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#8b9bb4]">
-            <FolderKanban className="w-3 h-3 text-[#66c0f4]" />
+          <span className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-[#8b9bb4]">
+            <FolderSimpleStar className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8]" />
             <span>{t.sectionLabel}</span>
           </span>
 
@@ -91,22 +91,25 @@ export function LibrarySidebar({
             aria-expanded={sectionMenuOpen}
             aria-label={t.sectionLabel}
             onClick={() => setSectionMenuOpen((prev) => !prev)}
-            className={`w-full px-2.5 py-2 rounded bg-[#232b36] hover:bg-[#2a3441] border transition-colors flex items-center justify-between gap-2 text-start cursor-pointer ${
-              sectionMenuOpen ? 'border-[#1a9fff]' : 'border-white/[0.08]'
+            className={`w-full px-2.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#232b36] dark:hover:bg-[#2a3441] border transition-colors flex items-center justify-between gap-2 text-start cursor-pointer ${
+              sectionMenuOpen
+                ? 'border-[#1a9fff]'
+                : 'border-slate-300 dark:border-white/[0.08]'
             }`}
           >
             <span className="flex items-center gap-2 min-w-0">
               <ActiveIcon className={`w-4 h-4 shrink-0 ${activeVisual.iconColorClass}`} />
-              <span className="text-[12.5px] font-semibold text-[#e5e9f0] truncate">
+              <span className="text-[12.5px] font-semibold text-slate-900 dark:text-[#e5e9f0] truncate">
                 {activeSection.label}
               </span>
-              <span className="text-[11.5px] text-[#8b9bb4] font-mono-tabular">
+              <span className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
                 ({sectionCounts[activeSectionTab] || 0})
               </span>
             </span>
-            <ChevronDown
-              className={`w-4 h-4 text-[#8b9bb4] shrink-0 transition-transform duration-150 ${
-                sectionMenuOpen ? 'rotate-180 text-[#66c0f4]' : ''
+            <CaretDown
+              weight="bold"
+              className={`w-3.5 h-3.5 text-slate-500 dark:text-[#8b9bb4] shrink-0 transition-transform duration-150 ${
+                sectionMenuOpen ? 'rotate-180 text-[#0284c7] dark:text-[#38bdf8]' : ''
               }`}
             />
           </button>
@@ -115,7 +118,7 @@ export function LibrarySidebar({
             <div
               role="listbox"
               aria-label={t.sectionLabel}
-              className="absolute inset-x-0 top-full mt-1 z-30 rounded bg-[#1b222c] border border-white/[0.12] shadow-2xl py-1 overflow-hidden"
+              className="absolute inset-x-0 top-full mt-1 z-30 rounded-xl bg-white dark:bg-[#1b222c] border border-slate-200 dark:border-white/[0.12] shadow-2xl py-1 overflow-hidden"
             >
               {LIBRARY_SECTIONS.map((sec) => {
                 const isSelected = sec.key === activeSectionTab;
@@ -133,18 +136,18 @@ export function LibrarySidebar({
                     }}
                     className={`w-full px-3 py-2 flex items-center justify-between gap-2 text-start text-[12.5px] transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-[#2a394b] text-white font-semibold'
-                        : 'text-[#c6d4df] hover:bg-white/[0.06] hover:text-white'
+                        ? 'bg-sky-50 text-sky-950 font-semibold dark:bg-[#2a394b] dark:text-white'
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:bg-white/[0.06] dark:hover:text-white'
                     }`}
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
                       <SecIcon className={`w-4 h-4 shrink-0 ${visual.iconColorClass}`} />
                       <span className="truncate">{sec.label}</span>
-                      <span className="text-[11px] text-[#8b9bb4] font-mono-tabular">
+                      <span className="text-[11px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
                         ({sectionCounts[sec.key] || 0})
                       </span>
                     </span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-[#1a9fff] shrink-0" />}
+                    {isSelected && <Check weight="bold" className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />}
                   </button>
                 );
               })}
@@ -155,15 +158,15 @@ export function LibrarySidebar({
         {/* Genres Dropdown Inside Active Section */}
         <div className="space-y-1.5 pt-0.5">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#8b9bb4]">
-              <Tag className="w-3 h-3 text-[#66c0f4]" />
+            <span className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-[#8b9bb4]">
+              <Tag className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8]" />
               <span>{t.genresIn} {activeSection.label}</span>
             </span>
             {genreFilter !== 'all' && (
               <button
                 type="button"
                 onClick={() => onGenreFilterChange('all')}
-                className="text-[10.5px] text-[#66c0f4] hover:text-white cursor-pointer"
+                className="text-[10.5px] text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white cursor-pointer"
               >
                 {t.reset}
               </button>
@@ -174,11 +177,17 @@ export function LibrarySidebar({
             aria-label={t.allGenres}
             value={genreFilter}
             onChange={(e) => onGenreFilterChange(e.target.value)}
-            className="w-full px-2.5 py-1.5 rounded bg-[#1f2733] border border-white/[0.08] text-[12px] text-[#dce4ee] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
+            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1f2733] border border-slate-300 dark:border-white/[0.08] text-[12px] text-slate-900 dark:text-[#dce4ee] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
           >
-            <option value="all">{t.allGenres} ({availableGenres.length})</option>
+            <option value="all" className="bg-white text-slate-900 dark:bg-[#1f2733] dark:text-[#dce4ee]">
+              {t.allGenres} ({availableGenres.length})
+            </option>
             {availableGenres.map((genre) => (
-              <option key={genre} value={genre}>
+              <option
+                key={genre}
+                value={genre}
+                className="bg-white text-slate-900 dark:bg-[#1f2733] dark:text-[#dce4ee]"
+              >
                 {genre}
               </option>
             ))}
@@ -190,18 +199,20 @@ export function LibrarySidebar({
       <button
         type="button"
         onClick={() => setMobileListOpen((prev) => !prev)}
-        className="lg:pointer-events-none w-full px-3 py-2 bg-[#202936]/80 border-b border-white/[0.05] flex items-center justify-between text-start cursor-pointer lg:cursor-default"
+        className="lg:pointer-events-none w-full px-3 py-2 bg-slate-100 dark:bg-[#202936]/80 border-b border-slate-200 dark:border-white/[0.05] flex items-center justify-between text-start cursor-pointer lg:cursor-default"
       >
-        <span className="text-[11px] font-semibold tracking-wider uppercase text-[#c6d4df]">
+        <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-700 dark:text-[#c6d4df]">
           {t.allCountLabel}{' '}
-          <span className="text-[#66c0f4] font-mono-tabular">({sidebarItems.length})</span>
+          <span className="text-[#0284c7] dark:text-[#66c0f4] font-mono-tabular">
+            ({sidebarItems.length})
+          </span>
         </span>
-        <span className="lg:hidden inline-flex items-center gap-1 text-[11px] text-[#8b9bb4]">
+        <span className="lg:hidden inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-[#8b9bb4]">
           <span>{mobileListOpen ? t.hide : t.show}</span>
           {mobileListOpen ? (
-            <ChevronUp className="w-3.5 h-3.5" />
+            <CaretUp weight="bold" className="w-3.5 h-3.5" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5" />
+            <CaretDown weight="bold" className="w-3.5 h-3.5" />
           )}
         </span>
       </button>
@@ -213,7 +224,7 @@ export function LibrarySidebar({
         } flex-1 overflow-y-auto py-1`}
       >
         {sidebarItems.length === 0 ? (
-          <div className="px-3 py-6 text-center text-[12px] text-[#677487]">
+          <div className="px-3 py-6 text-center text-[12px] text-slate-500 dark:text-[#677487]">
             {t.noMatchingTitles}
           </div>
         ) : (
@@ -227,23 +238,23 @@ export function LibrarySidebar({
                 onClick={() => onSelectGame(game)}
                 className={`w-full px-3 py-1.5 flex items-center gap-2.5 text-start transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-[#2d3e52] text-white'
-                    : 'text-[#aeb9c7] hover:bg-white/[0.04] hover:text-white'
+                    ? 'bg-sky-100 text-sky-950 font-semibold dark:bg-[#2d3e52] dark:text-white'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-[#aeb9c7] dark:hover:bg-white/[0.04] dark:hover:text-white'
                 }`}
               >
-                <div className="w-[18px] h-[24px] rounded-[2px] overflow-hidden shrink-0 bg-[#10151c]">
+                <div className="w-[18px] h-[24px] rounded-[3px] overflow-hidden shrink-0 bg-slate-200 dark:bg-[#10151c]">
                   <GameCover src={game.coverImage} alt={game.name} compact />
                 </div>
                 <span className="flex-1 truncate text-[12.5px] leading-tight">
                   {game.name}
                 </span>
                 {game.isNew && (
-                  <span className="px-1.5 py-[1px] rounded-[2px] bg-[#1a9fff] text-white text-[9px] font-bold tracking-wider uppercase shrink-0">
+                  <span className="px-1.5 py-[2px] rounded-full bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] dark:from-[#1a9fff] dark:to-[#38bdf8] text-white text-[8.5px] font-bold tracking-[0.08em] uppercase shadow-xs shrink-0">
                     NEW
                   </span>
                 )}
                 {isFav && (
-                  <Star className="w-3 h-3 text-[#f59e0b] fill-[#f59e0b] shrink-0" />
+                  <Star weight="fill" className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 )}
               </button>
             );

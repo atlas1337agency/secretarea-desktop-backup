@@ -3,7 +3,14 @@ const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const https = require('https');
 const { execFile } = require('child_process');
+const { createDownloadManager } = require('./downloadManager.cjs');
+const { createQbitSetupManager } = require('./qbitSetupManager.cjs');
+const { createHardwareMonitor } = require('./hardwareMonitor.cjs');
+const { createGamingSessionManager } = require('./hardware/gamingSessionManager.cjs');
+const { createPresentMonManager } = require('./hardware/presentMonManager.cjs');
+const { createPcCleaner } = require('./hardware/pcCleaner.cjs');
 
 const GITHUB_OWNER = 'secretarea1337';
 const GITHUB_REPO = 'secretarea-desktop';
@@ -16,6 +23,12 @@ if (!gotSingleInstanceLock) {
 let mainWindow = null;
 let appTray = null;
 let isQuitting = false;
+let downloadManager = null;
+let qbitSetupManager = null;
+let presentMonManager = null;
+let hardwareMonitor = null;
+let gamingSessionManager = null;
+let pcCleaner = null;
 
 function readPackageVersion() {
   if (app.isPackaged) {
@@ -201,6 +214,10 @@ function configureAutoUpdater() {
     });
   });
 
+  autoUpdater.on('before-quit-for-update', () => {
+    isQuitting = true;
+  });
+
   autoUpdater.on('error', (err) => {
     const rawMsg = err instanceof Error ? err.message : String(err || 'Update check failed.');
     const friendlyMsg = rawMsg.includes('ERR_INTERNET_DISCONNECTED') || rawMsg.includes('ENOTFOUND')
@@ -330,9 +347,19 @@ function registerUpdaterIpc() {
   ipcMain.handle('updater:install', (event) => {
     if (!isTrustedSender(event)) return;
     if (updateState.status !== 'downloaded') return;
+    isQuitting = true;
     setImmediate(() => {
       autoUpdater.quitAndInstall(false, true);
     });
+  });
+
+  ipcMain.handle('updater:get-release-notes', async (event, version) => {
+    if (!isTrustedSender(event)) return null;
+    const requestedVersion =
+      typeof version === 'string' && version.trim()
+        ? version.trim()
+        : readPackageVersion();
+    return fetchReleaseNotesForVersion(requestedVersion);
   });
 
   ipcMain.handle('window:is-fullscreen', (event) => {
@@ -360,6 +387,132 @@ function registerUpdaterIpc() {
     if (!isTrustedSender(event)) return null;
     return applyStartWithComputerSetting(Boolean(enabled));
   });
+
+  ipcMain.handle('settings:set-close-behavior', (event, behavior) => {
+    if (!isTrustedSender(event)) return null;
+    return applyCloseBehaviorSetting(behavior);
+  });
+
+  ipcMain.handle('app:exit-completely', (event) => {
+    if (!isTrustedSender(event)) return { ok: false };
+    setImmediate(() => {
+      performFullAppShutdown();
+    });
+    return { ok: true };
+  });
+
+  ipcMain.handle('settings:complete-onboarding', (event, payload = true) => {
+    if (!isTrustedSender(event)) return null;
+    const completed =
+      typeof payload === 'object' && payload !== null
+        ? Boolean(payload.completed ?? true)
+        : Boolean(payload);
+    const version =
+      typeof payload === 'object' &&
+      payload !== null &&
+      typeof payload.version === 'string' &&
+      payload.version.trim()
+        ? payload.version.trim()
+        : readPackageVersion();
+    writeDesktopLauncherSettings({
+      onboardingCompleted: completed,
+      lastOnboardedVersion: completed ? version : null,
+    });
+    return getDesktopSettingsPayload();
+  });
+}
+
+const releaseNotesCache = new Map();
+
+function fetchGithubReleaseJson(apiPath) {
+  return new Promise((resolve) => {
+    const req = https.get(
+      {
+        hostname: 'api.github.com',
+        path: apiPath,
+        timeout: 5500,
+        headers: {
+          'User-Agent': `SecretArea/${readPackageVersion()}`,
+          Accept: 'application/vnd.github+json',
+        },
+      },
+      (res) => {
+        if (!res || res.statusCode !== 200) {
+          res?.resume();
+          resolve(null);
+          return;
+        }
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          if (body.length < 64 * 1024) {
+            body += chunk;
+          }
+        });
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(body));
+          } catch {
+            resolve(null);
+          }
+        });
+      }
+    );
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+    req.on('error', () => {
+      resolve(null);
+    });
+  });
+}
+
+async function fetchReleaseNotesForVersion(rawVersion) {
+  const cleanVersion = String(rawVersion || readPackageVersion())
+    .replace(/^v/i, '')
+    .trim();
+  if (!/^[0-9A-Za-z._-]{1,32}$/.test(cleanVersion)) {
+    return null;
+  }
+  if (releaseNotesCache.has(cleanVersion)) {
+    return releaseNotesCache.get(cleanVersion);
+  }
+
+  let data = await fetchGithubReleaseJson(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/tags/v${encodeURIComponent(cleanVersion)}`
+  );
+  if (!data) {
+    data = await fetchGithubReleaseJson(
+      `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/tags/${encodeURIComponent(cleanVersion)}`
+    );
+  }
+
+  if (!data && updateState.releaseNotes && updateState.availableVersion === cleanVersion) {
+    const fallback = {
+      version: cleanVersion,
+      releaseName: updateState.releaseName || `SecretArea v${cleanVersion}`,
+      notes: updateState.releaseNotes,
+      publishedAt: updateState.releaseDate || null,
+      source: 'updater',
+    };
+    releaseNotesCache.set(cleanVersion, fallback);
+    return fallback;
+  }
+
+  if (!data || typeof data.body !== 'string') {
+    return null;
+  }
+
+  const parsed = {
+    version: cleanVersion,
+    releaseName: typeof data.name === 'string' && data.name.trim() ? data.name.trim() : `SecretArea v${cleanVersion}`,
+    notes: stripHtmlNotes(data.body) || data.body.trim(),
+    publishedAt: typeof data.published_at === 'string' ? data.published_at : null,
+    source: 'github',
+  };
+  releaseNotesCache.set(cleanVersion, parsed);
+  return parsed;
 }
 
 function getLauncherSettingsPath() {
@@ -370,22 +523,51 @@ function readDesktopLauncherSettings() {
   try {
     const filePath = getLauncherSettingsPath();
     if (!fs.existsSync(filePath)) {
-      return { startWithComputer: false };
+      return { startWithComputer: false, closeBehavior: 'exit' };
     }
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const startWithComputer = Boolean(parsed?.startWithComputer);
+    const rawBehavior = parsed?.closeBehavior;
+    const closeBehavior =
+      rawBehavior === 'minimize-to-tray' || rawBehavior === 'exit'
+        ? rawBehavior
+        : startWithComputer
+        ? 'minimize-to-tray'
+        : 'exit';
     return {
-      startWithComputer: Boolean(parsed?.startWithComputer),
+      ...(parsed && typeof parsed === 'object' ? parsed : {}),
+      startWithComputer,
+      closeBehavior,
     };
   } catch {
-    return { startWithComputer: false };
+    return { startWithComputer: false, closeBehavior: 'exit' };
   }
 }
 
 function writeDesktopLauncherSettings(next) {
   try {
     const filePath = getLauncherSettingsPath();
+    const existing = readDesktopLauncherSettings();
+    const nextStart = Boolean(
+      next && typeof next.startWithComputer === 'boolean'
+        ? next.startWithComputer
+        : existing.startWithComputer
+    );
+    const rawBehavior = next?.closeBehavior ?? existing.closeBehavior;
+    const closeBehavior =
+      rawBehavior === 'minimize-to-tray' || rawBehavior === 'exit'
+        ? rawBehavior
+        : nextStart
+        ? 'minimize-to-tray'
+        : 'exit';
+    const merged = {
+      ...existing,
+      ...(next && typeof next === 'object' ? next : {}),
+      startWithComputer: nextStart,
+      closeBehavior,
+    };
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify({ startWithComputer: Boolean(next.startWithComputer) }, null, 2), 'utf8');
+    fs.writeFileSync(filePath, JSON.stringify(merged, null, 2), 'utf8');
   } catch {
     // ignore disk write errors
   }
@@ -415,6 +597,47 @@ function showAndFocusMainWindow() {
   mainWindow.focus();
 }
 
+function performFullAppShutdown() {
+  isQuitting = true;
+  try {
+    if (hardwareMonitor) hardwareMonitor.shutdown();
+  } catch {
+    // ignore
+  }
+  try {
+    if (gamingSessionManager) gamingSessionManager.shutdown();
+  } catch {
+    // ignore
+  }
+  try {
+    if (pcCleaner) pcCleaner.cancel();
+  } catch {
+    // ignore
+  }
+  try {
+    if (qbitSetupManager) qbitSetupManager.shutdown();
+  } catch {
+    // ignore
+  }
+  try {
+    if (presentMonManager) presentMonManager.shutdown();
+  } catch {
+    // ignore
+  }
+  try {
+    if (downloadManager) downloadManager.shutdown();
+  } catch {
+    // ignore
+  }
+  destroySystemTray();
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (win && !win.isDestroyed()) {
+      win.destroy();
+    }
+  }
+  app.quit();
+}
+
 function ensureSystemTray() {
   if (appTray && !appTray.isDestroyed()) return appTray;
   const iconPath = resolveAppIcon();
@@ -432,11 +655,8 @@ function ensureSystemTray() {
     },
     { type: 'separator' },
     {
-      label: 'Quit SecretArea',
-      click: () => {
-        isQuitting = true;
-        app.quit();
-      },
+      label: 'Exit SecretArea Completely',
+      click: () => performFullAppShutdown(),
     },
   ]);
 
@@ -487,6 +707,13 @@ function getDesktopSettingsPayload() {
   }
   return {
     startWithComputer,
+    closeBehavior: persisted.closeBehavior === 'minimize-to-tray' ? 'minimize-to-tray' : 'exit',
+    onboardingCompleted: Boolean(persisted.onboardingCompleted),
+    lastOnboardedVersion:
+      typeof persisted.lastOnboardedVersion === 'string' && persisted.lastOnboardedVersion.trim()
+        ? persisted.lastOnboardedVersion.trim()
+        : null,
+    appVersion: readPackageVersion(),
     isPackaged: app.isPackaged,
     platform: process.platform,
     trayActive: Boolean(appTray && !appTray.isDestroyed()),
@@ -496,7 +723,20 @@ function getDesktopSettingsPayload() {
 function applyStartWithComputerSetting(enabled) {
   writeDesktopLauncherSettings({ startWithComputer: enabled });
   syncLoginItemWithOs(enabled);
-  if (enabled) {
+  const current = readDesktopLauncherSettings();
+  if (enabled || current.closeBehavior === 'minimize-to-tray') {
+    ensureSystemTray();
+  } else if (!isTrayLaunchRequested()) {
+    destroySystemTray();
+  }
+  return getDesktopSettingsPayload();
+}
+
+function applyCloseBehaviorSetting(rawBehavior) {
+  const closeBehavior = rawBehavior === 'minimize-to-tray' ? 'minimize-to-tray' : 'exit';
+  writeDesktopLauncherSettings({ closeBehavior });
+  const current = readDesktopLauncherSettings();
+  if (closeBehavior === 'minimize-to-tray' || current.startWithComputer) {
     ensureSystemTray();
   } else if (!isTrayLaunchRequested()) {
     destroySystemTray();
@@ -828,11 +1068,26 @@ function createWindow(options = {}) {
     }
   });
 
+  mainWindow.on('hide', () => {
+    if (hardwareMonitor) {
+      hardwareMonitor.pauseForHidden();
+    }
+  });
+
+  mainWindow.on('show', () => {
+    if (hardwareMonitor) {
+      hardwareMonitor.resumeFromHidden();
+    }
+  });
+
   mainWindow.on('close', (event) => {
     const persisted = readDesktopLauncherSettings();
-    if (!isQuitting && persisted.startWithComputer && appTray && !appTray.isDestroyed()) {
-      event.preventDefault();
-      mainWindow?.hide();
+    if (!isQuitting && persisted.closeBehavior === 'minimize-to-tray') {
+      ensureSystemTray();
+      if (appTray && !appTray.isDestroyed()) {
+        event.preventDefault();
+        mainWindow?.hide();
+      }
     }
   });
 
@@ -865,6 +1120,9 @@ function createWindow(options = {}) {
   }
 
   mainWindow.on('closed', () => {
+    if (hardwareMonitor) {
+      hardwareMonitor.stop();
+    }
     mainWindow = null;
   });
 }
@@ -919,9 +1177,69 @@ app.whenReady().then(() => {
   configureAutoUpdater();
   registerUpdaterIpc();
 
+  downloadManager = createDownloadManager({
+    getMainWindow: () => mainWindow,
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+  });
+  downloadManager.init();
+  downloadManager.registerIpc(ipcMain, isTrustedSender);
+
+  qbitSetupManager = createQbitSetupManager({
+    getMainWindow: () => mainWindow,
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+    getDownloadSnapshot: () => downloadManager.getSnapshot(),
+    testTorrentConnection: () => downloadManager.testTorrentConnection(),
+  });
+  qbitSetupManager.registerIpc(ipcMain, isTrustedSender);
+  qbitSetupManager.initStartupCheck();
+
+  presentMonManager = createPresentMonManager({
+    getMainWindow: () => mainWindow,
+    getUserDataPath: () => app.getPath('userData'),
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+    stopActiveGamingCapture: () => {
+      if (gamingSessionManager) {
+        gamingSessionManager.stopPresentMon();
+      }
+    },
+    onDependencyUpdated: () => {
+      if (gamingSessionManager) {
+        gamingSessionManager.refreshPresentMonAvailability();
+      }
+    },
+  });
+  presentMonManager.registerIpc(ipcMain, isTrustedSender);
+
+  gamingSessionManager = createGamingSessionManager({
+    getMainWindow: () => mainWindow,
+    getUserDataPath: () => app.getPath('userData'),
+    getPresentMonInfo: () => (presentMonManager ? presentMonManager.getActiveExecutableInfo() : null),
+  });
+  gamingSessionManager.registerIpc(ipcMain, isTrustedSender);
+  presentMonManager.initStartupCheck();
+
+  pcCleaner = createPcCleaner({
+    getMainWindow: () => mainWindow,
+    getUserDataPath: () => app.getPath('userData'),
+  });
+  pcCleaner.registerIpc(ipcMain, isTrustedSender);
+
+  hardwareMonitor = createHardwareMonitor({
+    getMainWindow: () => mainWindow,
+    onSnapshot: (snap) => {
+      if (gamingSessionManager) {
+        gamingSessionManager.ingestHardwareSnapshot(snap);
+      }
+    },
+  });
+  hardwareMonitor.registerIpc(ipcMain, isTrustedSender);
+
   const persisted = readDesktopLauncherSettings();
   const launchInTray = isTrayLaunchRequested();
-  if (persisted.startWithComputer || launchInTray) {
+  if (persisted.startWithComputer || persisted.closeBehavior === 'minimize-to-tray' || launchInTray) {
     ensureSystemTray();
   }
 
@@ -938,10 +1256,30 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  if (hardwareMonitor) {
+    hardwareMonitor.shutdown();
+  }
+  if (gamingSessionManager) {
+    gamingSessionManager.shutdown();
+  }
+  if (pcCleaner) {
+    pcCleaner.cancel();
+  }
+  if (qbitSetupManager) {
+    qbitSetupManager.shutdown();
+  }
+  if (presentMonManager) {
+    presentMonManager.shutdown();
+  }
+  if (downloadManager) {
+    downloadManager.shutdown();
+  }
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin' && !(appTray && !appTray.isDestroyed())) {
+  const persisted = readDesktopLauncherSettings();
+  const stayInTray = !isQuitting && persisted.closeBehavior === 'minimize-to-tray' && appTray && !appTray.isDestroyed();
+  if (process.platform !== 'darwin' && !stayInTray) {
     app.quit();
   }
 });

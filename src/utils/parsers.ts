@@ -268,8 +268,8 @@ export function extractMirrors(
     pushMirror(row.mirror1, 'Mega Mirror #1', 'Mega (Backup)');
     pushMirror(row.mirror2, 'Mega Mirror #2', 'Mega (Backup)');
   } else if (tab === 'architect') {
-    const uTorrentVal = row['µTorrent'] ?? row['uTorrent'] ?? row['utorrent'];
-    pushMirror(uTorrentVal, 'µTorrent Magnet', 'Magnet Link', 'µTorrent Link');
+    const torrentColumnVal = row['µTorrent'] ?? row['uTorrent'] ?? row['utorrent'];
+    pushMirror(torrentColumnVal, 'Torrent Magnet', 'Magnet Link', 'Torrent Link');
     if (typeof row.full === 'string' && row.full.includes('magnet:?')) {
       pushMirror(row.full, 'Magnet Link', 'Magnet Link', 'Full Download');
     } else {
@@ -288,7 +288,7 @@ export function extractMirrors(
     pushMirror(row.full, 'Magnet Link', 'Magnet Link', 'Full Download');
     pushMirror(
       row['µTorrent'] ?? row['uTorrent'] ?? row['utorrent'],
-      'uTorrent Magnet',
+      'Torrent Magnet',
       'Magnet Link',
       'Torrent File'
     );

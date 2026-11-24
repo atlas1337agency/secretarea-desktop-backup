@@ -66,6 +66,25 @@ export function collectCatalogImageUrls(catalog: SheetCatalogData): string[] {
   return urls;
 }
 
+function yieldToIdle(ms = 180): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback;
+      if (typeof ric === 'function') {
+        ric(() => resolve(), { timeout: 300 });
+      } else {
+        resolve();
+      }
+    }, ms);
+    void timer;
+  });
+}
+
 /**
  * Quietly pre-caches all catalog cover & backdrop images into CacheStorage
  * while online so every tab, page, and card displays images in Offline Mode.
@@ -82,6 +101,10 @@ export async function precacheCatalogImages(catalog: SheetCatalogData): Promise<
 
   isPrecaching = true;
   try {
+    // Let initial UI interactions and animations settle before background image caching
+    await yieldToIdle(2000);
+    if (!navigator.onLine) return;
+
     const allUrls = collectCatalogImageUrls(catalog);
     if (allUrls.length === 0) return;
 
@@ -92,7 +115,7 @@ export async function precacheCatalogImages(catalog: SheetCatalogData): Promise<
     const missing = allUrls.filter((u) => !cachedSet.has(u));
     if (missing.length === 0) return;
 
-    const BATCH_SIZE = 6;
+    const BATCH_SIZE = 2;
     for (let i = 0; i < missing.length; i += BATCH_SIZE) {
       if (!navigator.onLine) break;
 
@@ -113,6 +136,8 @@ export async function precacheCatalogImages(catalog: SheetCatalogData): Promise<
           }
         })
       );
+
+      await yieldToIdle(180);
     }
   } catch {
     // Ignore storage quota or browser cache errors cleanly

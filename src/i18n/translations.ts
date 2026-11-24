@@ -44,9 +44,20 @@ export interface LauncherTranslations {
   nav: {
     home: string;
     library: string;
+    downloads: string;
     extras: string;
     requests: string;
+    hardwareMonitor: string;
     settings: string;
+    switchLight: string;
+    switchDark: string;
+    lightLabel: string;
+    darkLabel: string;
+    selectLanguage: string;
+    openMenu: string;
+    closeMenu: string;
+    languageLabel: string;
+    themeLabel: string;
   };
   topbar: {
     webVersion: string;
@@ -75,21 +86,200 @@ export interface LauncherTranslations {
     desktopSupportedBadge: string;
     webNotice: string;
     trayActiveHint: string;
+    canRunItTitle: string;
+    canRunItDesc: string;
     windowSectionTitle: string;
     compactNavbarTitle: string;
     compactNavbarDesc: string;
+    lightModeTitle: string;
+    lightModeDesc: string;
+    darkModeBadge: string;
+    lightModeBadge: string;
     alwaysPs5Title: string;
     alwaysPs5Desc: string;
     alwaysXboxTitle: string;
     alwaysXboxDesc: string;
+    audioSectionTitle: string;
+    audioSectionDesc: string;
+    ambientMusicTitle: string;
+    ambientMusicDesc: string;
+    uiSoundsTitle: string;
+    uiSoundsDesc: string;
+    volumeTitle: string;
+    volumeDesc: string;
+    consoleThemeAudioHint: string;
     activeLabel: string;
     inactiveLabel: string;
+    downloadSectionTitle: string;
+    downloadFolderTitle: string;
+    downloadFolderDesc: string;
+    chooseFolderBtn: string;
+    openFolderBtn: string;
+    torrentSectionTitle: string;
+    torrentSectionDesc: string;
+    torrentEnableTitle: string;
+    torrentEnableDesc: string;
+    torrentAutoDetectBtn: string;
+    torrentDetectingBtn: string;
+    torrentTestBtn: string;
+    torrentTestingBtn: string;
+    torrentSaveBtn: string;
+    torrentSavingBtn: string;
+    torrentStatusConnected: string;
+    torrentStatusDisconnected: string;
+    torrentStatusTesting: string;
+    torrentNotInstalledTitle: string;
+    torrentNotInstalledDesc: string;
+    torrentDownloadBtn: string;
+    torrentHostLabel: string;
+    torrentPortLabel: string;
+    torrentUsernameLabel: string;
+    torrentPasswordLabel: string;
+    torrentPasswordSavedPlaceholder: string;
+    torrentApiKeyLabel: string;
+    torrentApiKeyPlaceholder: string;
+    torrentApiKeySavedPlaceholder: string;
+    torrentLoopbackNotice: string;
+    torrentLoopbackError: string;
+    torrentGuideTitle: string;
+    torrentGuideStep1: string;
+    torrentGuideStep2: string;
+    torrentGuideStep3: string;
+    torrentGuideStep4: string;
+    torrentGuideStep5: string;
+    torrentWebNotice: string;
+    torrentTestingWebPreviewMsg: string;
+    torrentTestingWebPreviewHint: string;
+    modeDesktopBadge: string;
+    modeWebPreviewBadge: string;
+    torrentSavedToast: string;
+    torrentManageSetupBtn: string;
+    replaySetupBtn: string;
+    closeBehaviorTitle: string;
+    closeBehaviorDesc: string;
+    closeBehaviorMinimizeTray: string;
+    closeBehaviorExit: string;
+    exitAppTitle: string;
+    exitAppDesc: string;
+    exitAppBtn: string;
+    exitAppConfirmBtn: string;
+    exitAppCancelBtn: string;
+    exitAppWebHint: string;
+  };
+  customTheme: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    enableLabel: string;
+    surfaceLabel: string;
+    surfaceMidnight: string;
+    surfaceObsidian: string;
+    surfaceAbyss: string;
+    surfaceDaylight: string;
+    accentColorLabel: string;
+    customHexLabel: string;
+    buttonStyleLabel: string;
+    btnRounded: string;
+    btnPill: string;
+    btnSharp: string;
+    cardRadiusLabel: string;
+    cardSharp: string;
+    cardMedium: string;
+    cardSoft: string;
+    glassBlurLabel: string;
+    glassBlurDesc: string;
+    previewLabel: string;
+    previewTitle: string;
+    previewPrimaryBtn: string;
+    previewSecondaryBtn: string;
+    resetBtn: string;
+    consoleOverrideNote: string;
+    summaryCustomPrefix: string;
+  };
+  downloads: {
+    pageTitle: string;
+    pageSubtitle: string;
+    quickAddPlaceholder: string;
+    quickAddBtn: string;
+    addTorrentFileBtn: string;
+    quickAddInvalid: string;
+    folderLabel: string;
+    chooseFolder: string;
+    openFolder: string;
+    clearFinished: string;
+    tabAll: string;
+    tabActive: string;
+    tabPaused: string;
+    tabCompleted: string;
+    tabFailed: string;
+    searchPlaceholder: string;
+    metricActive: string;
+    metricSpeed: string;
+    metricCompleted: string;
+    metricFreeDisk: string;
+    statusQueued: string;
+    statusResolving: string;
+    statusDownloading: string;
+    statusPaused: string;
+    statusCompleted: string;
+    statusFailed: string;
+    statusCancelled: string;
+    sourceDirect: string;
+    sourceMediafire: string;
+    sourceMega: string;
+    sourceQbittorrent: string;
+    sourceBrowser: string;
+    actionPause: string;
+    actionResume: string;
+    actionCancel: string;
+    actionDelete: string;
+    actionRetry: string;
+    actionOpenFile: string;
+    actionOpenFolder: string;
+    actionRemove: string;
+    actionOpenExternal: string;
+    peersLabel: string;
+    seedsLabel: string;
+    unknownSize: string;
+    etaCalculating: string;
+    torrentConnected: string;
+    torrentDisconnected: string;
+    torrentWebPreviewStatus: string;
+    configureTorrentBtn: string;
+    speedGraphTitle: string;
+    periodLabel: string;
+    period1m: string;
+    period5m: string;
+    period30m: string;
+    period1h: string;
+    totalUploadLabel: string;
+    totalDownloadLabel: string;
+    sizeLabel: string;
+    progressLabel: string;
+    statusLabel: string;
+    downSpeedLabel: string;
+    upSpeedLabel: string;
+    etaLabel: string;
+    ratioLabel: string;
+    showGraphBtn: string;
+    hideGraphBtn: string;
+    emptyTitle: string;
+    emptySubtitle: string;
+    webNoticeTitle: string;
+    webNoticeBody: string;
+    startedToast: string;
+    failedToast: string;
+    detailActiveTitle: string;
+    detailManageBtn: string;
+    detailOpenExternal: string;
+    detailStartInApp: string;
   };
   store: {
     featuredSpotlight: string;
     latestRelease: string;
     download: string;
     watchTrailer: string;
+    viewDetails: string;
+    exploreCatalog: string;
     repackVsOriginal: string;
     upcomingGames: string;
     recentGames: string;
@@ -256,6 +446,7 @@ export interface LauncherTranslations {
     description: string;
     noDescription: string;
     requirementsAndCanRun: string;
+    requirementsOnly: string;
     tools: string;
     steps: string;
     completed: string;
@@ -296,16 +487,436 @@ export interface LauncherTranslations {
     positive: string;
     negative: string;
   };
+  qbitSetup: {
+    modalTitle: string;
+    modalSubtitle: string;
+    stepChecking: string;
+    stepDetecting: string;
+    stepDownloading: string;
+    stepVerifying: string;
+    stepInstalling: string;
+    stepConfiguring: string;
+    stepCompleted: string;
+    installedLabel: string;
+    notInstalledValue: string;
+    latestLabel: string;
+    processLabel: string;
+    processRunning: string;
+    processStopped: string;
+    statusUpToDate: string;
+    statusNewerInstalled: string;
+    statusUpdateAvailable: string;
+    statusNotInstalled: string;
+    statusRunningBlocked: string;
+    statusLookupFailed: string;
+    consentNote: string;
+    installBtn: string;
+    updateBtn: string;
+    recheckBtn: string;
+    retryBtn: string;
+    skipBtn: string;
+    closeBtn: string;
+    officialDownloadBtn: string;
+    launchQbitBtn: string;
+    shaVerifiedLabel: string;
+    sigVerifiedLabel: string;
+    unsignedVerifiedNote: string;
+    webUiSectionTitle: string;
+    webUiDetectedEnabled: string;
+    webUiNotEnabledHint: string;
+    webUiLoopbackWarning: string;
+    webUiGuide1: string;
+    webUiGuide2: string;
+    webUiGuide3: string;
+    webUiGuide4: string;
+    webUiGuide5: string;
+    generatePasswordBtn: string;
+    saveAndVerifyBtn: string;
+    verifyingBtn: string;
+    webUiConnectedMsg: string;
+    openSettingsBtn: string;
+    webPreviewNotice: string;
+  };
+  presentMonSetup: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    modalTitleInstall: string;
+    modalTitleUpdate: string;
+    modalTitleRepair: string;
+    modalTitleManage: string;
+    modalSubtitle: string;
+    benefitsHeading: string;
+    benefit1: string;
+    benefit2: string;
+    benefit3: string;
+    stepChecking: string;
+    stepDownloading: string;
+    stepVerifying: string;
+    stepInstalling: string;
+    stepCompleted: string;
+    stepCancelled: string;
+    statusReady: string;
+    statusNotInstalled: string;
+    statusUpdateAvailable: string;
+    statusRepairRequired: string;
+    statusNewerInstalled: string;
+    statusDeclined: string;
+    statusChecking: string;
+    statusWebPreview: string;
+    installedVersionLabel: string;
+    latestVersionLabel: string;
+    downloadSizeLabel: string;
+    installPathLabel: string;
+    sourceLabel: string;
+    notInstalledValue: string;
+    allowInstallBtn: string;
+    notNowBtn: string;
+    updateNowBtn: string;
+    laterBtn: string;
+    repairBtn: string;
+    reinstallBtn: string;
+    checkUpdatesBtn: string;
+    checkingBtn: string;
+    cancelDownloadBtn: string;
+    retryBtn: string;
+    doneBtn: string;
+    officialReleasesBtn: string;
+    enablePresentMonBtn: string;
+    managePresentMonBtn: string;
+    shaVerifiedLabel: string;
+    sigVerifiedLabel: string;
+    consentNote: string;
+    runningConflictMsg: string;
+    corruptedIssuePrefix: string;
+    declinedBannerTitle: string;
+    declinedBannerDesc: string;
+    lookupErrorMsg: string;
+  };
+  onboarding: {
+    stepWelcome: string;
+    stepAppearance: string;
+    stepQbitCheck: string;
+    stepQbitIntegration: string;
+    stepReady: string;
+    firstTimeNotice: string;
+    welcomeEyebrow: string;
+    welcomeTitle: string;
+    welcomeSubtitle: string;
+    welcomeFeature1Title: string;
+    welcomeFeature1Desc: string;
+    welcomeFeature2Title: string;
+    welcomeFeature2Desc: string;
+    welcomeFeature3Title: string;
+    welcomeFeature3Desc: string;
+    getStartedBtn: string;
+    skipAllBtn: string;
+    appearanceTitle: string;
+    appearanceSubtitle: string;
+    themePickerLabel: string;
+    languagePickerLabel: string;
+    themeDarkName: string;
+    themeDarkDesc: string;
+    themeLightName: string;
+    themeLightDesc: string;
+    themePs5Name: string;
+    themePs5Desc: string;
+    themeXboxName: string;
+    themeXboxDesc: string;
+    settingsEditableNote: string;
+    backBtn: string;
+    continueBtn: string;
+    qbitCheckTitle: string;
+    qbitCheckSubtitle: string;
+    scanningText: string;
+    alreadyInstalledTitle: string;
+    alreadyInstalledDesc: string;
+    goIntegrationBtn: string;
+    updateFirstBtn: string;
+    notInstalledTitle: string;
+    notInstalledDesc: string;
+    installAndNextBtn: string;
+    installCompleteAdvanceMsg: string;
+    skipTorrentBtn: string;
+    integrationTitle: string;
+    integrationSubtitle: string;
+    hostLoopbackHint: string;
+    finishSetupBtn: string;
+    skipIntegrationBtn: string;
+    finalizingPhase1: string;
+    finalizingPhase2: string;
+    finalizingPhase3: string;
+    congratsEyebrow: string;
+    congratsTitle: string;
+    congratsSubtitle: string;
+    summaryThemeLabel: string;
+    summaryLanguageLabel: string;
+    summaryTorrentLabel: string;
+    summaryTorrentConnected: string;
+    summaryTorrentInstalled: string;
+    summaryTorrentSkipped: string;
+    changeLaterHint: string;
+    enterAppBtn: string;
+    openSettingsPageBtn: string;
+    whatIsSecretAreaTitle: string;
+    whatIsSecretAreaBody: string;
+    whatIsSecretAreaPoint1: string;
+    whatIsSecretAreaPoint2: string;
+    whatIsSecretAreaPoint3: string;
+    stepGuideLabel: string;
+    step1Guide: string;
+    step2Guide: string;
+    step3Guide: string;
+    step4Guide: string;
+    step5Guide: string;
+    platformHint: string;
+  };
+  updater: {
+    title: string;
+    subtitle: string;
+    currentVersionLabel: string;
+    checkBtn: string;
+    checkingBtn: string;
+    upToDateMsg: string;
+    checkingMsg: string;
+    newVersionAvailable: string;
+    whatsNewTitle: string;
+    whatsNewCountSuffix: string;
+    categoryFeature: string;
+    categoryImprovement: string;
+    categoryFix: string;
+    downloadUpdateBtn: string;
+    downloadingPrefix: string;
+    readyToInstall: string;
+    readyToInstallDesc: string;
+    installRestartBtn: string;
+    postponeBtn: string;
+    laterBtn: string;
+    detailsBtn: string;
+    toastUpdateAvailable: string;
+    toastUpdateReady: string;
+    toastDownloading: string;
+    installedVersionLabel: string;
+    restartHint: string;
+    lastCheckedLabel: string;
+    errorFallback: string;
+    preparingDownload: string;
+  };
+  hardware: {
+    pageTitle: string;
+    pageSubtitle: string;
+    startMonitoring: string;
+    stopMonitoring: string;
+    refreshNow: string;
+    statusActive: string;
+    statusStopped: string;
+    statusWebPreview: string;
+    intervalLabel: string;
+    interval1s: string;
+    interval1500ms: string;
+    interval2s: string;
+    interval3s: string;
+    interval5s: string;
+    naValue: string;
+    unsupportedHint: string;
+    webPreviewTitle: string;
+    webPreviewBody: string;
+    sectionOverview: string;
+    sectionPerformance: string;
+    sectionDetails: string;
+    cpuTitle: string;
+    gpuTitle: string;
+    ramTitle: string;
+    storageTitle: string;
+    networkTitle: string;
+    modelLabel: string;
+    manufacturerLabel: string;
+    usageLabel: string;
+    temperatureLabel: string;
+    clockSpeedLabel: string;
+    coresThreadsLabel: string;
+    coresUnit: string;
+    threadsUnit: string;
+    powerLabel: string;
+    perCoreUsageLabel: string;
+    vramLabel: string;
+    fanSpeedLabel: string;
+    noGpuDetected: string;
+    totalRamLabel: string;
+    usedRamLabel: string;
+    availableRamLabel: string;
+    memoryTypeLabel: string;
+    memorySpeedLabel: string;
+    driveTypeLabel: string;
+    capacityLabel: string;
+    usedSpaceLabel: string;
+    freeSpaceLabel: string;
+    readSpeedLabel: string;
+    writeSpeedLabel: string;
+    noStorageDetected: string;
+    activeInterfaceLabel: string;
+    linkStateLabel: string;
+    linkSpeedLabel: string;
+    downloadSpeedLabel: string;
+    uploadSpeedLabel: string;
+    totalRxLabel: string;
+    totalTxLabel: string;
+    noNetworkDetected: string;
+    uptimeLabel: string;
+    hostLabel: string;
+    chartCpuRamTitle: string;
+    chartGpuTempTitle: string;
+    chartNetworkTitle: string;
+    chartCpuLoad: string;
+    chartRamLoad: string;
+    chartGpuLoad: string;
+    chartCpuTemp: string;
+    chartGpuTemp: string;
+    chartNetDownload: string;
+    chartNetUpload: string;
+    peakLabel: string;
+    avgLabel: string;
+    lastUpdatedLabel: string;
+    tabOverview: string;
+    tabGaming: string;
+    tabTechnologies: string;
+    tabCleaner: string;
+    cpuSeriesLabel: string;
+    cpuGenerationLabel: string;
+    ramChannelsLabel: string;
+    ramSlotsLabel: string;
+    gamingTitle: string;
+    gamingSubtitle: string;
+    gamingSelectProcess: string;
+    gamingAllProcesses: string;
+    gamingRefreshProcesses: string;
+    gamingPingHost: string;
+    gamingStartSession: string;
+    gamingStopSession: string;
+    gamingSessionActive: string;
+    gamingSessionDuration: string;
+    gamingPresentMonMissingTitle: string;
+    gamingPresentMonMissingDesc: string;
+    gamingPresentMonReady: string;
+    gamingFpsCurrent: string;
+    gamingFpsAvg: string;
+    gamingFps1Low: string;
+    gamingFps01Low: string;
+    gamingFpsMax: string;
+    gamingFrameTimeAvg: string;
+    gamingFrameTimeP95: string;
+    gamingFramePacing: string;
+    gamingSpikes: string;
+    gamingStutters: string;
+    gamingDroppedFrames: string;
+    gamingFrameTimeChartTitle: string;
+    gamingNetworkLatencyTitle: string;
+    gamingPingLabel: string;
+    gamingPacketLossLabel: string;
+    gamingInputLatencyLabel: string;
+    gamingThrottlingLabel: string;
+    gamingThrottlingDetected: string;
+    gamingThrottlingNormal: string;
+    gamingBottleneckTitle: string;
+    gamingBottleneckWarming: string;
+    gamingHistoryTitle: string;
+    gamingHistoryEmpty: string;
+    gamingClearHistory: string;
+    gamingCompareTitle: string;
+    gamingCompareSelectA: string;
+    gamingCompareSelectB: string;
+    techTitle: string;
+    techSubtitle: string;
+    techStatusSupported: string;
+    techStatusDetected: string;
+    techStatusActive: string;
+    techStatusUnsupported: string;
+    techStatusUnavailable: string;
+    techStatusRequiresGame: string;
+    techStatusRequiresDriver: string;
+    techArchitectureLabel: string;
+    techDriverLabel: string;
+    techRebarLabel: string;
+    displayTitle: string;
+    displayPrimaryLabel: string;
+    displayResolutionLabel: string;
+    displayRefreshRateLabel: string;
+    displayConnectionLabel: string;
+    displayActiveGpuLabel: string;
+    displayDirectXLabel: string;
+    displayHagsLabel: string;
+    displayGameModeLabel: string;
+    displayHdrLabel: string;
+    displayVrrLabel: string;
+    laptopTitle: string;
+    laptopBatteryLabel: string;
+    laptopPowerStateLabel: string;
+    laptopPluggedIn: string;
+    laptopOnBattery: string;
+    laptopCharging: string;
+    laptopHealthLabel: string;
+    laptopPowerPlanLabel: string;
+    laptopHybridGpuLabel: string;
+    laptopDesktopNotice: string;
+    cleanerTitle: string;
+    cleanerSubtitle: string;
+    cleanerSafetyBannerTitle: string;
+    cleanerSafetyBannerDesc: string;
+    cleanerScanBtn: string;
+    cleanerScanningBtn: string;
+    cleanerCleanBtn: string;
+    cleanerCleaningBtn: string;
+    cleanerSelectSafeDefaults: string;
+    cleanerEstimatedTotal: string;
+    cleanerOptInBadge: string;
+    cleanerOptInWarningDesc: string;
+    cleanerPathsLabel: string;
+    cleanerConfirmTitle: string;
+    cleanerConfirmDesc: string;
+    cleanerConfirmAction: string;
+    cleanerCancelAction: string;
+    cleanerProgressCleaning: string;
+    cleanerReportTitle: string;
+    cleanerReportFreed: string;
+    cleanerReportRemoved: string;
+    cleanerReportSkipped: string;
+    cleanerCatOldTempTitle: string;
+    cleanerCatOldTempDesc: string;
+    cleanerCatUserTempTitle: string;
+    cleanerCatUserTempDesc: string;
+    cleanerCatAppCacheTitle: string;
+    cleanerCatAppCacheDesc: string;
+    cleanerCatSecretAreaCacheTitle: string;
+    cleanerCatSecretAreaCacheDesc: string;
+    cleanerCatThumbnailTitle: string;
+    cleanerCatThumbnailDesc: string;
+    cleanerCatShaderTitle: string;
+    cleanerCatShaderDesc: string;
+    cleanerCatRecycleTitle: string;
+    cleanerCatRecycleDesc: string;
+    cleanerCatBrowserTitle: string;
+    cleanerCatBrowserDesc: string;
+  };
 }
 
 const EN: LauncherTranslations = {
   locale: 'en-US',
   nav: {
-    home: 'HOME',
-    library: 'LIBRARY',
-    extras: 'EXTRAS',
-    requests: 'REQUESTS',
-    settings: 'SETTINGS',
+    home: 'Home',
+    library: 'Library',
+    downloads: 'Downloads',
+    extras: 'Extras',
+    requests: 'Requests',
+    hardwareMonitor: 'Hardware Monitor',
+    settings: 'Settings',
+    switchLight: 'Switch to Light mode',
+    switchDark: 'Switch to Dark mode',
+    lightLabel: 'Light',
+    darkLabel: 'Dark',
+    selectLanguage: 'Select language',
+    openMenu: 'Open navigation menu',
+    closeMenu: 'Close navigation menu',
+    languageLabel: 'Language',
+    themeLabel: 'Appearance',
   },
   topbar: {
     webVersion: 'SecretArea web version',
@@ -321,7 +932,7 @@ const EN: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Settings',
-    pageSubtitle: 'Customize launcher language, startup behavior, and window appearance.',
+    pageSubtitle: 'Customize launcher language, startup behavior, window theme, and soundscape.',
     resetDefaults: 'Reset Defaults',
     resetToast: 'Settings restored to defaults',
     languageSectionTitle: 'Language',
@@ -334,21 +945,200 @@ const EN: LauncherTranslations = {
     desktopSupportedBadge: 'Windows Tray Sync',
     webNotice: 'Tray auto-start activates automatically in the SecretArea.exe desktop app.',
     trayActiveHint: 'Closing the window minimizes SecretArea to the system tray while auto-start is active.',
+    canRunItTitle: 'Can Run It hardware check',
+    canRunItDesc: 'Compare games and tools against your PC hardware requirements across Home, Library, and Game pages.',
     windowSectionTitle: 'Window',
     compactNavbarTitle: 'Compact Navbar',
     compactNavbarDesc: 'Show the navbar as icons, even in a wide window.',
+    lightModeTitle: 'Light / Dark mode',
+    lightModeDesc: 'Switch between crisp Light mode and Steam-inspired Dark mode. Enabling PS5 or Xbox theme switches back to Dark mode.',
+    darkModeBadge: 'Dark Mode',
+    lightModeBadge: 'Light Mode',
     alwaysPs5Title: 'Always run app with PS5 theme',
     alwaysPs5Desc: 'Keep the PlayStation 5 sapphire theme and ambient soundscape active across the launcher.',
     alwaysXboxTitle: 'Always run app with Xbox theme',
     alwaysXboxDesc: 'Apply the emerald Xbox dashboard theme, wireframe orb backdrop, and Xbox UI sound effects.',
+    audioSectionTitle: 'Audio & Soundscape',
+    audioSectionDesc: 'Toggle PS5 and Xbox ambient music vs. UI click sounds separately and control playback volume.',
+    ambientMusicTitle: 'Ambient background music (PS5 / Xbox)',
+    ambientMusicDesc: 'Play evolving cosmic PS5 or emerald Xbox Nexus ambient music while a console theme is active.',
+    uiSoundsTitle: 'UI click & hover sounds',
+    uiSoundsDesc: 'Play subtle console focus ticks, confirmation chimes, and back tones when navigating buttons and cards.',
+    volumeTitle: 'Master volume',
+    volumeDesc: 'Adjust output volume for both console ambient music and UI sound effects.',
+    consoleThemeAudioHint: 'Select the PS5 or Xbox theme in Window above to hear the active console soundscape.',
     activeLabel: 'On',
     inactiveLabel: 'Off',
+    downloadSectionTitle: 'Downloads & Storage',
+    downloadFolderTitle: 'Default Download Folder',
+    downloadFolderDesc: 'Choose where direct links, MediaFire files, Mega archives, and browser downloads are saved.',
+    chooseFolderBtn: 'Choose Folder',
+    openFolderBtn: 'Open Folder',
+    torrentSectionTitle: 'qBittorrent Integration (Web UI API v2)',
+    torrentSectionDesc: 'Optional: Connect SecretArea to local qBittorrent Web UI (API v2 / 5.0+) to send magnets & .torrent files and track live download/upload speeds, ETA, and pause/resume/delete.',
+    torrentEnableTitle: 'Enable qBittorrent Web UI Sync',
+    torrentEnableDesc: 'Syncs magnet & .torrent downloads with local qBittorrent via encrypted safeStorage credentials. Direct, MediaFire, and Mega downloads always work without qBittorrent.',
+    torrentAutoDetectBtn: 'Auto Detect',
+    torrentDetectingBtn: 'Scanning...',
+    torrentTestBtn: 'Test Connection',
+    torrentTestingBtn: 'Testing...',
+    torrentSaveBtn: 'Save Configuration',
+    torrentSavingBtn: 'Saving...',
+    torrentStatusConnected: 'Connected',
+    torrentStatusDisconnected: 'Disconnected',
+    torrentStatusTesting: 'Testing...',
+    torrentNotInstalledTitle: 'qBittorrent was not detected on this PC (Optional)',
+    torrentNotInstalledDesc: 'SecretArea direct downloads, MediaFire, Mega, and the in-app browser work independently without qBittorrent. Install qBittorrent only if you want built-in magnet & .torrent tracking.',
+    torrentDownloadBtn: 'Get qBittorrent (Official)',
+    torrentHostLabel: 'Host (Loopback Only)',
+    torrentPortLabel: 'Port',
+    torrentUsernameLabel: 'Username',
+    torrentPasswordLabel: 'Password',
+    torrentPasswordSavedPlaceholder: 'Encrypted via safeStorage (leave blank to keep)',
+    torrentApiKeyLabel: 'API Key (Optional · qBittorrent 5.2+)',
+    torrentApiKeyPlaceholder: 'qbt_... (optional)',
+    torrentApiKeySavedPlaceholder: 'API Key saved securely (leave blank to keep)',
+    torrentLoopbackNotice: 'Local-only security: Web UI connections are restricted to loopback hosts (127.0.0.1 / localhost / ::1) and never exposed to external networks.',
+    torrentLoopbackError: 'Host must be a local loopback address (127.0.0.1, localhost, or ::1).',
+    torrentGuideTitle: 'How to enable qBittorrent Web UI (Manual Setup)',
+    torrentGuideStep1: '1. Open qBittorrent on Windows and go to Tools → Options → Web UI.',
+    torrentGuideStep2: '2. Check "Web User Interface (Remote control)", keep IP address set to 127.0.0.1 (or *), and set Port to 8080.',
+    torrentGuideStep3: '3. Under Authentication, set a Username & Password (or generate a qbt_ API key in qBittorrent 5.2.0+).',
+    torrentGuideStep4: '4. Click Apply & OK in qBittorrent, then enter the same credentials above and click Save Configuration.',
+    torrentGuideStep5: '5. Click Auto Detect & Test Connection above to verify live qBittorrent Web UI API v2 communication.',
+    torrentWebNotice: 'Web Preview Mode: Browsers cannot connect to local 127.0.0.1 qBittorrent Web UI or access Electron safeStorage. Use the SecretArea.exe Desktop App for live connection testing and torrent sync.',
+    torrentTestingWebPreviewMsg: 'Disconnected — Web Preview cannot connect to local qBittorrent Web UI.',
+    torrentTestingWebPreviewHint: 'Browser security blocks localhost Web UI requests and encrypted safeStorage. Open SecretArea.exe Desktop App to test and sync your local qBittorrent instance.',
+    modeDesktopBadge: 'Desktop App',
+    modeWebPreviewBadge: 'Web Preview',
+    torrentSavedToast: 'qBittorrent settings saved',
+    torrentManageSetupBtn: 'Auto Install / Update qBittorrent',
+    replaySetupBtn: 'Welcome Setup',
+    closeBehaviorTitle: 'Application Closing Behavior',
+    closeBehaviorDesc: 'Choose whether clicking the window close button minimizes SecretArea to the system tray or exits completely.',
+    closeBehaviorMinimizeTray: 'Minimize to System Tray',
+    closeBehaviorExit: 'Exit Application Completely',
+    exitAppTitle: 'Full Shutdown',
+    exitAppDesc: 'Immediately stop background hardware/gaming monitors, tray icon, and close SecretArea completely.',
+    exitAppBtn: 'Exit Application Completely',
+    exitAppConfirmBtn: 'Confirm Full Exit',
+    exitAppCancelBtn: 'Cancel',
+    exitAppWebHint: 'Full application shutdown is only available in the SecretArea.exe Desktop App.',
+  },
+  customTheme: {
+    sectionTitle: 'Custom Theme Builder',
+    sectionSubtitle: 'Design your default SecretArea palette, accent color, button geometry, and card surface.',
+    enableLabel: 'Enable Custom Default Theme',
+    surfaceLabel: 'Base Surface',
+    surfaceMidnight: 'Midnight Slate',
+    surfaceObsidian: 'Pure Obsidian',
+    surfaceAbyss: 'Deep Abyss',
+    surfaceDaylight: 'Clean Daylight',
+    accentColorLabel: 'Accent Color',
+    customHexLabel: 'Custom Hex',
+    buttonStyleLabel: 'Button Style',
+    btnRounded: 'Rounded',
+    btnPill: 'Pill',
+    btnSharp: 'Sharp',
+    cardRadiusLabel: 'Card Corners',
+    cardSharp: 'Sharp',
+    cardMedium: 'Balanced',
+    cardSoft: 'Soft',
+    glassBlurLabel: 'Frosted Glass Blur',
+    glassBlurDesc: 'Subtle translucent blur on panels and cards',
+    previewLabel: 'Live Preview',
+    previewTitle: 'SecretArea Custom Look',
+    previewPrimaryBtn: 'Primary Action',
+    previewSecondaryBtn: 'Secondary',
+    resetBtn: 'Reset Custom Theme',
+    consoleOverrideNote: 'Note: Turning Custom Theme on automatically switches out of PS5/Xbox console theme.',
+    summaryCustomPrefix: 'Custom',
+  },
+  downloads: {
+    pageTitle: 'Download Manager',
+    pageSubtitle: 'Track direct links, MediaFire, Mega, in-app browser captures, and qBittorrent transfers.',
+    quickAddPlaceholder: 'Paste a Direct URL, MediaFire, Mega, or Magnet link...',
+    quickAddBtn: 'Add Download',
+    addTorrentFileBtn: 'Add .torrent',
+    quickAddInvalid: 'Enter a valid http://, https://, or magnet:? link.',
+    folderLabel: 'Save to',
+    chooseFolder: 'Choose Folder',
+    openFolder: 'Open Folder',
+    clearFinished: 'Clear Finished',
+    tabAll: 'All',
+    tabActive: 'Active',
+    tabPaused: 'Paused',
+    tabCompleted: 'Completed',
+    tabFailed: 'Failed',
+    searchPlaceholder: 'Filter downloads...',
+    metricActive: 'Active',
+    metricSpeed: 'Total Speed',
+    metricCompleted: 'Completed',
+    metricFreeDisk: 'Free Disk Space',
+    statusQueued: 'Queued',
+    statusResolving: 'Resolving link...',
+    statusDownloading: 'Downloading',
+    statusPaused: 'Paused',
+    statusCompleted: 'Completed',
+    statusFailed: 'Failed',
+    statusCancelled: 'Cancelled',
+    sourceDirect: 'Direct Link',
+    sourceMediafire: 'MediaFire',
+    sourceMega: 'Mega',
+    sourceQbittorrent: 'qBittorrent',
+    sourceBrowser: 'In-App Browser',
+    actionPause: 'Pause',
+    actionResume: 'Resume',
+    actionCancel: 'Cancel',
+    actionDelete: 'Delete',
+    actionRetry: 'Retry',
+    actionOpenFile: 'Open File',
+    actionOpenFolder: 'Open Folder',
+    actionRemove: 'Remove',
+    actionOpenExternal: 'Open Externally',
+    peersLabel: 'Peers',
+    seedsLabel: 'Seeds',
+    unknownSize: 'Unknown size',
+    etaCalculating: 'Calculating...',
+    torrentConnected: 'qBittorrent Connected',
+    torrentDisconnected: 'qBittorrent Disconnected',
+    torrentWebPreviewStatus: 'Web Preview — Live qBittorrent sync runs in SecretArea.exe Desktop App',
+    configureTorrentBtn: 'Configure qBittorrent',
+    speedGraphTitle: 'Speed Activity',
+    periodLabel: 'Period:',
+    period1m: '1 Minute',
+    period5m: '5 Minutes',
+    period30m: '30 Minutes',
+    period1h: '1 Hour',
+    totalUploadLabel: 'Total Upload',
+    totalDownloadLabel: 'Total Download',
+    sizeLabel: 'Size',
+    progressLabel: 'Progress',
+    statusLabel: 'Status',
+    downSpeedLabel: 'Down Speed',
+    upSpeedLabel: 'Up Speed',
+    etaLabel: 'ETA',
+    ratioLabel: 'Ratio',
+    showGraphBtn: 'Show Speed Graph',
+    hideGraphBtn: 'Hide Speed Graph',
+    emptyTitle: 'No downloads in this view',
+    emptySubtitle: 'Paste any direct, MediaFire, Mega, or magnet link above, upload a .torrent file, or click a channel inside any Game or Tool page.',
+    webNoticeTitle: 'Web Preview Mode',
+    webNoticeBody: 'Live pause/resume, speed/ETA tracking, in-app browser capture, and qBittorrent Web UI sync run inside the SecretArea.exe desktop app.',
+    startedToast: 'Download added to queue',
+    failedToast: 'Could not start download',
+    detailActiveTitle: 'Downloads for This Release',
+    detailManageBtn: 'Open Download Manager',
+    detailOpenExternal: 'Open in External Browser',
+    detailStartInApp: 'Download in SecretArea',
   },
   store: {
     featuredSpotlight: 'Featured Spotlight',
     latestRelease: 'Latest Release',
     download: 'Download',
     watchTrailer: 'Watch Trailer',
+    viewDetails: 'Details',
+    exploreCatalog: 'Explore Catalog',
     repackVsOriginal: 'Repack Size vs Original',
     upcomingGames: 'Upcoming Games',
     recentGames: 'Recent Games',
@@ -515,6 +1305,7 @@ const EN: LauncherTranslations = {
     description: 'Description',
     noDescription: 'No description provided in catalog.',
     requirementsAndCanRun: 'Requirements & Can Run It',
+    requirementsOnly: 'System Requirements',
     tools: 'Tools',
     steps: 'Steps',
     completed: 'completed',
@@ -555,16 +1346,436 @@ const EN: LauncherTranslations = {
     positive: 'Positive',
     negative: 'Negative',
   },
+  qbitSetup: {
+    modalTitle: 'qBittorrent Dependency Setup',
+    modalSubtitle: 'Manage automatic Windows installation, official updates, and local Web UI verification.',
+    stepChecking: 'Checking dependencies...',
+    stepDetecting: 'Detecting qBittorrent...',
+    stepDownloading: 'Downloading qBittorrent...',
+    stepVerifying: 'Verifying installer...',
+    stepInstalling: 'Installing qBittorrent...',
+    stepConfiguring: 'Configuring integration...',
+    stepCompleted: 'Setup completed.',
+    installedLabel: 'Installed',
+    notInstalledValue: 'Not installed',
+    latestLabel: 'Latest Official',
+    processLabel: 'Process',
+    processRunning: 'Running',
+    processStopped: 'Not running',
+    statusUpToDate: 'Your qBittorrent installation is already up to date. No reinstall required.',
+    statusNewerInstalled: 'A newer version of qBittorrent is already installed. SecretArea will never downgrade it.',
+    statusUpdateAvailable: 'A newer official stable qBittorrent update is ready to install.',
+    statusNotInstalled: 'qBittorrent was not detected on this PC. SecretArea can download the official x64 installer, verify its checksum & signature, and install it silently.',
+    statusRunningBlocked: 'qBittorrent is currently running. Please close qBittorrent cleanly so active torrents are not interrupted, then click Check Again.',
+    statusLookupFailed: 'Unable to retrieve the latest official release right now.',
+    consentNote: 'By clicking Install/Update, SecretArea downloads the official 64-bit qBittorrent installer directly from GitHub/qbittorrent.org and verifies SHA-256 integrity before launching setup (Windows may ask for UAC confirmation).',
+    installBtn: 'Download & Install qBittorrent',
+    updateBtn: 'Update qBittorrent Now',
+    recheckBtn: 'Check Again',
+    retryBtn: 'Retry',
+    skipBtn: 'Not Now',
+    closeBtn: 'Done',
+    officialDownloadBtn: 'Official Download Page',
+    launchQbitBtn: 'Open qBittorrent',
+    shaVerifiedLabel: 'SHA-256 Checksum Verified',
+    sigVerifiedLabel: 'Publisher Signature Verified',
+    unsignedVerifiedNote: 'FOSS Installer (Unsigned) · Official SHA-256 Match Verified',
+    webUiSectionTitle: 'qBittorrent Web UI Setup (127.0.0.1 Only)',
+    webUiDetectedEnabled: 'Web UI is enabled in qBittorrent config.',
+    webUiNotEnabledHint: 'Web UI is not enabled yet. Follow these steps inside qBittorrent, then click Save & Verify Connection:',
+    webUiLoopbackWarning: 'Web UI IP is not restricted to 127.0.0.1. Set IP address to 127.0.0.1 in qBittorrent for local-only security.',
+    webUiGuide1: '1. Open qBittorrent → Tools → Options → Web UI.',
+    webUiGuide2: '2. Check "Web User Interface (Remote control)".',
+    webUiGuide3: '3. Set IP address to 127.0.0.1 and Port to 8080.',
+    webUiGuide4: '4. Set a Username and Password (use Generate Password below or enter your own), then click Apply / OK.',
+    webUiGuide5: '5. Enter those exact credentials below and click Save & Verify Connection.',
+    generatePasswordBtn: 'Generate Strong Password',
+    saveAndVerifyBtn: 'Save & Verify Connection',
+    verifyingBtn: 'Verifying...',
+    webUiConnectedMsg: 'Connected & verified! SecretArea is ready for magnet links and .torrent downloads.',
+    openSettingsBtn: 'Open Settings',
+    webPreviewNotice: 'Automatic installation runs inside SecretArea.exe Desktop App on Windows. In Web Preview, use the official link below.',
+  },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (FPS & Frame Time Engine)',
+    sectionSubtitle: 'Automatic detection, official GitHub release updates, and integrity verification for real ETW gaming telemetry.',
+    modalTitleInstall: 'Enable Gaming Performance Monitoring',
+    modalTitleUpdate: 'Update Intel PresentMon',
+    modalTitleRepair: 'Repair PresentMon Installation',
+    modalTitleManage: 'Intel PresentMon Dependency Manager',
+    modalSubtitle: 'Official Intel PresentMon ETW telemetry engine managed automatically by SecretArea Desktop.',
+    benefitsHeading: 'What PresentMon enables in SecretArea',
+    benefit1: 'Accurate real-time FPS, 1% Low & 0.1% Low FPS via zero-injection ETW',
+    benefit2: 'Frame time pacing, spike & stutter detection, and display latency capture',
+    benefit3: 'Hardware correlation & multi-sample CPU/GPU bottleneck diagnosis',
+    stepChecking: 'Checking PresentMon installation & latest GitHub release...',
+    stepDownloading: 'Downloading official PresentMon x64 binary...',
+    stepVerifying: 'Verifying SHA-256 checksum & Intel Authenticode signature...',
+    stepInstalling: 'Installing & verifying CLI compatibility...',
+    stepCompleted: 'PresentMon is installed, verified, and ready for FPS monitoring.',
+    stepCancelled: 'Download cancelled cleanly. No files were changed.',
+    statusReady: 'Installed & Ready',
+    statusNotInstalled: 'Not Installed',
+    statusUpdateAvailable: 'Update Available',
+    statusRepairRequired: 'Repair Needed',
+    statusNewerInstalled: 'Up to Date (Newer Local Build)',
+    statusDeclined: 'Disabled by User (Optional)',
+    statusChecking: 'Checking...',
+    statusWebPreview: 'Windows Desktop Only',
+    installedVersionLabel: 'Installed Version',
+    latestVersionLabel: 'Latest Official',
+    downloadSizeLabel: 'Download Size',
+    installPathLabel: 'Install Location',
+    sourceLabel: 'Official Source',
+    notInstalledValue: 'Not installed',
+    allowInstallBtn: 'Allow & Install',
+    notNowBtn: 'Not Now',
+    updateNowBtn: 'Update Now',
+    laterBtn: 'Later',
+    repairBtn: 'Repair Installation',
+    reinstallBtn: 'Reinstall PresentMon',
+    checkUpdatesBtn: 'Check for Updates',
+    checkingBtn: 'Checking...',
+    cancelDownloadBtn: 'Cancel',
+    retryBtn: 'Retry',
+    doneBtn: 'Done',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Install / Enable PresentMon',
+    managePresentMonBtn: 'Manage PresentMon',
+    shaVerifiedLabel: 'SHA-256 Digest Verified',
+    sigVerifiedLabel: 'Intel Corporation Signature Verified',
+    consentNote: 'SecretArea never downloads or installs PresentMon without your explicit approval. Assets are fetched exclusively over HTTPS from GitHub Releases and verified via SHA-256 and Intel Authenticode signature.',
+    runningConflictMsg: 'Another PresentMon process is running on your PC. Close it cleanly, then click Retry or Check for Updates.',
+    corruptedIssuePrefix: 'Detected installation issue',
+    declinedBannerTitle: 'PresentMon FPS monitoring was skipped',
+    declinedBannerDesc: 'SecretArea continues working normally with CPU, GPU, RAM, storage, and ping telemetry. You can install PresentMon anytime to unlock live FPS & frame time graphs.',
+    lookupErrorMsg: 'Unable to check GitHub Releases for the latest PresentMon version right now.',
+  },
+  onboarding: {
+    stepWelcome: 'Welcome',
+    stepAppearance: 'Theme & Language',
+    stepQbitCheck: 'qBittorrent Check',
+    stepQbitIntegration: 'Integration',
+    stepReady: 'Ready',
+    firstTimeNotice: 'One-time first-launch setup',
+    welcomeEyebrow: 'SecretArea Desktop',
+    welcomeTitle: 'Welcome to SecretArea',
+    welcomeSubtitle: 'Let us personalize your launcher theme, language, and qBittorrent download engine in less than a minute before you enter the desktop workspace.',
+    welcomeFeature1Title: '01. Theme & Language',
+    welcomeFeature1Desc: 'Pick Dark, Light, PlayStation 5, or Xbox Nexus along with your preferred language.',
+    welcomeFeature2Title: '02. qBittorrent Detection',
+    welcomeFeature2Desc: 'Automatically checks if qBittorrent is installed on your PC or installs the verified official build.',
+    welcomeFeature3Title: '03. Seamless Sync',
+    welcomeFeature3Desc: 'Connect local 127.0.0.1 Web UI credentials securely using Windows DPAPI / safeStorage.',
+    getStartedBtn: 'Get Started',
+    skipAllBtn: 'Skip to App',
+    appearanceTitle: 'Personalize Theme & Language',
+    appearanceSubtitle: 'Every choice updates live right here. You can switch themes or languages anytime in Settings.',
+    themePickerLabel: 'Launcher Theme',
+    languagePickerLabel: 'Interface Language',
+    themeDarkName: 'Dark Slate',
+    themeDarkDesc: 'High-contrast obsidian desktop launcher',
+    themeLightName: 'Light Mode',
+    themeLightDesc: 'Clean daylight workspace with crisp borders',
+    themePs5Name: 'PlayStation 5',
+    themePs5Desc: 'Sapphire aurora & console ambient sound',
+    themeXboxName: 'Xbox Nexus',
+    themeXboxDesc: 'Emerald wireframe & classic console glow',
+    settingsEditableNote: 'You can adjust sound, navbar layout, and themes later from Settings.',
+    backBtn: 'Back',
+    continueBtn: 'Continue',
+    qbitCheckTitle: 'qBittorrent Engine Check',
+    qbitCheckSubtitle: 'SecretArea checks your PC first so existing qBittorrent setups are preserved cleanly.',
+    scanningText: 'Checking your computer for an existing qBittorrent installation...',
+    alreadyInstalledTitle: 'qBittorrent is already installed on this PC',
+    alreadyInstalledDesc: 'Great! Since qBittorrent was already installed before SecretArea, continue to the next step to add your qBittorrent Integration settings.',
+    goIntegrationBtn: 'Configure qBittorrent Integration',
+    updateFirstBtn: 'Update qBittorrent First',
+    notInstalledTitle: 'qBittorrent is not installed yet',
+    notInstalledDesc: 'Install the official verified 64-bit qBittorrent client automatically, then continue straight to Integration settings.',
+    installAndNextBtn: 'Install qBittorrent & Continue',
+    installCompleteAdvanceMsg: 'qBittorrent installed and verified! Moving to Integration settings...',
+    skipTorrentBtn: 'Skip Torrent Setup (Direct Downloads Only)',
+    integrationTitle: 'qBittorrent Integration Settings',
+    integrationSubtitle: 'Add your local qBittorrent Web UI credentials so SecretArea tracks speed, seeds, peers, ETA, and progress.',
+    hostLoopbackHint: 'Locked to 127.0.0.1 (local loopback only) and stored securely with Electron safeStorage.',
+    finishSetupBtn: 'Finish Setup',
+    skipIntegrationBtn: 'Skip & Configure Later in Settings',
+    finalizingPhase1: 'Saving theme & language preferences...',
+    finalizingPhase2: 'Syncing download & torrent workspace...',
+    finalizingPhase3: 'Everything is ready!',
+    congratsEyebrow: 'Setup Complete',
+    congratsTitle: 'Congratulations! SecretArea Desktop is ready.',
+    congratsSubtitle: 'Your launcher is personalized and configured. Enjoy fast Direct, MediaFire, Mega, and qBittorrent downloads.',
+    summaryThemeLabel: 'Active Theme',
+    summaryLanguageLabel: 'Language',
+    summaryTorrentLabel: 'qBittorrent Status',
+    summaryTorrentConnected: 'Connected & Verified',
+    summaryTorrentInstalled: 'Installed (Configure in Settings)',
+    summaryTorrentSkipped: 'Skipped (Optional)',
+    changeLaterHint: 'You can change any theme, language, download folder, or qBittorrent integration setting anytime from the Settings page.',
+    enterAppBtn: 'Enter SecretArea Desktop',
+    openSettingsPageBtn: 'Review in Settings',
+    whatIsSecretAreaTitle: 'What is SecretArea?',
+    whatIsSecretAreaBody: 'SecretArea is an all-in-one Windows game hub, PC compatibility checker, and download manager built to keep your entire library organized in one clean workspace.',
+    whatIsSecretAreaPoint1: 'Browse curated Games, Hypervisor, SteamTools, PS5, and Extras catalogs with instant "Can Run It" checks against your PC specs.',
+    whatIsSecretAreaPoint2: 'Download directly with built-in resume support for Direct links, MediaFire, Mega, and in-app browser captures, plus optional qBittorrent sync.',
+    whatIsSecretAreaPoint3: 'Switch anytime between Dark, Light, PlayStation 5, Xbox Nexus, or your own Custom Theme in English, French, Spanish, or RTL Arabic.',
+    stepGuideLabel: 'What this step does',
+    step1Guide: 'This quick 5-step walkthrough introduces SecretArea and helps you configure visual style, language, and optional torrent tools before opening the main app.',
+    step2Guide: 'Pick a preset theme (Dark, Light, PS5, Xbox) or open the Custom Theme Builder to tune colors, buttons, and corners. Select your interface language below — everything previews immediately.',
+    step3Guide: 'SecretArea scans your computer to check if qBittorrent is already installed so your current setup stays untouched. If it is missing, you can auto-install the official release or skip this step.',
+    step4Guide: 'Connect SecretArea to qBittorrent local Web UI (127.0.0.1 only) so magnet links and .torrent files show live speed, seeds, peers, ETA, and ratio right inside SecretArea.',
+    step5Guide: 'Review the summary of choices you just configured. All of these options stay unlocked anytime inside the Settings page.',
+    platformHint: 'Adaptive desktop & compact viewport UI',
+  },
+  updater: {
+    title: 'About & Updates',
+    subtitle: 'SecretArea Desktop App',
+    currentVersionLabel: 'Current Installed Version',
+    checkBtn: 'Check for Updates',
+    checkingBtn: 'Checking...',
+    upToDateMsg: "You're using the latest version.",
+    checkingMsg: 'Checking GitHub Releases for a newer version...',
+    newVersionAvailable: 'New Version Available',
+    whatsNewTitle: "What's New in This Update",
+    whatsNewCountSuffix: 'changes',
+    categoryFeature: 'New',
+    categoryImprovement: 'Improved',
+    categoryFix: 'Fixed',
+    downloadUpdateBtn: 'Download Update',
+    downloadingPrefix: 'Downloading',
+    readyToInstall: 'is ready to install',
+    readyToInstallDesc: 'Click Install and Restart to update from your previous version now, or postpone to keep using SecretArea and finish updating when you close the app.',
+    installRestartBtn: 'Install and Restart',
+    postponeBtn: 'Postpone',
+    laterBtn: 'Later',
+    detailsBtn: "What's New",
+    toastUpdateAvailable: 'Update Available',
+    toastUpdateReady: 'Update Ready',
+    toastDownloading: 'Downloading',
+    installedVersionLabel: 'Installed version',
+    restartHint: 'Restart SecretArea to finish installing.',
+    lastCheckedLabel: 'Last checked',
+    errorFallback: 'Unable to check for updates right now.',
+    preparingDownload: 'Preparing download...',
+  },
+  hardware: {
+    pageTitle: 'Hardware Monitor',
+    pageSubtitle: 'Real-time system telemetry, temperatures, storage throughput, and network performance.',
+    startMonitoring: 'Start Monitoring',
+    stopMonitoring: 'Stop Monitoring',
+    refreshNow: 'Refresh Snapshot',
+    statusActive: 'Monitoring Active',
+    statusStopped: 'Monitoring Paused',
+    statusWebPreview: 'Web Preview',
+    intervalLabel: 'Refresh Interval',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/A',
+    unsupportedHint: 'Sensor unsupported or unavailable on this system',
+    webPreviewTitle: 'Desktop Telemetry Required',
+    webPreviewBody: 'Web Preview cannot access low-level OS hardware sensors directly. Launch the SecretArea Desktop app to read live CPU, GPU, RAM, storage, and network telemetry.',
+    sectionOverview: 'System Overview',
+    sectionPerformance: 'Live Performance',
+    sectionDetails: 'Hardware Details',
+    cpuTitle: 'Processor (CPU)',
+    gpuTitle: 'Graphics (GPU)',
+    ramTitle: 'Memory (RAM)',
+    storageTitle: 'Storage Drives',
+    networkTitle: 'Network Activity',
+    modelLabel: 'Model',
+    manufacturerLabel: 'Manufacturer',
+    usageLabel: 'Usage',
+    temperatureLabel: 'Temperature',
+    clockSpeedLabel: 'Clock Speed',
+    coresThreadsLabel: 'Cores / Threads',
+    coresUnit: 'Cores',
+    threadsUnit: 'Threads',
+    powerLabel: 'Power Draw',
+    perCoreUsageLabel: 'Logical Thread Load',
+    vramLabel: 'VRAM Usage',
+    fanSpeedLabel: 'Fan Speed',
+    noGpuDetected: 'No GPU telemetry reported by this host.',
+    totalRamLabel: 'Total RAM',
+    usedRamLabel: 'Used RAM',
+    availableRamLabel: 'Available RAM',
+    memoryTypeLabel: 'Memory Type',
+    memorySpeedLabel: 'Memory Speed',
+    driveTypeLabel: 'Drive Type',
+    capacityLabel: 'Total Capacity',
+    usedSpaceLabel: 'Used Space',
+    freeSpaceLabel: 'Free Space',
+    readSpeedLabel: 'Read Speed',
+    writeSpeedLabel: 'Write Speed',
+    noStorageDetected: 'No storage drives reported by this host.',
+    activeInterfaceLabel: 'Active Interface',
+    linkStateLabel: 'Link State',
+    linkSpeedLabel: 'Link Speed',
+    downloadSpeedLabel: 'Download Speed',
+    uploadSpeedLabel: 'Upload Speed',
+    totalRxLabel: 'Total Received',
+    totalTxLabel: 'Total Sent',
+    noNetworkDetected: 'No active network interface detected.',
+    uptimeLabel: 'System Uptime',
+    hostLabel: 'Host',
+    chartCpuRamTitle: 'CPU & RAM Utilization (%)',
+    chartGpuTempTitle: 'GPU Load (%) & Temperatures (°C)',
+    chartNetworkTitle: 'Network Throughput',
+    chartCpuLoad: 'CPU Load',
+    chartRamLoad: 'RAM Load',
+    chartGpuLoad: 'GPU Load',
+    chartCpuTemp: 'CPU Temp',
+    chartGpuTemp: 'GPU Temp',
+    chartNetDownload: 'Download',
+    chartNetUpload: 'Upload',
+    peakLabel: 'Peak',
+    avgLabel: 'Avg',
+    lastUpdatedLabel: 'Last sample',
+    tabOverview: 'System Telemetry',
+    tabGaming: 'Gaming & Bottlenecks',
+    tabTechnologies: 'GPU Tech, Display & Laptop',
+    tabCleaner: 'PC Cleaner',
+    cpuSeriesLabel: 'Series',
+    cpuGenerationLabel: 'Generation',
+    ramChannelsLabel: 'Channel Mode',
+    ramSlotsLabel: 'Populated Slots',
+    gamingTitle: 'Gaming Performance Monitor',
+    gamingSubtitle: 'Session-based FPS & frame-time capture (via PresentMon ETW), ping monitoring, hardware correlation, and multi-sample bottleneck analysis.',
+    gamingSelectProcess: 'Target Game / Process',
+    gamingAllProcesses: 'Foreground Active Window',
+    gamingRefreshProcesses: 'Refresh Processes',
+    gamingPingHost: 'Latency Probe Host',
+    gamingStartSession: 'Start Gaming Session',
+    gamingStopSession: 'Stop Gaming Session',
+    gamingSessionActive: 'Session Active',
+    gamingSessionDuration: 'Duration',
+    gamingPresentMonMissingTitle: 'PresentMon ETW Not Installed — FPS Metrics Show N/A',
+    gamingPresentMonMissingDesc: 'SecretArea never fakes or injects overlays into games. Place Intel PresentMon CLI (PresentMon.exe) in resources/bin/PresentMon.exe or install it under %LOCALAPPDATA%\\Intel\\PresentMon to enable real DX11/DX12/Vulkan/OpenGL FPS, 1% Low, and Frame Time capture.',
+    gamingPresentMonReady: 'PresentMon ETW Ready',
+    gamingFpsCurrent: 'Current FPS',
+    gamingFpsAvg: 'Average FPS',
+    gamingFps1Low: '1% Low FPS',
+    gamingFps01Low: '0.1% Low FPS',
+    gamingFpsMax: 'Max FPS',
+    gamingFrameTimeAvg: 'Avg Frame Time',
+    gamingFrameTimeP95: 'P95 Frame Time',
+    gamingFramePacing: 'Frame Pacing Stability',
+    gamingSpikes: 'Frame Spikes',
+    gamingStutters: 'Stutters (>2.2x)',
+    gamingDroppedFrames: 'Dropped Frames',
+    gamingFrameTimeChartTitle: 'Real-Time Frame Time History (ms)',
+    gamingNetworkLatencyTitle: 'Network & Thermal Telemetry',
+    gamingPingLabel: 'ICMP Ping',
+    gamingPacketLossLabel: 'Packet Loss',
+    gamingInputLatencyLabel: 'Input Latency',
+    gamingThrottlingLabel: 'Thermal Throttling',
+    gamingThrottlingDetected: 'Throttling Detected',
+    gamingThrottlingNormal: 'Nominal Temps',
+    gamingBottleneckTitle: 'Multi-Sample Bottleneck Analysis',
+    gamingBottleneckWarming: 'Collecting multi-sample rolling baseline (requires at least 5 consecutive samples to prevent false alerts)...',
+    gamingHistoryTitle: 'Local Gaming Session History',
+    gamingHistoryEmpty: 'No saved gaming sessions yet. Start and stop a session to record FPS, thermal, and bottleneck metrics.',
+    gamingClearHistory: 'Clear History',
+    gamingCompareTitle: 'Compare Two Sessions',
+    gamingCompareSelectA: 'Session A',
+    gamingCompareSelectB: 'Session B',
+    techTitle: 'Graphics Technologies & Hardware Capabilities',
+    techSubtitle: 'Verified GPU architecture support matrix across NVIDIA, AMD, and Intel. Game-level features are marked honestly without fake global activation.',
+    techStatusSupported: 'Supported',
+    techStatusDetected: 'Detected',
+    techStatusActive: 'Active',
+    techStatusUnsupported: 'Unsupported',
+    techStatusUnavailable: 'Unavailable',
+    techStatusRequiresGame: 'Requires Game Integration',
+    techStatusRequiresDriver: 'Requires Driver / SDK',
+    techArchitectureLabel: 'Architecture',
+    techDriverLabel: 'Driver Version',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Display & Windows Gaming Settings',
+    displayPrimaryLabel: 'Primary Display',
+    displayResolutionLabel: 'Resolution',
+    displayRefreshRateLabel: 'Refresh Rate',
+    displayConnectionLabel: 'Connection Type',
+    displayActiveGpuLabel: 'Active Rendering GPU',
+    displayDirectXLabel: 'DirectX Capability',
+    displayHagsLabel: 'Hardware-Accelerated GPU Scheduling',
+    displayGameModeLabel: 'Windows Game Mode',
+    displayHdrLabel: 'HDR Support',
+    displayVrrLabel: 'VRR / Adaptive Sync',
+    laptopTitle: 'Laptop & Power Telemetry',
+    laptopBatteryLabel: 'Battery Charge',
+    laptopPowerStateLabel: 'Power Source',
+    laptopPluggedIn: 'AC Plugged In',
+    laptopOnBattery: 'On Battery',
+    laptopCharging: 'Charging',
+    laptopHealthLabel: 'Battery Health',
+    laptopPowerPlanLabel: 'Active Power Plan',
+    laptopHybridGpuLabel: 'Hybrid GPU Mode',
+    laptopDesktopNotice: 'No system battery detected — running in Desktop AC configuration.',
+    cleanerTitle: 'Safe PC Cleaner & Cache Optimizer',
+    cleanerSubtitle: 'Scan temporary folders first, inspect exact paths and byte counts, then confirm cleanup.',
+    cleanerSafetyBannerTitle: 'Strict Personal Data & Game File Protection',
+    cleanerSafetyBannerDesc: 'SecretArea NEVER scans or deletes Desktop, Documents, Downloads, Pictures, Videos, Game installs, Saves, Mods, Windows/System32, or browser passwords, bookmarks, cookies, and history. Locked files are safely skipped.',
+    cleanerScanBtn: 'Scan Safe Locations',
+    cleanerScanningBtn: 'Scanning...',
+    cleanerCleanBtn: 'Review & Clean Selected',
+    cleanerCleaningBtn: 'Cleaning...',
+    cleanerSelectSafeDefaults: 'Select Recommended Safe Defaults',
+    cleanerEstimatedTotal: 'Selected to Free',
+    cleanerOptInBadge: 'Opt-In Caution',
+    cleanerOptInWarningDesc: 'Opt-in category (unchecked by default). Clearing shader cache may cause temporary stutter while games recompile shaders; Recycle Bin permanently removes trashed files.',
+    cleanerPathsLabel: 'Target Paths',
+    cleanerConfirmTitle: 'Confirm PC Cleanup',
+    cleanerConfirmDesc: 'Review the selected temporary and cache categories below before permanently removing files.',
+    cleanerConfirmAction: 'Confirm & Clean Files',
+    cleanerCancelAction: 'Cancel',
+    cleanerProgressCleaning: 'Cleaning selected caches...',
+    cleanerReportTitle: 'Cleanup Completed',
+    cleanerReportFreed: 'Space Freed',
+    cleanerReportRemoved: 'Files Removed',
+    cleanerReportSkipped: 'Locked Files Skipped',
+    cleanerCatOldTempTitle: 'Old System Temporary Files (>48h)',
+    cleanerCatOldTempDesc: 'Expired system temp files under Windows\\Temp or /tmp older than 48 hours.',
+    cleanerCatUserTempTitle: 'User Temp Folder',
+    cleanerCatUserTempDesc: 'User application temporary files inside %TEMP%.',
+    cleanerCatAppCacheTitle: 'App Temporary Caches',
+    cleanerCatAppCacheDesc: 'Safe crash dumps, temp logs, and non-user updater caches.',
+    cleanerCatSecretAreaCacheTitle: 'SecretArea Launcher Cache',
+    cleanerCatSecretAreaCacheDesc: 'Internal Chromium HTTP cache, GPU cache, and temp downloads inside SecretArea.',
+    cleanerCatThumbnailTitle: 'Windows Explorer Thumbnail Cache',
+    cleanerCatThumbnailDesc: 'Explorer thumbcache_*.db files (Windows rebuilds automatically).',
+    cleanerCatShaderTitle: 'DirectX / GPU Shader Cache',
+    cleanerCatShaderDesc: 'Compiled D3DSCache & GPU vendor shader caches. Games will rebuild shaders on next launch.',
+    cleanerCatRecycleTitle: 'Windows Recycle Bin',
+    cleanerCatRecycleDesc: 'Permanently empties items currently sitting in the Recycle Bin.',
+    cleanerCatBrowserTitle: 'Browser HTTP Cache Only (No History/Cookies)',
+    cleanerCatBrowserDesc: 'Clears ONLY Cache / Code Cache folders in Edge, Chrome, or Firefox. Preserves logins, cookies, bookmarks, and history.',
+  },
 };
 
 const FR: LauncherTranslations = {
   locale: 'fr-FR',
   nav: {
-    home: 'ACCUEIL',
-    library: 'BIBLIOTHÈQUE',
-    extras: 'EXTRAS',
-    requests: 'DEMANDES',
-    settings: 'PARAMÈTRES',
+    home: 'Accueil',
+    library: 'Bibliothèque',
+    downloads: 'Téléchargements',
+    extras: 'Extras',
+    requests: 'Demandes',
+    hardwareMonitor: 'Moniteur matériel',
+    settings: 'Paramètres',
+    switchLight: 'Passer en mode clair',
+    switchDark: 'Passer en mode sombre',
+    lightLabel: 'Clair',
+    darkLabel: 'Sombre',
+    selectLanguage: 'Choisir la langue',
+    openMenu: 'Ouvrir le menu de navigation',
+    closeMenu: 'Fermer le menu de navigation',
+    languageLabel: 'Langue',
+    themeLabel: 'Apparence',
   },
   topbar: {
     webVersion: 'SecretArea version web',
@@ -580,7 +1791,7 @@ const FR: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Paramètres',
-    pageSubtitle: 'Personnalisez la langue du lanceur, le démarrage et l’apparence de la fenêtre.',
+    pageSubtitle: 'Personnalisez la langue, le démarrage, l’apparence de la fenêtre et l’ambiance sonore.',
     resetDefaults: 'Réinitialiser',
     resetToast: 'Paramètres réinitialisés par défaut',
     languageSectionTitle: 'Langue',
@@ -593,21 +1804,200 @@ const FR: LauncherTranslations = {
     desktopSupportedBadge: 'Zone de notification Windows',
     webNotice: 'Le démarrage automatique dans la barre d’état s’active automatiquement dans SecretArea.exe.',
     trayActiveHint: 'Fermer la fenêtre réduit SecretArea dans la zone de notification tant que cette option est active.',
+    canRunItTitle: 'Vérification matérielle « Can Run It »',
+    canRunItDesc: 'Compare automatiquement les jeux et outils avec la configuration de votre PC sur l’accueil, la bibliothèque et les fiches.',
     windowSectionTitle: 'Fenêtre',
     compactNavbarTitle: 'Barre de navigation compacte',
     compactNavbarDesc: 'Afficher la barre de navigation sous forme d’icônes, même dans une large fenêtre.',
+    lightModeTitle: 'Mode Clair / Sombre',
+    lightModeDesc: 'Basculez entre le mode Clair lumineux et le mode Sombre. Activer un thème PS5 ou Xbox repasse en mode Sombre.',
+    darkModeBadge: 'Mode Sombre',
+    lightModeBadge: 'Mode Clair',
     alwaysPs5Title: 'Toujours lancer l’application avec le thème PS5',
     alwaysPs5Desc: 'Garder le thème saphir PlayStation 5 et la musique d’ambiance actifs dans tout le lanceur.',
     alwaysXboxTitle: 'Toujours lancer l’application avec le thème Xbox',
     alwaysXboxDesc: 'Appliquer le thème émeraude Xbox, l’orbe filaire et les effets sonores Xbox.',
+    audioSectionTitle: 'Audio et ambiance sonore',
+    audioSectionDesc: 'Activez ou coupez séparément la musique d’ambiance PS5/Xbox et les sons d’interface, et réglez le volume.',
+    ambientMusicTitle: 'Musique d’ambiance (PS5 / Xbox)',
+    ambientMusicDesc: 'Joue la musique spatiale PS5 ou l’ambiance émeraude Xbox Nexus lorsqu’un thème console est actif.',
+    uiSoundsTitle: 'Sons de clic et survol de l’interface',
+    uiSoundsDesc: 'Joue les clics, survols et tonalités de retour style console lors de la navigation.',
+    volumeTitle: 'Volume principal',
+    volumeDesc: 'Ajuste le niveau sonore global de la musique d’ambiance et des effets sonores de l’interface.',
+    consoleThemeAudioHint: 'Activez le thème PS5 ou Xbox dans la section Fenêtre ci-dessus pour écouter l’ambiance sonore.',
     activeLabel: 'Activé',
     inactiveLabel: 'Désactivé',
+    downloadSectionTitle: 'Téléchargements et stockage',
+    downloadFolderTitle: 'Dossier de téléchargement par défaut',
+    downloadFolderDesc: 'Choisissez où enregistrer les liens directs, fichiers MediaFire, archives Mega et captures du navigateur intégré.',
+    chooseFolderBtn: 'Choisir un dossier',
+    openFolderBtn: 'Ouvrir le dossier',
+    torrentSectionTitle: 'Intégration qBittorrent (Web UI API v2)',
+    torrentSectionDesc: 'Optionnel : connectez SecretArea à qBittorrent Web UI locale (API v2 / 5.0+) pour envoyer des magnets et fichiers .torrent et suivre vitesse DL/UL, ETA et pause/reprise.',
+    torrentEnableTitle: 'Activer la synchronisation qBittorrent Web UI',
+    torrentEnableDesc: 'Synchronise les téléchargements magnet et .torrent avec qBittorrent local via safeStorage. Les liens directs, MediaFire et Mega fonctionnent sans qBittorrent.',
+    torrentAutoDetectBtn: 'Détection auto',
+    torrentDetectingBtn: 'Analyse...',
+    torrentTestBtn: 'Tester la connexion',
+    torrentTestingBtn: 'Test...',
+    torrentSaveBtn: 'Enregistrer',
+    torrentSavingBtn: 'Enregistrement...',
+    torrentStatusConnected: 'Connecté',
+    torrentStatusDisconnected: 'Déconnecté',
+    torrentStatusTesting: 'Test en cours...',
+    torrentNotInstalledTitle: 'qBittorrent non détecté sur ce PC (Optionnel)',
+    torrentNotInstalledDesc: 'Les téléchargements directs, MediaFire, Mega et le navigateur intégré fonctionnent sans qBittorrent. Installez-le uniquement pour le suivi magnet/.torrent.',
+    torrentDownloadBtn: 'Télécharger qBittorrent',
+    torrentHostLabel: 'Hôte (Boucle locale)',
+    torrentPortLabel: 'Port',
+    torrentUsernameLabel: 'Nom d’utilisateur',
+    torrentPasswordLabel: 'Mot de passe',
+    torrentPasswordSavedPlaceholder: 'Chiffré via safeStorage (laisser vide pour conserver)',
+    torrentApiKeyLabel: 'Clé API (Optionnel · qBittorrent 5.2+)',
+    torrentApiKeyPlaceholder: 'qbt_... (optionnel)',
+    torrentApiKeySavedPlaceholder: 'Clé API enregistrée (laisser vide pour conserver)',
+    torrentLoopbackNotice: 'Sécurité locale : l’accès Web UI est limité aux adresses locales (127.0.0.1 / localhost / ::1) et jamais exposé sur le réseau externe.',
+    torrentLoopbackError: 'L’hôte doit être une adresse locale (127.0.0.1, localhost ou ::1).',
+    torrentGuideTitle: 'Comment activer qBittorrent Web UI (Configuration manuelle)',
+    torrentGuideStep1: '1. Ouvrez qBittorrent sur Windows puis allez dans Outils → Options → Interface Web (Web UI).',
+    torrentGuideStep2: '2. Cochez « Interface utilisateur Web (Contrôle à distance) », laissez l’IP sur 127.0.0.1 et le port sur 8080.',
+    torrentGuideStep3: '3. Dans Authentification, définissez un nom d’utilisateur et un mot de passe (ou une clé API qbt_ sur v5.2.0+).',
+    torrentGuideStep4: '4. Cliquez sur Appliquer et OK dans qBittorrent, puis saisissez vos identifiants ci-dessus et enregistrez.',
+    torrentGuideStep5: '5. Cliquez sur « Détection auto » et « Tester la connexion » pour vérifier l’API Web UI v2.',
+    torrentWebNotice: 'Mode Aperçu Web : les navigateurs ne peuvent pas contacter qBittorrent Web UI (127.0.0.1) ni utiliser safeStorage. Utilisez SecretArea.exe pour tester et synchroniser.',
+    torrentTestingWebPreviewMsg: 'Déconnecté — L’aperçu Web ne peut pas contacter qBittorrent local.',
+    torrentTestingWebPreviewHint: 'Le navigateur bloque l’accès local Web UI et safeStorage. Lancez l’application SecretArea.exe pour tester et synchroniser qBittorrent.',
+    modeDesktopBadge: 'App Bureau',
+    modeWebPreviewBadge: 'Aperçu Web',
+    torrentSavedToast: 'Paramètres qBittorrent enregistrés',
+    torrentManageSetupBtn: 'Installer / Mettre à jour qBittorrent',
+    replaySetupBtn: 'Assistant de bienvenue',
+    closeBehaviorTitle: 'Comportement à la fermeture',
+    closeBehaviorDesc: 'Choisissez si le bouton de fermeture réduit SecretArea dans la zone de notification ou ferme complètement l’application.',
+    closeBehaviorMinimizeTray: 'Réduire dans la zone de notification',
+    closeBehaviorExit: 'Quitter complètement l’application',
+    exitAppTitle: 'Fermeture complète',
+    exitAppDesc: 'Arrête immédiatement les moniteurs matériels/gaming, retire l’icône de la barre d’état et ferme SecretArea.',
+    exitAppBtn: 'Quitter complètement',
+    exitAppConfirmBtn: 'Confirmer la fermeture',
+    exitAppCancelBtn: 'Annuler',
+    exitAppWebHint: 'La fermeture complète s’applique uniquement dans SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'Créateur de thème personnalisé',
+    sectionSubtitle: 'Personnalisez votre palette par défaut, la couleur d’accentuation, les boutons et le style des cartes.',
+    enableLabel: 'Activer le thème personnalisé',
+    surfaceLabel: 'Surface de base',
+    surfaceMidnight: 'Ardoise Nuit',
+    surfaceObsidian: 'Obsidienne Pure',
+    surfaceAbyss: 'Abysse Profond',
+    surfaceDaylight: 'Clair Lumineux',
+    accentColorLabel: 'Couleur d’accentuation',
+    customHexLabel: 'Hex personnalisé',
+    buttonStyleLabel: 'Forme des boutons',
+    btnRounded: 'Arrondi',
+    btnPill: 'Pilule',
+    btnSharp: 'Net',
+    cardRadiusLabel: 'Coins des cartes',
+    cardSharp: 'Anguleux',
+    cardMedium: 'Équilibré',
+    cardSoft: 'Doux',
+    glassBlurLabel: 'Flou vitré',
+    glassBlurDesc: 'Effet de flou translucide sur les panneaux',
+    previewLabel: 'Aperçu en direct',
+    previewTitle: 'Style personnalisé SecretArea',
+    previewPrimaryBtn: 'Action principale',
+    previewSecondaryBtn: 'Secondaire',
+    resetBtn: 'Réinitialiser le thème',
+    consoleOverrideNote: 'Note : activer le thème personnalisé désactive les thèmes console PS5 / Xbox.',
+    summaryCustomPrefix: 'Personnalisé',
+  },
+  downloads: {
+    pageTitle: 'Gestionnaire de téléchargements',
+    pageSubtitle: 'Suivez les liens directs, MediaFire, Mega, captures navigateur et transferts qBittorrent.',
+    quickAddPlaceholder: 'Collez un lien direct, MediaFire, Mega ou Magnet...',
+    quickAddBtn: 'Ajouter',
+    addTorrentFileBtn: 'Ajouter .torrent',
+    quickAddInvalid: 'Entrez un lien http://, https:// ou magnet:? valide.',
+    folderLabel: 'Enregistrer dans',
+    chooseFolder: 'Choisir le dossier',
+    openFolder: 'Ouvrir le dossier',
+    clearFinished: 'Effacer terminés',
+    tabAll: 'Tous',
+    tabActive: 'Actifs',
+    tabPaused: 'En pause',
+    tabCompleted: 'Terminés',
+    tabFailed: 'Échoués',
+    searchPlaceholder: 'Filtrer les téléchargements...',
+    metricActive: 'Actifs',
+    metricSpeed: 'Vitesse totale',
+    metricCompleted: 'Terminés',
+    metricFreeDisk: 'Espace libre',
+    statusQueued: 'En file d’attente',
+    statusResolving: 'Résolution du lien...',
+    statusDownloading: 'Téléchargement',
+    statusPaused: 'En pause',
+    statusCompleted: 'Terminé',
+    statusFailed: 'Échec',
+    statusCancelled: 'Annulé',
+    sourceDirect: 'Lien direct',
+    sourceMediafire: 'MediaFire',
+    sourceMega: 'Mega',
+    sourceQbittorrent: 'qBittorrent',
+    sourceBrowser: 'Navigateur intégré',
+    actionPause: 'Pause',
+    actionResume: 'Reprendre',
+    actionCancel: 'Annuler',
+    actionDelete: 'Supprimer',
+    actionRetry: 'Réessayer',
+    actionOpenFile: 'Ouvrir le fichier',
+    actionOpenFolder: 'Ouvrir le dossier',
+    actionRemove: 'Retirer',
+    actionOpenExternal: 'Ouvrir en externe',
+    peersLabel: 'Pairs',
+    seedsLabel: 'Sources',
+    unknownSize: 'Taille inconnue',
+    etaCalculating: 'Calcul...',
+    torrentConnected: 'qBittorrent connecté',
+    torrentDisconnected: 'qBittorrent déconnecté',
+    torrentWebPreviewStatus: 'Aperçu Web — La synchronisation qBittorrent nécessite SecretArea.exe',
+    configureTorrentBtn: 'Configurer qBittorrent',
+    speedGraphTitle: 'Courbe de vitesse',
+    periodLabel: 'Période :',
+    period1m: '1 minute',
+    period5m: '5 minutes',
+    period30m: '30 minutes',
+    period1h: '1 heure',
+    totalUploadLabel: 'Envoi total',
+    totalDownloadLabel: 'Réception totale',
+    sizeLabel: 'Taille',
+    progressLabel: 'Progression',
+    statusLabel: 'Statut',
+    downSpeedLabel: 'Vitesse DL',
+    upSpeedLabel: 'Vitesse UL',
+    etaLabel: 'ETA',
+    ratioLabel: 'Ratio',
+    showGraphBtn: 'Afficher le graphique',
+    hideGraphBtn: 'Masquer le graphique',
+    emptyTitle: 'Aucun téléchargement dans cette vue',
+    emptySubtitle: 'Collez un lien direct, MediaFire, Mega ou magnet ci-dessus, importez un fichier .torrent, ou cliquez sur une source dans la fiche d’un jeu.',
+    webNoticeTitle: 'Mode Aperçu Web',
+    webNoticeBody: 'La gestion pause/reprise, vitesse/ETA, capture navigateur et synchronisation qBittorrent Web UI fonctionnent dans SecretArea.exe.',
+    startedToast: 'Téléchargement ajouté à la file',
+    failedToast: 'Impossible de démarrer le téléchargement',
+    detailActiveTitle: 'Téléchargements de cette sortie',
+    detailManageBtn: 'Ouvrir le gestionnaire',
+    detailOpenExternal: 'Ouvrir dans le navigateur externe',
+    detailStartInApp: 'Télécharger dans SecretArea',
   },
   store: {
     featuredSpotlight: 'À la une',
     latestRelease: 'Dernière sortie',
     download: 'Télécharger',
     watchTrailer: 'Voir la bande-annonce',
+    viewDetails: 'Détails',
+    exploreCatalog: 'Explorer le catalogue',
     repackVsOriginal: 'Taille Repack vs Original',
     upcomingGames: 'Jeux à venir',
     recentGames: 'Jeux récents',
@@ -774,6 +2164,7 @@ const FR: LauncherTranslations = {
     description: 'Description',
     noDescription: 'Aucune description disponible.',
     requirementsAndCanRun: 'Configuration requise & Compatibilité',
+    requirementsOnly: 'Configuration requise',
     tools: 'Outils',
     steps: 'Étapes d’installation',
     completed: 'terminées',
@@ -814,16 +2205,436 @@ const FR: LauncherTranslations = {
     positive: 'Positif',
     negative: 'Négatif',
   },
+  qbitSetup: {
+    modalTitle: 'Installation automatique de qBittorrent',
+    modalSubtitle: 'Détection Windows, mise à jour officielle vérifiée et configuration locale de la Web UI.',
+    stepChecking: 'Vérification des dépendances...',
+    stepDetecting: 'Détection de qBittorrent...',
+    stepDownloading: 'Téléchargement de qBittorrent...',
+    stepVerifying: 'Vérification de l’installateur...',
+    stepInstalling: 'Installation de qBittorrent...',
+    stepConfiguring: 'Configuration de l’intégration...',
+    stepCompleted: 'Installation terminée.',
+    installedLabel: 'Installé',
+    notInstalledValue: 'Non installé',
+    latestLabel: 'Dernière version officielle',
+    processLabel: 'Processus',
+    processRunning: 'En cours d’exécution',
+    processStopped: 'Arrêté',
+    statusUpToDate: 'Votre version de qBittorrent est déjà à jour. Aucune réinstallation nécessaire.',
+    statusNewerInstalled: 'Une version plus récente est déjà installée. SecretArea ne la rétrogradera pas.',
+    statusUpdateAvailable: 'Une mise à jour officielle stable de qBittorrent est disponible.',
+    statusNotInstalled: 'qBittorrent n’a pas été détecté sur ce PC. SecretArea peut télécharger l’installateur x64 officiel, vérifier son hachage et sa signature, et l’installer.',
+    statusRunningBlocked: 'qBittorrent est en cours d’exécution. Fermez-le proprement pour ne pas interrompre vos torrents, puis cliquez sur Revérifier.',
+    statusLookupFailed: 'Impossible de récupérer la dernière version officielle pour le moment.',
+    consentNote: 'En cliquant sur Installer/Mettre à jour, SecretArea télécharge l’installateur officiel 64 bits depuis GitHub/qbittorrent.org et vérifie le SHA-256 avant exécution.',
+    installBtn: 'Télécharger et installer qBittorrent',
+    updateBtn: 'Mettre à jour qBittorrent',
+    recheckBtn: 'Revérifier',
+    retryBtn: 'Réessayer',
+    skipBtn: 'Plus tard',
+    closeBtn: 'Terminer',
+    officialDownloadBtn: 'Page officielle',
+    launchQbitBtn: 'Ouvrir qBittorrent',
+    shaVerifiedLabel: 'Somme SHA-256 vérifiée',
+    sigVerifiedLabel: 'Signature éditeur vérifiée',
+    unsignedVerifiedNote: 'Installateur open-source (non signé) · SHA-256 officiel vérifié',
+    webUiSectionTitle: 'Configuration Web UI qBittorrent (127.0.0.1 uniquement)',
+    webUiDetectedEnabled: 'La Web UI est activée dans la configuration qBittorrent.',
+    webUiNotEnabledHint: 'La Web UI n’est pas encore activée. Suivez ces étapes dans qBittorrent, puis vérifiez la connexion :',
+    webUiLoopbackWarning: 'L’adresse IP Web UI n’est pas limitée à 127.0.0.1. Réglez l’IP sur 127.0.0.1 dans qBittorrent.',
+    webUiGuide1: '1. Ouvrez qBittorrent → Outils → Options → Web UI.',
+    webUiGuide2: '2. Cochez « Interface Web (Contrôle à distance) ».',
+    webUiGuide3: '3. Réglez l’adresse IP sur 127.0.0.1 et le port sur 8080.',
+    webUiGuide4: '4. Définissez un identifiant et un mot de passe, puis cliquez sur Appliquer / OK.',
+    webUiGuide5: '5. Saisissez ces mêmes identifiants ci-dessous et cliquez sur Enregistrer et vérifier.',
+    generatePasswordBtn: 'Générer un mot de passe fort',
+    saveAndVerifyBtn: 'Enregistrer et vérifier',
+    verifyingBtn: 'Vérification...',
+    webUiConnectedMsg: 'Connecté et vérifié ! SecretArea est prêt pour vos liens magnet et .torrent.',
+    openSettingsBtn: 'Ouvrir les paramètres',
+    webPreviewNotice: 'L’installation automatique s’exécute dans SecretArea.exe sur Windows. Utilisez le lien officiel ci-dessous en aperçu Web.',
+  },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (Moteur FPS et Frame Time)',
+    sectionSubtitle: 'Détection automatique, mises à jour officielles via GitHub Releases et vérification cryptographique.',
+    modalTitleInstall: 'Activer la surveillance des performances en jeu',
+    modalTitleUpdate: 'Mettre à jour Intel PresentMon',
+    modalTitleRepair: 'Réparer l’installation PresentMon',
+    modalTitleManage: 'Gestionnaire Intel PresentMon',
+    modalSubtitle: 'Moteur officiel de télémétrie ETW géré automatiquement par SecretArea Desktop.',
+    benefitsHeading: 'Fonctionnalités débloquées avec PresentMon',
+    benefit1: 'Mesure précise des FPS, 1% Low et 0.1% Low sans aucune injection en jeu',
+    benefit2: 'Analyse du temps d’image (frame time), saccades et latence d’affichage',
+    benefit3: 'Corrélation matérielle CPU/GPU et diagnostic des goulots d’étranglement',
+    stepChecking: 'Vérification locale et recherche de la dernière version GitHub...',
+    stepDownloading: 'Téléchargement du binaire officiel PresentMon x64...',
+    stepVerifying: 'Vérification SHA-256 et signature numérique Intel...',
+    stepInstalling: 'Installation et test de compatibilité CLI...',
+    stepCompleted: 'PresentMon est installé, vérifié et prêt pour le suivi FPS.',
+    stepCancelled: 'Téléchargement annulé proprement.',
+    statusReady: 'Installé et prêt',
+    statusNotInstalled: 'Non installé',
+    statusUpdateAvailable: 'Mise à jour disponible',
+    statusRepairRequired: 'Réparation requise',
+    statusNewerInstalled: 'À jour (version locale plus récente)',
+    statusDeclined: 'Ignoré par l’utilisateur',
+    statusChecking: 'Vérification...',
+    statusWebPreview: 'Windows Desktop uniquement',
+    installedVersionLabel: 'Version installée',
+    latestVersionLabel: 'Dernière officielle',
+    downloadSizeLabel: 'Taille du téléchargement',
+    installPathLabel: 'Emplacement',
+    sourceLabel: 'Source officielle',
+    notInstalledValue: 'Non installé',
+    allowInstallBtn: 'Autoriser et installer',
+    notNowBtn: 'Pas maintenant',
+    updateNowBtn: 'Mettre à jour',
+    laterBtn: 'Plus tard',
+    repairBtn: 'Réparer l’installation',
+    reinstallBtn: 'Réinstaller PresentMon',
+    checkUpdatesBtn: 'Vérifier les mises à jour',
+    checkingBtn: 'Vérification...',
+    cancelDownloadBtn: 'Annuler',
+    retryBtn: 'Réessayer',
+    doneBtn: 'Terminer',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Installer / Activer PresentMon',
+    managePresentMonBtn: 'Gérer PresentMon',
+    shaVerifiedLabel: 'Empreinte SHA-256 vérifiée',
+    sigVerifiedLabel: 'Signature Intel Corporation vérifiée',
+    consentNote: 'SecretArea ne télécharge ni n’installe jamais PresentMon sans votre accord. Les fichiers proviennent exclusivement de GitHub Releases en HTTPS avec vérification SHA-256 et signature Intel.',
+    runningConflictMsg: 'Un processus PresentMon est actif. Fermez-le puis réessayez.',
+    corruptedIssuePrefix: 'Problème détecté',
+    declinedBannerTitle: 'Suivi FPS PresentMon désactivé',
+    declinedBannerDesc: 'SecretArea reste 100% fonctionnel (CPU, GPU, RAM, stockage, ping). Vous pouvez installer PresentMon à tout moment.',
+    lookupErrorMsg: 'Impossible de consulter GitHub Releases pour PresentMon actuellement.',
+  },
+  onboarding: {
+    stepWelcome: 'Bienvenue',
+    stepAppearance: 'Thème et langue',
+    stepQbitCheck: 'Vérification qBittorrent',
+    stepQbitIntegration: 'Intégration',
+    stepReady: 'Prêt',
+    firstTimeNotice: 'Configuration unique au premier lancement',
+    welcomeEyebrow: 'SecretArea Desktop',
+    welcomeTitle: 'Bienvenue dans SecretArea',
+    welcomeSubtitle: 'Personnalisons votre thème, votre langue et votre moteur qBittorrent en moins d’une minute avant d’ouvrir l’application.',
+    welcomeFeature1Title: '01. Thème et langue',
+    welcomeFeature1Desc: 'Choisissez Sombre, Clair, PlayStation 5 ou Xbox Nexus avec votre langue préférée.',
+    welcomeFeature2Title: '02. Détection qBittorrent',
+    welcomeFeature2Desc: 'Vérifie si qBittorrent est déjà installé ou installe automatiquement la version officielle.',
+    welcomeFeature3Title: '03. Synchronisation locale',
+    welcomeFeature3Desc: 'Connectez la Web UI locale 127.0.0.1 de façon chiffrée via safeStorage.',
+    getStartedBtn: 'Commencer',
+    skipAllBtn: 'Accéder à l’application',
+    appearanceTitle: 'Personnaliser le thème et la langue',
+    appearanceSubtitle: 'Chaque choix s’applique en direct. Modifiable à tout moment dans les Paramètres.',
+    themePickerLabel: 'Thème du lanceur',
+    languagePickerLabel: 'Langue de l’interface',
+    themeDarkName: 'Mode Sombre',
+    themeDarkDesc: 'Interface ardoise sombre à fort contraste',
+    themeLightName: 'Mode Clair',
+    themeLightDesc: 'Espace clair et net de jour',
+    themePs5Name: 'PlayStation 5',
+    themePs5Desc: 'Aurore saphir et ambiance sonore console',
+    themeXboxName: 'Xbox Nexus',
+    themeXboxDesc: 'Maillage émeraude et ambiance Xbox',
+    settingsEditableNote: 'Les sons, la barre de navigation et les thèmes restent réglables dans Paramètres.',
+    backBtn: 'Retour',
+    continueBtn: 'Continuer',
+    qbitCheckTitle: 'Vérification de qBittorrent',
+    qbitCheckSubtitle: 'SecretArea analyse votre PC afin de préserver toute installation existante.',
+    scanningText: 'Recherche d’une installation qBittorrent existante...',
+    alreadyInstalledTitle: 'qBittorrent est déjà installé sur ce PC',
+    alreadyInstalledDesc: 'Parfait ! Comme qBittorrent était déjà installé, passez à l’étape suivante pour ajouter vos paramètres d’intégration qBittorrent.',
+    goIntegrationBtn: 'Configurer l’intégration qBittorrent',
+    updateFirstBtn: 'Mettre à jour qBittorrent d’abord',
+    notInstalledTitle: 'qBittorrent n’est pas encore installé',
+    notInstalledDesc: 'Installez automatiquement la version officielle 64 bits vérifiée, puis passez aux paramètres d’intégration.',
+    installAndNextBtn: 'Installer qBittorrent et continuer',
+    installCompleteAdvanceMsg: 'qBittorrent installé et vérifié ! Passage à l’intégration...',
+    skipTorrentBtn: 'Ignorer (Téléchargements directs uniquement)',
+    integrationTitle: 'Paramètres d’intégration qBittorrent',
+    integrationSubtitle: 'Ajoutez vos identifiants Web UI locaux pour suivre vitesse, seeds, peers, ETA et progression.',
+    hostLoopbackHint: 'Restreint à 127.0.0.1 (boucle locale) et chiffré avec Electron safeStorage.',
+    finishSetupBtn: 'Terminer l’installation',
+    skipIntegrationBtn: 'Configurer plus tard dans Paramètres',
+    finalizingPhase1: 'Application du thème et de la langue...',
+    finalizingPhase2: 'Préparation du gestionnaire de téléchargements...',
+    finalizingPhase3: 'Tout est prêt !',
+    congratsEyebrow: 'Configuration terminée',
+    congratsTitle: 'Félicitations ! SecretArea Desktop est prêt.',
+    congratsSubtitle: 'Votre espace est configuré. Profitez de vos téléchargements directs, MediaFire, Mega et qBittorrent.',
+    summaryThemeLabel: 'Thème actif',
+    summaryLanguageLabel: 'Langue',
+    summaryTorrentLabel: 'État qBittorrent',
+    summaryTorrentConnected: 'Connecté et vérifié',
+    summaryTorrentInstalled: 'Installé (à lier dans Paramètres)',
+    summaryTorrentSkipped: 'Ignoré (Optionnel)',
+    changeLaterHint: 'Vous pouvez modifier le thème, la langue, le dossier ou les paramètres qBittorrent à tout moment dans la page Paramètres.',
+    enterAppBtn: 'Entrer dans SecretArea',
+    openSettingsPageBtn: 'Ouvrir les Paramètres',
+    whatIsSecretAreaTitle: 'Qu’est-ce que SecretArea ?',
+    whatIsSecretAreaBody: 'SecretArea est un lanceur Windows tout-en-un qui regroupe un catalogue de jeux et d’outils, la vérification de compatibilité PC et un gestionnaire de téléchargements.',
+    whatIsSecretAreaPoint1: 'Parcourez Jeux, Hypervisor, SteamTools, PS5 et Extras avec la vérification matérielle « Can Run It » adaptée à votre PC.',
+    whatIsSecretAreaPoint2: 'Téléchargez rapidement via liens directs, MediaFire, Mega et navigateur intégré, ou synchronisez avec qBittorrent.',
+    whatIsSecretAreaPoint3: 'Basculez à tout moment entre Sombre, Clair, PS5, Xbox Nexus ou votre Thème personnalisé en 4 langues dont l’arabe RTL.',
+    stepGuideLabel: 'Explication de cette étape',
+    step1Guide: 'Cet assistant rapide en 5 étapes présente SecretArea et vous aide à régler l’apparence, la langue et l’option qBittorrent avant l’ouverture.',
+    step2Guide: 'Choisissez un thème prêt à l’emploi ou utilisez le Créateur de thème personnalisé (couleurs, boutons, arrondis) et votre langue : l’aperçu est immédiat.',
+    step3Guide: 'SecretArea vérifie si qBittorrent est déjà installé afin de préserver votre configuration. S’il est absent, vous pouvez l’installer ou passer cette étape.',
+    step4Guide: 'Connectez SecretArea à la Web UI locale (127.0.0.1 uniquement) pour afficher vitesse, sources, pairs, ETA et ratio des magnets et .torrent.',
+    step5Guide: 'Vérifiez le récapitulatif de vos choix ci-dessous. Tous ces réglages restent modifiables à tout moment dans les Paramètres.',
+    platformHint: 'Interface réactive petit et grand écran',
+  },
+  updater: {
+    title: 'À propos & Mises à jour',
+    subtitle: 'SecretArea Desktop',
+    currentVersionLabel: 'Version installée actuelle',
+    checkBtn: 'Rechercher des mises à jour',
+    checkingBtn: 'Recherche...',
+    upToDateMsg: 'Vous utilisez déjà la dernière version.',
+    checkingMsg: 'Vérification des nouvelles versions sur GitHub Releases...',
+    newVersionAvailable: 'Nouvelle version disponible',
+    whatsNewTitle: 'Nouveautés de cette version',
+    whatsNewCountSuffix: 'nouveautés',
+    categoryFeature: 'Nouveau',
+    categoryImprovement: 'Amélioré',
+    categoryFix: 'Corrigé',
+    downloadUpdateBtn: 'Télécharger la mise à jour',
+    downloadingPrefix: 'Téléchargement',
+    readyToInstall: 'est prête à être installée',
+    readyToInstallDesc: 'Cliquez sur Installer et redémarrer pour appliquer la mise à jour maintenant, ou reportez pour continuer à utiliser SecretArea.',
+    installRestartBtn: 'Installer et redémarrer',
+    postponeBtn: 'Plus tard',
+    laterBtn: 'Plus tard',
+    detailsBtn: 'Nouveautés',
+    toastUpdateAvailable: 'Mise à jour disponible',
+    toastUpdateReady: 'Mise à jour prête',
+    toastDownloading: 'Téléchargement',
+    installedVersionLabel: 'Version installée',
+    restartHint: 'Redémarrez SecretArea pour terminer l’installation.',
+    lastCheckedLabel: 'Dernière vérification',
+    errorFallback: 'Impossible de vérifier les mises à jour pour le moment.',
+    preparingDownload: 'Préparation du téléchargement...',
+  },
+  hardware: {
+    pageTitle: 'Moniteur matériel',
+    pageSubtitle: 'Télémétrie système en temps réel : températures, disques, mémoire et réseau.',
+    startMonitoring: 'Démarrer le suivi',
+    stopMonitoring: 'Arrêter le suivi',
+    refreshNow: 'Actualiser',
+    statusActive: 'Suivi actif',
+    statusStopped: 'Suivi en pause',
+    statusWebPreview: 'Aperçu Web',
+    intervalLabel: 'Intervalle',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/D',
+    unsupportedHint: 'Capteur non pris en charge sur ce système',
+    webPreviewTitle: 'Application Bureau requise',
+    webPreviewBody: 'L’aperçu Web ne peut pas lire les capteurs matériels du système. Lancez SecretArea Desktop pour afficher la télémétrie CPU, GPU, RAM, stockage et réseau.',
+    sectionOverview: 'Vue d’ensemble',
+    sectionPerformance: 'Performances en direct',
+    sectionDetails: 'Détails du matériel',
+    cpuTitle: 'Processeur (CPU)',
+    gpuTitle: 'Carte graphique (GPU)',
+    ramTitle: 'Mémoire (RAM)',
+    storageTitle: 'Disques de stockage',
+    networkTitle: 'Activité réseau',
+    modelLabel: 'Modèle',
+    manufacturerLabel: 'Fabricant',
+    usageLabel: 'Utilisation',
+    temperatureLabel: 'Température',
+    clockSpeedLabel: 'Fréquence',
+    coresThreadsLabel: 'Cœurs / Threads',
+    coresUnit: 'Cœurs',
+    threadsUnit: 'Threads',
+    powerLabel: 'Consommation',
+    perCoreUsageLabel: 'Charge par thread logique',
+    vramLabel: 'VRAM utilisée',
+    fanSpeedLabel: 'Ventilateur',
+    noGpuDetected: 'Aucune donnée GPU détectée sur cet hôte.',
+    totalRamLabel: 'RAM totale',
+    usedRamLabel: 'RAM utilisée',
+    availableRamLabel: 'RAM disponible',
+    memoryTypeLabel: 'Type mémoire',
+    memorySpeedLabel: 'Fréquence RAM',
+    driveTypeLabel: 'Type',
+    capacityLabel: 'Capacité totale',
+    usedSpaceLabel: 'Espace utilisé',
+    freeSpaceLabel: 'Espace libre',
+    readSpeedLabel: 'Vitesse lecture',
+    writeSpeedLabel: 'Vitesse écriture',
+    noStorageDetected: 'Aucun lecteur de stockage détecté.',
+    activeInterfaceLabel: 'Interface active',
+    linkStateLabel: 'État du lien',
+    linkSpeedLabel: 'Débit du lien',
+    downloadSpeedLabel: 'Téléchargement',
+    uploadSpeedLabel: 'Envoi',
+    totalRxLabel: 'Total reçu',
+    totalTxLabel: 'Total envoyé',
+    noNetworkDetected: 'Aucune interface réseau active détectée.',
+    uptimeLabel: 'Temps d’activité',
+    hostLabel: 'Hôte',
+    chartCpuRamTitle: 'Charge CPU et RAM (%)',
+    chartGpuTempTitle: 'Charge GPU (%) et Températures (°C)',
+    chartNetworkTitle: 'Débit réseau',
+    chartCpuLoad: 'Charge CPU',
+    chartRamLoad: 'Charge RAM',
+    chartGpuLoad: 'Charge GPU',
+    chartCpuTemp: 'Temp. CPU',
+    chartGpuTemp: 'Temp. GPU',
+    chartNetDownload: 'Réception',
+    chartNetUpload: 'Émission',
+    peakLabel: 'Pic',
+    avgLabel: 'Moy.',
+    lastUpdatedLabel: 'Dernière mesure',
+    tabOverview: 'Télémétrie système',
+    tabGaming: 'Jeux & Goulets',
+    tabTechnologies: 'Tech GPU, Écran & Portable',
+    tabCleaner: 'Nettoyeur PC',
+    cpuSeriesLabel: 'Série',
+    cpuGenerationLabel: 'Génération',
+    ramChannelsLabel: 'Canaux mémoire',
+    ramSlotsLabel: 'Emplacements utilisés',
+    gamingTitle: 'Moniteur de performances en jeu',
+    gamingSubtitle: 'Capture FPS et temps d’image par session (via PresentMon ETW), latence réseau, corrélation matérielle et analyse multi-échantillons des goulets d’étranglement.',
+    gamingSelectProcess: 'Jeu / Processus cible',
+    gamingAllProcesses: 'Fenêtre active au premier plan',
+    gamingRefreshProcesses: 'Actualiser les processus',
+    gamingPingHost: 'Hôte de test Ping',
+    gamingStartSession: 'Démarrer la session',
+    gamingStopSession: 'Arrêter la session',
+    gamingSessionActive: 'Session active',
+    gamingSessionDuration: 'Durée',
+    gamingPresentMonMissingTitle: 'PresentMon ETW absent — FPS affichés en N/D',
+    gamingPresentMonMissingDesc: 'SecretArea ne simule jamais les FPS et n’injecte aucun overlay. Placez PresentMon.exe dans resources/bin/PresentMon.exe ou %LOCALAPPDATA%\\Intel\\PresentMon pour capturer les vrais FPS, 1% Low et Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW prêt',
+    gamingFpsCurrent: 'FPS actuels',
+    gamingFpsAvg: 'FPS moyens',
+    gamingFps1Low: 'FPS 1% Low',
+    gamingFps01Low: 'FPS 0.1% Low',
+    gamingFpsMax: 'FPS max',
+    gamingFrameTimeAvg: 'Frame Time moy.',
+    gamingFrameTimeP95: 'Frame Time P95',
+    gamingFramePacing: 'Stabilité du pacing',
+    gamingSpikes: 'Pics de latence',
+    gamingStutters: 'Micro-saccades',
+    gamingDroppedFrames: 'Images perdues',
+    gamingFrameTimeChartTitle: 'Historique Frame Time en direct (ms)',
+    gamingNetworkLatencyTitle: 'Réseau & Thermique en jeu',
+    gamingPingLabel: 'Ping ICMP',
+    gamingPacketLossLabel: 'Perte de paquets',
+    gamingInputLatencyLabel: 'Latence d’entrée',
+    gamingThrottlingLabel: 'Bridal thermique',
+    gamingThrottlingDetected: 'Limitation détectée',
+    gamingThrottlingNormal: 'Températures normales',
+    gamingBottleneckTitle: 'Analyse des goulets multi-échantillons',
+    gamingBottleneckWarming: 'Collecte de la ligne de base (minimum 5 échantillons consécutifs requis pour éviter les faux positifs)...',
+    gamingHistoryTitle: 'Historique local des sessions',
+    gamingHistoryEmpty: 'Aucune session enregistrée. Démarrez puis arrêtez une session pour conserver vos statistiques.',
+    gamingClearHistory: 'Effacer l’historique',
+    gamingCompareTitle: 'Comparer deux sessions',
+    gamingCompareSelectA: 'Session A',
+    gamingCompareSelectB: 'Session B',
+    techTitle: 'Technologies graphiques et capacités matérielles',
+    techSubtitle: 'Matrice de compatibilité GPU NVIDIA, AMD et Intel. Les fonctions dépendant des jeux ne sont jamais marquées actives à tort.',
+    techStatusSupported: 'Compatible',
+    techStatusDetected: 'Détecté',
+    techStatusActive: 'Actif',
+    techStatusUnsupported: 'Non pris en charge',
+    techStatusUnavailable: 'Indisponible',
+    techStatusRequiresGame: 'Requiert intégration jeu',
+    techStatusRequiresDriver: 'Requiert pilote / SDK',
+    techArchitectureLabel: 'Architecture',
+    techDriverLabel: 'Version pilote',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Écran et réglages jeu Windows',
+    displayPrimaryLabel: 'Écran principal',
+    displayResolutionLabel: 'Résolution',
+    displayRefreshRateLabel: 'Fréquence',
+    displayConnectionLabel: 'Connexion',
+    displayActiveGpuLabel: 'GPU de rendu actif',
+    displayDirectXLabel: 'DirectX',
+    displayHagsLabel: 'Planification GPU matérielle (HAGS)',
+    displayGameModeLabel: 'Mode Jeu Windows',
+    displayHdrLabel: 'HDR',
+    displayVrrLabel: 'VRR / Sync adaptative',
+    laptopTitle: 'Batterie et alimentation portable',
+    laptopBatteryLabel: 'Niveau batterie',
+    laptopPowerStateLabel: 'Alimentation',
+    laptopPluggedIn: 'Secteur branché',
+    laptopOnBattery: 'Sur batterie',
+    laptopCharging: 'En charge',
+    laptopHealthLabel: 'Santé batterie',
+    laptopPowerPlanLabel: 'Mode d’alimentation',
+    laptopHybridGpuLabel: 'Mode GPU hybride',
+    laptopDesktopNotice: 'Aucune batterie détectée — configuration PC fixe sur secteur.',
+    cleanerTitle: 'Nettoyeur PC sécurisé',
+    cleanerSubtitle: 'Analysez d’abord les dossiers temporaires, vérifiez les chemins exacts, puis confirmez le nettoyage.',
+    cleanerSafetyBannerTitle: 'Protection stricte des fichiers personnels et jeux',
+    cleanerSafetyBannerDesc: 'SecretArea ne touche JAMAIS au Bureau, Documents, Téléchargements, Images, Vidéos, jeux, sauvegardes, mods, Windows/System32, ni aux mots de passe, favoris, cookies ou historique des navigateurs.',
+    cleanerScanBtn: 'Analyser les zones sûres',
+    cleanerScanningBtn: 'Analyse...',
+    cleanerCleanBtn: 'Vérifier et nettoyer',
+    cleanerCleaningBtn: 'Nettoyage...',
+    cleanerSelectSafeDefaults: 'Sélection recommandée',
+    cleanerEstimatedTotal: 'Espace sélectionné',
+    cleanerOptInBadge: 'Optionnel',
+    cleanerOptInWarningDesc: 'Catégorie optionnelle (décochée par défaut). Vider le cache de shaders peut provoquer une compilation au prochain lancement.',
+    cleanerPathsLabel: 'Chemins ciblés',
+    cleanerConfirmTitle: 'Confirmer le nettoyage',
+    cleanerConfirmDesc: 'Vérifiez les catégories sélectionnées avant de supprimer définitivement ces fichiers temporaires.',
+    cleanerConfirmAction: 'Confirmer et nettoyer',
+    cleanerCancelAction: 'Annuler',
+    cleanerProgressCleaning: 'Nettoyage en cours...',
+    cleanerReportTitle: 'Nettoyage terminé',
+    cleanerReportFreed: 'Espace libéré',
+    cleanerReportRemoved: 'Fichiers supprimés',
+    cleanerReportSkipped: 'Fichiers verrouillés ignorés',
+    cleanerCatOldTempTitle: 'Anciens fichiers Temp (>48h)',
+    cleanerCatOldTempDesc: 'Fichiers temporaires système de plus de 48 heures.',
+    cleanerCatUserTempTitle: 'Dossier Temp utilisateur',
+    cleanerCatUserTempDesc: 'Fichiers temporaires dans %TEMP%.',
+    cleanerCatAppCacheTitle: 'Caches temporaires système',
+    cleanerCatAppCacheDesc: 'Journaux temporaires et vidages d’erreur sûrs.',
+    cleanerCatSecretAreaCacheTitle: 'Cache SecretArea',
+    cleanerCatSecretAreaCacheDesc: 'Cache HTTP/GPU interne et téléchargements temporaires de SecretArea.',
+    cleanerCatThumbnailTitle: 'Cache de miniatures Windows',
+    cleanerCatThumbnailDesc: 'Fichiers thumbcache_*.db de l’Explorateur Windows.',
+    cleanerCatShaderTitle: 'Cache Shaders DirectX / GPU',
+    cleanerCatShaderDesc: 'Caches de shaders D3DSCache et pilotes GPU.',
+    cleanerCatRecycleTitle: 'Corbeille Windows',
+    cleanerCatRecycleDesc: 'Vide définitivement les éléments de la Corbeille.',
+    cleanerCatBrowserTitle: 'Cache HTTP navigateur uniquement',
+    cleanerCatBrowserDesc: 'Supprime uniquement le cache HTTP/Code d’Edge, Chrome ou Firefox (conserve connexions, cookies et historique).',
+  },
 };
 
 const ES: LauncherTranslations = {
   locale: 'es-ES',
   nav: {
-    home: 'INICIO',
-    library: 'BIBLIOTECA',
-    extras: 'EXTRAS',
-    requests: 'SOLICITUDES',
-    settings: 'AJUSTES',
+    home: 'Inicio',
+    library: 'Biblioteca',
+    downloads: 'Descargas',
+    extras: 'Extras',
+    requests: 'Solicitudes',
+    hardwareMonitor: 'Monitor de hardware',
+    settings: 'Ajustes',
+    switchLight: 'Cambiar a modo claro',
+    switchDark: 'Cambiar a modo oscuro',
+    lightLabel: 'Claro',
+    darkLabel: 'Oscuro',
+    selectLanguage: 'Seleccionar idioma',
+    openMenu: 'Abrir menú de navegación',
+    closeMenu: 'Cerrar menú de navegación',
+    languageLabel: 'Idioma',
+    themeLabel: 'Apariencia',
   },
   topbar: {
     webVersion: 'SecretArea versión web',
@@ -839,7 +2650,7 @@ const ES: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'Ajustes',
-    pageSubtitle: 'Personaliza el idioma del lanzador, el inicio con el sistema y la apariencia de la ventana.',
+    pageSubtitle: 'Personaliza el idioma, el inicio, la apariencia de la ventana y el paisaje sonoro.',
     resetDefaults: 'Restablecer',
     resetToast: 'Ajustes restablecidos a los valores predeterminados',
     languageSectionTitle: 'Idioma',
@@ -852,21 +2663,200 @@ const ES: LauncherTranslations = {
     desktopSupportedBadge: 'Bandeja de Windows',
     webNotice: 'El inicio automático en bandeja se activa en la aplicación de escritorio SecretArea.exe.',
     trayActiveHint: 'Al cerrar la ventana, SecretArea permanecerá en la bandeja del sistema mientras esta opción esté activa.',
+    canRunItTitle: 'Comprobación de hardware «Can Run It»',
+    canRunItDesc: 'Compara juegos y herramientas con los requisitos de tu PC en Inicio, Biblioteca y fichas de juegos.',
     windowSectionTitle: 'Ventana',
     compactNavbarTitle: 'Barra de navegación compacta',
     compactNavbarDesc: 'Muestra la barra de navegación como iconos, incluso en una ventana ancha.',
+    lightModeTitle: 'Modo Claro / Oscuro',
+    lightModeDesc: 'Alterna entre el modo Claro y el modo Oscuro. Al activar el tema PS5 o Xbox vuelve al modo Oscuro.',
+    darkModeBadge: 'Modo Oscuro',
+    lightModeBadge: 'Modo Claro',
     alwaysPs5Title: 'Ejecutar siempre con tema PS5',
     alwaysPs5Desc: 'Mantén activo el tema zafiro de PlayStation 5 y su ambiente sonoro en todo el lanzador.',
     alwaysXboxTitle: 'Ejecutar siempre con tema Xbox',
     alwaysXboxDesc: 'Aplica el tema esmeralda de Xbox, el fondo de malla geométrica con orbe verde y sonidos de Xbox.',
+    audioSectionTitle: 'Audio y sonido',
+    audioSectionDesc: 'Activa o silencia por separado la música ambiental de PS5/Xbox y los clics de interfaz, y ajusta el volumen.',
+    ambientMusicTitle: 'Música ambiental de fondo (PS5 / Xbox)',
+    ambientMusicDesc: 'Reproduce la música ambiental espacial de PS5 o esmeralda de Xbox Nexus cuando hay un tema de consola activo.',
+    uiSoundsTitle: 'Sonidos de clic y enfoque en la interfaz',
+    uiSoundsDesc: 'Reproduce tonos suaves de enfoque, confirmación y retroceso al navegar por botones y tarjetas.',
+    volumeTitle: 'Volumen principal',
+    volumeDesc: 'Ajusta el nivel de salida tanto para la música ambiental como para los efectos de sonido de la interfaz.',
+    consoleThemeAudioHint: 'Selecciona el tema PS5 o Xbox en Ventana arriba para escuchar el paisaje sonoro de consola.',
     activeLabel: 'Activado',
     inactiveLabel: 'Desactivado',
+    downloadSectionTitle: 'Descargas y almacenamiento',
+    downloadFolderTitle: 'Carpeta de descargas predeterminada',
+    downloadFolderDesc: 'Elige dónde guardar enlaces directos, archivos MediaFire, archivos Mega y descargas del navegador integrado.',
+    chooseFolderBtn: 'Elegir carpeta',
+    openFolderBtn: 'Abrir carpeta',
+    torrentSectionTitle: 'Integración con qBittorrent (Web UI API v2)',
+    torrentSectionDesc: 'Opcional: conecta SecretArea con qBittorrent Web UI local (API v2 / 5.0+) para añadir magnets y archivos .torrent y ver velocidad DL/UL, ETA y pausar/reanudar/eliminar.',
+    torrentEnableTitle: 'Activar sincronización con qBittorrent Web UI',
+    torrentEnableDesc: 'Sincroniza enlaces magnet y .torrent con qBittorrent local usando safeStorage. Los enlaces directos, MediaFire y Mega funcionan sin qBittorrent.',
+    torrentAutoDetectBtn: 'Autodetectar',
+    torrentDetectingBtn: 'Buscando...',
+    torrentTestBtn: 'Probar conexión',
+    torrentTestingBtn: 'Probando...',
+    torrentSaveBtn: 'Guardar configuración',
+    torrentSavingBtn: 'Guardando...',
+    torrentStatusConnected: 'Conectado',
+    torrentStatusDisconnected: 'Desconectado',
+    torrentStatusTesting: 'Probando...',
+    torrentNotInstalledTitle: 'No se detectó qBittorrent en este PC (Opcional)',
+    torrentNotInstalledDesc: 'Las descargas directas, MediaFire, Mega y el navegador integrado funcionan sin qBittorrent. Instálalo solo si deseas seguimiento de magnets y .torrent.',
+    torrentDownloadBtn: 'Descargar qBittorrent',
+    torrentHostLabel: 'Host (Solo local)',
+    torrentPortLabel: 'Puerto',
+    torrentUsernameLabel: 'Usuario',
+    torrentPasswordLabel: 'Contraseña',
+    torrentPasswordSavedPlaceholder: 'Cifrada con safeStorage (dejar vacío para mantener)',
+    torrentApiKeyLabel: 'API Key (Opcional · qBittorrent 5.2+)',
+    torrentApiKeyPlaceholder: 'qbt_... (opcional)',
+    torrentApiKeySavedPlaceholder: 'API Key guardada (dejar vacío para mantener)',
+    torrentLoopbackNotice: 'Seguridad local: las conexiones Web UI se limitan a direcciones locales (127.0.0.1 / localhost / ::1) y nunca se exponen a redes externas.',
+    torrentLoopbackError: 'El host debe ser una dirección local (127.0.0.1, localhost o ::1).',
+    torrentGuideTitle: 'Cómo habilitar qBittorrent Web UI (Configuración manual)',
+    torrentGuideStep1: '1. Abre qBittorrent en Windows y ve a Herramientas → Opciones → Web UI.',
+    torrentGuideStep2: '2. Marca «Interfaz de usuario Web (Control remoto)», mantén la IP en 127.0.0.1 y el puerto en 8080.',
+    torrentGuideStep3: '3. En Autenticación, configura Usuario y Contraseña (o una API Key qbt_ en qBittorrent 5.2.0+).',
+    torrentGuideStep4: '4. Pulsa Aplicar y Aceptar en qBittorrent, escribe las credenciales arriba y guarda la configuración.',
+    torrentGuideStep5: '5. Pulsa «Autodetectar» y «Probar conexión» para verificar la API Web UI v2.',
+    torrentWebNotice: 'Modo vista web: el navegador no puede conectarse a qBittorrent local (127.0.0.1) ni usar safeStorage. Usa SecretArea.exe para probar y sincronizar.',
+    torrentTestingWebPreviewMsg: 'Desconectado — La vista web no puede conectar con qBittorrent local.',
+    torrentTestingWebPreviewHint: 'El navegador bloquea las solicitudes locales Web UI y safeStorage. Abre SecretArea.exe para probar y sincronizar qBittorrent.',
+    modeDesktopBadge: 'App de Escritorio',
+    modeWebPreviewBadge: 'Vista Web',
+    torrentSavedToast: 'Configuración de qBittorrent guardada',
+    torrentManageSetupBtn: 'Instalar / Actualizar qBittorrent',
+    replaySetupBtn: 'Asistente inicial',
+    closeBehaviorTitle: 'Comportamiento al cerrar',
+    closeBehaviorDesc: 'Elige si al cerrar la ventana SecretArea se minimiza a la bandeja del sistema o se cierra por completo.',
+    closeBehaviorMinimizeTray: 'Minimizar a la bandeja',
+    closeBehaviorExit: 'Cerrar aplicación por completo',
+    exitAppTitle: 'Cierre completo',
+    exitAppDesc: 'Detiene inmediatamente los monitores de hardware y juego, quita el icono de la bandeja y cierra SecretArea.',
+    exitAppBtn: 'Cerrar por completo',
+    exitAppConfirmBtn: 'Confirmar cierre total',
+    exitAppCancelBtn: 'Cancelar',
+    exitAppWebHint: 'El cierre completo solo está disponible en SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'Creador de tema personalizado',
+    sectionSubtitle: 'Diseña tu tema predeterminado eligiendo superficie, colores de acento, botones y bordes.',
+    enableLabel: 'Activar tema personalizado',
+    surfaceLabel: 'Superficie base',
+    surfaceMidnight: 'Pizarra Nocturna',
+    surfaceObsidian: 'Obsidiana Pura',
+    surfaceAbyss: 'Abismo Profundo',
+    surfaceDaylight: 'Luz Diurna',
+    accentColorLabel: 'Color de acento',
+    customHexLabel: 'Hex personalizado',
+    buttonStyleLabel: 'Estilo de botones',
+    btnRounded: 'Redondeado',
+    btnPill: 'Píldora',
+    btnSharp: 'Recto',
+    cardRadiusLabel: 'Esquinas de tarjetas',
+    cardSharp: 'Marcadas',
+    cardMedium: 'Equilibradas',
+    cardSoft: 'Suaves',
+    glassBlurLabel: 'Desenfoque cristal',
+    glassBlurDesc: 'Efecto translúcido sutil en paneles y tarjetas',
+    previewLabel: 'Vista previa en vivo',
+    previewTitle: 'Estilo personalizado SecretArea',
+    previewPrimaryBtn: 'Acción principal',
+    previewSecondaryBtn: 'Secundario',
+    resetBtn: 'Restablecer tema',
+    consoleOverrideNote: 'Nota: activar el tema personalizado desactiva el tema de consola PS5 / Xbox.',
+    summaryCustomPrefix: 'Personalizado',
+  },
+  downloads: {
+    pageTitle: 'Gestor de descargas',
+    pageSubtitle: 'Controla enlaces directos, MediaFire, Mega, capturas del navegador integrado y transferencias qBittorrent.',
+    quickAddPlaceholder: 'Pega un enlace directo, MediaFire, Mega o Magnet...',
+    quickAddBtn: 'Añadir descarga',
+    addTorrentFileBtn: 'Añadir .torrent',
+    quickAddInvalid: 'Introduce una URL válida http://, https:// o magnet:?',
+    folderLabel: 'Guardar en',
+    chooseFolder: 'Elegir carpeta',
+    openFolder: 'Abrir carpeta',
+    clearFinished: 'Limpiar terminados',
+    tabAll: 'Todos',
+    tabActive: 'Activos',
+    tabPaused: 'Pausados',
+    tabCompleted: 'Completados',
+    tabFailed: 'Fallidos',
+    searchPlaceholder: 'Filtrar descargas...',
+    metricActive: 'Activos',
+    metricSpeed: 'Velocidad total',
+    metricCompleted: 'Completados',
+    metricFreeDisk: 'Espacio libre',
+    statusQueued: 'En cola',
+    statusResolving: 'Resolviendo enlace...',
+    statusDownloading: 'Descargando',
+    statusPaused: 'Pausado',
+    statusCompleted: 'Completado',
+    statusFailed: 'Error',
+    statusCancelled: 'Cancelado',
+    sourceDirect: 'Enlace directo',
+    sourceMediafire: 'MediaFire',
+    sourceMega: 'Mega',
+    sourceQbittorrent: 'qBittorrent',
+    sourceBrowser: 'Navegador integrado',
+    actionPause: 'Pausar',
+    actionResume: 'Reanudar',
+    actionCancel: 'Cancelar',
+    actionDelete: 'Eliminar',
+    actionRetry: 'Reintentar',
+    actionOpenFile: 'Abrir archivo',
+    actionOpenFolder: 'Abrir carpeta',
+    actionRemove: 'Eliminar',
+    actionOpenExternal: 'Abrir externamente',
+    peersLabel: 'Pares',
+    seedsLabel: 'Semillas',
+    unknownSize: 'Tamaño desconocido',
+    etaCalculating: 'Calculando...',
+    torrentConnected: 'qBittorrent conectado',
+    torrentDisconnected: 'qBittorrent desconectado',
+    torrentWebPreviewStatus: 'Vista web — La sincronización con qBittorrent requiere SecretArea.exe',
+    configureTorrentBtn: 'Configurar qBittorrent',
+    speedGraphTitle: 'Gráfico de velocidad',
+    periodLabel: 'Período:',
+    period1m: '1 minuto',
+    period5m: '5 minutos',
+    period30m: '30 minutos',
+    period1h: '1 hora',
+    totalUploadLabel: 'Subida total',
+    totalDownloadLabel: 'Descarga total',
+    sizeLabel: 'Tamaño',
+    progressLabel: 'Progreso',
+    statusLabel: 'Estado',
+    downSpeedLabel: 'Vel. bajada',
+    upSpeedLabel: 'Vel. subida',
+    etaLabel: 'ETA',
+    ratioLabel: 'Ratio',
+    showGraphBtn: 'Mostrar gráfico',
+    hideGraphBtn: 'Ocultar gráfico',
+    emptyTitle: 'No hay descargas en esta vista',
+    emptySubtitle: 'Pega cualquier enlace directo, MediaFire, Mega o magnet arriba, sube un archivo .torrent, o elige un canal desde la ficha de cualquier juego.',
+    webNoticeTitle: 'Modo vista web',
+    webNoticeBody: 'La pausa/reanudación, velocidad/ETA, captura integrada y sincronización con qBittorrent Web UI requieren la app de escritorio SecretArea.exe.',
+    startedToast: 'Descarga añadida a la cola',
+    failedToast: 'No se pudo iniciar la descarga',
+    detailActiveTitle: 'Descargas de este lanzamiento',
+    detailManageBtn: 'Abrir gestor de descargas',
+    detailOpenExternal: 'Abrir en navegador externo',
+    detailStartInApp: 'Descargar en SecretArea',
   },
   store: {
     featuredSpotlight: 'Destacado',
     latestRelease: 'Último lanzamiento',
     download: 'Descargar',
     watchTrailer: 'Ver tráiler',
+    viewDetails: 'Detalles',
+    exploreCatalog: 'Explorar catálogo',
     repackVsOriginal: 'Tamaño Repack vs Original',
     upcomingGames: 'Próximos juegos',
     recentGames: 'Juegos recientes',
@@ -1033,6 +3023,7 @@ const ES: LauncherTranslations = {
     description: 'Descripción',
     noDescription: 'No hay descripción disponible.',
     requirementsAndCanRun: 'Requisitos y Compatibilidad',
+    requirementsOnly: 'Requisitos del sistema',
     tools: 'Herramientas',
     steps: 'Pasos de instalación',
     completed: 'completados',
@@ -1073,6 +3064,415 @@ const ES: LauncherTranslations = {
     positive: 'Positivo',
     negative: 'Negativo',
   },
+  qbitSetup: {
+    modalTitle: 'Instalación automática de qBittorrent',
+    modalSubtitle: 'Detección en Windows, actualización oficial verificada y configuración local de Web UI.',
+    stepChecking: 'Comprobando dependencias...',
+    stepDetecting: 'Detectando qBittorrent...',
+    stepDownloading: 'Descargando qBittorrent...',
+    stepVerifying: 'Verificando instalador...',
+    stepInstalling: 'Instalando qBittorrent...',
+    stepConfiguring: 'Configurando integración...',
+    stepCompleted: 'Configuración completada.',
+    installedLabel: 'Instalado',
+    notInstalledValue: 'No instalado',
+    latestLabel: 'Última versión oficial',
+    processLabel: 'Proceso',
+    processRunning: 'En ejecución',
+    processStopped: 'Detenido',
+    statusUpToDate: 'Tu versión de qBittorrent ya está actualizada. No es necesario reinstalar.',
+    statusNewerInstalled: 'Ya tienes instalada una versión más reciente. SecretArea nunca la degradará.',
+    statusUpdateAvailable: 'Hay una nueva actualización estable oficial de qBittorrent lista para instalar.',
+    statusNotInstalled: 'No se detectó qBittorrent en este PC. SecretArea puede descargar el instalador oficial de 64 bits, verificar su SHA-256 y firma, e instalarlo.',
+    statusRunningBlocked: 'qBittorrent está abierto actualmente. Ciérralo para no interrumpir tus torrents y luego pulsa Comprobar de nuevo.',
+    statusLookupFailed: 'No se pudo obtener la última versión oficial en este momento.',
+    consentNote: 'Al pulsar Instalar/Actualizar, SecretArea descarga el instalador oficial x64 desde GitHub/qbittorrent.org y verifica su integridad SHA-256 antes de ejecutarlo.',
+    installBtn: 'Descargar e instalar qBittorrent',
+    updateBtn: 'Actualizar qBittorrent ahora',
+    recheckBtn: 'Comprobar de nuevo',
+    retryBtn: 'Reintentar',
+    skipBtn: 'Ahora no',
+    closeBtn: 'Listo',
+    officialDownloadBtn: 'Descarga oficial',
+    launchQbitBtn: 'Abrir qBittorrent',
+    shaVerifiedLabel: 'SHA-256 verificado',
+    sigVerifiedLabel: 'Firma del editor verificada',
+    unsignedVerifiedNote: 'Instalador FOSS (sin firma) · SHA-256 oficial verificado',
+    webUiSectionTitle: 'Configuración de Web UI (solo 127.0.0.1)',
+    webUiDetectedEnabled: 'La Web UI está habilitada en la configuración de qBittorrent.',
+    webUiNotEnabledHint: 'La Web UI aún no está activa. Sigue estos pasos en qBittorrent y luego verifica la conexión:',
+    webUiLoopbackWarning: 'La IP de la Web UI no está limitada a 127.0.0.1. Cambia la IP a 127.0.0.1 en qBittorrent.',
+    webUiGuide1: '1. Abre qBittorrent → Herramientas → Opciones → Web UI.',
+    webUiGuide2: '2. Marca «Interfaz Web (Control remoto)».',
+    webUiGuide3: '3. Establece la dirección IP en 127.0.0.1 y el puerto en 8080.',
+    webUiGuide4: '4. Configura un Usuario y Contraseña y pulsa Aplicar / Aceptar.',
+    webUiGuide5: '5. Introduce esas credenciales abajo y pulsa Guardar y verificar conexión.',
+    generatePasswordBtn: 'Generar contraseña segura',
+    saveAndVerifyBtn: 'Guardar y verificar',
+    verifyingBtn: 'Verificando...',
+    webUiConnectedMsg: '¡Conectado y verificado! SecretArea está listo para enlaces magnet y archivos .torrent.',
+    openSettingsBtn: 'Abrir Ajustes',
+    webPreviewNotice: 'La instalación automática funciona en SecretArea.exe para Windows. En la vista Web usa el enlace oficial.',
+  },
+  presentMonSetup: {
+    sectionTitle: 'Intel PresentMon (Motor de FPS y Frame Time)',
+    sectionSubtitle: 'Detección automática, actualizaciones desde GitHub Releases y verificación SHA-256 y de firma Intel.',
+    modalTitleInstall: 'Activar monitorización de rendimiento en juegos',
+    modalTitleUpdate: 'Actualizar Intel PresentMon',
+    modalTitleRepair: 'Reparar instalación de PresentMon',
+    modalTitleManage: 'Gestor de dependencias Intel PresentMon',
+    modalSubtitle: 'Motor oficial de telemetría ETW gestionado automáticamente por SecretArea Desktop.',
+    benefitsHeading: 'Qué habilita PresentMon en SecretArea',
+    benefit1: 'FPS en tiempo real, 1% Low y 0.1% Low mediante ETW sin inyección en juegos',
+    benefit2: 'Registro de frame time, picos, tirones y latencia de visualización',
+    benefit3: 'Correlación CPU/GPU y diagnóstico de cuellos de botella por sesión',
+    stepChecking: 'Comprobando instalación y última versión oficial en GitHub...',
+    stepDownloading: 'Descargando binario oficial PresentMon x64...',
+    stepVerifying: 'Verificando resumen SHA-256 y firma de Intel...',
+    stepInstalling: 'Instalando y validando compatibilidad CLI...',
+    stepCompleted: 'PresentMon está instalado, verificado y listo para capturar FPS.',
+    stepCancelled: 'Descarga cancelada limpiamente.',
+    statusReady: 'Instalado y listo',
+    statusNotInstalled: 'No instalado',
+    statusUpdateAvailable: 'Actualización disponible',
+    statusRepairRequired: 'Reparación necesaria',
+    statusNewerInstalled: 'Actualizado (compilación local más reciente)',
+    statusDeclined: 'Omitido por el usuario',
+    statusChecking: 'Comprobando...',
+    statusWebPreview: 'Solo Windows Desktop',
+    installedVersionLabel: 'Versión instalada',
+    latestVersionLabel: 'Última oficial',
+    downloadSizeLabel: 'Tamaño de descarga',
+    installPathLabel: 'Ruta de instalación',
+    sourceLabel: 'Fuente oficial',
+    notInstalledValue: 'No instalado',
+    allowInstallBtn: 'Permitir e instalar',
+    notNowBtn: 'Ahora no',
+    updateNowBtn: 'Actualizar ahora',
+    laterBtn: 'Más tarde',
+    repairBtn: 'Reparar instalación',
+    reinstallBtn: 'Reinstalar PresentMon',
+    checkUpdatesBtn: 'Buscar actualizaciones',
+    checkingBtn: 'Comprobando...',
+    cancelDownloadBtn: 'Cancelar',
+    retryBtn: 'Reintentar',
+    doneBtn: 'Listo',
+    officialReleasesBtn: 'GitHub Releases',
+    enablePresentMonBtn: 'Instalar / Activar PresentMon',
+    managePresentMonBtn: 'Gestionar PresentMon',
+    shaVerifiedLabel: 'SHA-256 verificado',
+    sigVerifiedLabel: 'Firma de Intel Corporation verificada',
+    consentNote: 'SecretArea nunca descarga ni instala PresentMon sin tu aprobación explícita. Los archivos se descargan solo por HTTPS desde GitHub Releases y se verifican por SHA-256 y firma Intel.',
+    runningConflictMsg: 'Hay otro proceso PresentMon abierto. Ciérralo y vuelve a intentarlo.',
+    corruptedIssuePrefix: 'Problema detectado',
+    declinedBannerTitle: 'Monitorización FPS con PresentMon omitida',
+    declinedBannerDesc: 'SecretArea sigue funcionando normalmente con métricas de CPU, GPU, RAM, disco y ping. Puedes instalar PresentMon cuando quieras.',
+    lookupErrorMsg: 'No se pudo consultar GitHub Releases para PresentMon en este momento.',
+  },
+  onboarding: {
+    stepWelcome: 'Bienvenida',
+    stepAppearance: 'Tema e idioma',
+    stepQbitCheck: 'qBittorrent',
+    stepQbitIntegration: 'Integración',
+    stepReady: 'Listo',
+    firstTimeNotice: 'Configuración única tras instalar',
+    welcomeEyebrow: 'SecretArea Desktop',
+    welcomeTitle: 'Bienvenido a SecretArea',
+    welcomeSubtitle: 'Personaliza tu tema, idioma y motor qBittorrent en menos de un minuto antes de entrar en el escritorio.',
+    welcomeFeature1Title: '01. Tema e idioma',
+    welcomeFeature1Desc: 'Elige entre Modo Oscuro, Claro, PlayStation 5 o Xbox Nexus y tu idioma preferido.',
+    welcomeFeature2Title: '02. Detección de qBittorrent',
+    welcomeFeature2Desc: 'Comprueba automáticamente si qBittorrent ya está instalado o instala la versión oficial verificada.',
+    welcomeFeature3Title: '03. Integración local',
+    welcomeFeature3Desc: 'Conecta la Web UI local 127.0.0.1 cifrada de forma segura con safeStorage.',
+    getStartedBtn: 'Comenzar',
+    skipAllBtn: 'Ir a la aplicación',
+    appearanceTitle: 'Personaliza tema e idioma',
+    appearanceSubtitle: 'Cada cambio se aplica en vivo. Podrás ajustarlo en cualquier momento desde Ajustes.',
+    themePickerLabel: 'Tema del lanzador',
+    languagePickerLabel: 'Idioma de la interfaz',
+    themeDarkName: 'Modo Oscuro',
+    themeDarkDesc: 'Interfaz pizarra oscura de alto contraste',
+    themeLightName: 'Modo Claro',
+    themeLightDesc: 'Espacio diurno limpio y luminoso',
+    themePs5Name: 'PlayStation 5',
+    themePs5Desc: 'Aurora zafiro y sonido ambiental de consola',
+    themeXboxName: 'Xbox Nexus',
+    themeXboxDesc: 'Malla esmeralda y brillo clásico Xbox',
+    settingsEditableNote: 'También puedes ajustar sonido, barra y temas más tarde en Ajustes.',
+    backBtn: 'Atrás',
+    continueBtn: 'Continuar',
+    qbitCheckTitle: 'Comprobación de qBittorrent',
+    qbitCheckSubtitle: 'SecretArea analiza tu equipo para respetar instalaciones previas de qBittorrent.',
+    scanningText: 'Buscando una instalación existente de qBittorrent...',
+    alreadyInstalledTitle: 'qBittorrent ya está instalado en este equipo',
+    alreadyInstalledDesc: '¡Genial! Como qBittorrent ya estaba instalado antes de SecretArea, continúa al siguiente paso para añadir los ajustes de integración.',
+    goIntegrationBtn: 'Configurar integración qBittorrent',
+    updateFirstBtn: 'Actualizar qBittorrent primero',
+    notInstalledTitle: 'qBittorrent aún no está instalado',
+    notInstalledDesc: 'Instala automáticamente la versión oficial de 64 bits verificada y pasa directo a los ajustes de integración.',
+    installAndNextBtn: 'Instalar qBittorrent y continuar',
+    installCompleteAdvanceMsg: '¡qBittorrent instalado y verificado! Pasando a integración...',
+    skipTorrentBtn: 'Omitir por ahora (solo descargas directas)',
+    integrationTitle: 'Ajustes de integración qBittorrent',
+    integrationSubtitle: 'Añade tus credenciales locales de Web UI para sincronizar velocidad, seeds, peers, ETA y progreso.',
+    hostLoopbackHint: 'Bloqueado en 127.0.0.1 (solo local) y guardado cifrado con Electron safeStorage.',
+    finishSetupBtn: 'Finalizar configuración',
+    skipIntegrationBtn: 'Configurar luego en Ajustes',
+    finalizingPhase1: 'Guardando tema e idioma...',
+    finalizingPhase2: 'Preparando gestor de descargas...',
+    finalizingPhase3: '¡Todo listo!',
+    congratsEyebrow: 'Configuración completada',
+    congratsTitle: '¡Felicidades! SecretArea Desktop está listo.',
+    congratsSubtitle: 'Tu lanzador está configurado. Disfruta de descargas rápidas por Directo, MediaFire, Mega y qBittorrent.',
+    summaryThemeLabel: 'Tema activo',
+    summaryLanguageLabel: 'Idioma',
+    summaryTorrentLabel: 'Estado qBittorrent',
+    summaryTorrentConnected: 'Conectado y verificado',
+    summaryTorrentInstalled: 'Instalado (Configurar en Ajustes)',
+    summaryTorrentSkipped: 'Omitido (Opcional)',
+    changeLaterHint: 'Puedes cambiar el tema, idioma, carpeta de descargas o ajustes de qBittorrent cuando quieras desde la página Ajustes.',
+    enterAppBtn: 'Entrar en SecretArea',
+    openSettingsPageBtn: 'Ver en Ajustes',
+    whatIsSecretAreaTitle: '¿Qué es SecretArea?',
+    whatIsSecretAreaBody: 'SecretArea es un centro de juegos y herramientas todo en uno para Windows con comprobación automática de requisitos de PC y gestor de descargas integrado.',
+    whatIsSecretAreaPoint1: 'Explora catálogos de Juegos, Hypervisor, SteamTools, PS5 y Extras con análisis instantáneo «Can Run It» para tu equipo.',
+    whatIsSecretAreaPoint2: 'Descarga con pausa y reanudación en enlaces directos, MediaFire, Mega y navegador integrado, además de sincronización opcional con qBittorrent.',
+    whatIsSecretAreaPoint3: 'Personaliza la apariencia en modo Oscuro, Claro, PS5, Xbox Nexus o con tu Tema Personalizado en 4 idiomas.',
+    stepGuideLabel: 'Qué hace este paso',
+    step1Guide: 'Este asistente rápido de 5 pasos presenta qué es SecretArea y te permite dejar listos tu tema, idioma y motor torrent opcional.',
+    step2Guide: 'Elige un tema base o usa el Creador de tema personalizado para ajustar colores, botones y bordes junto con tu idioma en tiempo real.',
+    step3Guide: 'SecretArea analiza tu equipo para saber si qBittorrent ya está instalado y conservar tu configuración actual, o instalar la versión oficial.',
+    step4Guide: 'Conecta SecretArea con la Web UI local (solo 127.0.0.1) para ver velocidad DL/UL, semillas, pares, ETA y ratio en enlaces magnet y .torrent.',
+    step5Guide: 'Revisa el resumen de tu configuración inicial. Todos estos ajustes se pueden modificar en cualquier momento desde Ajustes.',
+    platformHint: 'Diseño adaptable a pantallas pequeñas y grandes',
+  },
+  updater: {
+    title: 'Acerca de y Actualizaciones',
+    subtitle: 'SecretArea Desktop',
+    currentVersionLabel: 'Versión instalada actual',
+    checkBtn: 'Buscar actualizaciones',
+    checkingBtn: 'Buscando...',
+    upToDateMsg: 'Ya tienes la última versión instalada.',
+    checkingMsg: 'Comprobando nuevas versiones en GitHub Releases...',
+    newVersionAvailable: 'Nueva versión disponible',
+    whatsNewTitle: 'Qué hay de nuevo en esta actualización',
+    whatsNewCountSuffix: 'cambios',
+    categoryFeature: 'Nuevo',
+    categoryImprovement: 'Mejorado',
+    categoryFix: 'Corregido',
+    downloadUpdateBtn: 'Descargar actualización',
+    downloadingPrefix: 'Descargando',
+    readyToInstall: 'está lista para instalar',
+    readyToInstallDesc: 'Pulsa Instalar y reiniciar para actualizar desde tu versión anterior ahora, o posponer para seguir usando SecretArea.',
+    installRestartBtn: 'Instalar y reiniciar',
+    postponeBtn: 'Posponer',
+    laterBtn: 'Más tarde',
+    detailsBtn: 'Novedades',
+    toastUpdateAvailable: 'Actualización disponible',
+    toastUpdateReady: 'Actualización lista',
+    toastDownloading: 'Descargando',
+    installedVersionLabel: 'Versión instalada',
+    restartHint: 'Reinicia SecretArea para completar la instalación.',
+    lastCheckedLabel: 'Última comprobación',
+    errorFallback: 'No se pudo comprobar si hay actualizaciones ahora.',
+    preparingDownload: 'Preparando descarga...',
+  },
+  hardware: {
+    pageTitle: 'Monitor de hardware',
+    pageSubtitle: 'Telemetría del sistema en tiempo real: temperaturas, discos, memoria y red.',
+    startMonitoring: 'Iniciar monitoreo',
+    stopMonitoring: 'Detener monitoreo',
+    refreshNow: 'Actualizar',
+    statusActive: 'Monitoreo activo',
+    statusStopped: 'Monitoreo pausado',
+    statusWebPreview: 'Vista web',
+    intervalLabel: 'Intervalo',
+    interval1s: '1s',
+    interval1500ms: '1.5s',
+    interval2s: '2s',
+    interval3s: '3s',
+    interval5s: '5s',
+    naValue: 'N/D',
+    unsupportedHint: 'Sensor no compatible en este sistema',
+    webPreviewTitle: 'Se requiere la app de escritorio',
+    webPreviewBody: 'La vista previa web no puede leer sensores del hardware. Abre SecretArea Desktop para ver CPU, GPU, RAM, almacenamiento y red en tiempo real.',
+    sectionOverview: 'Resumen del sistema',
+    sectionPerformance: 'Rendimiento en vivo',
+    sectionDetails: 'Detalles del hardware',
+    cpuTitle: 'Procesador (CPU)',
+    gpuTitle: 'Gráficos (GPU)',
+    ramTitle: 'Memoria (RAM)',
+    storageTitle: 'Almacenamiento',
+    networkTitle: 'Actividad de red',
+    modelLabel: 'Modelo',
+    manufacturerLabel: 'Fabricante',
+    usageLabel: 'Uso',
+    temperatureLabel: 'Temperatura',
+    clockSpeedLabel: 'Frecuencia',
+    coresThreadsLabel: 'Núcleos / Hilos',
+    coresUnit: 'Núcleos',
+    threadsUnit: 'Hilos',
+    powerLabel: 'Consumo',
+    perCoreUsageLabel: 'Carga por hilo lógico',
+    vramLabel: 'Uso de VRAM',
+    fanSpeedLabel: 'Ventilador',
+    noGpuDetected: 'No se detectó telemetría de GPU.',
+    totalRamLabel: 'RAM total',
+    usedRamLabel: 'RAM usada',
+    availableRamLabel: 'RAM disponible',
+    memoryTypeLabel: 'Tipo de memoria',
+    memorySpeedLabel: 'Velocidad',
+    driveTypeLabel: 'Tipo',
+    capacityLabel: 'Capacidad total',
+    usedSpaceLabel: 'Espacio usado',
+    freeSpaceLabel: 'Espacio libre',
+    readSpeedLabel: 'Lectura',
+    writeSpeedLabel: 'Escritura',
+    noStorageDetected: 'No se detectaron unidades de almacenamiento.',
+    activeInterfaceLabel: 'Interfaz activa',
+    linkStateLabel: 'Estado',
+    linkSpeedLabel: 'Velocidad de enlace',
+    downloadSpeedLabel: 'Descarga',
+    uploadSpeedLabel: 'Subida',
+    totalRxLabel: 'Total recibido',
+    totalTxLabel: 'Total enviado',
+    noNetworkDetected: 'No hay interfaz de red activa.',
+    uptimeLabel: 'Tiempo activo',
+    hostLabel: 'Equipo',
+    chartCpuRamTitle: 'Uso de CPU y RAM (%)',
+    chartGpuTempTitle: 'Carga GPU (%) y Temperaturas (°C)',
+    chartNetworkTitle: 'Actividad de red',
+    chartCpuLoad: 'Uso CPU',
+    chartRamLoad: 'Uso RAM',
+    chartGpuLoad: 'Uso GPU',
+    chartCpuTemp: 'Temp. CPU',
+    chartGpuTemp: 'Temp. GPU',
+    chartNetDownload: 'Descarga',
+    chartNetUpload: 'Subida',
+    peakLabel: 'Pico',
+    avgLabel: 'Prom.',
+    lastUpdatedLabel: 'Última lectura',
+    tabOverview: 'Telemetría del sistema',
+    tabGaming: 'Juegos y cuellos de botella',
+    tabTechnologies: 'Tecnologías GPU, Pantalla y Portátil',
+    tabCleaner: 'Limpiador de PC',
+    cpuSeriesLabel: 'Serie',
+    cpuGenerationLabel: 'Generación',
+    ramChannelsLabel: 'Canales RAM',
+    ramSlotsLabel: 'Ranuras activas',
+    gamingTitle: 'Monitor de rendimiento en juegos',
+    gamingSubtitle: 'Captura de FPS y Frame Time por sesión (PresentMon ETW), ping real, correlación de hardware y análisis multimuestra.',
+    gamingSelectProcess: 'Juego / Proceso objetivo',
+    gamingAllProcesses: 'Ventana activa en primer plano',
+    gamingRefreshProcesses: 'Actualizar procesos',
+    gamingPingHost: 'Host de prueba Ping',
+    gamingStartSession: 'Iniciar sesión',
+    gamingStopSession: 'Detener sesión',
+    gamingSessionActive: 'Sesión activa',
+    gamingSessionDuration: 'Duración',
+    gamingPresentMonMissingTitle: 'PresentMon ETW no instalado — FPS en N/D',
+    gamingPresentMonMissingDesc: 'SecretArea nunca simula FPS ni inyecta overlays. Coloca PresentMon.exe en resources/bin/PresentMon.exe o %LOCALAPPDATA%\\Intel\\PresentMon para leer FPS reales, 1% Low y Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW listo',
+    gamingFpsCurrent: 'FPS actuales',
+    gamingFpsAvg: 'FPS promedio',
+    gamingFps1Low: 'FPS 1% Low',
+    gamingFps01Low: 'FPS 0.1% Low',
+    gamingFpsMax: 'FPS máximos',
+    gamingFrameTimeAvg: 'Frame Time prom.',
+    gamingFrameTimeP95: 'Frame Time P95',
+    gamingFramePacing: 'Estabilidad de pacing',
+    gamingSpikes: 'Picos',
+    gamingStutters: 'Tirones',
+    gamingDroppedFrames: 'Cuadros perdidos',
+    gamingFrameTimeChartTitle: 'Historial de Frame Time en vivo (ms)',
+    gamingNetworkLatencyTitle: 'Red y estado térmico',
+    gamingPingLabel: 'Ping ICMP',
+    gamingPacketLossLabel: 'Pérdida de paquetes',
+    gamingInputLatencyLabel: 'Latencia de entrada',
+    gamingThrottlingLabel: 'Estrangulamiento térmico',
+    gamingThrottlingDetected: 'Throttling detectado',
+    gamingThrottlingNormal: 'Temperaturas normales',
+    gamingBottleneckTitle: 'Análisis de cuellos de botella multimuestra',
+    gamingBottleneckWarming: 'Recopilando muestras base (se requieren al menos 5 muestras consecutivas)...',
+    gamingHistoryTitle: 'Historial local de sesiones',
+    gamingHistoryEmpty: 'Aún no hay sesiones guardadas. Inicia y detén una sesión para registrar métricas.',
+    gamingClearHistory: 'Borrar historial',
+    gamingCompareTitle: 'Comparar dos sesiones',
+    gamingCompareSelectA: 'Sesión A',
+    gamingCompareSelectB: 'Sesión B',
+    techTitle: 'Tecnologías gráficas y capacidades del hardware',
+    techSubtitle: 'Compatibilidad verificada de NVIDIA, AMD e Intel. Las funciones por juego nunca se muestran como activas globalmente sin confirmación.',
+    techStatusSupported: 'Compatible',
+    techStatusDetected: 'Detectado',
+    techStatusActive: 'Activo',
+    techStatusUnsupported: 'No compatible',
+    techStatusUnavailable: 'No disponible',
+    techStatusRequiresGame: 'Requiere soporte del juego',
+    techStatusRequiresDriver: 'Requiere driver / SDK',
+    techArchitectureLabel: 'Arquitectura',
+    techDriverLabel: 'Versión de driver',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'Pantalla y ajustes de juego Windows',
+    displayPrimaryLabel: 'Pantalla principal',
+    displayResolutionLabel: 'Resolución',
+    displayRefreshRateLabel: 'Frecuencia',
+    displayConnectionLabel: 'Conexión',
+    displayActiveGpuLabel: 'GPU de renderizado',
+    displayDirectXLabel: 'DirectX',
+    displayHagsLabel: 'Programación GPU por hardware (HAGS)',
+    displayGameModeLabel: 'Modo de juego Windows',
+    displayHdrLabel: 'HDR',
+    displayVrrLabel: 'VRR / Sync adaptativa',
+    laptopTitle: 'Batería y energía de portátil',
+    laptopBatteryLabel: 'Batería',
+    laptopPowerStateLabel: 'Fuente de energía',
+    laptopPluggedIn: 'Conectado a corriente',
+    laptopOnBattery: 'Con batería',
+    laptopCharging: 'Cargando',
+    laptopHealthLabel: 'Salud de batería',
+    laptopPowerPlanLabel: 'Plan de energía',
+    laptopHybridGpuLabel: 'Modo GPU híbrida',
+    laptopDesktopNotice: 'No se detectó batería — funcionando en modo escritorio.',
+    cleanerTitle: 'Limpiador seguro de PC',
+    cleanerSubtitle: 'Escanea carpetas temporales primero, revisa rutas exactas y confirma la limpieza.',
+    cleanerSafetyBannerTitle: 'Protección estricta de archivos personales y juegos',
+    cleanerSafetyBannerDesc: 'SecretArea NUNCA borra Escritorio, Documentos, Descargas, Imágenes, Vídeos, juegos, partidas, mods, System32 ni contraseñas, marcadores, cookies o historial del navegador.',
+    cleanerScanBtn: 'Escanear ubicaciones seguras',
+    cleanerScanningBtn: 'Escaneando...',
+    cleanerCleanBtn: 'Revisar y limpiar',
+    cleanerCleaningBtn: 'Limpiando...',
+    cleanerSelectSafeDefaults: 'Seleccionar recomendados',
+    cleanerEstimatedTotal: 'Espacio seleccionado',
+    cleanerOptInBadge: 'Opcional',
+    cleanerOptInWarningDesc: 'Categoría opcional (desmarcada por defecto). Limpiar caché de shaders puede requerir recompilación al abrir juegos.',
+    cleanerPathsLabel: 'Rutas analizadas',
+    cleanerConfirmTitle: 'Confirmar limpieza',
+    cleanerConfirmDesc: 'Revisa las categorías seleccionadas antes de eliminar estos archivos temporales.',
+    cleanerConfirmAction: 'Confirmar y limpiar',
+    cleanerCancelAction: 'Cancelar',
+    cleanerProgressCleaning: 'Limpiando cachés seleccionadas...',
+    cleanerReportTitle: 'Limpieza completada',
+    cleanerReportFreed: 'Espacio liberado',
+    cleanerReportRemoved: 'Archivos eliminados',
+    cleanerReportSkipped: 'Archivos en uso omitidos',
+    cleanerCatOldTempTitle: 'Temporales antiguos (>48h)',
+    cleanerCatOldTempDesc: 'Archivos temporales del sistema con más de 48 horas.',
+    cleanerCatUserTempTitle: 'Carpeta Temp de usuario',
+    cleanerCatUserTempDesc: 'Archivos temporales de aplicaciones en %TEMP%.',
+    cleanerCatAppCacheTitle: 'Cachés temporales de apps',
+    cleanerCatAppCacheDesc: 'Volcados de error y registros temporales seguros.',
+    cleanerCatSecretAreaCacheTitle: 'Caché de SecretArea',
+    cleanerCatSecretAreaCacheDesc: 'Caché HTTP/GPU y descargas temporales de SecretArea.',
+    cleanerCatThumbnailTitle: 'Caché de miniaturas de Windows',
+    cleanerCatThumbnailDesc: 'Archivos thumbcache_*.db del explorador.',
+    cleanerCatShaderTitle: 'Caché de Shaders DirectX / GPU',
+    cleanerCatShaderDesc: 'Cachés compiladas D3DSCache y de controladores GPU.',
+    cleanerCatRecycleTitle: 'Papelera de reciclaje',
+    cleanerCatRecycleDesc: 'Vacía permanentemente la Papelera de Windows.',
+    cleanerCatBrowserTitle: 'Solo caché HTTP del navegador',
+    cleanerCatBrowserDesc: 'Elimina únicamente Cache / Code Cache de Edge, Chrome o Firefox sin tocar sesiones, cookies ni historial.',
+  },
 };
 
 const AR: LauncherTranslations = {
@@ -1080,9 +3480,20 @@ const AR: LauncherTranslations = {
   nav: {
     home: 'الرئيسية',
     library: 'المكتبة',
+    downloads: 'التنزيلات',
     extras: 'إضافات',
     requests: 'الطلبات',
+    hardwareMonitor: 'مراقب العتاد',
     settings: 'الإعدادات',
+    switchLight: 'التبديل إلى الوضع الفاتح',
+    switchDark: 'التبديل إلى الوضع الداكن',
+    lightLabel: 'فاتح',
+    darkLabel: 'داكن',
+    selectLanguage: 'اختر اللغة',
+    openMenu: 'فتح قائمة التنقل',
+    closeMenu: 'إغلاق قائمة التنقل',
+    languageLabel: 'اللغة',
+    themeLabel: 'المظهر',
   },
   topbar: {
     webVersion: 'نسخة الويب SecretArea',
@@ -1098,7 +3509,7 @@ const AR: LauncherTranslations = {
   },
   settings: {
     pageTitle: 'الإعدادات',
-    pageSubtitle: 'تخصيص لغة المشغّل، سلوك بدء التشغيل والإغلاق، ومظهر النافذة.',
+    pageSubtitle: 'تخصيص لغة المشغّل، البدء والإغلاق، مظهر النافذة، والمؤثرات الصوتية.',
     resetDefaults: 'استعادة الافتراضي',
     resetToast: 'تمت استعادة الإعدادات الافتراضية',
     languageSectionTitle: 'اللغة',
@@ -1111,21 +3522,200 @@ const AR: LauncherTranslations = {
     desktopSupportedBadge: 'تشغيل تلقائي في Tray',
     webNotice: 'يتفعّل التشغيل التلقائي في شريط النظام تلقائياً داخل تطبيق سطح المكتب SecretArea.exe.',
     trayActiveHint: 'عند تفعيل هذا الخيار، يؤدي إغلاق النافذة إلى تصغير SecretArea إلى شريط النظام.',
+    canRunItTitle: 'فحص التوافق مع الجهاز (Can Run It)',
+    canRunItDesc: 'مقارنة الألعاب والأدوات تلقائياً مع مواصفات جهازك في الصفحة الرئيسية والمكتبة وصفحات الألعاب.',
     windowSectionTitle: 'النافذة',
     compactNavbarTitle: 'شريط تنقّل مدمج',
     compactNavbarDesc: 'إظهار شريط التنقّل كأيقونات فقط، حتى في النافذة العريضة.',
+    lightModeTitle: 'الوضع الفاتح / الداكن',
+    lightModeDesc: 'التبديل بين الوضع الفاتح والوضع الداكن. تفعيل مظهر PS5 أو Xbox يعيد التبديل إلى الوضع الداكن.',
+    darkModeBadge: 'الوضع الداكن',
+    lightModeBadge: 'الوضع الفاتح',
     alwaysPs5Title: 'تشغيل التطبيق دائماً بمظهر PS5',
     alwaysPs5Desc: 'تشغيل مظهر PlayStation 5 الياقوتي والموسيقى المحيطة في كامل المشغّل.',
     alwaysXboxTitle: 'تشغيل التطبيق دائماً بمظهر Xbox',
     alwaysXboxDesc: 'تطبيق مظهر Xbox الأخضر الزمردي وخلفية الشبكة والكرة المضيئة مع مؤثرات Xbox الصوتية.',
+    audioSectionTitle: 'الصوت والمشهد الصوتي',
+    audioSectionDesc: 'التحكم المنفصل في الموسيقى المحيطة لـ PS5 و Xbox مقابل أصوات النقر في الواجهة مع شريط مستوى الصوت.',
+    ambientMusicTitle: 'الموسيقى المحيطة بالخلفية (PS5 / Xbox)',
+    ambientMusicDesc: 'تشغيل الموسيقى المحيطة الهادئة لـ PS5 أو Xbox Nexus عند تفعيل أحد مظاهر الكونسول.',
+    uiSoundsTitle: 'أصوات النقر والتمرير في الواجهة',
+    uiSoundsDesc: 'تشغيل نقرات التركيز ونغمات التأكيد والرجوع عند التنقل بين الأزرار والبطاقات.',
+    volumeTitle: 'مستوى الصوت الرئيسي',
+    volumeDesc: 'ضبط مستوى الصوت العام لكل من الموسيقى المحيطة ومؤثرات الواجهة الصوتية.',
+    consoleThemeAudioHint: 'اختر مظهر PS5 أو Xbox في قسم النافذة أعلاه لسماع المشهد الصوتي النشط.',
     activeLabel: 'مفعّل',
     inactiveLabel: 'متوقف',
+    downloadSectionTitle: 'التنزيلات والتخزين',
+    downloadFolderTitle: 'مجلد التنزيلات الافتراضي',
+    downloadFolderDesc: 'اختر المجلد الذي تُحفظ فيه الروابط المباشرة وملفات MediaFire و Mega وتنزيلات المتصفح المدمج.',
+    chooseFolderBtn: 'تغيير المجلد',
+    openFolderBtn: 'فتح المجلد',
+    torrentSectionTitle: 'ربط qBittorrent (Web UI API v2)',
+    torrentSectionDesc: 'اختياري: اربط SecretArea بواجهة الويب المحلية لبرنامج qBittorrent (API v2 / 5.0+) لإرسال روابط Magnet وملفات .torrent ومتابعة سرعة التحميل والرفع والوقت المتبقي.',
+    torrentEnableTitle: 'تفعيل المزامنة مع qBittorrent Web UI',
+    torrentEnableDesc: 'يزامن روابط Magnet وملفات .torrent مع qBittorrent المحلي مع تشفير البيانات عبر safeStorage. الروابط المباشرة و MediaFire و Mega تعمل دائماً دون الحاجة لـ qBittorrent.',
+    torrentAutoDetectBtn: 'كشف تلقائي',
+    torrentDetectingBtn: 'جارٍ الفحص...',
+    torrentTestBtn: 'اختبار الاتصال',
+    torrentTestingBtn: 'جارٍ الاختبار...',
+    torrentSaveBtn: 'حفظ الإعدادات',
+    torrentSavingBtn: 'جارٍ الحفظ...',
+    torrentStatusConnected: 'متصل',
+    torrentStatusDisconnected: 'غير متصل',
+    torrentStatusTesting: 'جارٍ الاختبار...',
+    torrentNotInstalledTitle: 'لم يتم العثور على qBittorrent على هذا الجهاز (اختياري)',
+    torrentNotInstalledDesc: 'تعمل التنزيلات المباشرة و MediaFire و Mega والمتصفح المدمج بشكل مستقل تماماً. ثبّت qBittorrent فقط إذا أردت متابعة روابط Magnet وملفات .torrent داخل التطبيق.',
+    torrentDownloadBtn: 'تنزيل qBittorrent الرسمي',
+    torrentHostLabel: 'المضيف (محلي فقط)',
+    torrentPortLabel: 'المنفذ (Port)',
+    torrentUsernameLabel: 'اسم المستخدم',
+    torrentPasswordLabel: 'كلمة المرور',
+    torrentPasswordSavedPlaceholder: 'مشفرة عبر safeStorage (اتركها فارغة للإبقاء)',
+    torrentApiKeyLabel: 'مفتاح API (اختياري · qBittorrent 5.2+)',
+    torrentApiKeyPlaceholder: 'qbt_... (اختياري)',
+    torrentApiKeySavedPlaceholder: 'مفتاح API محفوظ بأمان (اتركه فارغاً للإبقاء)',
+    torrentLoopbackNotice: 'أمان الشبكة المحلية: يقتصر الاتصال على العنوان المحلي (127.0.0.1 / localhost / ::1) ولا يتم فتح Web UI على الشبكة الخارجية.',
+    torrentLoopbackError: 'يجب أن يكون المضيف عنواناً محلياً فقط (127.0.0.1 أو localhost أو ::1).',
+    torrentGuideTitle: 'خطوات تفعيل qBittorrent Web UI (إعداد يدوي)',
+    torrentGuideStep1: '1. افتح qBittorrent على ويندوز واذهب إلى Tools ← Options ← Web UI.',
+    torrentGuideStep2: '2. فعّل خيار «Web User Interface (Remote control)»، واترك IP Address على 127.0.0.1 والمنفذ 8080.',
+    torrentGuideStep3: '3. ضمن Authentication أدخل اسم المستخدم وكلمة المرور (أو أنشئ مفتاح API يبدأ بـ qbt_ في qBittorrent 5.2.0+).',
+    torrentGuideStep4: '4. اضغط Apply ثم OK في qBittorrent، ثم أدخل نفس البيانات أعلاه واضغط حفظ الإعدادات.',
+    torrentGuideStep5: '5. اضغط «كشف تلقائي» ثم «اختبار الاتصال» للتحقق من الاتصال بـ Web UI API v2.',
+    torrentWebNotice: 'وضع معاينة الويب: لا يمكن للمتصفح الاتصال بواجهة qBittorrent المحلية (127.0.0.1) أو استخدام safeStorage. استخدم تطبيق سطح المكتب SecretArea.exe لاختبار الاتصال والمزامنة.',
+    torrentTestingWebPreviewMsg: 'غير متصل — معاينة الويب لا تستطيع الاتصال بـ qBittorrent المحلي.',
+    torrentTestingWebPreviewHint: 'قيود المتصفح تمنع الاتصال بالمنفذ المحلي وتشفير safeStorage. شغّل تطبيق SecretArea.exe لاختبار الاتصال ومزامنة التحميلات.',
+    modeDesktopBadge: 'تطبيق سطح المكتب',
+    modeWebPreviewBadge: 'معاينة الويب',
+    torrentSavedToast: 'تم حفظ إعدادات qBittorrent',
+    torrentManageSetupBtn: 'تثبيت / تحديث qBittorrent تلقائياً',
+    replaySetupBtn: 'إعداد الترحيب',
+    closeBehaviorTitle: 'سلوك إغلاق التطبيق',
+    closeBehaviorDesc: 'اختر ما إذا كان إغلاق النافذة يصغّر SecretArea إلى شريط النظام (Tray) أو يغلق التطبيق بالكامل.',
+    closeBehaviorMinimizeTray: 'تصغير إلى شريط النظام',
+    closeBehaviorExit: 'إغلاق التطبيق بالكامل',
+    exitAppTitle: 'إغلاق كامل للتطبيق',
+    exitAppDesc: 'إيقاف مراقبة العتاد والألعاب وأيقونة شريط النظام وإغلاق SecretArea بالكامل فوراً.',
+    exitAppBtn: 'إغلاق التطبيق بالكامل',
+    exitAppConfirmBtn: 'تأكيد الإغلاق الكامل',
+    exitAppCancelBtn: 'إلغاء',
+    exitAppWebHint: 'الإغلاق الكامل متاح فقط داخل تطبيق سطح المكتب SecretArea.exe.',
+  },
+  customTheme: {
+    sectionTitle: 'منشئ المظهر المخصص',
+    sectionSubtitle: 'صمّم مظهرك الافتراضي باختيار ألوان الخلفية ولون التمييز وشكل الأزرار والبطاقات.',
+    enableLabel: 'تفعيل المظهر المخصص كافتراضي',
+    surfaceLabel: 'خلفية الواجهة',
+    surfaceMidnight: 'أردواز ليلي',
+    surfaceObsidian: 'أسود عميق',
+    surfaceAbyss: 'أزرق عميق',
+    surfaceDaylight: 'نهاري مشرق',
+    accentColorLabel: 'لون التمييز الأساسي',
+    customHexLabel: 'لون مخصص Hex',
+    buttonStyleLabel: 'نمط الأزرار',
+    btnRounded: 'دائري لطيف',
+    btnPill: 'كبسولة ناعمة',
+    btnSharp: 'حواف حادة',
+    cardRadiusLabel: 'استدارة البطاقات',
+    cardSharp: 'حادة',
+    cardMedium: 'متوازنة',
+    cardSoft: 'ناعمة',
+    glassBlurLabel: 'تأثير الزجاج الضبابي',
+    glassBlurDesc: 'ضبابية خفيفة وشفافة للوحات والبطاقات',
+    previewLabel: 'معاينة فورية',
+    previewTitle: 'مظهر SecretArea المخصص',
+    previewPrimaryBtn: 'زر أساسي',
+    previewSecondaryBtn: 'زر ثانوي',
+    resetBtn: 'إعادة ضبط المظهر المخصص',
+    consoleOverrideNote: 'ملاحظة: تفعيل المظهر المخصص يلغي مؤقتاً مظهر كونسول PS5 / Xbox.',
+    summaryCustomPrefix: 'مخصص',
+  },
+  downloads: {
+    pageTitle: 'مدير التنزيلات',
+    pageSubtitle: 'متابعة الروابط المباشرة و MediaFire و Mega وتنزيلات المتصفح المدمج وتحميلات qBittorrent.',
+    quickAddPlaceholder: 'الصق رابطاً مباشراً أو MediaFire أو Mega أو Magnet...',
+    quickAddBtn: 'إضافة تنزيل',
+    addTorrentFileBtn: 'إضافة .torrent',
+    quickAddInvalid: 'أدخل رابط http:// أو https:// أو magnet:? صحيحاً.',
+    folderLabel: 'الحفظ في',
+    chooseFolder: 'تغيير المجلد',
+    openFolder: 'فتح المجلد',
+    clearFinished: 'مسح المكتملة',
+    tabAll: 'الكل',
+    tabActive: 'النشطة',
+    tabPaused: 'المتوقفة مؤقتاً',
+    tabCompleted: 'المكتملة',
+    tabFailed: 'الفاشلة',
+    searchPlaceholder: 'تصفية التنزيلات...',
+    metricActive: 'النشطة',
+    metricSpeed: 'السرعة الكلية',
+    metricCompleted: 'المكتملة',
+    metricFreeDisk: 'المساحة الحرة',
+    statusQueued: 'في الانتظار',
+    statusResolving: 'جارٍ فحص الرابط...',
+    statusDownloading: 'جارٍ التنزيل',
+    statusPaused: 'متوقف مؤقتاً',
+    statusCompleted: 'مكتمل',
+    statusFailed: 'فشل',
+    statusCancelled: 'ملغى',
+    sourceDirect: 'رابط مباشر',
+    sourceMediafire: 'MediaFire',
+    sourceMega: 'Mega',
+    sourceQbittorrent: 'qBittorrent',
+    sourceBrowser: 'المتصفح المدمج',
+    actionPause: 'إيقاف مؤقت',
+    actionResume: 'استئناف',
+    actionCancel: 'إلغاء',
+    actionDelete: 'حذف',
+    actionRetry: 'إعادة المحاولة',
+    actionOpenFile: 'فتح الملف',
+    actionOpenFolder: 'فتح المجلد',
+    actionRemove: 'إزالة',
+    actionOpenExternal: 'فتح في المتصفح',
+    peersLabel: 'الأقران',
+    seedsLabel: 'البذور',
+    unknownSize: 'حجم غير معروف',
+    etaCalculating: 'جارٍ الحساب...',
+    torrentConnected: 'qBittorrent متصل',
+    torrentDisconnected: 'qBittorrent غير متصل',
+    torrentWebPreviewStatus: 'معاينة الويب — المزامنة المباشرة لـ qBittorrent تعمل في SecretArea.exe',
+    configureTorrentBtn: 'إعداد qBittorrent',
+    speedGraphTitle: 'مخطط سرعة التحميل والرفع',
+    periodLabel: 'الفترة:',
+    period1m: 'دقيقة واحدة',
+    period5m: '5 دقائق',
+    period30m: '30 دقيقة',
+    period1h: 'ساعة واحدة',
+    totalUploadLabel: 'إجمالي الرفع',
+    totalDownloadLabel: 'إجمالي التحميل',
+    sizeLabel: 'الحجم',
+    progressLabel: 'التقدم',
+    statusLabel: 'الحالة',
+    downSpeedLabel: 'سرعة التحميل',
+    upSpeedLabel: 'سرعة الرفع',
+    etaLabel: 'الوقت المتبقي',
+    ratioLabel: 'النسبة (Ratio)',
+    showGraphBtn: 'إظهار مخطط السرعة',
+    hideGraphBtn: 'إخفاء مخطط السرعة',
+    emptyTitle: 'لا توجد تنزيلات في هذا العرض',
+    emptySubtitle: 'الصق أي رابط مباشر أو MediaFire أو Mega أو Magnet أعلاه، أو أضف ملف .torrent، أو اختر قناة تحميل من صفحة أي لعبة.',
+    webNoticeTitle: 'وضع معاينة الويب',
+    webNoticeBody: 'التحكم بالإيقاف/الاستئناف وعرض السرعة والوقت المتبقي ومزامنة qBittorrent Web UI تعمل داخل تطبيق سطح المكتب SecretArea.exe.',
+    startedToast: 'تمت إضافة التنزيل إلى القائمة',
+    failedToast: 'تعذر بدء التنزيل',
+    detailActiveTitle: 'تنزيلات هذا الإصدار',
+    detailManageBtn: 'فتح مدير التنزيلات',
+    detailOpenExternal: 'فتح في متصفح خارجي',
+    detailStartInApp: 'التحميل داخل SecretArea',
   },
   store: {
     featuredSpotlight: 'اختيار مميز',
     latestRelease: 'أحدث إصدار',
     download: 'تحميل',
     watchTrailer: 'مشاهدة العرض',
+    viewDetails: 'التفاصيل',
+    exploreCatalog: 'تصفح الكتالوج',
     repackVsOriginal: 'حجم الريباك مقابل الأصلي',
     upcomingGames: 'الألعاب القادمة',
     recentGames: 'أحدث الألعاب',
@@ -1292,6 +3882,7 @@ const AR: LauncherTranslations = {
     description: 'الوصف',
     noDescription: 'لا يوجد وصف متاح في الكتالوج.',
     requirementsAndCanRun: 'متطلبات التشغيل وفحص التوافق',
+    requirementsOnly: 'متطلبات التشغيل',
     tools: 'الأدوات',
     steps: 'خطوات التثبيت',
     completed: 'مكتمل',
@@ -1331,6 +3922,415 @@ const AR: LauncherTranslations = {
     noReqsListed: 'لم يتم إدراج متطلبات تشغيل محددة.',
     positive: 'إيجابي',
     negative: 'سلبي',
+  },
+  qbitSetup: {
+    modalTitle: 'التثبيت التلقائي لبرنامج qBittorrent',
+    modalSubtitle: 'الكشف التلقائي على ويندوز، التحقق من التوقيع وSHA-256، وإعداد واجهة الويب المحلية.',
+    stepChecking: 'جارٍ فحص المتطلبات...',
+    stepDetecting: 'جارٍ الكشف عن qBittorrent...',
+    stepDownloading: 'جارٍ تنزيل qBittorrent...',
+    stepVerifying: 'جارٍ التحقق من ملف التثبيت...',
+    stepInstalling: 'جارٍ تثبيت qBittorrent...',
+    stepConfiguring: 'جارٍ تهيئة التكامل...',
+    stepCompleted: 'اكتمل الإعداد.',
+    installedLabel: 'الإصدار المثبت',
+    notInstalledValue: 'غير مثبت',
+    latestLabel: 'أحدث إصدار رسمي',
+    processLabel: 'الحالة',
+    processRunning: 'قيد التشغيل',
+    processStopped: 'متوقف',
+    statusUpToDate: 'برنامج qBittorrent محدّث بالفعل إلى أحدث إصدار. لا حاجة لإعادة التثبيت.',
+    statusNewerInstalled: 'الإصدار المثبت لديك أحدث من الإصدار الرسمي الحالي. لن يقوم SecretArea بالرجوع لإصدار أقدم.',
+    statusUpdateAvailable: 'يتوفر تحديث رسمي مستقر جديد لبرنامج qBittorrent جاهز للتثبيت.',
+    statusNotInstalled: 'لم يتم العثور على qBittorrent على هذا الجهاز. يمكن لـ SecretArea تنزيل المثبت الرسمي 64-بت، التحقق من سلامته، وتثبيته تلقائياً.',
+    statusRunningBlocked: 'برنامج qBittorrent يعمل حالياً. يرجى إغلاقه بشكل طبيعي حتى لا تنقطع التحميلات الجارية، ثم اضغط فحص مرة أخرى.',
+    statusLookupFailed: 'تعذر الوصول إلى بيانات أحدث إصدار رسمي حالياً.',
+    consentNote: 'بالضغط على تثبيت/تحديث، يقوم SecretArea بتنزيل مثبت 64-بت الرسمي مباشرة من GitHub/qbittorrent.org والتحقق من SHA-256 قبل تشغيله.',
+    installBtn: 'تنزيل وتثبيت qBittorrent',
+    updateBtn: 'تحديث qBittorrent الآن',
+    recheckBtn: 'فحص مرة أخرى',
+    retryBtn: 'إعادة المحاولة',
+    skipBtn: 'ليس الآن',
+    closeBtn: 'تم',
+    officialDownloadBtn: 'صفحة التنزيل الرسمية',
+    launchQbitBtn: 'فتح qBittorrent',
+    shaVerifiedLabel: 'تم التحقق من SHA-256',
+    sigVerifiedLabel: 'تم التحقق من التوقيع الرقمي',
+    unsignedVerifiedNote: 'مثبت مفتوح المصدر · تم التحقق من بصمة SHA-256 الرسمية',
+    webUiSectionTitle: 'إعداد واجهة الويب لـ qBittorrent (127.0.0.1 فقط)',
+    webUiDetectedEnabled: 'واجهة الويب مفعلة في إعدادات qBittorrent.',
+    webUiNotEnabledHint: 'واجهة الويب غير مفعلة بعد. اتبع الخطوات التالية داخل qBittorrent ثم اضغط حفظ والتحقق من الاتصال:',
+    webUiLoopbackWarning: 'عنوان IP لواجهة الويب غير مقيد على 127.0.0.1. اضبط IP على 127.0.0.1 لحماية جهازك.',
+    webUiGuide1: '1. افتح qBittorrent ← Tools (الأدوات) ← Options (الخيارات) ← Web UI.',
+    webUiGuide2: '2. فعّل خيار "Web User Interface (Remote control)".',
+    webUiGuide3: '3. اضبط عنوان IP على 127.0.0.1 والمنفذ (Port) على 8080.',
+    webUiGuide4: '4. أدخل اسم المستخدم وكلمة المرور (أو أنشئ كلمة مرور قوية أدناه) ثم اضغط Apply / OK.',
+    webUiGuide5: '5. أدخل نفس البيانات أدناه واضغط حفظ والتحقق من الاتصال.',
+    generatePasswordBtn: 'توليد كلمة مرور قوية',
+    saveAndVerifyBtn: 'حفظ والتحقق من الاتصال',
+    verifyingBtn: 'جارٍ التحقق...',
+    webUiConnectedMsg: 'متصل وموثق! SecretArea جاهز لتحميل روابط Magnet وملفات .torrent.',
+    openSettingsBtn: 'فتح الإعدادات',
+    webPreviewNotice: 'يعمل التثبيت التلقائي داخل تطبيق سطح المكتب SecretArea.exe على ويندوز فقط.',
+  },
+  presentMonSetup: {
+    sectionTitle: 'أداة Intel PresentMon (محرك قياس FPS ووقت الإطار)',
+    sectionSubtitle: 'كشف تلقائي، تحديثات رسمية من GitHub Releases، وتحقق أمني من التوقيع الرقمي وبصمة SHA-256.',
+    modalTitleInstall: 'تفعيل مراقبة أداء الألعاب',
+    modalTitleUpdate: 'تحديث Intel PresentMon',
+    modalTitleRepair: 'إصلاح تثبيت PresentMon',
+    modalTitleManage: 'مدير أداة Intel PresentMon',
+    modalSubtitle: 'محرك قياس ETW الرسمي من Intel بإدارة تلقائية كاملة داخل SecretArea لسطح المكتب.',
+    benefitsHeading: 'ما يقدمه PresentMon داخل SecretArea',
+    benefit1: 'قياس حقيقي لمعدل الإطارات FPS و 1% Low و 0.1% Low عبر ETW بدون حقن في الألعاب',
+    benefit2: 'مراقبة وقت الإطار Frame Time واكتشاف التقطيع والتهنيج ووقت الاستجابة',
+    benefit3: 'تحليل اختناقات المعالج وكرت الشاشة CPU/GPU أثناء جلسات اللعب',
+    stepChecking: 'جارٍ فحص التثبيت الحالي والبحث عن أحدث إصدار رسمي على GitHub...',
+    stepDownloading: 'جارٍ تنزيل ملف PresentMon x64 الرسمي...',
+    stepVerifying: 'جارٍ التحقق من بصمة SHA-256 وتوقيع شركة Intel الرقمي...',
+    stepInstalling: 'جارٍ التثبيت وفحص توافق أوامر التشغيل...',
+    stepCompleted: 'تم تثبيت PresentMon والتحقق منه بنجاح وهو جاهز لمراقبة FPS.',
+    stepCancelled: 'تم إلغاء التنزيل بأمان دون أي تعديل على ملفاتك.',
+    statusReady: 'مثبت وجاهز',
+    statusNotInstalled: 'غير مثبت',
+    statusUpdateAvailable: 'يتوفر تحديث جديد',
+    statusRepairRequired: 'يحتاج إلى إصلاح',
+    statusNewerInstalled: 'محدث (إصدار محلي أحدث)',
+    statusDeclined: 'معطل باختيار المستخدم (اختياري)',
+    statusChecking: 'جارٍ الفحص...',
+    statusWebPreview: 'متاح لتطبيق ويندوز فقط',
+    installedVersionLabel: 'الإصدار المثبت',
+    latestVersionLabel: 'أحدث إصدار رسمي',
+    downloadSizeLabel: 'حجم التنزيل',
+    installPathLabel: 'مسار التثبيت',
+    sourceLabel: 'المصدر الرسمي',
+    notInstalledValue: 'غير مثبت',
+    allowInstallBtn: 'السماح والتثبيت',
+    notNowBtn: 'ليس الآن',
+    updateNowBtn: 'تحديث الآن',
+    laterBtn: 'لاحقاً',
+    repairBtn: 'إصلاح التثبيت',
+    reinstallBtn: 'إعادة تثبيت PresentMon',
+    checkUpdatesBtn: 'التحقق من التحديثات',
+    checkingBtn: 'جارٍ الفحص...',
+    cancelDownloadBtn: 'إلغاء',
+    retryBtn: 'إعادة المحاولة',
+    doneBtn: 'تم',
+    officialReleasesBtn: 'إصدارات GitHub الرسمية',
+    enablePresentMonBtn: 'تثبيت / تفعيل PresentMon',
+    managePresentMonBtn: 'إدارة PresentMon',
+    shaVerifiedLabel: 'تم التحقق من بصمة SHA-256',
+    sigVerifiedLabel: 'تم التحقق من توقيع Intel Corporation الرقمي',
+    consentNote: 'لا يقوم SecretArea بتنزيل أو تثبيت PresentMon أبداً بدون موافقتك الصريحة. يتم جلب الملفات حصرياً عبر HTTPS من GitHub Releases مع التحقق من SHA-256 وتوقيع Intel.',
+    runningConflictMsg: 'توجد نسخة أخرى من PresentMon تعمل حالياً على جهازك. أغلقها ثم اضغط إعادة المحاولة.',
+    corruptedIssuePrefix: 'مشكلة مكتشفة',
+    declinedBannerTitle: 'تم تأجيل تفعيل مراقبة FPS عبر PresentMon',
+    declinedBannerDesc: 'يستمر SecretArea بالعمل بشكل كامل لمراقبة المعالج وكرت الشاشة والرام والتخزين والبنغ. يمكنك تثبيت PresentMon في أي وقت.',
+    lookupErrorMsg: 'تعذر الوصول إلى GitHub Releases للتحقق من أحدث إصدار لـ PresentMon حالياً.',
+  },
+  onboarding: {
+    stepWelcome: 'الترحيب',
+    stepAppearance: 'المظهر واللغة',
+    stepQbitCheck: 'فحص qBittorrent',
+    stepQbitIntegration: 'ربط التكامل',
+    stepReady: 'جاهز',
+    firstTimeNotice: 'إعداد لمرة واحدة عند أول تشغيل بعد التثبيت',
+    welcomeEyebrow: 'SecretArea لسطح المكتب',
+    welcomeTitle: 'مرحباً بك في SecretArea',
+    welcomeSubtitle: 'لنقم بتخصيص المظهر، اللغة، ومحرك التحميل qBittorrent في أقل من دقيقة قبل الدخول إلى مساحة العمل.',
+    welcomeFeature1Title: '01. المظهر واللغة',
+    welcomeFeature1Desc: 'اختر بين الوضع الداكن، الفاتح، PlayStation 5، أو Xbox Nexus مع لغتك المفضلة.',
+    welcomeFeature2Title: '02. فحص qBittorrent',
+    welcomeFeature2Desc: 'يفحص جهازك تلقائياً لاكتشاف qBittorrent المثبت مسبقاً أو تثبيت أحدث نسخة رسمية موثوقة.',
+    welcomeFeature3Title: '03. ربط سريع وآمن',
+    welcomeFeature3Desc: 'اربط واجهة الويب المحلية 127.0.0.1 بتشفير آمن عبر Windows safeStorage.',
+    getStartedBtn: 'ابدأ الإعداد الآن',
+    skipAllBtn: 'الدخول مباشرة',
+    appearanceTitle: 'تخصيص المظهر واللغة',
+    appearanceSubtitle: 'تُطبق كل اختياراتك مباشرة هنا. ويمكنك تغيير أي شيء لاحقاً من صفحة الإعدادات.',
+    themePickerLabel: 'مظهر التطبيق',
+    languagePickerLabel: 'لغة الواجهة',
+    themeDarkName: 'الوضع الداكن',
+    themeDarkDesc: 'مظهر داكن مريح بتباين احترافي',
+    themeLightName: 'الوضع الفاتح',
+    themeLightDesc: 'تصميم نهاري مشرق وواضح',
+    themePs5Name: 'بلايستيشن 5',
+    themePs5Desc: 'أضواء ياقوتية زرقاء وأصوات الكونسول',
+    themeXboxName: 'إكس بوكس نيكسوس',
+    themeXboxDesc: 'شبكة زمردية خضراء وتوهج Xbox الكلاسيكي',
+    settingsEditableNote: 'يمكنك تعديل الصوتيات وتخطيط الشريط والمظهر لاحقاً من الإعدادات.',
+    backBtn: 'السابق',
+    continueBtn: 'متابعة',
+    qbitCheckTitle: 'فحص تثبيت qBittorrent',
+    qbitCheckSubtitle: 'يتحقق SecretArea من جهازك أولاً للحفاظ على أي تثبيت سابق لبرنامج qBittorrent.',
+    scanningText: 'جارٍ فحص الجهاز بحثاً عن تثبيت qBittorrent...',
+    alreadyInstalledTitle: 'برنامج qBittorrent مثبت بالفعل على جهازك',
+    alreadyInstalledDesc: 'رائع! بما أن qBittorrent كان مثبتاً قبل SecretArea، انتقل إلى الخطوة التالية لإضافة إعدادات التكامل والربط.',
+    goIntegrationBtn: 'إضافة إعدادات تكامل qBittorrent',
+    updateFirstBtn: 'تحديث qBittorrent أولاً',
+    notInstalledTitle: 'برنامج qBittorrent غير مثبت بعد',
+    notInstalledDesc: 'قم بتنزيل وتثبيت النسخة الرسمية 64-بت الموثوقة تلقائياً، ثم انتقل مباشرة إلى إعدادات التكامل.',
+    installAndNextBtn: 'تثبيت qBittorrent والمتابعة',
+    installCompleteAdvanceMsg: 'تم تثبيت qBittorrent والتحقق منه بنجاح! جارٍ الانتقال لإعدادات التكامل...',
+    skipTorrentBtn: 'تخطي إعداد التورنت (التنزيل المباشر فقط)',
+    integrationTitle: 'إعدادات تكامل qBittorrent',
+    integrationSubtitle: 'أضف بيانات واجهة الويب المحلية لمتابعة السرعة، البذور، الأقران، الوقت المتبقي، ونسبة التقدم.',
+    hostLoopbackHint: 'مقيد على 127.0.0.1 فقط (اتصال محلي) ومحفوظ بتشفير Electron safeStorage.',
+    finishSetupBtn: 'إنهاء الإعداد',
+    skipIntegrationBtn: 'تخطي والإعداد لاحقاً من الإعدادات',
+    finalizingPhase1: 'جارٍ حفظ تفضيلات المظهر واللغة...',
+    finalizingPhase2: 'جارٍ تجهيز مساحة التنزيلات والتكامل...',
+    finalizingPhase3: 'تم تجهيز كل شيء بنجاح!',
+    congratsEyebrow: 'اكتمل الإعداد',
+    congratsTitle: 'تهانينا! تطبيق SecretArea Desktop جاهز الآن.',
+    congratsSubtitle: 'تم تخصيص تطبيقك بنجاح. استمتع بتحميلات سريعة عبر Direct وMediaFire وMega وqBittorrent.',
+    summaryThemeLabel: 'المظهر النشط',
+    summaryLanguageLabel: 'اللغة',
+    summaryTorrentLabel: 'حالة qBittorrent',
+    summaryTorrentConnected: 'متصل وموثق',
+    summaryTorrentInstalled: 'مثبت (يمكنك ربطه من الإعدادات)',
+    summaryTorrentSkipped: 'تم التخطي (اختياري)',
+    changeLaterHint: 'يمكنك تغيير المظهر، اللغة، مجلد التنزيل، أو إعدادات qBittorrent في أي وقت من صفحة الإعدادات.',
+    enterAppBtn: 'الدخول إلى SecretArea',
+    openSettingsPageBtn: 'مراجعة في الإعدادات',
+    whatIsSecretAreaTitle: 'ما هو برنامج SecretArea؟',
+    whatIsSecretAreaBody: 'SecretArea هو مشغّل ألعاب وأدوات متكامل لنظام ويندوز يجمع بين استعراض الكتالوج، فحص توافق مواصفات الجهاز، ومدير تنزيلات سريع في مكان واحد.',
+    whatIsSecretAreaPoint1: 'تصفح أقسام الألعاب و Hypervisor و SteamTools و PS5 والإضافات مع فحص «هل يعمل على جهازك؟» تلقائياً وفق مواصفات حاسوبك.',
+    whatIsSecretAreaPoint2: 'نزّل بسرعة عالية مع دعم الإيقاف والاستئناف للروابط المباشرة و MediaFire و Mega والمتصفح المدمج، بالإضافة إلى ربط اختياري مع qBittorrent.',
+    whatIsSecretAreaPoint3: 'خصّص التجربة بين الوضع الداكن والفاتح و PS5 و Xbox Nexus أو منشئ المظهر المخصص، مع دعم العربية RTL بالكامل.',
+    stepGuideLabel: 'ماذا تفعل في هذه الخطوة؟',
+    step1Guide: 'يعرّفك هذا الدليل السريع من 5 خطوات على برنامج SecretArea ويساعدك في ضبط المظهر واللغة ومحرك التحميل الاختياري قبل الدخول للتطبيق.',
+    step2Guide: 'اختر مظهراً جاهزاً أو افتح منشئ المظهر المخصص لتعديل الألوان والأزرار والحواف مع اختيار لغة الواجهة — وتظهر النتيجة فوراً أمامك.',
+    step3Guide: 'يفحص SecretArea جهازك للتحقق مما إذا كان qBittorrent مثبتاً مسبقاً للحفاظ على إعداداتك دون مساس، أو تثبيت النسخة الرسمية بضغطة زر عند الحاجة.',
+    step4Guide: 'اربط SecretArea بواجهة الويب المحلية (127.0.0.1 فقط) لمتابعة روابط Magnet وملفات .torrent بالسرعة والبذور والأقران والوقت المتبقي مباشرة.',
+    step5Guide: 'راجع ملخص الاختيارات التي قمت بضبطها الآن. ويمكنك تعديل أي إعداد منها لاحقاً في أي وقت من صفحة الإعدادات.',
+    platformHint: 'تصميم متجاوب للشاشات الصغيرة والكبيرة',
+  },
+  updater: {
+    title: 'حول التطبيق والتحديثات',
+    subtitle: 'تطبيق سطح المكتب SecretArea',
+    currentVersionLabel: 'الإصدار المثبت حالياً',
+    checkBtn: 'التحقق من التحديثات',
+    checkingBtn: 'جارٍ التحقق...',
+    upToDateMsg: 'أنت تستخدم أحدث إصدار بالفعل.',
+    checkingMsg: 'جارٍ فحص GitHub Releases للبحث عن إصدار أحدث...',
+    newVersionAvailable: 'يتوفر إصدار جديد',
+    whatsNewTitle: 'ما الجديد في هذا التحديث',
+    whatsNewCountSuffix: 'تحديثات',
+    categoryFeature: 'جديد',
+    categoryImprovement: 'تحسين',
+    categoryFix: 'إصلاح',
+    downloadUpdateBtn: 'تنزيل التحديث',
+    downloadingPrefix: 'جارٍ التنزيل',
+    readyToInstall: 'جاهز للتثبيت الآن',
+    readyToInstallDesc: 'اضغط التثبيت وإعادة التشغيل لتحديث نسختك السابقة الآن، أو قم بالتأجيل لمواصلة العمل وتثبيت التحديث عند إغلاق التطبيق.',
+    installRestartBtn: 'تثبيت وإعادة التشغيل',
+    postponeBtn: 'تأجيل',
+    laterBtn: 'لاحقاً',
+    detailsBtn: 'ما الجديد',
+    toastUpdateAvailable: 'يتوفر تحديث جديد',
+    toastUpdateReady: 'التحديث جاهز',
+    toastDownloading: 'جارٍ التنزيل',
+    installedVersionLabel: 'الإصدار المثبت',
+    restartHint: 'أعد تشغيل SecretArea لإكمال التثبيت.',
+    lastCheckedLabel: 'آخر فحص',
+    errorFallback: 'تعذر التحقق من التحديثات حالياً.',
+    preparingDownload: 'جارٍ تجهيز التنزيل...',
+  },
+  hardware: {
+    pageTitle: 'مراقب العتاد',
+    pageSubtitle: 'قراءات حية لأداء المعالج والرسوميات والذاكرة والتخزين والشبكة ودرجات الحرارة.',
+    startMonitoring: 'بدء المراقبة',
+    stopMonitoring: 'إيقاف المراقبة',
+    refreshNow: 'تحديث الآن',
+    statusActive: 'المراقبة نشطة',
+    statusStopped: 'المراقبة متوقفة',
+    statusWebPreview: 'معاينة الويب',
+    intervalLabel: 'معدل التحديث',
+    interval1s: '1ث',
+    interval1500ms: '1.5ث',
+    interval2s: '2ث',
+    interval3s: '3ث',
+    interval5s: '5ث',
+    naValue: 'غير متاح',
+    unsupportedHint: 'الحساس غير مدعوم أو غير متاح على هذا النظام',
+    webPreviewTitle: 'يتطلب تطبيق سطح المكتب',
+    webPreviewBody: 'لا يمكن لمعاينة الويب الوصول إلى مستشعرات العتاد مباشرة. شغّل تطبيق SecretArea Desktop لقراءة بيانات المعالج وكرت الشاشة والذاكرة والأقراص والشبكة.',
+    sectionOverview: 'نظرة عامة على النظام',
+    sectionPerformance: 'الأداء المباشر',
+    sectionDetails: 'تفاصيل العتاد',
+    cpuTitle: 'المعالج (CPU)',
+    gpuTitle: 'بطاقة الرسوميات (GPU)',
+    ramTitle: 'الذاكرة العشوائية (RAM)',
+    storageTitle: 'أقراص التخزين',
+    networkTitle: 'نشاط الشبكة',
+    modelLabel: 'الطراز',
+    manufacturerLabel: 'الشركة المصنّعة',
+    usageLabel: 'الاستهلاك',
+    temperatureLabel: 'درجة الحرارة',
+    clockSpeedLabel: 'التردد',
+    coresThreadsLabel: 'الأنوية / المسارات',
+    coresUnit: 'أنوية',
+    threadsUnit: 'مسارات',
+    powerLabel: 'استهلاك الطاقة',
+    perCoreUsageLabel: 'حمل المسارات المنطقية',
+    vramLabel: 'ذاكرة الفيديو VRAM',
+    fanSpeedLabel: 'سرعة المروحة',
+    noGpuDetected: 'لم يتم رصد قراءات كرت الشاشة على هذا الجهاز.',
+    totalRamLabel: 'إجمالي الذاكرة',
+    usedRamLabel: 'المستخدم',
+    availableRamLabel: 'المتاح',
+    memoryTypeLabel: 'نوع الذاكرة',
+    memorySpeedLabel: 'تردد الذاكرة',
+    driveTypeLabel: 'نوع القرص',
+    capacityLabel: 'السعة الإجمالية',
+    usedSpaceLabel: 'المساحة المستخدمة',
+    freeSpaceLabel: 'المساحة الحرة',
+    readSpeedLabel: 'سرعة القراءة',
+    writeSpeedLabel: 'سرعة الكتابة',
+    noStorageDetected: 'لم يتم رصد أقراص تخزين.',
+    activeInterfaceLabel: 'المحول النشط',
+    linkStateLabel: 'حالة الاتصال',
+    linkSpeedLabel: 'سرعة الرابط',
+    downloadSpeedLabel: 'سرعة التنزيل',
+    uploadSpeedLabel: 'سرعة الرفع',
+    totalRxLabel: 'إجمالي المستلم',
+    totalTxLabel: 'إجمالي المرسل',
+    noNetworkDetected: 'لا يوجد محول شبكة نشط.',
+    uptimeLabel: 'مدة التشغيل',
+    hostLabel: 'الجهاز',
+    chartCpuRamTitle: 'نسبة استخدام المعالج والذاكرة (%)',
+    chartGpuTempTitle: 'حمل كرت الشاشة (%) ودرجات الحرارة (°C)',
+    chartNetworkTitle: 'معدل نقل الشبكة',
+    chartCpuLoad: 'حمل المعالج',
+    chartRamLoad: 'حمل الذاكرة',
+    chartGpuLoad: 'حمل الرسوميات',
+    chartCpuTemp: 'حرارة المعالج',
+    chartGpuTemp: 'حرارة كرت الشاشة',
+    chartNetDownload: 'التنزيل',
+    chartNetUpload: 'الرفع',
+    peakLabel: 'الذروة',
+    avgLabel: 'المتوسط',
+    lastUpdatedLabel: 'آخر قراءة',
+    tabOverview: 'مراقبة العتاد',
+    tabGaming: 'أداء الألعاب والاختناق',
+    tabTechnologies: 'تقنيات الرسوميات والشاشة',
+    tabCleaner: 'تنظيف الجهاز الآمن',
+    cpuSeriesLabel: 'السلسلة',
+    cpuGenerationLabel: 'الجيل',
+    ramChannelsLabel: 'القنوات',
+    ramSlotsLabel: 'المنافذ المستخدمة',
+    gamingTitle: 'مركز مراقبة أداء الألعاب',
+    gamingSubtitle: 'قياس الإطارات (FPS) وزمن الإطار عبر PresentMon ETW دون حقن، مع قياس Ping وتحليل اختناق العتاد متعدد العينات.',
+    gamingSelectProcess: 'اللعبة أو العملية المستهدفة',
+    gamingAllProcesses: 'النافذة النشطة حالياً',
+    gamingRefreshProcesses: 'تحديث العمليات',
+    gamingPingHost: 'عنوان قياس Ping',
+    gamingStartSession: 'بدء جلسة مراقبة',
+    gamingStopSession: 'إيقاف الجلسة',
+    gamingSessionActive: 'الجلسة نشطة',
+    gamingSessionDuration: 'المدة',
+    gamingPresentMonMissingTitle: 'أداة PresentMon ETW غير مثبتة — قراءات FPS غير متاحة',
+    gamingPresentMonMissingDesc: 'لا يقوم SecretArea بتزييف الإطارات أو حقن الألعاب أبداً. ضع PresentMon.exe في resources/bin/PresentMon.exe أو %LOCALAPPDATA%\\Intel\\PresentMon لالتقاط FPS الحقيقي و 1% Low و Frame Time.',
+    gamingPresentMonReady: 'PresentMon ETW جاهز',
+    gamingFpsCurrent: 'FPS الحالي',
+    gamingFpsAvg: 'متوسط FPS',
+    gamingFps1Low: '1% Low FPS',
+    gamingFps01Low: '0.1% Low FPS',
+    gamingFpsMax: 'أعلى FPS',
+    gamingFrameTimeAvg: 'متوسط زمن الإطار',
+    gamingFrameTimeP95: 'زمن الإطار P95',
+    gamingFramePacing: 'استقرار الإطارات',
+    gamingSpikes: 'القفزات المفاجئة',
+    gamingStutters: 'التقطيع (Stutters)',
+    gamingDroppedFrames: 'إطارات مفقودة',
+    gamingFrameTimeChartTitle: 'مخطط زمن الإطار الحي (مللي ثانية)',
+    gamingNetworkLatencyTitle: 'الشبكة والحالة الحرارية',
+    gamingPingLabel: 'زمن الاستجابة Ping',
+    gamingPacketLossLabel: 'فقدان الحزم',
+    gamingInputLatencyLabel: 'زمن استجابة الإدخال',
+    gamingThrottlingLabel: 'الاختناق الحراري',
+    gamingThrottlingDetected: 'تم رصد اختناق حراري',
+    gamingThrottlingNormal: 'الحرارة ضمن الحد الآمن',
+    gamingBottleneckTitle: 'تحليل اختناق الأداء (Bottleneck)',
+    gamingBottleneckWarming: 'جارٍ جمع 5 عينات متتالية على الأقل قبل إصدار تحليل الاختناق لضمان الدقة...',
+    gamingHistoryTitle: 'سجل جلسات اللعب المحفوظة',
+    gamingHistoryEmpty: 'لا توجد جلسات محفوظة بعد. ابدأ جلسة وأنهِها لحفظ الأداء والحرارة.',
+    gamingClearHistory: 'مسح السجل',
+    gamingCompareTitle: 'مقارنة جلستين',
+    gamingCompareSelectA: 'الجلسة الأولى',
+    gamingCompareSelectB: 'الجلسة الثانية',
+    techTitle: 'تقنيات كروت الشاشة وقدرات النظام',
+    techSubtitle: 'مصفوفة الدعم الفعلية لتقنيات NVIDIA و AMD و Intel مع التوضيح الدقيق لما يتطلب دعماً داخل اللعبة.',
+    techStatusSupported: 'مدعوم',
+    techStatusDetected: 'تم الرصد',
+    techStatusActive: 'مفعّل',
+    techStatusUnsupported: 'غير مدعوم',
+    techStatusUnavailable: 'غير متاح',
+    techStatusRequiresGame: 'يتطلب دعم اللعبة',
+    techStatusRequiresDriver: 'يتطلب تعريف / SDK',
+    techArchitectureLabel: 'المعمارية',
+    techDriverLabel: 'إصدار التعريف',
+    techRebarLabel: 'Resizable BAR / SAM',
+    displayTitle: 'الشاشة وإعدادات الألعاب في ويندوز',
+    displayPrimaryLabel: 'الشاشة الأساسية',
+    displayResolutionLabel: 'الدقة',
+    displayRefreshRateLabel: 'معدل التحديث',
+    displayConnectionLabel: 'نوع التوصيل',
+    displayActiveGpuLabel: 'كرت الشاشة النشط',
+    displayDirectXLabel: 'دعم DirectX',
+    displayHagsLabel: 'جدولة GPU المسرّعة (HAGS)',
+    displayGameModeLabel: 'وضع الألعاب في ويندوز',
+    displayHdrLabel: 'دعم HDR',
+    displayVrrLabel: 'معدل التحديث المتغير VRR',
+    laptopTitle: 'بطارية اللابتوب وإدارة الطاقة',
+    laptopBatteryLabel: 'نسبة الشحن',
+    laptopPowerStateLabel: 'مصدر الطاقة',
+    laptopPluggedIn: 'متصل بالشاحن',
+    laptopOnBattery: 'على البطارية',
+    laptopCharging: 'جارٍ الشحن',
+    laptopHealthLabel: 'صحة البطارية',
+    laptopPowerPlanLabel: 'خطة الطاقة النشطة',
+    laptopHybridGpuLabel: 'وضع الرسوميات الهجين',
+    laptopDesktopNotice: 'لم يتم رصد بطارية — يعمل الجهاز ككمبيوتر مكتبي.',
+    cleanerTitle: 'منظف الجهاز الآمن والذاكرة المؤقتة',
+    cleanerSubtitle: 'افحص الملفات المؤقتة أولاً، راجع المسارات والأحجام الدقيقة، ثم أكّد التنظيف بأمان.',
+    cleanerSafetyBannerTitle: 'حماية صارمة للملفات الشخصية والألعاب',
+    cleanerSafetyBannerDesc: 'لا يقترب SecretArea أبداً من سطح المكتب أو المستندات أو التنزيلات أو الصور أو الفيديو أو الألعاب أو ملفات الحفظ أو المودات أو النظام أو كلمات مرور وسجل المتصفح.',
+    cleanerScanBtn: 'فحص المسارات الآمنة',
+    cleanerScanningBtn: 'جارٍ الفحص...',
+    cleanerCleanBtn: 'مراجعة وتنظيف المحدد',
+    cleanerCleaningBtn: 'جارٍ التنظيف...',
+    cleanerSelectSafeDefaults: 'تحديد الآمن الموصى به',
+    cleanerEstimatedTotal: 'المساحة المتوقعة',
+    cleanerOptInBadge: 'اختياري بحذر',
+    cleanerOptInWarningDesc: 'خيار إضافي غير محدد تلقائياً. حذف كاش التظليل قد يسبب تقطيعاً مؤقتاً لإعادة البناء، وإفراغ سلة المحذوفات نهائي.',
+    cleanerPathsLabel: 'المسارات المشمولة',
+    cleanerConfirmTitle: 'تأكيد تنظيف الجهاز',
+    cleanerConfirmDesc: 'راجع الفئات المحددة أدناه قبل حذف الملفات المؤقتة نهائياً.',
+    cleanerConfirmAction: 'تأكيد وتنفيذ التنظيف',
+    cleanerCancelAction: 'إلغاء',
+    cleanerProgressCleaning: 'جارٍ تنظيف المسارات المحددة...',
+    cleanerReportTitle: 'اكتمل التنظيف بنجاح',
+    cleanerReportFreed: 'المساحة المحررة',
+    cleanerReportRemoved: 'الملفات المحذوفة',
+    cleanerReportSkipped: 'ملفات مقيدة تم تخطيها',
+    cleanerCatOldTempTitle: 'ملفات النظام المؤقتة القديمة (>48 ساعة)',
+    cleanerCatOldTempDesc: 'الملفات المؤقتة الأقدم من 48 ساعة في مجلد النظام المؤقت.',
+    cleanerCatUserTempTitle: 'مجلد المستخدم المؤقت',
+    cleanerCatUserTempDesc: 'الملفات المؤقتة لتطبيقات المستخدم داخل %TEMP%.',
+    cleanerCatAppCacheTitle: 'ذاكرة التطبيقات المؤقتة',
+    cleanerCatAppCacheDesc: 'تقارير الأعطال والملفات المؤقتة الآمنة.',
+    cleanerCatSecretAreaCacheTitle: 'ذاكرة SecretArea المؤقتة',
+    cleanerCatSecretAreaCacheDesc: 'كاش المتصفح والرسوميات الداخلي لتطبيق SecretArea فقط.',
+    cleanerCatThumbnailTitle: 'كاش صور المصغرات في ويندوز',
+    cleanerCatThumbnailDesc: 'ملفات thumbcache_*.db التي يعيد ويندوز بناءها تلقائياً.',
+    cleanerCatShaderTitle: 'كاش تظليل DirectX وبطاقة الشاشة',
+    cleanerCatShaderDesc: 'ملفات D3DSCache وكاش التعريفات. ستعيد الألعاب بناءه تلقائياً.',
+    cleanerCatRecycleTitle: 'سلة المحذوفات',
+    cleanerCatRecycleDesc: 'إفراغ سلة المحذوفات في ويندوز بشكل نهائي.',
+    cleanerCatBrowserTitle: 'كاش المتصفح المؤقت فقط (دون السجل)',
+    cleanerCatBrowserDesc: 'يحذف كاش HTTP في Edge و Chrome و Firefox فقط مع الحفاظ الكامل على الحسابات والكوكيز والمفضلة والسجل.',
   },
 };
 

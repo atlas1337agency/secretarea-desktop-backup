@@ -1,5 +1,10 @@
 import type { ComponentType } from 'react';
-import { Gamepad2, HardDriveDownload, ShieldAlert, Wrench } from 'lucide-react';
+import {
+  GameController,
+  HardDrives,
+  ShieldWarning,
+  Wrench,
+} from '@phosphor-icons/react';
 import type { SheetTabKey } from '../types';
 
 export function SteamIcon({ className = 'w-3.5 h-3.5' }: { className?: string }) {
@@ -39,9 +44,10 @@ interface SectionVisualMeta {
 const DEFAULT_META: SectionVisualMeta = {
   shortBadge: 'GAME',
   label: 'Games',
-  icon: Gamepad2,
-  iconColorClass: 'text-[#66c0f4]',
-  badgeClass: 'bg-[#0f172a]/90 border-white/25 text-[#e2e8f0]',
+  icon: GameController,
+  iconColorClass: 'text-[#0284c7] dark:text-[#38bdf8]',
+  badgeClass:
+    'bg-[#0b111a]/80 border-white/20 text-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.4)]',
 };
 
 export const SECTION_VISUAL_META: Partial<Record<SheetTabKey, SectionVisualMeta>> = {
@@ -49,37 +55,42 @@ export const SECTION_VISUAL_META: Partial<Record<SheetTabKey, SectionVisualMeta>
   hypervisor: {
     shortBadge: 'HV',
     label: 'Hypervisor',
-    icon: ShieldAlert,
-    iconColorClass: 'text-[#f87171]',
-    badgeClass: 'bg-[#dc2626] border-[#fca5a5]/70 text-white shadow-[0_2px_8px_rgba(220,38,38,0.65)]',
+    icon: ShieldWarning,
+    iconColorClass: 'text-rose-500 dark:text-[#fb7185]',
+    badgeClass:
+      'bg-rose-600/90 border-rose-300/45 text-white shadow-[0_4px_14px_rgba(225,29,72,0.5)]',
   },
   steamtools: {
     shortBadge: 'STEAM',
     label: 'SteamTools',
     icon: SteamIcon,
-    iconColorClass: 'text-[#66c0f4]',
-    badgeClass: 'bg-[#171a21]/95 border-[#66c0f4]/60 text-[#66c0f4]',
+    iconColorClass: 'text-[#0284c7] dark:text-[#7dd3fc]',
+    badgeClass:
+      'bg-[#101824]/88 border-sky-400/45 text-[#7dd3fc] shadow-[0_4px_12px_rgba(14,165,233,0.28)]',
   },
   ps5: {
     shortBadge: 'PS5',
     label: 'PS5',
     icon: Ps5Icon,
-    iconColorClass: 'text-[#60a5fa]',
-    badgeClass: 'bg-[#006fcd]/95 border-[#93c5fd]/65 text-white',
+    iconColorClass: 'text-blue-600 dark:text-[#60a5fa]',
+    badgeClass:
+      'bg-[#0057b8]/90 border-blue-300/45 text-white shadow-[0_4px_12px_rgba(0,87,184,0.45)]',
   },
   architect: {
     shortBadge: 'TOOLS',
     label: 'Tools',
     icon: Wrench,
-    iconColorClass: 'text-[#fbbf24]',
-    badgeClass: 'bg-[#b45309]/95 border-[#fcd34d]/60 text-white',
+    iconColorClass: 'text-amber-600 dark:text-[#fbbf24]',
+    badgeClass:
+      'bg-amber-600/90 border-amber-300/45 text-white shadow-[0_4px_12px_rgba(217,119,6,0.45)]',
   },
   extra: {
     shortBadge: 'SAVE',
     label: 'Savegame',
-    icon: HardDriveDownload,
-    iconColorClass: 'text-[#34d399]',
-    badgeClass: 'bg-[#059669]/95 border-[#6ee7b7]/60 text-white',
+    icon: HardDrives,
+    iconColorClass: 'text-emerald-600 dark:text-[#34d399]',
+    badgeClass:
+      'bg-emerald-600/90 border-emerald-300/45 text-white shadow-[0_4px_12px_rgba(5,150,105,0.45)]',
   },
 };
 
@@ -104,11 +115,11 @@ export function SectionSourceBadge({
   return (
     <span
       title={`From ${meta.label}`}
-      className={`inline-flex items-center gap-1 px-1.5 py-[2px] rounded-[3px] border backdrop-blur-sm text-[9.5px] font-extrabold tracking-[0.06em] uppercase leading-none shadow-md pointer-events-none select-none ${
+      className={`inline-flex items-center gap-1 px-2 py-[3px] rounded-full border backdrop-blur-md text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none pointer-events-none select-none ${
         meta.badgeClass
-      } ${hasTopRibbon ? 'top-7' : 'top-1.5'} ${className}`}
+      } ${hasTopRibbon ? 'top-7' : 'top-2'} ${className}`}
     >
-      {tab !== 'hypervisor' && <Icon className="w-3 h-3 shrink-0" />}
+      <Icon className="w-3 h-3 shrink-0" />
       <span>{meta.shortBadge}</span>
     </span>
   );

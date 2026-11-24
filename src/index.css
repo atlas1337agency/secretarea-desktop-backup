@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
@@ -10,6 +11,12 @@
   html,
   body {
     font-family: var(--font-sans);
+    background-color: #f4f6f9;
+    color: #0f172a;
+  }
+
+  html.dark,
+  html.dark body {
     background-color: #0e141b;
     color: #dcdedf;
   }
@@ -33,22 +40,35 @@
   }
 }
 
-/* Steam-inspired subtle dark scrollbars */
+/* Subtle light & dark scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #141920;
+  background: #e2e8f0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2f3846;
+  background: #94a3b8;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #141920;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2f3846;
+  border-radius: 2px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #435064;
 }
 
@@ -203,7 +223,7 @@ html.theme-ps5 body {
 
 /* Hero Spotlight (ASTRO-inspired framing & frosted buttons) */
 .theme-ps5 .sa-ps5-hero {
-  border-radius: 22px;
+  border-radius: 0 0 22px 22px;
   border-color: rgba(255, 255, 255, 0.18);
   background-color: #02173b;
   box-shadow:
@@ -552,7 +572,7 @@ html.theme-ps5 body {
 }
 
 /* Inputs, Selects & Textareas */
-.theme-ps5 input,
+.theme-ps5 input:not([type="range"]),
 .theme-ps5 select,
 .theme-ps5 textarea {
   border-radius: 12px;
@@ -560,7 +580,7 @@ html.theme-ps5 body {
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-.theme-ps5 input:focus,
+.theme-ps5 input:not([type="range"]):focus,
 .theme-ps5 select:focus,
 .theme-ps5 textarea:focus {
   border-color: rgba(255, 255, 255, 0.9);
@@ -696,7 +716,7 @@ html.theme-xbox body {
 
 /* Hero Spotlight in Xbox Mode */
 .theme-xbox .sa-ps5-hero {
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   border-color: rgba(110, 231, 85, 0.3);
   background-color: #07190a;
   box-shadow:
@@ -1033,7 +1053,7 @@ html.theme-xbox body {
 }
 
 /* Inputs, Selects & Textareas in Xbox Mode */
-.theme-xbox input,
+.theme-xbox input:not([type="range"]),
 .theme-xbox select,
 .theme-xbox textarea {
   border-radius: 6px;
@@ -1041,7 +1061,7 @@ html.theme-xbox body {
   border-color: rgba(110, 231, 85, 0.25);
 }
 
-.theme-xbox input:focus,
+.theme-xbox input:not([type="range"]):focus,
 .theme-xbox select:focus,
 .theme-xbox textarea:focus {
   border-color: #7cf25c;
@@ -1062,6 +1082,164 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   background: rgba(124, 242, 92, 0.68);
 }
 
+/* ==========================================================================
+   Custom Default Theme Builder (.theme-custom)
+   ========================================================================== */
+html.theme-custom,
+html.theme-custom body {
+  background-color: var(--sa-bg-canvas, #0e141b);
+}
+
+.theme-custom .sa-app-shell {
+  background-color: var(--sa-bg-canvas, #0e141b);
+  background-image:
+    radial-gradient(85% 55% at 50% -8%, var(--sa-accent-soft, rgba(26, 159, 255, 0.14)) 0%, transparent 72%);
+}
+
+.theme-custom .sa-ps5-panel,
+.theme-custom [class*="bg-[#171d25]"],
+.theme-custom [class*="bg-[#151c25]"] {
+  background-color: var(--sa-bg-surface);
+  border-color: var(--sa-border-subtle);
+  border-radius: var(--sa-card-radius, 12px);
+  backdrop-filter: var(--sa-panel-blur, blur(14px));
+}
+
+.theme-custom .sa-ps5-subpanel,
+.theme-custom [class*="bg-[#12171f]"],
+.theme-custom [class*="bg-[#10161e]"] {
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  border-radius: calc(var(--sa-card-radius, 12px) * 0.78);
+}
+
+.theme-custom button[class*="bg-[#1a9fff]"],
+.theme-custom button[class*="bg-[#0284c7]"],
+.theme-custom a[class*="bg-[#1a9fff]"],
+.theme-custom a[class*="bg-[#0284c7]"] {
+  background-color: var(--sa-accent, #1a9fff);
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+.theme-custom button[class*="bg-[#1a9fff]"]:hover,
+.theme-custom button[class*="bg-[#0284c7]"]:hover,
+.theme-custom a[class*="bg-[#1a9fff]"]:hover,
+.theme-custom a[class*="bg-[#0284c7]"]:hover {
+  background-color: var(--sa-accent-hover, #38adff);
+}
+
+.theme-custom .sa-ps5-subpanel[aria-pressed="true"],
+.theme-custom .sa-custom-accent-ring {
+  border-color: var(--sa-accent, #1a9fff);
+  box-shadow: 0 0 0 1px var(--sa-accent-ring, rgba(26, 159, 255, 0.42)), 0 10px 26px var(--sa-accent-soft, rgba(26, 159, 255, 0.14));
+}
+
+.theme-custom button:not([role="switch"]) {
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+.theme-custom .sa-custom-accent-text {
+  color: var(--sa-accent, #1a9fff);
+}
+
+.theme-custom .sa-custom-accent-bg {
+  background-color: var(--sa-accent, #1a9fff);
+}
+
+/* ==========================================================================
+   First-Launch Onboarding & Celebratory Launch Animations (Compositor-Only)
+   ========================================================================== */
+@keyframes sa-onboard-step-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes sa-onboard-ring-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.84);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sa-onboard-launch-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes sa-welcome-aura-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate3d(18px, -12px, 0) scale(1.06);
+    opacity: 0.94;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+}
+
+@keyframes sa-welcome-stagger {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.sa-onboard-step-in {
+  animation: sa-onboard-step-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sa-onboard-ring-pop {
+  animation: sa-onboard-ring-pop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sa-onboard-launch-out {
+  animation: sa-onboard-launch-out 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sa-welcome-aura {
+  animation: sa-welcome-aura-drift 14s ease-in-out infinite;
+}
+
+.sa-welcome-stagger-1 {
+  animation: sa-welcome-stagger 320ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
+}
+
+.sa-welcome-stagger-2 {
+  animation: sa-welcome-stagger 340ms cubic-bezier(0.16, 1, 0.3, 1) 110ms both;
+}
+
+.sa-welcome-stagger-3 {
+  animation: sa-welcome-stagger 360ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-ps5 .sa-app-shell::before,
   .theme-ps5 .sa-app-shell::after,
@@ -1069,7 +1247,14 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
   .theme-xbox .sa-app-shell::after,
   .sa-ps5-eq-bar-1,
   .sa-ps5-eq-bar-2,
-  .sa-ps5-eq-bar-3 {
+  .sa-ps5-eq-bar-3,
+  .sa-onboard-step-in,
+  .sa-onboard-ring-pop,
+  .sa-onboard-launch-out,
+  .sa-welcome-aura,
+  .sa-welcome-stagger-1,
+  .sa-welcome-stagger-2,
+  .sa-welcome-stagger-3 {
     animation: none;
   }
 

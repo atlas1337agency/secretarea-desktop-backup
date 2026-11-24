@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   ArrowLeft,
-  Award,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Film,
-  Layers,
+  ArrowSquareOut,
+  CalendarBlank,
+  CaretLeft,
+  CaretRight,
+  FilmStrip,
   ListChecks,
+  Medal,
   Play,
-  Sparkles,
+  Sparkle,
+  Stack,
   Trophy,
   X,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import type { GameItem, SheetCatalogData, SheetTabKey } from '../types';
 import { sanitizeUrl } from '../utils/parsers';
 import { GameCover } from './GameCover';
@@ -275,32 +275,32 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gradient-to-b from-[#1b2838] via-[#151e29] to-[#10151c] px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-7">
+    <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#1b2838] dark:via-[#151e29] dark:to-[#10151c] px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-7">
       <div className="max-w-[1600px] mx-auto space-y-7 sm:space-y-9 lg:space-y-11">
         {/* 1. Upcoming List (Text List with Random Colors / Google Sheet: UpcomingList) */}
         {upcomingGroups.length > 0 && (
           <section className="space-y-3 sm:space-y-3.5">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <ListChecks className="w-4 h-4 text-[#66c0f4] shrink-0" />
-              <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+              <ListChecks className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+              <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                 {t.upcomingList}
               </h2>
-              <div className="h-px flex-1 bg-white/[0.08]" />
+              <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-3.5">
               {upcomingGroups.map((group) => (
                 <div
                   key={group.key}
-                  className={`sa-ps5-panel rounded-lg bg-[#121923] border border-white/[0.07] p-3.5 sm:p-4 flex flex-col gap-3 ${
+                  className={`sa-ps5-panel rounded-lg bg-white dark:bg-[#121923] border border-slate-200 dark:border-white/[0.07] shadow-sm dark:shadow-none p-3.5 sm:p-4 flex flex-col gap-3 ${
                     group.key === 'game' ? 'sm:col-span-2 xl:col-span-2' : ''
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/[0.06]">
-                    <span className="text-[11.5px] sm:text-[12px] font-bold uppercase tracking-[0.08em] text-[#66c0f4]">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200 dark:border-white/[0.06]">
+                    <span className="text-[11.5px] sm:text-[12px] font-bold uppercase tracking-[0.08em] text-[#0284c7] dark:text-[#66c0f4]">
                       {group.label}
                     </span>
-                    <span className="text-[11px] font-mono-tabular text-[#8b9bb4]">
+                    <span className="text-[11px] font-mono-tabular text-slate-500 dark:text-[#8b9bb4]">
                       {group.entries.length}
                     </span>
                   </div>
@@ -320,11 +320,11 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                         <span
                           aria-hidden="true"
                           style={{ backgroundColor: entry.color }}
-                          className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
+                          className="w-2 h-2 rounded-full mt-1.5 shrink-0 ring-1 ring-black/10 dark:ring-0"
                         />
                         <span
-                          style={{ color: entry.color }}
-                          className="font-medium break-words"
+                          style={{ '--entry-color': entry.color } as CSSProperties}
+                          className="font-medium break-words text-slate-800 dark:text-[color:var(--entry-color)]"
                         >
                           {entry.text}
                         </span>
@@ -342,11 +342,11 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           <section className="space-y-3 sm:space-y-3.5">
             <div className="flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <Film className="w-4 h-4 text-[#66c0f4] shrink-0" />
-                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+                <FilmStrip className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.trailers}
                 </h2>
-                <div className="h-px flex-1 bg-white/[0.08]" />
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -354,17 +354,17 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                   type="button"
                   aria-label="Scroll Trailers left"
                   onClick={() => scrollRow(trailersScrollerRef, -1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   aria-label="Scroll Trailers right"
                   onClick={() => scrollRow(trailersScrollerRef, 1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -372,7 +372,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
             <div
               dir="ltr"
               ref={trailersScrollerRef}
-              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-white/[0.08] bg-[#141c27]"
+              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#141c27] shadow-sm dark:shadow-none"
             >
               {trailerEntries.map(({ item, links, releaseLabel, developer, genre }) => (
                 <button
@@ -385,7 +385,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                       activeLinkIndex: 0,
                     })
                   }
-                  className="group snap-start shrink-0 w-[82vw] sm:w-[290px] md:w-[310px] lg:w-[330px] text-left bg-[#141c27] hover:bg-[#1a2534] border-r border-white/[0.06] last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-[#1a9fff]/65 overflow-hidden transition-colors duration-200 cursor-pointer flex flex-col"
+                  className="group snap-start shrink-0 w-[82vw] sm:w-[290px] md:w-[310px] lg:w-[330px] text-left bg-white hover:bg-slate-50 dark:bg-[#141c27] dark:hover:bg-[#1a2534] border-r border-slate-200 dark:border-white/[0.06] last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-[#1a9fff]/65 overflow-hidden transition-colors duration-200 cursor-pointer flex flex-col"
                 >
                   <div className="relative aspect-video w-full bg-[#0b1016] overflow-hidden">
                     <GameCover
@@ -397,7 +397,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
 
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="w-11 h-11 rounded-full bg-[#1a9fff]/90 group-hover:bg-[#38adff] text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                        <Play className="w-5 h-5 fill-current translate-x-[1px]" />
+                        <Play weight="fill" className="w-5 h-5 fill-current translate-x-[1px]" />
                       </span>
                     </div>
 
@@ -409,17 +409,17 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
 
                     {releaseLabel && (
                       <span className="absolute bottom-2 left-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-black/75 border border-white/10 text-[10.5px] font-mono-tabular text-[#e5e9f0]">
-                        <Calendar className="w-3 h-3 text-[#66c0f4]" />
+                        <CalendarBlank className="w-3 h-3 text-[#66c0f4]" />
                         <span>{releaseLabel}</span>
                       </span>
                     )}
                   </div>
 
                   <div className="p-3 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
-                    <h3 className="text-[13.5px] sm:text-[14px] font-semibold text-white group-hover:text-[#66c0f4] transition-colors line-clamp-1">
+                    <h3 className="text-[13.5px] sm:text-[14px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-white dark:group-hover:text-[#66c0f4] transition-colors line-clamp-1">
                       {item.name}
                     </h3>
-                    <div className="text-[11.5px] text-[#8b9bb4] truncate">
+                    <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] truncate">
                       {[developer, genre].filter(Boolean).join(' · ') || 'Upcoming Release'}
                     </div>
                   </div>
@@ -434,11 +434,11 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           <section className="space-y-3 sm:space-y-3.5">
             <div className="flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <Layers className="w-4 h-4 text-[#66c0f4] shrink-0" />
-                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white shrink-0">
+                <Stack className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.bestSeries}
                 </h2>
-                <div className="h-px flex-1 bg-white/[0.08]" />
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -446,17 +446,17 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                   type="button"
                   aria-label="Scroll Best Series left"
                   onClick={() => scrollRow(seriesScrollerRef, -1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   aria-label="Scroll Best Series right"
                   onClick={() => scrollRow(seriesScrollerRef, 1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -464,14 +464,14 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
             <div
               dir="ltr"
               ref={seriesScrollerRef}
-              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-white/[0.08] bg-[#141c27]"
+              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#141c27] shadow-sm dark:shadow-none"
             >
               {bestSeriesEntries.map(({ item, titles, backdrop, categoryLabel }) => (
                 <button
                   key={`${item.tab}-${item.id}`}
                   type="button"
                   onClick={() => setActiveSeriesPopup(item)}
-                  className="group snap-start shrink-0 w-[78vw] sm:w-[275px] md:w-[295px] lg:w-[315px] text-left bg-[#141c27] hover:bg-[#1a2534] border-r border-white/[0.06] last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-[#1a9fff]/65 overflow-hidden transition-colors duration-200 cursor-pointer flex flex-col"
+                  className="group snap-start shrink-0 w-[78vw] sm:w-[275px] md:w-[295px] lg:w-[315px] text-left bg-white hover:bg-slate-50 dark:bg-[#141c27] dark:hover:bg-[#1a2534] border-r border-slate-200 dark:border-white/[0.06] last:border-r-0 hover:ring-1 hover:ring-inset hover:ring-[#1a9fff]/65 overflow-hidden transition-colors duration-200 cursor-pointer flex flex-col"
                 >
                   <div className="relative aspect-[16/9] w-full bg-[#0b1016] overflow-hidden">
                     <GameCover
@@ -493,10 +493,10 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                   </div>
 
                   <div className="p-3 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
-                    <h3 className="text-[13.5px] sm:text-[14px] font-semibold text-white group-hover:text-[#66c0f4] transition-colors line-clamp-1">
+                    <h3 className="text-[13.5px] sm:text-[14px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-white dark:group-hover:text-[#66c0f4] transition-colors line-clamp-1">
                       {item.name}
                     </h3>
-                    <p className="text-[11.5px] text-[#8b9bb4] line-clamp-1">
+                    <p className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] line-clamp-1">
                       {titles[0] || categoryLabel || 'Game Series'}
                     </p>
                   </div>
@@ -511,14 +511,14 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           <section className="space-y-3 sm:space-y-3.5">
             <div className="flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <Trophy className="w-4 h-4 text-[#fbbf24] shrink-0" />
-                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-white truncate">
+                <Trophy className="w-4 h-4 text-amber-500 dark:text-[#fbbf24] shrink-0" />
+                <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
                   {t.topOpenWorld}{' '}
-                  <span className="text-[#66c0f4] font-mono-tabular font-semibold">
+                  <span className="text-[#0284c7] dark:text-[#66c0f4] font-mono-tabular font-semibold">
                     ({topGamesEntries.length})
                   </span>
                 </h2>
-                <div className="h-px flex-1 bg-white/[0.08] hidden sm:block" />
+                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08] hidden sm:block" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -526,17 +526,17 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                   type="button"
                   aria-label="Scroll Top Open World Games left"
                   onClick={() => scrollRow(topGamesScrollerRef, -1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
                   aria-label="Scroll Top Open World Games right"
                   onClick={() => scrollRow(topGamesScrollerRef, 1)}
-                  className="p-1.5 rounded bg-[#212a37] hover:bg-[#2c3849] border border-white/[0.08] text-[#c6d4df] hover:text-white transition-colors cursor-pointer"
+                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -544,7 +544,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
             <div
               dir="ltr"
               ref={topGamesScrollerRef}
-              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-white/[0.08] bg-[#141c27]"
+              className="sa-ps5-panel no-scrollbar flex gap-0 overflow-x-auto scroll-smooth snap-x snap-mandatory rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#141c27] shadow-sm dark:shadow-none"
             >
               {topGamesEntries.map((item, idx) => {
                 const rank = Number(item.rawFields.rank) || idx + 1;
@@ -563,7 +563,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 return (
                   <div
                     key={`${item.tab}-${item.id}-${idx}`}
-                    className="snap-start shrink-0 w-[78vw] sm:w-[275px] md:w-[300px] lg:w-[325px] bg-[#141c27] border-r border-white/[0.06] last:border-r-0 overflow-hidden select-none pointer-events-none"
+                    className="snap-start shrink-0 w-[78vw] sm:w-[275px] md:w-[300px] lg:w-[325px] bg-slate-100 dark:bg-[#141c27] border-r border-slate-200 dark:border-white/[0.06] last:border-r-0 overflow-hidden select-none pointer-events-none"
                   >
                     <div className="relative aspect-[16/9] w-full bg-[#0b1016] overflow-hidden">
                       <GameCover
@@ -604,18 +604,18 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           aria-modal="true"
           aria-label={activeTrailerPopup.item.name}
           onClick={() => setActiveTrailerPopup(null)}
-          className="fixed inset-0 z-[70] bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+          className="fixed inset-0 z-[70] bg-black/75 dark:bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="sa-ps5-panel w-full max-w-4xl rounded-xl bg-[#121923] border border-white/[0.12] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
+            className="sa-ps5-panel w-full max-w-4xl rounded-xl bg-white dark:bg-[#121923] border border-slate-200 dark:border-white/[0.12] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
           >
-            <div className="sa-ps5-modal-header px-4 sm:px-5 py-3.5 bg-[#171d27] border-b border-white/[0.08] flex items-center justify-between gap-3">
+            <div className="sa-ps5-modal-header px-4 sm:px-5 py-3.5 bg-slate-50 dark:bg-[#171d27] border-b border-slate-200 dark:border-white/[0.08] flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="text-[15px] sm:text-[17px] font-bold text-white truncate">
+                <h3 className="text-[15px] sm:text-[17px] font-bold text-slate-900 dark:text-white truncate">
                   {activeTrailerPopup.item.name}
                 </h3>
-                <div className="text-[11.5px] text-[#8b9bb4] truncate">
+                <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] truncate">
                   {[
                     activeTrailerPopup.item.rawFields.developer,
                     activeTrailerPopup.item.rawFields.genre,
@@ -629,7 +629,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 type="button"
                 aria-label="Close trailer popup"
                 onClick={() => setActiveTrailerPopup(null)}
-                className="p-2 rounded bg-[#232b36] hover:bg-[#303c4d] text-[#c6d4df] hover:text-white transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#232b36] dark:hover:bg-[#303c4d] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -654,7 +654,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                       />
                     ) : currentLink?.watchUrl ? (
                       <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
-                        <Film className="w-10 h-10 text-[#66c0f4]" />
+                        <FilmStrip className="w-10 h-10 text-[#66c0f4]" />
                         <a
                           href={currentLink.watchUrl}
                           target="_blank"
@@ -662,7 +662,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                           className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[13px] font-semibold"
                         >
                           <span>Watch Trailer</span>
-                          <ExternalLink className="w-4 h-4" />
+                          <ArrowSquareOut className="w-4 h-4" />
                         </a>
                       </div>
                     ) : (
@@ -674,7 +674,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 );
               })()}
 
-              <div className="sa-ps5-subpanel p-4 sm:p-5 space-y-3 bg-[#121923]">
+              <div className="sa-ps5-subpanel p-4 sm:p-5 space-y-3 bg-white dark:bg-[#121923]">
                 {activeTrailerPopup.links.length > 1 && (
                   <div className="flex flex-wrap items-center gap-2">
                     {activeTrailerPopup.links.map((link, idx) => {
@@ -691,10 +691,10 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-semibold transition-colors cursor-pointer ${
                             active
                               ? 'bg-[#1a9fff] text-white'
-                              : 'bg-[#1d2633] hover:bg-[#273344] text-[#c6d4df] border border-white/[0.08]'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-[#1d2633] dark:hover:bg-[#273344] dark:text-[#c6d4df] dark:border-white/[0.08]'
                           }`}
                         >
-                          <Play className="w-3 h-3 fill-current" />
+                          <Play weight="fill" className="w-3 h-3 fill-current" />
                           <span>{link.label}</span>
                         </button>
                       );
@@ -703,8 +703,8 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 )}
 
                 {activeTrailerPopup.item.rawFields.platforms && (
-                  <div className="text-[12.5px] text-[#aeb9c7]">
-                    <span className="text-[#66c0f4] font-semibold">Platforms: </span>
+                  <div className="text-[12.5px] text-slate-700 dark:text-[#aeb9c7]">
+                    <span className="text-[#0284c7] dark:text-[#66c0f4] font-semibold">Platforms: </span>
                     <span>{activeTrailerPopup.item.rawFields.platforms}</span>
                   </div>
                 )}
@@ -720,25 +720,25 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           role="dialog"
           aria-modal="true"
           aria-label={activeSeriesPopup.name}
-          className="sa-ps5-modal fixed inset-0 z-[70] w-screen h-screen bg-[#0f141b] flex flex-col overflow-hidden"
+          className="sa-ps5-modal fixed inset-0 z-[70] w-screen h-screen bg-[#f4f6f9] dark:bg-[#0f141b] flex flex-col overflow-hidden"
         >
           {/* Top Full-Screen Header Bar */}
-          <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-3 bg-[#171a21] border-b border-white/[0.08] shrink-0">
+          <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-3 bg-white dark:bg-[#171a21] border-b border-slate-200 dark:border-white/[0.08] shrink-0">
             <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
                   onClick={() => setActiveSeriesPopup(null)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#232b36] hover:bg-[#2d3847] border border-white/[0.08] text-[12px] font-semibold text-[#e5e9f0] hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-[#232b36] dark:hover:bg-[#2d3847] dark:border-white/[0.08] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
                   <span>{t.back}</span>
                 </button>
 
-                <div className="flex items-center gap-2 text-[12px] text-[#8b9bb4] min-w-0">
+                <div className="flex items-center gap-2 text-[12px] text-slate-500 dark:text-[#8b9bb4] min-w-0">
                   <span className="hidden sm:inline shrink-0">{t.bestSeries}</span>
-                  <span className="hidden sm:inline text-[#4b5b70]">/</span>
-                  <span className="text-white font-semibold truncate">
+                  <span className="hidden sm:inline text-slate-300 dark:text-[#4b5b70]">/</span>
+                  <span className="text-slate-900 dark:text-white font-semibold truncate">
                     {activeSeriesPopup.name}
                   </span>
                 </div>
@@ -748,7 +748,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 type="button"
                 aria-label="Close series popup"
                 onClick={() => setActiveSeriesPopup(null)}
-                className="p-2 rounded bg-[#252f3d] hover:bg-[#313e50] text-[#aeb9c7] hover:text-white transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#252f3d] dark:hover:bg-[#313e50] dark:text-[#aeb9c7] dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -756,7 +756,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
           </header>
 
           {/* Full-Screen Scrollable Body */}
-          <div className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-gradient-to-b from-[#161f2b] via-[#111720] to-[#0c1016]">
+          <div className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#161f2b] dark:via-[#111720] dark:to-[#0c1016]">
             {/* Hero Banner */}
             <div className="sa-ps5-modal-hero relative h-48 sm:h-64 lg:h-80 bg-[#0b1016] border-b border-white/[0.07] overflow-hidden">
               <GameCover
@@ -803,14 +803,14 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                 if (thumbs.length === 0) return null;
                 return (
                   <section className="space-y-3">
-                    <h3 className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#8b9bb4]">
+                    <h3 className="text-[12px] font-bold uppercase tracking-[0.08em] text-slate-600 dark:text-[#8b9bb4]">
                       {t.seriesPosters}
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
                       {thumbs.map((url, i) => (
                         <div
                           key={i}
-                          className="aspect-[2/3] rounded overflow-hidden bg-[#0b1016] border border-white/[0.08]"
+                          className="aspect-[2/3] rounded overflow-hidden bg-slate-100 dark:bg-[#0b1016] border border-slate-200 dark:border-white/[0.08]"
                         >
                           <GameCover
                             src={url}
@@ -825,8 +825,8 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
               })()}
 
               <section className="space-y-3">
-                <div className="flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[#66c0f4]">
-                  <Sparkles className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-[0.08em] text-[#0284c7] dark:text-[#66c0f4]">
+                  <Sparkle className="w-4 h-4" />
                   <span>{t.gamesInSeries}</span>
                 </div>
 
@@ -844,19 +844,19 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                           key={idx}
                           className={`sa-ps5-subpanel px-3.5 py-2.5 rounded border flex items-center gap-2.5 ${
                             isBest
-                              ? 'bg-[#1a2433] border-[#fbbf24]/50'
-                              : 'bg-[#141c27] border-white/[0.07]'
+                              ? 'bg-amber-50 border-amber-300 dark:bg-[#1a2433] dark:border-[#fbbf24]/50'
+                              : 'bg-white border-slate-200 dark:bg-[#141c27] dark:border-white/[0.07]'
                           }`}
                         >
-                          <span className="text-[11.5px] font-mono-tabular text-[#8b9bb4] w-6 shrink-0">
+                          <span className="text-[11.5px] font-mono-tabular text-slate-500 dark:text-[#8b9bb4] w-6 shrink-0">
                             {idx + 1}.
                           </span>
-                          <span className="text-[13px] sm:text-[13.5px] font-medium text-white truncate flex-1">
+                          <span className="text-[13px] sm:text-[13.5px] font-medium text-slate-900 dark:text-white truncate flex-1">
                             {cleanLabel}
                           </span>
                           {isBest && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-[#fbbf24]/20 border border-[#fbbf24]/50 text-[#fbbf24] text-[10px] font-bold uppercase shrink-0">
-                              <Award className="w-3 h-3" />
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] bg-amber-100 border border-amber-300 text-amber-800 dark:bg-[#fbbf24]/20 dark:border-[#fbbf24]/50 dark:text-[#fbbf24] text-[10px] font-bold uppercase shrink-0">
+                              <Medal className="w-3 h-3" />
                               <span>{t.bestBadge}</span>
                             </span>
                           )}

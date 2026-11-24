@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Info, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import {
+  CheckCircle,
+  Info,
+  WarningCircle,
+  WifiHigh,
+  WifiSlash,
+} from '@phosphor-icons/react';
 import { DEFAULT_CATALOG } from './data/gamesCatalog';
 import {
   fetchCatalogFromGas,
@@ -11,11 +17,19 @@ import {
 } from './services/sheetsApi';
 import { precacheCatalogImages } from './services/imageCache';
 import type {
+  CloseBehaviorMode,
+  DownloadManagerSnapshot,
   GameItem,
   LibrarySectionTab,
+  MirrorLink,
+  PresentMonSetupState,
   PrimarySection,
+  QbitSetupState,
   SheetCatalogData,
   SortOption,
+  TorrentConnectionTestResult,
+  TorrentDetectionResult,
+  TorrentIntegrationConfig,
 } from './types';
 import {
   ALL_SHEET_TABS,
@@ -31,22 +45,57 @@ import { ExtrasView } from './components/ExtrasView';
 import { StudiosView } from './components/StudiosView';
 import { StudioDetailModal } from './components/StudioDetailModal';
 import { RequestsView } from './components/RequestsView';
+import { DownloadsView } from './components/DownloadsView';
+import { HardwareMonitorView } from './components/HardwareMonitorView';
 import { SettingsView } from './components/SettingsView';
 import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
+import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
+import { PresentMonSetupModal } from './components/PresentMonSetupModal';
+import {
+  FirstLaunchOnboarding,
+  type OnboardingThemeChoice,
+} from './components/FirstLaunchOnboarding';
 import {
   getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
   getDesktopWindowBridge,
+  type DesktopReleaseNotesPayload,
   type DesktopUpdateState,
 } from './services/desktopUpdater';
 import {
+  buildMirrorDownloadPayload,
+  createWebFallbackTask,
+  EMPTY_DOWNLOAD_SNAPSHOT,
+  getDesktopDownloadsBridge,
+  loadWebFallbackSnapshot,
+  saveWebFallbackTasks,
+  saveWebFallbackTorrentConfig,
+  type StartDownloadPayload,
+} from './services/downloadManager';
+import {
+  EMPTY_QBIT_SETUP_STATE,
+  getDesktopQbitSetupBridge,
+  QBIT_OFFICIAL_DOWNLOAD_URL,
+} from './services/qbitSetup';
+import {
+  EMPTY_PRESENTMON_SETUP_STATE,
+  getDesktopPresentMonSetupBridge,
+  PRESENTMON_OFFICIAL_RELEASES_URL,
+} from './services/presentMonSetup';
+import {
   applyDocumentLanguageSettings,
+  applyDocumentThemeSettings,
+  DEFAULT_CUSTOM_THEME,
   DEFAULT_LAUNCHER_SETTINGS,
   getActiveConsoleTheme,
+  getAppVersionString,
+  isLocalOnboardingCompleted,
   loadLauncherSettings,
   saveLauncherSettings,
+  setLocalOnboardingCompleted,
   type AppLanguage,
+  type CustomThemeConfig,
   type LauncherSettings,
 } from './services/launcherSettings';
 import { getTranslations } from './i18n/translations';
@@ -55,6 +104,7 @@ import {
   playPsBootChime,
   playPsClickSound,
   playPsHoverSound,
+  setPsVolume,
   startPsAmbientSound,
   stopPsAmbientSound,
 } from './utils/psSounds';
@@ -63,6 +113,7 @@ import {
   playXboxBootChime,
   playXboxClickSound,
   playXboxHoverSound,
+  setXboxVolume,
   startXboxAmbientSound,
   stopXboxAmbientSound,
 } from './utils/xboxSounds';
@@ -121,7 +172,7 @@ export default function App() {
   const catalogRef = useRef<SheetCatalogData>(catalog);
   catalogRef.current = catalog;
   const [gasUrl] = useState<string>(() => getSavedGasUrl());
-  const lastCatalogSignatureRef = useRef<string>(JSON.stringify(DEFAULT_CATALOG));
+  const tabSignaturesRef = useRef<Partial<Record<keyof SheetCatalogData, string>>>({});
 
   const [activeSection, setActiveSection] = useState<PrimarySection>('store');
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(() => {
@@ -164,8 +215,34 @@ export default function App() {
   const updaterBridge = useMemo(() => getDesktopUpdaterBridge(), []);
   const windowBridge = useMemo(() => getDesktopWindowBridge(), []);
   const settingsBridge = useMemo(() => getDesktopSettingsBridge(), []);
+  const downloadsBridge = useMemo(() => getDesktopDownloadsBridge(), []);
+  const qbitSetupBridge = useMemo(() => getDesktopQbitSetupBridge(), []);
+  const presentMonSetupBridge = useMemo(() => getDesktopPresentMonSetupBridge(), []);
   const [desktopUpdateState, setDesktopUpdateState] = useState<DesktopUpdateState | null>(null);
   const [isUpdaterModalOpen, setIsUpdaterModalOpen] = useState(false);
+  const [downloadSnapshot, setDownloadSnapshot] = useState<DownloadManagerSnapshot>(() =>
+    getDesktopDownloadsBridge() ? EMPTY_DOWNLOAD_SNAPSHOT : loadWebFallbackSnapshot()
+  );
+  const [qbitSetupState, setQbitSetupState] = useState<QbitSetupState>(EMPTY_QBIT_SETUP_STATE);
+  const [isQbitSetupModalOpen, setIsQbitSetupModalOpen] = useState(false);
+  const hasAutoPromptedQbitRef = useRef(false);
+  const [presentMonSetupState, setPresentMonSetupState] = useState<PresentMonSetupState>(
+    EMPTY_PRESENTMON_SETUP_STATE
+  );
+  const [isPresentMonModalOpen, setIsPresentMonModalOpen] = useState(false);
+  const hasAutoPromptedPresentMonRef = useRef(false);
+  const isDesktopApp = Boolean(settingsBridge || qbitSetupBridge || downloadsBridge);
+  const [resolvedAppVersion, setResolvedAppVersion] = useState<string>(() =>
+    getAppVersionString()
+  );
+  const [fetchedUpdateReleaseNotes, setFetchedUpdateReleaseNotes] =
+    useState<DesktopReleaseNotesPayload | null>(null);
+  const [onboardingPhase, setOnboardingPhase] = useState<'checking' | 'active' | 'completed'>(() => {
+    if (getDesktopSettingsBridge()) return 'checking';
+    return isLocalOnboardingCompleted() ? 'completed' : 'active';
+  });
+  const onboardingPhaseRef = useRef(onboardingPhase);
+  onboardingPhaseRef.current = onboardingPhase;
 
   const t = useMemo(() => getTranslations(launcherSettings.language), [launcherSettings.language]);
 
@@ -177,22 +254,172 @@ export default function App() {
     saveLauncherSettings(launcherSettings);
   }, [launcherSettings]);
 
-  // Sync persisted Electron desktop auto-start tray setting on startup
+  // Sync persisted Electron desktop settings & first-install-only Welcome Setup
   useEffect(() => {
     if (!settingsBridge) return;
     let active = true;
-    void settingsBridge.getDesktopSettings().then((desktopSettings) => {
-      if (!active || !desktopSettings) return;
-      setLauncherSettings((prev) =>
-        prev.startWithComputer === desktopSettings.startWithComputer
-          ? prev
-          : { ...prev, startWithComputer: desktopSettings.startWithComputer }
-      );
-    });
+    void settingsBridge
+      .getDesktopSettings()
+      .then((desktopSettings) => {
+        if (!active) return;
+        const currentVer = desktopSettings?.appVersion?.trim() || getAppVersionString();
+        setResolvedAppVersion(currentVer);
+
+        if (!desktopSettings) {
+          setOnboardingPhase(isLocalOnboardingCompleted() ? 'completed' : 'active');
+          return;
+        }
+
+        const nextCloseBehavior: CloseBehaviorMode =
+          desktopSettings.closeBehavior === 'minimize-to-tray'
+            ? 'minimize-to-tray'
+            : desktopSettings.closeBehavior === 'exit'
+            ? 'exit'
+            : desktopSettings.startWithComputer
+            ? 'minimize-to-tray'
+            : 'exit';
+
+        setLauncherSettings((prev) =>
+          prev.startWithComputer === desktopSettings.startWithComputer &&
+          prev.closeBehavior === nextCloseBehavior
+            ? prev
+            : {
+                ...prev,
+                startWithComputer: desktopSettings.startWithComputer,
+                closeBehavior: nextCloseBehavior,
+              }
+        );
+
+        const desktopCompleted = Boolean(desktopSettings.onboardingCompleted);
+        if (desktopCompleted || isLocalOnboardingCompleted()) {
+          setLocalOnboardingCompleted(true);
+          setOnboardingPhase('completed');
+        } else {
+          setOnboardingPhase('active');
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setOnboardingPhase((prev) => (prev === 'checking' ? 'active' : prev));
+        }
+      });
     return () => {
       active = false;
     };
   }, [settingsBridge]);
+
+  // Fetch GitHub release notes when a newer update version is available or ready to install
+  useEffect(() => {
+    const availableVer = desktopUpdateState?.availableVersion?.trim();
+    const shouldFetch =
+      Boolean(availableVer) &&
+      !desktopUpdateState?.releaseNotes &&
+      (desktopUpdateState?.status === 'available' ||
+        desktopUpdateState?.status === 'downloading' ||
+        desktopUpdateState?.status === 'downloaded');
+
+    if (!shouldFetch || !availableVer || !updaterBridge?.getReleaseNotes) return;
+
+    let active = true;
+    void updaterBridge
+      .getReleaseNotes(availableVer)
+      .then((payload) => {
+        if (active && payload) {
+          setFetchedUpdateReleaseNotes(payload);
+        }
+      })
+      .catch(() => {
+        // Fallback cleanly to built-in localized changelog parser
+      });
+    return () => {
+      active = false;
+    };
+  }, [
+    desktopUpdateState?.availableVersion,
+    desktopUpdateState?.releaseNotes,
+    desktopUpdateState?.status,
+    updaterBridge,
+  ]);
+
+  // Sync Electron Download Manager snapshot + live progress updates
+  useEffect(() => {
+    if (!downloadsBridge) return;
+    let active = true;
+    void downloadsBridge.getState().then((snapshot) => {
+      if (active && snapshot) {
+        setDownloadSnapshot(snapshot);
+      }
+    });
+    const unsubscribe = downloadsBridge.onUpdated((snapshot) => {
+      if (active && snapshot) {
+        setDownloadSnapshot(snapshot);
+      }
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [downloadsBridge]);
+
+  // Sync automated qBittorrent installation & version management state + first-launch wizard
+  useEffect(() => {
+    if (!qbitSetupBridge) return;
+    let active = true;
+    const applySetupState = (next: QbitSetupState | null) => {
+      if (!active || !next) return;
+      setQbitSetupState(next);
+      if (
+        next.shouldPromptOnFirstLaunch &&
+        !hasAutoPromptedQbitRef.current &&
+        onboardingPhaseRef.current === 'completed'
+      ) {
+        hasAutoPromptedQbitRef.current = true;
+        setIsQbitSetupModalOpen(true);
+      }
+    };
+    void qbitSetupBridge.getState().then(applySetupState);
+    const unsubscribe = qbitSetupBridge.onStateChange(applySetupState);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [qbitSetupBridge]);
+
+  // Sync automated Intel PresentMon dependency detection, version checks, & permission modal
+  useEffect(() => {
+    if (!presentMonSetupBridge) return;
+    let active = true;
+    const applyPresentMonState = (next: PresentMonSetupState | null) => {
+      if (!active || !next) return;
+      setPresentMonSetupState(next);
+      if (
+        next.shouldPrompt &&
+        !hasAutoPromptedPresentMonRef.current &&
+        onboardingPhaseRef.current === 'completed'
+      ) {
+        hasAutoPromptedPresentMonRef.current = true;
+        setIsPresentMonModalOpen(true);
+      }
+    };
+    void presentMonSetupBridge.getState().then(applyPresentMonState);
+    const unsubscribe = presentMonSetupBridge.onStateChange(applyPresentMonState);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [presentMonSetupBridge]);
+
+  // Open pending PresentMon permission prompt once onboarding transitions to completed
+  useEffect(() => {
+    if (
+      onboardingPhase === 'completed' &&
+      presentMonSetupState.shouldPrompt &&
+      !hasAutoPromptedPresentMonRef.current
+    ) {
+      hasAutoPromptedPresentMonRef.current = true;
+      setIsPresentMonModalOpen(true);
+    }
+  }, [onboardingPhase, presentMonSetupState.shouldPrompt]);
 
   // Automatically detect real PC/laptop specs when SecretArea.exe starts (unless custom override saved)
   useEffect(() => {
@@ -297,16 +524,25 @@ export default function App() {
   );
 
   useEffect(() => {
-    document.documentElement.classList.toggle('theme-ps5', activeTheme === 'ps5');
-    document.documentElement.classList.toggle('theme-xbox', activeTheme === 'xbox');
-  }, [activeTheme]);
+    applyDocumentThemeSettings(launcherSettings);
+  }, [launcherSettings]);
 
-  // Ambient console background music/soundscape based on active Settings theme
+  const hasSoundVolume = launcherSettings.soundVolume > 0;
+
   useEffect(() => {
-    if (activeTheme === 'ps5' && soundEnabled) {
+    const normalized = launcherSettings.soundVolume / 100;
+    setPsVolume(normalized);
+    setXboxVolume(normalized);
+  }, [launcherSettings.soundVolume]);
+
+  // Ambient console background music/soundscape based on active Settings theme & ambient music toggle
+  useEffect(() => {
+    const canPlayAmbient =
+      soundEnabled && launcherSettings.ambientMusicEnabled && hasSoundVolume;
+    if (activeTheme === 'ps5' && canPlayAmbient) {
       stopXboxAmbientSound();
       startPsAmbientSound();
-    } else if (activeTheme === 'xbox' && soundEnabled) {
+    } else if (activeTheme === 'xbox' && canPlayAmbient) {
       stopPsAmbientSound();
       startXboxAmbientSound();
     } else {
@@ -317,11 +553,18 @@ export default function App() {
       stopPsAmbientSound();
       stopXboxAmbientSound();
     };
-  }, [activeTheme, soundEnabled]);
+  }, [activeTheme, soundEnabled, launcherSettings.ambientMusicEnabled, hasSoundVolume]);
 
-  // Global console hover & click sound effects when PS5 or Xbox theme is active
+  // Global console hover & click sound effects when PS5 or Xbox theme is active and UI sounds are enabled
   useEffect(() => {
-    if (activeTheme === 'default' || !soundEnabled) return;
+    if (
+      activeTheme === 'default' ||
+      !soundEnabled ||
+      !launcherSettings.uiClickSoundsEnabled ||
+      !hasSoundVolume
+    ) {
+      return;
+    }
 
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
@@ -377,7 +620,7 @@ export default function App() {
       document.removeEventListener('click', handleGlobalClick, true);
       document.removeEventListener('mouseover', handleGlobalHover, true);
     };
-  }, [activeTheme, soundEnabled]);
+  }, [activeTheme, soundEnabled, launcherSettings.uiClickSoundsEnabled, hasSoundVolume]);
 
   // Sync native Fullscreen changes without altering the active launcher theme
   useEffect(() => {
@@ -485,8 +728,57 @@ export default function App() {
     [notify, settingsBridge]
   );
 
+  const handleChangeCloseBehavior = useCallback(
+    async (behavior: CloseBehaviorMode) => {
+      setLauncherSettings((prev) => ({ ...prev, closeBehavior: behavior }));
+      if (!settingsBridge?.setCloseBehavior) return;
+      try {
+        const res = await settingsBridge.setCloseBehavior(behavior);
+        if (res?.closeBehavior) {
+          setLauncherSettings((prev) => ({
+            ...prev,
+            closeBehavior: res.closeBehavior === 'minimize-to-tray' ? 'minimize-to-tray' : 'exit',
+          }));
+        }
+      } catch {
+        notify('Could not save application closing behavior.', 'error');
+      }
+    },
+    [notify, settingsBridge]
+  );
+
+  const handleExitApplication = useCallback(async () => {
+    if (!settingsBridge?.exitApplication) return;
+    try {
+      await settingsBridge.exitApplication();
+    } catch {
+      notify('Could not exit application cleanly.', 'error');
+    }
+  }, [notify, settingsBridge]);
+
+  const handleToggleEnableCanRunIt = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({ ...prev, enableCanRunIt: enabled }));
+    if (!enabled) {
+      setCanRunFilter('all');
+    }
+  }, []);
+
   const handleToggleCompactNavbar = useCallback((enabled: boolean) => {
     setLauncherSettings((prev) => ({ ...prev, compactNavbar: enabled }));
+  }, []);
+
+  const handleToggleLightMode = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      lightMode: enabled,
+      alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
+      alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
+      customTheme: { ...prev.customTheme, enabled: false },
+    }));
+    if (enabled) {
+      stopPsAmbientSound();
+      stopXboxAmbientSound();
+    }
   }, []);
 
   const handleToggleAlwaysPs5Theme = useCallback(
@@ -495,13 +787,20 @@ export default function App() {
         ...prev,
         alwaysPs5Theme: enabled,
         alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
+        lightMode: enabled ? false : prev.lightMode,
+        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
-      if (enabled && soundEnabled) {
+      if (
+        enabled &&
+        soundEnabled &&
+        launcherSettings.uiClickSoundsEnabled &&
+        launcherSettings.soundVolume > 0
+      ) {
         stopXboxAmbientSound();
         playPsBootChime();
       }
     },
-    [soundEnabled]
+    [soundEnabled, launcherSettings.uiClickSoundsEnabled, launcherSettings.soundVolume]
   );
 
   const handleToggleAlwaysXboxTheme = useCallback(
@@ -510,14 +809,78 @@ export default function App() {
         ...prev,
         alwaysXboxTheme: enabled,
         alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
+        lightMode: enabled ? false : prev.lightMode,
+        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
-      if (enabled && soundEnabled) {
+      if (
+        enabled &&
+        soundEnabled &&
+        launcherSettings.uiClickSoundsEnabled &&
+        launcherSettings.soundVolume > 0
+      ) {
         stopPsAmbientSound();
         playXboxBootChime();
       }
     },
-    [soundEnabled]
+    [soundEnabled, launcherSettings.uiClickSoundsEnabled, launcherSettings.soundVolume]
   );
+
+  const handleUpdateCustomTheme = useCallback((patch: Partial<CustomThemeConfig>) => {
+    setLauncherSettings((prev) => {
+      const nextCustom: CustomThemeConfig = {
+        ...prev.customTheme,
+        ...patch,
+      };
+      const activatingCustom = nextCustom.enabled;
+      return {
+        ...prev,
+        alwaysPs5Theme: activatingCustom ? false : prev.alwaysPs5Theme,
+        alwaysXboxTheme: activatingCustom ? false : prev.alwaysXboxTheme,
+        lightMode: activatingCustom ? nextCustom.surfaceStyle === 'daylight' : prev.lightMode,
+        customTheme: nextCustom,
+      };
+    });
+    if (patch.enabled) {
+      stopPsAmbientSound();
+      stopXboxAmbientSound();
+    }
+  }, []);
+
+  const handleResetCustomTheme = useCallback(() => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      lightMode: false,
+      customTheme: { ...DEFAULT_CUSTOM_THEME, enabled: false },
+    }));
+  }, []);
+
+  const handleToggleAmbientMusic = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({ ...prev, ambientMusicEnabled: enabled }));
+  }, []);
+
+  const handleToggleUiClickSounds = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({ ...prev, uiClickSoundsEnabled: enabled }));
+  }, []);
+
+  const handleChangeSoundVolume = useCallback((volume: number) => {
+    const clamped = Math.min(100, Math.max(0, Math.round(volume)));
+    const normalized = clamped / 100;
+    setPsVolume(normalized);
+    setXboxVolume(normalized);
+    if (clamped > 0) {
+      setSoundEnabled(true);
+    }
+    setLauncherSettings((prev) => ({ ...prev, soundVolume: clamped }));
+  }, []);
+
+  const handlePreviewSoundVolume = useCallback(() => {
+    if (launcherSettings.soundVolume <= 0) return;
+    if (activeTheme === 'xbox') {
+      playXboxClickSound();
+    } else {
+      playPsClickSound();
+    }
+  }, [activeTheme, launcherSettings.soundVolume]);
 
   const handleResetLauncherSettings = useCallback(async () => {
     const defaults = { ...DEFAULT_LAUNCHER_SETTINGS };
@@ -525,6 +888,7 @@ export default function App() {
     if (settingsBridge) {
       try {
         await settingsBridge.setStartWithComputer(false);
+        await settingsBridge.setCloseBehavior?.(defaults.closeBehavior);
       } catch {
         // Ignore desktop reset error cleanly
       }
@@ -532,51 +896,449 @@ export default function App() {
     notify(getTranslations(defaults.language).settings.resetToast, 'info');
   }, [notify, settingsBridge]);
 
+  const handleStartDownloadPayload = useCallback(
+    async (payload: StartDownloadPayload) => {
+      if (downloadsBridge) {
+        try {
+          const task = await downloadsBridge.start(payload);
+          const refreshed = await downloadsBridge.getState();
+          if (refreshed) setDownloadSnapshot(refreshed);
+          notify(`${t.downloads.startedToast}: ${task.title}`, 'success');
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : t.downloads.failedToast;
+          notify(msg, 'error');
+        }
+        return;
+      }
+
+      const fallbackTask = createWebFallbackTask(payload);
+      setDownloadSnapshot((prev) => {
+        const nextTasks = [fallbackTask, ...prev.tasks].slice(0, 60);
+        saveWebFallbackTasks(nextTasks);
+        return { ...prev, tasks: nextTasks };
+      });
+    },
+    [downloadsBridge, notify, t.downloads.failedToast, t.downloads.startedToast]
+  );
+
+  const handleAddTorrentFile = useCallback(async () => {
+    if (!downloadsBridge) return;
+    try {
+      const task = await downloadsBridge.addTorrentFile();
+      if (!task) return;
+      const refreshed = await downloadsBridge.getState();
+      if (refreshed) setDownloadSnapshot(refreshed);
+      notify(`${t.downloads.startedToast}: ${task.title}`, 'success');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t.downloads.failedToast;
+      notify(msg, 'error');
+    }
+  }, [downloadsBridge, notify, t.downloads.failedToast, t.downloads.startedToast]);
+
+  const handleStartMirrorDownload = useCallback(
+    (mirror: MirrorLink, game: GameItem) => {
+      const payload = buildMirrorDownloadPayload(mirror, game);
+      void handleStartDownloadPayload(payload);
+    },
+    [handleStartDownloadPayload]
+  );
+
+  const handlePauseDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.pause(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleResumeDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.resume(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleCancelDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.cancel(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleRetryDownload = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      const next = await downloadsBridge.retry(id);
+      if (next) setDownloadSnapshot(next);
+    },
+    [downloadsBridge]
+  );
+
+  const handleRemoveDownload = useCallback(
+    async (id: string, deleteFiles = false) => {
+      if (downloadsBridge) {
+        const next = await downloadsBridge.remove(id, deleteFiles);
+        if (next) setDownloadSnapshot(next);
+        return;
+      }
+      setDownloadSnapshot((prev) => {
+        const nextTasks = prev.tasks.filter((item) => item.id !== id);
+        saveWebFallbackTasks(nextTasks);
+        return { ...prev, tasks: nextTasks };
+      });
+    },
+    [downloadsBridge]
+  );
+
+  const handleClearCompletedDownloads = useCallback(async () => {
+    if (downloadsBridge) {
+      const next = await downloadsBridge.clearCompleted();
+      if (next) setDownloadSnapshot(next);
+      return;
+    }
+    setDownloadSnapshot((prev) => {
+      saveWebFallbackTasks([]);
+      return { ...prev, tasks: [] };
+    });
+  }, [downloadsBridge]);
+
+  const handleChooseDownloadFolder = useCallback(async () => {
+    if (!downloadsBridge) return;
+    const next = await downloadsBridge.chooseFolder();
+    if (next) setDownloadSnapshot(next);
+  }, [downloadsBridge]);
+
+  const handleOpenDownloadFolder = useCallback(
+    async (id?: string) => {
+      if (!downloadsBridge) return;
+      await downloadsBridge.openFolder(id);
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenDownloadedFile = useCallback(
+    async (id: string) => {
+      if (!downloadsBridge) return;
+      await downloadsBridge.openFile(id);
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenExternalUrl = useCallback(
+    async (url: string) => {
+      if (downloadsBridge) {
+        await downloadsBridge.openExternal(url);
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.click();
+    },
+    [downloadsBridge]
+  );
+
+  const handleDetectTorrentClient =
+    useCallback(async (): Promise<TorrentDetectionResult | null> => {
+      if (!downloadsBridge) return null;
+      return downloadsBridge.detectTorrentClient();
+    }, [downloadsBridge]);
+
+  const handleSaveTorrentConfig = useCallback(
+    async (cfg: Partial<TorrentIntegrationConfig>) => {
+      if (downloadsBridge) {
+        const next = await downloadsBridge.saveTorrentConfig(cfg);
+        if (next) setDownloadSnapshot(next);
+        notify(t.settings.torrentSavedToast, 'success');
+        return;
+      }
+      saveWebFallbackTorrentConfig(cfg);
+      setDownloadSnapshot((prev) => ({
+        ...prev,
+        torrentConfig: { ...prev.torrentConfig, ...cfg, password: '', apiKey: '' },
+      }));
+      notify(t.settings.torrentSavedToast, 'success');
+    },
+    [downloadsBridge, notify, t.settings.torrentSavedToast]
+  );
+
+  const handleTestTorrentConnection = useCallback(
+    async (
+      cfg?: Partial<TorrentIntegrationConfig>
+    ): Promise<TorrentConnectionTestResult | null> => {
+      if (!downloadsBridge) return null;
+      const result = await downloadsBridge.testTorrentConnection(cfg);
+      const refreshed = await downloadsBridge.getState().catch(() => null);
+      if (refreshed) setDownloadSnapshot(refreshed);
+      return result;
+    },
+    [downloadsBridge]
+  );
+
+  const handleOpenTorrentSettings = useCallback(() => {
+    setActiveSection('settings');
+    window.setTimeout(() => {
+      document.getElementById('torrent-integration-settings')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 80);
+  }, []);
+
+  const handleOpenQbitSetupWizard = useCallback(() => {
+    setIsQbitSetupModalOpen(true);
+    if (qbitSetupBridge) {
+      void qbitSetupBridge.checkStatus().then((next) => {
+        if (next) setQbitSetupState(next);
+      });
+    }
+  }, [qbitSetupBridge]);
+
+  const handleRecheckQbitSetup = useCallback(async () => {
+    if (!qbitSetupBridge) return;
+    const next = await qbitSetupBridge.checkStatus();
+    if (next) setQbitSetupState(next);
+  }, [qbitSetupBridge]);
+
+  const handleStartQbitInstall = useCallback(
+    async (userConfirmed: boolean) => {
+      if (!qbitSetupBridge) return;
+      const next = await qbitSetupBridge.startInstall(userConfirmed);
+      if (next) setQbitSetupState(next);
+    },
+    [qbitSetupBridge]
+  );
+
+  const handleLaunchQbitClient = useCallback(async () => {
+    if (!qbitSetupBridge) return;
+    const res = await qbitSetupBridge.launchClient();
+    if (!res?.ok && res?.error) {
+      notify(res.error, 'error');
+    }
+  }, [qbitSetupBridge, notify]);
+
+  const handleDismissQbitSetup = useCallback(() => {
+    if (!qbitSetupBridge) return;
+    void qbitSetupBridge.dismiss().then((next) => {
+      if (next) setQbitSetupState(next);
+    });
+  }, [qbitSetupBridge]);
+
+  const handleGenerateQbitPassword = useCallback(async (): Promise<string> => {
+    if (qbitSetupBridge) {
+      return qbitSetupBridge.generatePassword();
+    }
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
+    const arr = new Uint8Array(16);
+    window.crypto.getRandomValues(arr);
+    return Array.from(arr, (b) => chars[b % chars.length]).join('');
+  }, [qbitSetupBridge]);
+
+  const handleSaveAndVerifyQbitWebUi = useCallback(
+    async (cfg: Partial<TorrentIntegrationConfig>): Promise<TorrentConnectionTestResult | null> => {
+      await handleSaveTorrentConfig(cfg);
+      const res = await handleTestTorrentConnection(cfg);
+      if (qbitSetupBridge) {
+        const refreshed = await qbitSetupBridge.refreshLocal().catch(() => null);
+        if (refreshed) setQbitSetupState(refreshed);
+      }
+      return res;
+    },
+    [handleSaveTorrentConfig, handleTestTorrentConnection, qbitSetupBridge]
+  );
+
+  const handleOpenOfficialQbitDownload = useCallback(() => {
+    if (qbitSetupBridge) {
+      void qbitSetupBridge.openOfficialDownload();
+      return;
+    }
+    void handleOpenExternalUrl(QBIT_OFFICIAL_DOWNLOAD_URL);
+  }, [qbitSetupBridge, handleOpenExternalUrl]);
+
+  const handleOpenPresentMonManager = useCallback(() => {
+    setIsPresentMonModalOpen(true);
+    if (presentMonSetupBridge) {
+      void presentMonSetupBridge.checkStatus({ force: true }).then((next) => {
+        if (next) setPresentMonSetupState(next);
+      });
+    }
+  }, [presentMonSetupBridge]);
+
+  const handleCheckPresentMonUpdates = useCallback(async () => {
+    if (!presentMonSetupBridge) return;
+    const next = await presentMonSetupBridge.checkStatus({ force: true });
+    if (next) setPresentMonSetupState(next);
+  }, [presentMonSetupBridge]);
+
+  const handleStartPresentMonInstallOrUpdate = useCallback(
+    async (
+      userConfirmed: boolean,
+      mode: 'auto' | 'install' | 'update' | 'repair' | 'reinstall' = 'auto'
+    ) => {
+      if (!presentMonSetupBridge) return;
+      const next = await presentMonSetupBridge.startInstall(userConfirmed, mode);
+      if (next) setPresentMonSetupState(next);
+    },
+    [presentMonSetupBridge]
+  );
+
+  const handleCancelPresentMonOperation = useCallback(() => {
+    if (!presentMonSetupBridge) return;
+    void presentMonSetupBridge.cancel().then((next) => {
+      if (next) setPresentMonSetupState(next);
+    });
+  }, [presentMonSetupBridge]);
+
+  const handleDismissPresentMonPrompt = useCallback(
+    (declinePermanently: boolean) => {
+      if (!presentMonSetupBridge) return;
+      void presentMonSetupBridge.dismiss(declinePermanently).then((next) => {
+        if (next) setPresentMonSetupState(next);
+      });
+    },
+    [presentMonSetupBridge]
+  );
+
+  const handleOpenOfficialPresentMonReleases = useCallback(() => {
+    if (presentMonSetupBridge) {
+      void presentMonSetupBridge.openOfficialReleases();
+      return;
+    }
+    void handleOpenExternalUrl(PRESENTMON_OFFICIAL_RELEASES_URL);
+  }, [presentMonSetupBridge, handleOpenExternalUrl]);
+
+  const handleSelectOnboardingTheme = useCallback(
+    (choice: OnboardingThemeChoice) => {
+      if (choice === 'light') {
+        handleToggleLightMode(true);
+      } else if (choice === 'ps5') {
+        handleToggleAlwaysPs5Theme(true);
+      } else if (choice === 'xbox') {
+        handleToggleAlwaysXboxTheme(true);
+      } else {
+        setLauncherSettings((prev) => ({
+          ...prev,
+          lightMode: false,
+          alwaysPs5Theme: false,
+          alwaysXboxTheme: false,
+          customTheme: { ...prev.customTheme, enabled: false },
+        }));
+        stopPsAmbientSound();
+        stopXboxAmbientSound();
+      }
+    },
+    [handleToggleLightMode, handleToggleAlwaysPs5Theme, handleToggleAlwaysXboxTheme]
+  );
+
+  const handleCompleteOnboarding = useCallback(
+    (destination: 'store' | 'settings') => {
+      setLocalOnboardingCompleted(true);
+      hasAutoPromptedQbitRef.current = true;
+      setOnboardingPhase('completed');
+      setActiveSection(destination);
+      if (settingsBridge?.completeOnboarding) {
+        void settingsBridge.completeOnboarding({
+          completed: true,
+          version: resolvedAppVersion,
+        });
+      }
+      if (qbitSetupBridge) {
+        void qbitSetupBridge.dismiss().then((next) => {
+          if (next) setQbitSetupState(next);
+        });
+      }
+    },
+    [resolvedAppVersion, settingsBridge, qbitSetupBridge]
+  );
+
+  // Welcome Setup preview trigger — allowed only in Google AI Studio / Web Preview, hidden in Desktop app
+  const handleReplayOnboarding = useCallback(() => {
+    if (isDesktopApp) return;
+    setOnboardingPhase('active');
+  }, [isDesktopApp]);
+
   const isBackgroundRefreshingRef = useRef(false);
   const lastRefreshAttemptAtRef = useRef(0);
 
-  const refreshCatalogSilently = useCallback(async (url: string, force = false) => {
-    const clean = url.trim();
-    if (!clean || isBackgroundRefreshingRef.current) return;
+  const applyCatalogDiffSilently = useCallback((incoming: SheetCatalogData): boolean => {
+    const prev = catalogRef.current;
+    let anyChanged = false;
+    const merged: SheetCatalogData = { ...prev };
 
-    const now = Date.now();
-    if (!force && now - lastRefreshAttemptAtRef.current < 3000) {
-      return;
+    for (const tab of ALL_SHEET_TABS) {
+      const nextItems =
+        tab === 'game' && (!incoming.game || incoming.game.length === 0)
+          ? prev.game.length > 0
+            ? prev.game
+            : DEFAULT_CATALOG.game
+          : incoming[tab] || [];
+
+      const prevSig =
+        tabSignaturesRef.current[tab] ??
+        (tabSignaturesRef.current[tab] = JSON.stringify(prev[tab] || []));
+      const nextSig = JSON.stringify(nextItems);
+
+      if (nextSig !== prevSig) {
+        tabSignaturesRef.current[tab] = nextSig;
+        merged[tab] = nextItems;
+        anyChanged = true;
+      } else {
+        merged[tab] = prev[tab];
+      }
     }
 
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setIsOnline(false);
-      setConnectivityBadge('offline');
-      return;
+    if (anyChanged) {
+      setCatalog(merged);
+      window.setTimeout(() => {
+        void saveCachedCatalog(merged);
+      }, 0);
     }
 
-    lastRefreshAttemptAtRef.current = now;
-    isBackgroundRefreshingRef.current = true;
-    try {
-      const latest = await fetchCatalogFromGas(clean);
-      hasCompletedLiveSyncRef.current = true;
-      const nextCatalog: SheetCatalogData = {
-        ...latest,
-        game: latest.game.length > 0 ? latest.game : DEFAULT_CATALOG.game,
-      };
-      const nextSignature = JSON.stringify(nextCatalog);
+    return anyChanged;
+  }, []);
 
-      if (nextSignature !== lastCatalogSignatureRef.current) {
-        lastCatalogSignatureRef.current = nextSignature;
-        setCatalog(nextCatalog);
-        void saveCachedCatalog(nextCatalog);
+  const refreshCatalogSilently = useCallback(
+    async (url: string, force = false) => {
+      const clean = url.trim();
+      if (!clean || isBackgroundRefreshingRef.current) return;
+
+      const now = Date.now();
+      if (!force && now - lastRefreshAttemptAtRef.current < 60000) {
+        return;
       }
 
-      void precacheCatalogImages(nextCatalog);
-    } catch {
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setIsOnline(false);
         setConnectivityBadge('offline');
+        return;
       }
-    } finally {
-      isBackgroundRefreshingRef.current = false;
-    }
-  }, []);
+
+      lastRefreshAttemptAtRef.current = now;
+      isBackgroundRefreshingRef.current = true;
+      try {
+        const latest = await fetchCatalogFromGas(clean);
+        hasCompletedLiveSyncRef.current = true;
+        const changed = applyCatalogDiffSilently(latest);
+        if (changed) {
+          void precacheCatalogImages(latest);
+        }
+      } catch {
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          setIsOnline(false);
+          setConnectivityBadge('offline');
+        }
+      } finally {
+        isBackgroundRefreshingRef.current = false;
+      }
+    },
+    [applyCatalogDiffSilently]
+  );
 
   // Hydrate catalog from IndexedDB immediately so offline sessions retain data & warm cover cache
   useEffect(() => {
@@ -584,16 +1346,8 @@ export default function App() {
     void loadCachedCatalog().then((cached) => {
       if (cancelled) return;
       if (cached && !hasCompletedLiveSyncRef.current) {
-        const nextCatalog: SheetCatalogData = {
-          ...cached,
-          game: cached.game.length > 0 ? cached.game : DEFAULT_CATALOG.game,
-        };
-        const nextSignature = JSON.stringify(nextCatalog);
-        if (nextSignature !== lastCatalogSignatureRef.current) {
-          lastCatalogSignatureRef.current = nextSignature;
-          setCatalog(nextCatalog);
-        }
-        void precacheCatalogImages(nextCatalog);
+        applyCatalogDiffSilently(cached);
+        void precacheCatalogImages(cached);
       } else {
         void precacheCatalogImages(DEFAULT_CATALOG);
       }
@@ -601,7 +1355,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [applyCatalogDiffSilently]);
 
   // Monitor WiFi / network state transitions
   useEffect(() => {
@@ -643,10 +1397,12 @@ export default function App() {
     };
   }, [gasUrl, refreshCatalogSilently]);
 
-  // Quietly check for catalog updates on mount, focus, visibility, and every 30s when visible & online
+  // Quietly check for catalog updates in the background (without blocking startup or focus switching)
   useEffect(() => {
     if (!gasUrl || !isOnline) return;
-    void refreshCatalogSilently(gasUrl, true);
+    const initialTimer = window.setTimeout(() => {
+      void refreshCatalogSilently(gasUrl, true);
+    }, 1200);
 
     const handleFocusOrVisible = () => {
       if (document.visibilityState === 'visible') {
@@ -660,15 +1416,16 @@ export default function App() {
       if (document.visibilityState === 'visible') {
         void refreshCatalogSilently(gasUrl);
       }
-    }, 30000);
+    }, 180000);
     return () => {
+      window.clearTimeout(initialTimer);
       window.removeEventListener('focus', handleFocusOrVisible);
       document.removeEventListener('visibilitychange', handleFocusOrVisible);
       window.clearInterval(intervalId);
     };
   }, [gasUrl, isOnline, refreshCatalogSilently]);
 
-  // Keep selectedGame and selectedStudio synchronized with live catalog updates and URL ?game=<slug>
+  // Keep selectedGame and selectedStudio synchronized with live catalog updates without abruptly closing them
   useEffect(() => {
     const slug = new URLSearchParams(window.location.search).get('game');
     setSelectedGame((prev) => {
@@ -689,10 +1446,7 @@ export default function App() {
             prev.rawFields.launcher === sameEntry.rawFields.launcher;
           return isUnchanged ? prev : sameEntry;
         }
-        if (hasCompletedLiveSyncRef.current) {
-          updateGameUrlParam(null, true);
-          return null;
-        }
+        return prev;
       }
       if (slug) {
         return findItemBySlug(catalog, slug) || prev;
@@ -708,7 +1462,7 @@ export default function App() {
           ? prev
           : sameStudio;
       }
-      return hasCompletedLiveSyncRef.current ? null : prev;
+      return prev;
     });
   }, [catalog]);
 
@@ -789,7 +1543,7 @@ export default function App() {
         if (!matchesSelectedGenre) continue;
       }
 
-      if (canRunFilter !== 'all') {
+      if (launcherSettings.enableCanRunIt && canRunFilter !== 'all') {
         const evalRes = evaluateCanRunGame(item, systemSpecs);
         if (canRunFilter === 'can-run' && evalRes.status !== 'can-run') continue;
         if (canRunFilter === 'cannot-run' && evalRes.status !== 'cannot-run') continue;
@@ -858,6 +1612,7 @@ export default function App() {
     searchQuery,
     genreFilter,
     canRunFilter,
+    launcherSettings.enableCanRunIt,
     systemSpecs,
     sortBy,
     favorites,
@@ -898,15 +1653,67 @@ export default function App() {
     setActiveSection('studios');
   };
 
+  const effectiveSoundEnabled =
+    soundEnabled &&
+    launcherSettings.soundVolume > 0 &&
+    (launcherSettings.ambientMusicEnabled || launcherSettings.uiClickSoundsEnabled);
+
+  const activeDownloadsCount = useMemo(
+    () =>
+      downloadSnapshot.tasks.filter(
+        (task) =>
+          task.status === 'downloading' ||
+          task.status === 'resolving' ||
+          task.status === 'queued'
+      ).length,
+    [downloadSnapshot.tasks]
+  );
+
+  if (onboardingPhase === 'checking') {
+    return (
+      <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[#f4f6f9] dark:bg-[#0e141b]">
+        <div className="w-9 h-9 rounded-full border-2 border-[#0284c7] dark:border-[#38bdf8] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (onboardingPhase === 'active') {
+    return (
+      <FirstLaunchOnboarding
+        isDesktopApp={isDesktopApp}
+        desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+        settings={launcherSettings}
+        activeTheme={activeTheme}
+        setupState={qbitSetupState}
+        torrentConfig={downloadSnapshot.torrentConfig}
+        torrentConnected={downloadSnapshot.torrentConnected}
+        onSelectTheme={handleSelectOnboardingTheme}
+        onUpdateCustomTheme={handleUpdateCustomTheme}
+        onResetCustomTheme={handleResetCustomTheme}
+        onChangeLanguage={handleChangeLanguage}
+        onRecheckQbit={handleRecheckQbitSetup}
+        onStartQbitInstall={handleStartQbitInstall}
+        onLaunchQbitClient={handleLaunchQbitClient}
+        onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
+        onGenerateQbitPassword={handleGenerateQbitPassword}
+        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+        onCompleteOnboarding={handleCompleteOnboarding}
+      />
+    );
+  }
+
   return (
-    <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#141921] text-[#e5e9f0]">
+    <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#141921] dark:text-[#e5e9f0]">
       <TopUtilityBar
         activeTheme={activeTheme}
-        soundEnabled={soundEnabled}
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        activeDownloadsCount={activeDownloadsCount}
+        soundEnabled={effectiveSoundEnabled}
         isFullscreen={isFullscreen}
         onToggleSound={() => setSoundEnabled((prev) => !prev)}
         onToggleFullscreen={handleToggleFullscreen}
-        desktopVersion={desktopUpdateState?.currentVersion || null}
+        desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
         updateBadgeStatus={updateBadgeStatus}
         onOpenUpdates={
           updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
@@ -920,13 +1727,14 @@ export default function App() {
         activeTheme={activeTheme}
         compactNavbar={launcherSettings.compactNavbar}
         language={launcherSettings.language}
+        activeDownloadsCount={activeDownloadsCount}
       />
 
       {catalog.maintenance.some(
         (m) => (m.rawFields.active || '').toLowerCase() === 'yes' || m.rawFields.active === 'true'
       ) && (
-        <div className="bg-[#f59e0b]/15 border-b border-[#f59e0b]/30 px-4 py-2 text-[12.5px] text-[#fde68a] flex items-center justify-center gap-2 shrink-0">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+        <div className="bg-amber-500/15 border-b border-amber-500/35 px-4 py-2 text-[12.5px] text-amber-900 dark:text-[#fde68a] flex items-center justify-center gap-2 shrink-0">
+          <WarningCircle className="w-4 h-4 shrink-0" />
           <span>{catalog.maintenance[0]?.description || catalog.maintenance[0]?.name}</span>
         </div>
       )}
@@ -958,7 +1766,10 @@ export default function App() {
               genreFilter={genreFilter}
               onGenreFilterChange={setGenreFilter}
               canRunFilter={canRunFilter}
-              onCanRunFilterChange={setCanRunFilter}
+              onCanRunFilterChange={
+                launcherSettings.enableCanRunIt ? setCanRunFilter : undefined
+              }
+              canRunItEnabled={launcherSettings.enableCanRunIt}
               onClearAllFilters={() => {
                 setSearchQuery('');
                 setGenreFilter('all');
@@ -979,6 +1790,7 @@ export default function App() {
             catalog={catalog}
             favorites={favorites}
             systemSpecs={systemSpecs}
+            canRunItEnabled={launcherSettings.enableCanRunIt}
             isRefreshingSpecs={isRefreshingSpecs}
             language={launcherSettings.language}
             onRefreshSpecs={handleRefreshSystemSpecs}
@@ -1011,21 +1823,85 @@ export default function App() {
           <RequestsView
             gasUrl={gasUrl}
             language={launcherSettings.language}
+            activeTheme={activeTheme}
+            lightMode={launcherSettings.lightMode}
             onNotify={notify}
+          />
+        )}
+
+        {activeSection === 'downloads' && (
+          <DownloadsView
+            snapshot={downloadSnapshot}
+            isDesktopApp={Boolean(downloadsBridge)}
+            freeSpaceGB={systemSpecs.freeSpaceGB ?? null}
+            language={launcherSettings.language}
+            onStartDownload={handleStartDownloadPayload}
+            onAddTorrentFile={handleAddTorrentFile}
+            onPauseDownload={handlePauseDownload}
+            onResumeDownload={handleResumeDownload}
+            onCancelDownload={handleCancelDownload}
+            onRetryDownload={handleRetryDownload}
+            onRemoveDownload={handleRemoveDownload}
+            onClearCompleted={handleClearCompletedDownloads}
+            onChooseFolder={handleChooseDownloadFolder}
+            onOpenFolder={handleOpenDownloadFolder}
+            onOpenFile={handleOpenDownloadedFile}
+            onOpenExternal={handleOpenExternalUrl}
+            onOpenTorrentSettings={handleOpenTorrentSettings}
+            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+          />
+        )}
+
+        {activeSection === 'hardware' && (
+          <HardwareMonitorView
+            isDesktopApp={isDesktopApp}
+            language={launcherSettings.language}
+            presentMonSetupState={presentMonSetupState}
+            onOpenPresentMonManager={handleOpenPresentMonManager}
           />
         )}
 
         {activeSection === 'settings' && (
           <SettingsView
             settings={launcherSettings}
-            isDesktopApp={Boolean(settingsBridge)}
+            isDesktopApp={isDesktopApp}
+            desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
             isUpdatingAutoLaunch={isUpdatingAutoLaunch}
+            downloadFolder={downloadSnapshot.downloadFolder}
+            torrentConfig={downloadSnapshot.torrentConfig}
+            torrentConnected={downloadSnapshot.torrentConnected}
+            torrentVersion={downloadSnapshot.torrentVersion}
+            torrentWebApiVersion={downloadSnapshot.torrentWebApiVersion}
+            torrentError={downloadSnapshot.torrentError}
             onChangeLanguage={handleChangeLanguage}
             onToggleStartWithComputer={handleToggleStartWithComputer}
+            onChangeCloseBehavior={handleChangeCloseBehavior}
+            onExitApplication={handleExitApplication}
+            onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
             onToggleCompactNavbar={handleToggleCompactNavbar}
+            onToggleLightMode={handleToggleLightMode}
             onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
             onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
+            onUpdateCustomTheme={handleUpdateCustomTheme}
+            onResetCustomTheme={handleResetCustomTheme}
+            onToggleAmbientMusic={handleToggleAmbientMusic}
+            onToggleUiClickSounds={handleToggleUiClickSounds}
+            onChangeSoundVolume={handleChangeSoundVolume}
+            onPreviewSoundVolume={handlePreviewSoundVolume}
             onResetDefaults={handleResetLauncherSettings}
+            onChooseDownloadFolder={handleChooseDownloadFolder}
+            onOpenDownloadFolder={() => handleOpenDownloadFolder()}
+            onOpenExternal={handleOpenExternalUrl}
+            onDetectTorrentClient={handleDetectTorrentClient}
+            onSaveTorrentConfig={handleSaveTorrentConfig}
+            onTestTorrentConnection={handleTestTorrentConnection}
+            qbitSetupState={qbitSetupState}
+            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+            presentMonSetupState={presentMonSetupState}
+            onOpenPresentMonManager={handleOpenPresentMonManager}
+            onCheckPresentMonUpdates={handleCheckPresentMonUpdates}
+            onStartPresentMonInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+            onReplayOnboarding={!isDesktopApp ? handleReplayOnboarding : undefined}
           />
         )}
       </main>
@@ -1047,8 +1923,17 @@ export default function App() {
         initialViewMode={modalViewMode}
         favorites={favorites}
         systemSpecs={systemSpecs}
+        canRunItEnabled={launcherSettings.enableCanRunIt}
         isRefreshingSpecs={isRefreshingSpecs}
+        isDesktopApp={Boolean(downloadsBridge)}
         language={launcherSettings.language}
+        downloadTasks={downloadSnapshot.tasks}
+        onStartDownload={handleStartMirrorDownload}
+        onPauseDownload={handlePauseDownload}
+        onResumeDownload={handleResumeDownload}
+        onCancelDownload={handleCancelDownload}
+        onOpenDownloadFolder={handleOpenDownloadFolder}
+        onOpenDownloadsTab={() => setActiveSection('downloads')}
         onRefreshSpecs={handleRefreshSystemSpecs}
         onSaveCustomSpecs={handleSaveCustomSystemSpecs}
         onResetCustomSpecs={handleResetSystemSpecs}
@@ -1061,7 +1946,9 @@ export default function App() {
         <DesktopUpdaterModal
           isOpen={isUpdaterModalOpen}
           activeTheme={activeTheme}
+          language={launcherSettings.language}
           state={desktopUpdateState}
+          fetchedReleaseNotes={fetchedUpdateReleaseNotes}
           onClose={() => setIsUpdaterModalOpen(false)}
           onCheckForUpdates={handleCheckForUpdates}
           onDownloadUpdate={handleDownloadUpdate}
@@ -1071,6 +1958,37 @@ export default function App() {
         />
       )}
 
+      <QbitSetupWizardModal
+        isOpen={isQbitSetupModalOpen}
+        isDesktopApp={Boolean(qbitSetupBridge || downloadsBridge)}
+        language={launcherSettings.language}
+        setupState={qbitSetupState}
+        torrentConfig={downloadSnapshot.torrentConfig}
+        torrentConnected={downloadSnapshot.torrentConnected}
+        onClose={() => setIsQbitSetupModalOpen(false)}
+        onDismissFirstLaunch={handleDismissQbitSetup}
+        onRecheck={handleRecheckQbitSetup}
+        onStartInstall={handleStartQbitInstall}
+        onLaunchClient={handleLaunchQbitClient}
+        onOpenOfficialDownload={handleOpenOfficialQbitDownload}
+        onGeneratePassword={handleGenerateQbitPassword}
+        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+        onOpenSettings={handleOpenTorrentSettings}
+      />
+
+      <PresentMonSetupModal
+        isOpen={isPresentMonModalOpen}
+        isDesktopApp={Boolean(presentMonSetupBridge || downloadsBridge)}
+        language={launcherSettings.language}
+        setupState={presentMonSetupState}
+        onClose={() => setIsPresentMonModalOpen(false)}
+        onDismiss={handleDismissPresentMonPrompt}
+        onCheckUpdates={handleCheckPresentMonUpdates}
+        onStartInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+        onCancelOperation={handleCancelPresentMonOperation}
+        onOpenOfficialReleases={handleOpenOfficialPresentMonReleases}
+      />
+
       {/* Persistent Offline Mode / Auto-hiding Online Mode Badge */}
       {connectivityBadge !== 'hidden' && (
         <div
@@ -1079,13 +1997,13 @@ export default function App() {
           className="fixed bottom-3.5 start-3.5 sm:bottom-4 sm:start-4 z-[85] pointer-events-none select-none"
         >
           {connectivityBadge === 'offline' ? (
-            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#7f1d1d]/95 border border-[#ef4444]/60 shadow-[0_10px_28px_rgba(0,0,0,0.55)] text-xs font-semibold text-[#fecaca] backdrop-blur-md">
-              <WifiOff className="w-4 h-4 text-[#f87171] shrink-0" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#7f1d1d]/95 border border-[#ef4444]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#fecaca] backdrop-blur-md">
+              <WifiSlash className="w-4 h-4 text-[#f87171] shrink-0" />
               <span>{t.topbar.offlineMode}</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#064e3b]/95 border border-[#10b981]/60 shadow-[0_10px_28px_rgba(0,0,0,0.55)] text-xs font-semibold text-[#a7f3d0] backdrop-blur-md">
-              <Wifi className="w-4 h-4 text-[#34d399] shrink-0" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#064e3b]/95 border border-[#10b981]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#a7f3d0] backdrop-blur-md">
+              <WifiHigh className="w-4 h-4 text-[#34d399] shrink-0" />
               <span>{t.topbar.onlineMode}</span>
             </div>
           )}
@@ -1098,15 +2016,17 @@ export default function App() {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className="pointer-events-auto px-3.5 py-2.5 rounded bg-[#1b222d] border border-white/[0.12] shadow-xl flex items-center gap-2.5 text-[12.5px] text-white"
+              className="pointer-events-auto px-3.5 py-2.5 rounded bg-white dark:bg-[#1b222d] border border-slate-200 dark:border-white/[0.12] shadow-xl flex items-center gap-2.5 text-[12.5px] text-slate-900 dark:text-white"
             >
               {toast.type === 'success' && (
-                <CheckCircle2 className="w-4 h-4 text-[#34d399] shrink-0" />
+                <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-[#34d399] shrink-0" />
               )}
               {toast.type === 'error' && (
-                <AlertCircle className="w-4 h-4 text-[#f87171] shrink-0" />
+                <WarningCircle className="w-4 h-4 text-rose-600 dark:text-[#f87171] shrink-0" />
               )}
-              {toast.type === 'info' && <Info className="w-4 h-4 text-[#66c0f4] shrink-0" />}
+              {toast.type === 'info' && (
+                <Info className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+              )}
               <span>{toast.message}</span>
             </div>
           ))}
