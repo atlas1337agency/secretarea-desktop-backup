@@ -1,19 +1,23 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import {
   ArrowSquareOut,
   ArrowsIn,
   Bell,
-  Clock,
   CornersOut,
   Cpu,
   DownloadSimple,
   Gear,
+  GraphicsCard,
+  Memory,
   SpeakerHigh,
   SpeakerSlash,
   SpinnerGap,
+  Thermometer,
+  WifiHigh,
 } from '@phosphor-icons/react';
-import type { PrimarySection } from '../types';
+import type { HardwareMonitorSnapshot, PrimarySection } from '../types';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
+import { formatStorageBytes, isValidMetric } from '../services/hardwareMonitor';
 import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
@@ -32,7 +36,29 @@ interface TopUtilityBarProps {
   unreadNotificationsCount?: number;
   isNotificationCenterOpen?: boolean;
   onOpenNotifications?: () => void;
+  hardwareSnapshot?: HardwareMonitorSnapshot | null;
   language?: AppLanguage;
+}
+
+function formatCompactPercent(value: number | null | undefined): string {
+  if (!isValidMetric(value)) return '--';
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  return `${clamped}%`;
+}
+
+function formatCompactNetSpeed(bytesPerSec: number | null | undefined): string {
+  if (!isValidMetric(bytesPerSec) || bytesPerSec < 0) return '--';
+  const mb = bytesPerSec / (1024 * 1024);
+  if (mb >= 1) {
+    return `${mb >= 10 ? Math.round(mb) : mb.toFixed(1)} MB/s`;
+  }
+  const kb = bytesPerSec / 1024;
+  return `${Math.round(kb)} KB/s`;
+}
+
+function formatCompactTemp(celsius: number | null | undefined): string {
+  if (!isValidMetric(celsius) || celsius <= 0) return '--';
+  return `${Math.round(celsius)}°C`;
 }
 
 export function TopUtilityBar({
@@ -51,34 +77,88 @@ export function TopUtilityBar({
   unreadNotificationsCount = 0,
   isNotificationCenterOpen = false,
   onOpenNotifications,
+  hardwareSnapshot = null,
   language = 'en',
 }: TopUtilityBarProps) {
-  const [now, setNow] = useState<Date>(() => new Date());
   const t = getTranslations(language);
 
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
   const hasConsoleAudio = isPs5Theme || isXboxTheme;
 
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
+  const primaryGpu = hardwareSnapshot?.gpus?.[0] || null;
+  const gpuUtil = primaryGpu?.utilizationPercent ?? null;
+  const cpuUtil = hardwareSnapshot?.cpu?.usagePercent ?? null;
+  const ramUtil = hardwareSnapshot?.ram?.usagePercent ?? null;
+  const netDownBytes =
+    hardwareSnapshot?.network?.totalDownloadBytesPerSec ??
+    hardwareSnapshot?.network?.activeInterface?.downloadBytesPerSec ??
+    null;
+  const cpuTemp = hardwareSnapshot?.cpu?.temperatureCelsius ?? null;
+  const gpuTemp = primaryGpu?.temperatureCelsius ?? null;
+  const validTemps = [cpuTemp, gpuTemp].filter(
+    (temp): temp is number => isValidMetric(temp) && temp > 0
+  );
+  const pcTemp = validTemps.length > 0 ? Math.max(...validTemps) : null;
 
-  const formattedDate = now.toLocaleDateString(t.locale, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const getLoadColorClass = (pct: number | null | undefined) => {
+    if (!isValidMetric(pct)) {
+      return isPs5Theme
+        ? 'text-white/55'
+        : isXboxTheme
+        ? 'text-[#b7dab9]/70'
+        : 'text-slate-400 dark:text-[#7c8da6]';
+    }
+    if (pct >= 88) return 'text-rose-500 dark:text-[#fb7185]';
+    if (pct >= 70) return 'text-amber-500 dark:text-[#fbbf24]';
+    return isPs5Theme
+      ? 'text-[#7cc4ff]'
+      : isXboxTheme
+      ? 'text-[#6ee755]'
+      : 'text-[#0284c7] dark:text-[#38bdf8]';
+  };
 
-  const formattedTime = now.toLocaleTimeString(t.locale, {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const getTempColorClass = (temp: number | null | undefined) => {
+    if (!isValidMetric(temp) || temp <= 0) {
+      return isPs5Theme
+        ? 'text-white/55'
+        : isXboxTheme
+        ? 'text-[#b7dab9]/70'
+        : 'text-slate-400 dark:text-[#7c8da6]';
+    }
+    if (temp >= 85) return 'text-rose-500 dark:text-[#fb7185]';
+    if (temp >= 72) return 'text-amber-500 dark:text-[#fbbf24]';
+    return isXboxTheme ? 'text-[#6ee755]' : 'text-emerald-600 dark:text-[#34d399]';
+  };
+
+  const gpuTooltip = primaryGpu?.model
+    ? `GPU (${primaryGpu.model}): ${formatCompactPercent(gpuUtil)}`
+    : `GPU: ${formatCompactPercent(gpuUtil)}`;
+  const cpuTooltip = hardwareSnapshot?.cpu?.model
+    ? `CPU (${hardwareSnapshot.cpu.model}): ${formatCompactPercent(cpuUtil)}`
+    : `CPU: ${formatCompactPercent(cpuUtil)}`;
+  const ramTooltip =
+    isValidMetric(hardwareSnapshot?.ram?.usedBytes) &&
+    isValidMetric(hardwareSnapshot?.ram?.totalBytes)
+      ? `RAM: ${formatStorageBytes(hardwareSnapshot.ram.usedBytes)} / ${formatStorageBytes(
+          hardwareSnapshot.ram.totalBytes
+        )} (${formatCompactPercent(ramUtil)})`
+      : `RAM: ${formatCompactPercent(ramUtil)}`;
+  const wifiTooltip = hardwareSnapshot?.network?.activeInterface
+    ? `${hardwareSnapshot.network.activeInterface.displayName}: ↓ ${formatCompactNetSpeed(
+        netDownBytes
+      )}${
+        isValidMetric(hardwareSnapshot.network.activeInterface.speedMbps)
+          ? ` (${hardwareSnapshot.network.activeInterface.speedMbps} Mbps)`
+          : ''
+      }`
+    : `Wi-Fi Speed: ${formatCompactNetSpeed(netDownBytes)}`;
+  const tempTooltip = [
+    isValidMetric(cpuTemp) && cpuTemp > 0 ? `CPU: ${Math.round(cpuTemp)}°C` : null,
+    isValidMetric(gpuTemp) && gpuTemp > 0 ? `GPU: ${Math.round(gpuTemp)}°C` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ') || `PC Temperature: ${formatCompactTemp(pcTemp)}`;
 
   const utilityNavItems: {
     id: PrimarySection;
@@ -107,48 +187,98 @@ export function TopUtilityBar({
       }`}
     >
       <div className="w-full max-w-[1600px] mx-auto h-full px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 text-[11.5px]">
-      {/* Left Zone: Live Date & Time */}
-      <div className="flex items-center gap-1.5 min-w-0 flex-1 font-mono-tabular">
-        <Clock
-          className={`w-3.5 h-3.5 shrink-0 ${
-            isPs5Theme
-              ? 'text-[#7cc4ff]'
-              : isXboxTheme
-              ? 'text-[#6ee755]'
-              : 'text-[#0284c7] dark:text-[#66c0f4]'
-          }`}
-        />
+      {/* Left Zone: Live Desktop Hardware Telemetry (GPU, CPU, RAM, Wi-Fi Speed, PC Temp — Icon & Value Only) */}
+      <button
+        type="button"
+        dir="ltr"
+        onClick={() => onSelectSection('hardware')}
+        title={t.nav.hardwareMonitor}
+        aria-label={t.nav.hardwareMonitor}
+        className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-x-auto no-scrollbar font-mono-tabular text-start cursor-pointer hover:opacity-90 transition-opacity"
+      >
+        {/* GPU */}
         <span
-          className={`hidden sm:inline truncate ${
-            isPs5Theme
-              ? 'text-white/75 font-light'
-              : isXboxTheme
-              ? 'text-[#b7dab9] font-normal'
-              : 'text-slate-600 dark:text-[#b8c7dc]'
-          }`}
+          title={gpuTooltip}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
         >
-          {formattedDate}
+          <GraphicsCard className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(gpuUtil)}`} />
+          <span
+            className={`font-semibold ${
+              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+            }`}
+          >
+            {formatCompactPercent(gpuUtil)}
+          </span>
         </span>
+
+        {/* CPU */}
         <span
-          className={`hidden sm:inline ${
-            hasConsoleAudio ? 'text-white/25' : 'text-slate-300 dark:text-white/25'
-          }`}
-          aria-hidden="true"
+          title={cpuTooltip}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
         >
-          ·
+          <Cpu className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(cpuUtil)}`} />
+          <span
+            className={`font-semibold ${
+              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+            }`}
+          >
+            {formatCompactPercent(cpuUtil)}
+          </span>
         </span>
+
+        {/* RAM */}
         <span
-          className={`whitespace-nowrap ${
-            isPs5Theme
-              ? 'text-white font-light tracking-wider text-[12.5px]'
-              : isXboxTheme
-              ? 'text-white font-semibold tracking-wider text-[12px]'
-              : 'text-slate-900 dark:text-white/90 font-medium'
-          }`}
+          title={ramTooltip}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
         >
-          {formattedTime}
+          <Memory className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(ramUtil)}`} />
+          <span
+            className={`font-semibold ${
+              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+            }`}
+          >
+            {formatCompactPercent(ramUtil)}
+          </span>
         </span>
-      </div>
+
+        {/* Wi-Fi / Network Speed */}
+        <span
+          title={wifiTooltip}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+        >
+          <WifiHigh
+            className={`w-3.5 h-3.5 shrink-0 ${
+              isPs5Theme
+                ? 'text-[#7cc4ff]'
+                : isXboxTheme
+                ? 'text-[#6ee755]'
+                : 'text-[#0284c7] dark:text-[#38bdf8]'
+            }`}
+          />
+          <span
+            className={`font-semibold ${
+              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+            }`}
+          >
+            {formatCompactNetSpeed(netDownBytes)}
+          </span>
+        </span>
+
+        {/* PC Temperature */}
+        <span
+          title={tempTooltip}
+          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+        >
+          <Thermometer className={`w-3.5 h-3.5 shrink-0 ${getTempColorClass(pcTemp)}`} />
+          <span
+            className={`font-semibold ${
+              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+            }`}
+          >
+            {formatCompactTemp(pcTemp)}
+          </span>
+        </span>
+      </button>
 
       {/* Center Zone: Clickable SecretArea Web Version Link */}
       <div className="flex items-center justify-center shrink-0">

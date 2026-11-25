@@ -662,6 +662,74 @@ export function sortStudiosByTop(studios: GameItem[]): GameItem[] {
   );
 }
 
+const STUDIO_TAB_PREFIX_MAP: Partial<Record<SheetTabKey, { prefix: string; field: string }>> = {
+  game: { prefix: 'g', field: 'Games ID' },
+  hypervisor: { prefix: 'h', field: 'Hypervisor ID' },
+  steamtools: { prefix: 's', field: 'SteamTools ID' },
+  architect: { prefix: 'a', field: 'Tools ID' },
+};
+
+const STUDIO_ALL_REF_FIELDS = ['Games ID', 'Hypervisor ID', 'SteamTools ID', 'Tools ID'] as const;
+
+export function buildItemStudiosMap(studios: GameItem[]): Map<string, GameItem[]> {
+  const map = new Map<string, GameItem[]>();
+  const prefixToTab: Record<string, SheetTabKey> = {
+    g: 'game',
+    h: 'hypervisor',
+    s: 'steamtools',
+    a: 'architect',
+  };
+
+  for (const studio of studios) {
+    for (const field of STUDIO_ALL_REF_FIELDS) {
+      const raw = studio.rawFields[field] || '';
+      if (!raw) continue;
+      for (const part of raw.split(',')) {
+        const clean = part.trim().toLowerCase();
+        const match = clean.match(/^([ghsa])(\d+)$/);
+        if (!match) continue;
+        const tab = prefixToTab[match[1]];
+        if (!tab) continue;
+        const key = `${tab}:${match[2]}`;
+        const list = map.get(key);
+        if (!list) {
+          map.set(key, [studio]);
+        } else if (!list.some((s) => s.id === studio.id)) {
+          list.push(studio);
+        }
+      }
+    }
+  }
+  return map;
+}
+
+export function resolveStudiosForItem(item: GameItem, studios: GameItem[]): GameItem[] {
+  if (!item || !studios || studios.length === 0) return [];
+  const meta = STUDIO_TAB_PREFIX_MAP[item.tab];
+  if (!meta) return [];
+  const targetToken = `${meta.prefix}${item.id.trim().toLowerCase()}`;
+  const matched: GameItem[] = [];
+  const seenIds = new Set<string>();
+
+  for (const studio of studios) {
+    if (seenIds.has(studio.id)) continue;
+    for (const field of STUDIO_ALL_REF_FIELDS) {
+      const raw = studio.rawFields[field] || '';
+      if (!raw) continue;
+      const found = raw
+        .split(',')
+        .some((part) => part.trim().toLowerCase() === targetToken);
+      if (found) {
+        seenIds.add(studio.id);
+        matched.push(studio);
+        break;
+      }
+    }
+  }
+
+  return matched;
+}
+
 export function toGameSlug(name: string): string {
   return name
     .toLowerCase()

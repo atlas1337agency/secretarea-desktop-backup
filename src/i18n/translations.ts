@@ -59,6 +59,7 @@ export interface LauncherTranslations {
     closeMenu: string;
     languageLabel: string;
     themeLabel: string;
+    spin: string;
   };
   topbar: {
     webVersion: string;
@@ -92,6 +93,8 @@ export interface LauncherTranslations {
     windowSectionTitle: string;
     compactNavbarTitle: string;
     compactNavbarDesc: string;
+    customCursorTitle: string;
+    customCursorDesc: string;
     lightModeTitle: string;
     lightModeDesc: string;
     darkModeBadge: string;
@@ -437,6 +440,7 @@ export interface LauncherTranslations {
     standard: string;
     free: string;
     dateAdded: string;
+    developerStudio: string;
     repacker: string;
     languages: string;
     genres: string;
@@ -932,6 +936,16 @@ export interface LauncherTranslations {
     emptyState: string;
     changesSuffix: string;
     closeBtn: string;
+    devBadge: string;
+    updateAvailableBadge: string;
+    installedDevBadge: string;
+    devModeEnvLabel: string;
+    prodEnvLabel: string;
+    unpublishedNote: string;
+    syncingAutoLabel: string;
+    newCountLabel: string;
+    changedCountLabel: string;
+    fixedCountLabel: string;
   };
   notificationCenter: {
     buttonLabel: string;
@@ -972,6 +986,32 @@ export interface LauncherTranslations {
       upcominglist: string;
       popularrepacks: string;
     };
+  };
+  spinWheel: {
+    title: string;
+    subtitle: string;
+    spinBtn: string;
+    spinningLabel: string;
+    spinAgainBtn: string;
+    viewGameBtn: string;
+    poolCountSuffix: string;
+    filterAll: string;
+    filterGames: string;
+    filterHv: string;
+    filterCanRun: string;
+    readyTitle: string;
+    readyDesc: string;
+    winnerLabel: string;
+    recentTitle: string;
+    emptyPool: string;
+    repackSizeLabel: string;
+    originalSizeLabel: string;
+    canRunPass: string;
+    canRunFail: string;
+    addFavorite: string;
+    removeFavorite: string;
+    congratsTitle: string;
+    congratsSubtitle: string;
   };
   deals: {
     pageTitle: string;
@@ -1183,6 +1223,7 @@ const EN: LauncherTranslations = {
     closeMenu: 'Close navigation menu',
     languageLabel: 'Language',
     themeLabel: 'Appearance',
+    spin: 'Spin',
   },
   topbar: {
     webVersion: 'SecretArea web version',
@@ -1216,6 +1257,8 @@ const EN: LauncherTranslations = {
     windowSectionTitle: 'Window',
     compactNavbarTitle: 'Compact Navbar',
     compactNavbarDesc: 'Show the navbar as icons, even in a wide window.',
+    customCursorTitle: 'Custom Animated Cursor',
+    customCursorDesc: 'Use the custom desktop vector cursor with ripple click bursts, hover rings, and animated states.',
     lightModeTitle: 'Light / Dark mode',
     lightModeDesc: 'Switch between crisp Light mode and Steam-inspired Dark mode. Enabling PS5 or Xbox theme switches back to Dark mode.',
     darkModeBadge: 'Dark Mode',
@@ -1229,10 +1272,10 @@ const EN: LauncherTranslations = {
     ambientMusicTitle: 'Ambient background music (PS5 / Xbox)',
     ambientMusicDesc: 'Play evolving cosmic PS5 or emerald Xbox Nexus ambient music while a console theme is active.',
     uiSoundsTitle: 'UI click & hover sounds',
-    uiSoundsDesc: 'Play subtle console focus ticks, confirmation chimes, and back tones when navigating buttons and cards.',
+    uiSoundsDesc: 'Play crisp cursor click effects, focus ticks, and back tones across all themes and custom cursor interactions.',
     volumeTitle: 'Master volume',
-    volumeDesc: 'Adjust output volume for both console ambient music and UI sound effects.',
-    consoleThemeAudioHint: 'Select the PS5 or Xbox theme in Window above to hear the active console soundscape.',
+    volumeDesc: 'Adjust output volume for custom cursor click sounds, ambient music, and UI sound effects.',
+    consoleThemeAudioHint: 'Cursor click sounds are active in every theme. Select PS5 or Xbox theme in Window above to also hear ambient console music.',
     activeLabel: 'On',
     inactiveLabel: 'Off',
     downloadSectionTitle: 'Downloads & Storage',
@@ -1561,6 +1604,7 @@ const EN: LauncherTranslations = {
     standard: 'Standard',
     free: 'Free',
     dateAdded: 'Date Added',
+    developerStudio: 'Developer Studio',
     repacker: 'Repacker',
     languages: 'Languages',
     genres: 'Genres',
@@ -2056,6 +2100,16 @@ const EN: LauncherTranslations = {
     emptyState: 'No releases or changelog entries match your filter.',
     changesSuffix: 'changes',
     closeBtn: 'Close',
+    devBadge: 'In Development',
+    updateAvailableBadge: 'Update Available',
+    installedDevBadge: 'Running (Dev Mode)',
+    devModeEnvLabel: 'Development Mode',
+    prodEnvLabel: 'Installed Build',
+    unpublishedNote: 'Not yet pushed to GitHub',
+    syncingAutoLabel: 'Auto-syncing releases...',
+    newCountLabel: 'New',
+    changedCountLabel: 'Changed',
+    fixedCountLabel: 'Fixed',
   },
   notificationCenter: {
     buttonLabel: 'Notifications',
@@ -2096,6 +2150,32 @@ const EN: LauncherTranslations = {
       upcominglist: 'Upcoming List',
       popularrepacks: 'Popular Repacks',
     },
+  },
+  spinWheel: {
+    title: 'Popular Repacks Spin Wheel',
+    subtitle: 'Spin the wheel to discover a random pick from Most Popular Games',
+    spinBtn: 'Spin the Wheel',
+    spinningLabel: 'Spinning...',
+    spinAgainBtn: 'Spin Again',
+    viewGameBtn: 'View game detail',
+    poolCountSuffix: 'games in pool',
+    filterAll: 'All Popular',
+    filterGames: 'Games',
+    filterHv: 'Hypervisor',
+    filterCanRun: 'Can Run It',
+    readyTitle: 'Ready to Discover Something Great?',
+    readyDesc: 'Click SPIN in the center of the wheel to pick a random title from our Most Popular Games catalog.',
+    winnerLabel: 'Lucky Pick',
+    recentTitle: 'Recent Spins',
+    emptyPool: 'No games match this filter in Popular Repacks.',
+    repackSizeLabel: 'Repack',
+    originalSizeLabel: 'Original',
+    canRunPass: 'Runs well on your PC',
+    canRunFail: 'Below PC specs',
+    addFavorite: 'Favorite',
+    removeFavorite: 'Favorited',
+    congratsTitle: 'Congratulations!',
+    congratsSubtitle: 'Your lucky Popular Games pick is ready.',
   },
   deals: {
     pageTitle: 'Game Discovery & Deals Hub',
@@ -2325,6 +2405,7 @@ const FR: LauncherTranslations = {
     closeMenu: 'Fermer le menu de navigation',
     languageLabel: 'Langue',
     themeLabel: 'Apparence',
+    spin: 'Roue',
   },
   topbar: {
     webVersion: 'SecretArea version web',
@@ -2358,6 +2439,8 @@ const FR: LauncherTranslations = {
     windowSectionTitle: 'Fenêtre',
     compactNavbarTitle: 'Barre de navigation compacte',
     compactNavbarDesc: 'Afficher la barre de navigation sous forme d’icônes, même dans une large fenêtre.',
+    customCursorTitle: 'Curseur animé personnalisé',
+    customCursorDesc: 'Utiliser le curseur vectoriel personnalisé avec ondes de clic, anneau de survol et états animés.',
     lightModeTitle: 'Mode Clair / Sombre',
     lightModeDesc: 'Basculez entre le mode Clair lumineux et le mode Sombre. Activer un thème PS5 ou Xbox repasse en mode Sombre.',
     darkModeBadge: 'Mode Sombre',
@@ -2371,10 +2454,10 @@ const FR: LauncherTranslations = {
     ambientMusicTitle: 'Musique d’ambiance (PS5 / Xbox)',
     ambientMusicDesc: 'Joue la musique spatiale PS5 ou l’ambiance émeraude Xbox Nexus lorsqu’un thème console est actif.',
     uiSoundsTitle: 'Sons de clic et survol de l’interface',
-    uiSoundsDesc: 'Joue les clics, survols et tonalités de retour style console lors de la navigation.',
+    uiSoundsDesc: 'Joue des clics de curseur précis, retours de survol et tonalités sur tous les thèmes.',
     volumeTitle: 'Volume principal',
-    volumeDesc: 'Ajuste le niveau sonore global de la musique d’ambiance et des effets sonores de l’interface.',
-    consoleThemeAudioHint: 'Activez le thème PS5 ou Xbox dans la section Fenêtre ci-dessus pour écouter l’ambiance sonore.',
+    volumeDesc: 'Ajuste le niveau sonore des clics du curseur, de la musique d’ambiance et des effets sonores.',
+    consoleThemeAudioHint: 'Les sons de clic fonctionnent sur tous les thèmes. Activez PS5 ou Xbox ci-dessus pour écouter la musique d’ambiance.',
     activeLabel: 'Activé',
     inactiveLabel: 'Désactivé',
     downloadSectionTitle: 'Téléchargements et stockage',
@@ -2703,6 +2786,7 @@ const FR: LauncherTranslations = {
     standard: 'Standard',
     free: 'Gratuit',
     dateAdded: 'Date d’ajout',
+    developerStudio: 'Studio de développement',
     repacker: 'Repacker',
     languages: 'Langues',
     genres: 'Genres',
@@ -3198,6 +3282,16 @@ const FR: LauncherTranslations = {
     emptyState: 'Aucune version ou entrée ne correspond à votre recherche.',
     changesSuffix: 'modifications',
     closeBtn: 'Fermer',
+    devBadge: 'En développement',
+    updateAvailableBadge: 'Mise à jour disponible',
+    installedDevBadge: 'Actif (Mode Dév)',
+    devModeEnvLabel: 'Mode Développement',
+    prodEnvLabel: 'Version Installée',
+    unpublishedNote: 'Pas encore publié sur GitHub',
+    syncingAutoLabel: 'Synchronisation auto...',
+    newCountLabel: 'Nouveautés',
+    changedCountLabel: 'Modifiés',
+    fixedCountLabel: 'Corrigés',
   },
   notificationCenter: {
     buttonLabel: 'Notifications',
@@ -3238,6 +3332,32 @@ const FR: LauncherTranslations = {
       upcominglist: 'Liste à venir',
       popularrepacks: 'Repacks populaires',
     },
+  },
+  spinWheel: {
+    title: 'Roue des Repacks Populaires',
+    subtitle: 'Tournez la roue pour découvrir un jeu aléatoire parmi les Plus Populaires',
+    spinBtn: 'Lancer la roue',
+    spinningLabel: 'Rotation...',
+    spinAgainBtn: 'Relancer',
+    viewGameBtn: 'Voir les détails du jeu',
+    poolCountSuffix: 'jeux dispo',
+    filterAll: 'Tous populaires',
+    filterGames: 'Jeux',
+    filterHv: 'Hypervisor',
+    filterCanRun: 'Compatible PC',
+    readyTitle: 'Prêt pour une surprise ?',
+    readyDesc: 'Cliquez sur SPIN au centre de la roue pour tirer au sort un jeu parmi les Repacks Populaires.',
+    winnerLabel: 'Sélection gagnante',
+    recentTitle: 'Tirages récents',
+    emptyPool: 'Aucun jeu ne correspond à ce filtre dans les Repacks Populaires.',
+    repackSizeLabel: 'Repack',
+    originalSizeLabel: 'Original',
+    canRunPass: 'Compatible avec votre PC',
+    canRunFail: 'Config PC insuffisante',
+    addFavorite: 'Favori',
+    removeFavorite: 'Favori ajouté',
+    congratsTitle: 'Félicitations !',
+    congratsSubtitle: 'Votre sélection aléatoire est prête.',
   },
   deals: {
     pageTitle: 'Découverte & Bons Plans PC',
@@ -3467,6 +3587,7 @@ const ES: LauncherTranslations = {
     closeMenu: 'Cerrar menú de navegación',
     languageLabel: 'Idioma',
     themeLabel: 'Apariencia',
+    spin: 'Ruleta',
   },
   topbar: {
     webVersion: 'SecretArea versión web',
@@ -3500,6 +3621,8 @@ const ES: LauncherTranslations = {
     windowSectionTitle: 'Ventana',
     compactNavbarTitle: 'Barra de navegación compacta',
     compactNavbarDesc: 'Muestra la barra de navegación como iconos, incluso en una ventana ancha.',
+    customCursorTitle: 'Cursor animado personalizado',
+    customCursorDesc: 'Usa el cursor vectorial de escritorio con ondas al hacer clic, anillo al pasar y estados animados.',
     lightModeTitle: 'Modo Claro / Oscuro',
     lightModeDesc: 'Alterna entre el modo Claro y el modo Oscuro. Al activar el tema PS5 o Xbox vuelve al modo Oscuro.',
     darkModeBadge: 'Modo Oscuro',
@@ -3513,10 +3636,10 @@ const ES: LauncherTranslations = {
     ambientMusicTitle: 'Música ambiental de fondo (PS5 / Xbox)',
     ambientMusicDesc: 'Reproduce la música ambiental espacial de PS5 o esmeralda de Xbox Nexus cuando hay un tema de consola activo.',
     uiSoundsTitle: 'Sonidos de clic y enfoque en la interfaz',
-    uiSoundsDesc: 'Reproduce tonos suaves de enfoque, confirmación y retroceso al navegar por botones y tarjetas.',
+    uiSoundsDesc: 'Reproduce efectos nítidos al hacer clic con el cursor, toques de enfoque y retroceso en todos los temas.',
     volumeTitle: 'Volumen principal',
-    volumeDesc: 'Ajusta el nivel de salida tanto para la música ambiental como para los efectos de sonido de la interfaz.',
-    consoleThemeAudioHint: 'Selecciona el tema PS5 o Xbox en Ventana arriba para escuchar el paisaje sonoro de consola.',
+    volumeDesc: 'Ajusta el nivel de salida para los clics del cursor, música ambiental y efectos de sonido.',
+    consoleThemeAudioHint: 'Los sonidos de clic están activos en todos los temas. Selecciona PS5 o Xbox arriba para escuchar música ambiental.',
     activeLabel: 'Activado',
     inactiveLabel: 'Desactivado',
     downloadSectionTitle: 'Descargas y almacenamiento',
@@ -3845,6 +3968,7 @@ const ES: LauncherTranslations = {
     standard: 'Estándar',
     free: 'Gratis',
     dateAdded: 'Fecha añadido',
+    developerStudio: 'Estudio desarrollador',
     repacker: 'Repacker',
     languages: 'Idiomas',
     genres: 'Géneros',
@@ -4340,6 +4464,16 @@ const ES: LauncherTranslations = {
     emptyState: 'No hay versiones ni cambios que coincidan con el filtro.',
     changesSuffix: 'cambios',
     closeBtn: 'Cerrar',
+    devBadge: 'En desarrollo',
+    updateAvailableBadge: 'Actualización disponible',
+    installedDevBadge: 'Activo (Modo Dev)',
+    devModeEnvLabel: 'Modo Desarrollo',
+    prodEnvLabel: 'Versión Instalada',
+    unpublishedNote: 'Aún no publicado en GitHub',
+    syncingAutoLabel: 'Sincronizando versiones...',
+    newCountLabel: 'Nuevas',
+    changedCountLabel: 'Cambios',
+    fixedCountLabel: 'Correcciones',
   },
   notificationCenter: {
     buttonLabel: 'Notificaciones',
@@ -4380,6 +4514,32 @@ const ES: LauncherTranslations = {
       upcominglist: 'Lista próxima',
       popularrepacks: 'Repacks populares',
     },
+  },
+  spinWheel: {
+    title: 'Ruleta de Repacks Populares',
+    subtitle: 'Gira la ruleta para elegir al azar entre los Juegos Más Populares',
+    spinBtn: 'Girar la ruleta',
+    spinningLabel: 'Girando...',
+    spinAgainBtn: 'Girar de nuevo',
+    viewGameBtn: 'Ver detalles del juego',
+    poolCountSuffix: 'juegos',
+    filterAll: 'Todos',
+    filterGames: 'Juegos',
+    filterHv: 'Hypervisor',
+    filterCanRun: 'Puedo jugarlo',
+    readyTitle: '¿Listo para tu próximo juego?',
+    readyDesc: 'Pulsa SPIN en el centro de la ruleta para descubrir un título aleatorio de Repacks Populares.',
+    winnerLabel: 'Juego elegido',
+    recentTitle: 'Giros recientes',
+    emptyPool: 'No hay juegos en Repacks Populares para este filtro.',
+    repackSizeLabel: 'Repack',
+    originalSizeLabel: 'Original',
+    canRunPass: 'Funciona bien en tu PC',
+    canRunFail: 'Debajo de requisitos',
+    addFavorite: 'Favorito',
+    removeFavorite: 'En favoritos',
+    congratsTitle: '¡Felicidades!',
+    congratsSubtitle: 'Tu juego elegido al azar está listo.',
   },
   deals: {
     pageTitle: 'Ofertas y Descubrimiento de Juegos',
@@ -4609,6 +4769,7 @@ const AR: LauncherTranslations = {
     closeMenu: 'إغلاق قائمة التنقل',
     languageLabel: 'اللغة',
     themeLabel: 'المظهر',
+    spin: 'عجلة الحظ',
   },
   topbar: {
     webVersion: 'نسخة الويب SecretArea',
@@ -4642,6 +4803,8 @@ const AR: LauncherTranslations = {
     windowSectionTitle: 'النافذة',
     compactNavbarTitle: 'شريط تنقّل مدمج',
     compactNavbarDesc: 'إظهار شريط التنقّل كأيقونات فقط، حتى في النافذة العريضة.',
+    customCursorTitle: 'مؤشر مخصص متحرك',
+    customCursorDesc: 'استخدام مؤشر سطح المكتب المرسوم المخصص مع تموجات النقر وحلقة التمرير والحالات المتحركة.',
     lightModeTitle: 'الوضع الفاتح / الداكن',
     lightModeDesc: 'التبديل بين الوضع الفاتح والوضع الداكن. تفعيل مظهر PS5 أو Xbox يعيد التبديل إلى الوضع الداكن.',
     darkModeBadge: 'الوضع الداكن',
@@ -4655,10 +4818,10 @@ const AR: LauncherTranslations = {
     ambientMusicTitle: 'الموسيقى المحيطة بالخلفية (PS5 / Xbox)',
     ambientMusicDesc: 'تشغيل الموسيقى المحيطة الهادئة لـ PS5 أو Xbox Nexus عند تفعيل أحد مظاهر الكونسول.',
     uiSoundsTitle: 'أصوات النقر والتمرير في الواجهة',
-    uiSoundsDesc: 'تشغيل نقرات التركيز ونغمات التأكيد والرجوع عند التنقل بين الأزرار والبطاقات.',
+    uiSoundsDesc: 'تشغيل أصوات نقر المؤشر المخصص ونغمات التمرير والرجوع عبر جميع السمات.',
     volumeTitle: 'مستوى الصوت الرئيسي',
-    volumeDesc: 'ضبط مستوى الصوت العام لكل من الموسيقى المحيطة ومؤثرات الواجهة الصوتية.',
-    consoleThemeAudioHint: 'اختر مظهر PS5 أو Xbox في قسم النافذة أعلاه لسماع المشهد الصوتي النشط.',
+    volumeDesc: 'ضبط مستوى الصوت لنقرات المؤشر والموسيقى المحيطة ومؤثرات الواجهة الصوتية.',
+    consoleThemeAudioHint: 'أصوات نقر المؤشر تعمل في جميع السمات. اختر مظهر PS5 أو Xbox في قسم النافذة أعلاه لسماع الموسيقى المحيطة.',
     activeLabel: 'مفعّل',
     inactiveLabel: 'متوقف',
     downloadSectionTitle: 'التنزيلات والتخزين',
@@ -4987,6 +5150,7 @@ const AR: LauncherTranslations = {
     standard: 'قياسي',
     free: 'مجاني',
     dateAdded: 'تاريخ الإضافة',
+    developerStudio: 'استوديو التطوير',
     repacker: 'الناشر',
     languages: 'اللغات',
     genres: 'التصنيفات',
@@ -5482,6 +5646,16 @@ const AR: LauncherTranslations = {
     emptyState: 'لا توجد إصدارات أو تغييرات مطابقة لبحثك.',
     changesSuffix: 'تغييرات',
     closeBtn: 'إغلاق',
+    devBadge: 'قيد التطوير',
+    updateAvailableBadge: 'تحديث متاح',
+    installedDevBadge: 'قيد التشغيل (تطوير)',
+    devModeEnvLabel: 'وضع التطوير',
+    prodEnvLabel: 'الإصدار المثبت',
+    unpublishedNote: 'لم يُنشر بعد على GitHub',
+    syncingAutoLabel: 'مزامنة تلقائية للإصدارات...',
+    newCountLabel: 'جديد',
+    changedCountLabel: 'تحسينات',
+    fixedCountLabel: 'إصلاحات',
   },
   notificationCenter: {
     buttonLabel: 'الإشعارات',
@@ -5522,6 +5696,32 @@ const AR: LauncherTranslations = {
       upcominglist: 'قائمة القادم',
       popularrepacks: 'الأكثر شعبية',
     },
+  },
+  spinWheel: {
+    title: 'عجلة الحظ للألعاب الشائعة',
+    subtitle: 'أدر العجلة لاختيار لعبة عشوائية من قائمة الألعاب الأكثر شعبية',
+    spinBtn: 'أدر العجلة',
+    spinningLabel: 'جارٍ التدوير...',
+    spinAgainBtn: 'تدوير مجدداً',
+    viewGameBtn: 'عرض تفاصيل اللعبة',
+    poolCountSuffix: 'لعبة متاحة',
+    filterAll: 'كل الشائعة',
+    filterGames: 'الألعاب',
+    filterHv: 'Hypervisor',
+    filterCanRun: 'يعمل على جهازي',
+    readyTitle: 'مستعد لاكتشاف لعبتك القادمة؟',
+    readyDesc: 'اضغط على SPIN في وسط العجلة لاختيار لعبة عشوائية من قائمة الألعاب الأكثر شعبية.',
+    winnerLabel: 'اللعبة المختارة',
+    recentTitle: 'السحوبات الأخيرة',
+    emptyPool: 'لا توجد ألعاب مطابقة لهذا الفلتر في قائمة الأكثر شعبية.',
+    repackSizeLabel: 'حجم الريباك',
+    originalSizeLabel: 'الحجم الأصلي',
+    canRunPass: 'يعمل بسلاسة على جهازك',
+    canRunFail: 'أقل من مواصفات جهازك',
+    addFavorite: 'مفضلة',
+    removeFavorite: 'بالمفضلة',
+    congratsTitle: 'تهانينا!',
+    congratsSubtitle: 'تم اختيار هذه اللعبة الشائعة لك عشوائياً.',
   },
   deals: {
     pageTitle: 'مركز عروض واكتشاف الألعاب',

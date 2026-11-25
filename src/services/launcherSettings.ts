@@ -28,6 +28,7 @@ export interface LauncherSettings {
   alwaysXboxTheme: boolean;
   ambientMusicEnabled: boolean;
   uiClickSoundsEnabled: boolean;
+  customCursorEnabled: boolean;
   soundVolume: number;
   customTheme: CustomThemeConfig;
 }
@@ -116,6 +117,7 @@ export const DEFAULT_LAUNCHER_SETTINGS: LauncherSettings = {
   alwaysXboxTheme: false,
   ambientMusicEnabled: true,
   uiClickSoundsEnabled: true,
+  customCursorEnabled: true,
   soundVolume: 70,
   customTheme: { ...DEFAULT_CUSTOM_THEME },
 };
@@ -128,7 +130,7 @@ export function getAppVersionString(): string {
   } catch {
     // ignore undefined define during isolated tests
   }
-  return '1.0.5';
+  return '1.0.6';
 }
 
 function normalizeLanguage(value: unknown): AppLanguage {
@@ -258,6 +260,10 @@ export function loadLauncherSettings(): LauncherSettings {
         typeof parsed.uiClickSoundsEnabled === 'boolean'
           ? parsed.uiClickSoundsEnabled
           : DEFAULT_LAUNCHER_SETTINGS.uiClickSoundsEnabled,
+      customCursorEnabled:
+        typeof parsed.customCursorEnabled === 'boolean'
+          ? parsed.customCursorEnabled
+          : DEFAULT_LAUNCHER_SETTINGS.customCursorEnabled,
       soundVolume: normalizeVolume(parsed.soundVolume),
       customTheme: alwaysXboxTheme || alwaysPs5Theme ? { ...customTheme, enabled: false } : customTheme,
     };

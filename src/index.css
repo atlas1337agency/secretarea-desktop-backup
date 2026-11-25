@@ -1315,7 +1315,13 @@ html.theme-custom body {
   .sa-welcome-stagger-3,
   .sa-ready-orbit,
   .sa-ready-ripple,
-  .sa-ready-cta-sheen::after {
+  .sa-ready-cta-sheen::after,
+  .sa-cursor-ripple-outer,
+  .sa-cursor-ripple-inner,
+  .sa-cursor-burst-rays,
+  .sa-cursor-dashed-orbit,
+  .sa-cursor-spinner-rotate,
+  .sa-cursor-hourglass-flip {
     animation: none;
   }
 
@@ -1330,3 +1336,199 @@ html.theme-custom body {
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Custom Desktop Vector Cursor & Click Burst Animations (Compositor-Only)
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  html.sa-custom-cursor,
+  html.sa-custom-cursor *,
+  html.sa-custom-cursor *::before,
+  html.sa-custom-cursor *::after {
+    cursor: none !important;
+  }
+}
+
+@keyframes sa-cursor-ripple-outer {
+  0% {
+    opacity: 0.92;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.15);
+  }
+}
+
+@keyframes sa-cursor-ripple-inner {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@keyframes sa-cursor-burst-rays {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.55);
+  }
+  55% {
+    opacity: 0.85;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes sa-cursor-dashed-orbit {
+  0% {
+    transform: rotate(0deg) scale(0.96);
+    opacity: 0.78;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.06);
+    opacity: 0.96;
+  }
+  100% {
+    transform: rotate(360deg) scale(0.96);
+    opacity: 0.78;
+  }
+}
+
+@keyframes sa-cursor-spinner-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sa-cursor-hourglass-flip {
+  0%,
+  35% {
+    transform: rotate(0deg);
+  }
+  50%,
+  85% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.sa-cursor-ripple-outer {
+  transform-origin: center;
+  animation: sa-cursor-ripple-outer 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sa-cursor-ripple-inner {
+  transform-origin: center;
+  animation: sa-cursor-ripple-inner 340ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sa-cursor-burst-rays {
+  transform-origin: center;
+  animation: sa-cursor-burst-rays 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sa-cursor-dashed-orbit {
+  transform-origin: center;
+  animation: sa-cursor-dashed-orbit 4.5s linear infinite;
+}
+
+.sa-cursor-spinner-rotate {
+  transform-origin: center;
+  animation: sa-cursor-spinner-rotate 850ms linear infinite;
+}
+
+.sa-cursor-hourglass-flip {
+  transform-origin: center;
+  animation: sa-cursor-hourglass-flip 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* ==========================================================================
+   Navbar & Modal Spin Wheel Continuous Ambient Animations
+   ========================================================================== */
+@keyframes sa-spin-wheel-idle {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sa-spin-bulb-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes sa-spin-hub-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4), 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(56, 189, 248, 0), 0 8px 24px rgba(26, 159, 255, 0.45);
+  }
+}
+
+.sa-spin-wheel-idle {
+  transform-origin: center;
+  will-change: transform;
+  animation: sa-spin-wheel-idle 7.5s linear infinite;
+}
+
+.group:hover .sa-spin-wheel-idle {
+  animation-duration: 1.8s;
+}
+
+.sa-spin-bulb-even {
+  transform-origin: center;
+  animation: sa-spin-bulb-pulse 1.3s ease-in-out infinite;
+}
+
+.sa-spin-bulb-odd {
+  transform-origin: center;
+  animation: sa-spin-bulb-pulse 1.3s ease-in-out 0.65s infinite;
+}
+
+.sa-spin-hub-glow {
+  animation: sa-spin-hub-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes sa-confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -18px, 0) scale(0.7) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--sa-cx, 24px), var(--sa-cy, 240px), 0) scale(1) rotate(var(--sa-cr, 420deg));
+  }
+}
+
+.sa-confetti-piece {
+  will-change: transform, opacity;
+  animation: sa-confetti-fall var(--sa-cd, 2.4s) cubic-bezier(0.16, 0.84, 0.36, 1) var(--sa-delay, 0s) forwards;
+}
+
+

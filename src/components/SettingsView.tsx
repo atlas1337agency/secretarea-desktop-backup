@@ -63,6 +63,7 @@ interface SettingsViewProps {
   onExitApplication?: () => void;
   onToggleEnableCanRunIt: (enabled: boolean) => void;
   onToggleCompactNavbar: (enabled: boolean) => void;
+  onToggleCustomCursor: (enabled: boolean) => void;
   onToggleLightMode: (enabled: boolean) => void;
   onToggleAlwaysPs5Theme: (enabled: boolean) => void;
   onToggleAlwaysXboxTheme: (enabled: boolean) => void;
@@ -215,6 +216,7 @@ export function SettingsView({
   onExitApplication,
   onToggleEnableCanRunIt,
   onToggleCompactNavbar,
+  onToggleCustomCursor,
   onToggleLightMode,
   onToggleAlwaysPs5Theme,
   onToggleAlwaysXboxTheme,
@@ -703,6 +705,34 @@ export function SettingsView({
               onLabel={t.activeLabel}
               offLabel={t.inactiveLabel}
               onChange={onToggleCompactNavbar}
+            />
+          </div>
+
+          {/* Custom Animated Desktop Cursor */}
+          <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              <span className="w-8 h-8 rounded-lg bg-slate-200/80 dark:bg-[#1a2433] border border-slate-300/70 dark:border-white/[0.08] text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0 mt-0.5">
+                <CursorClick className="w-4 h-4" />
+              </span>
+              <div className="space-y-0.5 min-w-0">
+                <span
+                  id="setting-custom-cursor"
+                  className="block text-[13.5px] font-semibold text-slate-900 dark:text-white"
+                >
+                  {t.customCursorTitle}
+                </span>
+                <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                  {t.customCursorDesc}
+                </p>
+              </div>
+            </div>
+
+            <ToggleSwitch
+              checked={settings.customCursorEnabled}
+              labelId="setting-custom-cursor"
+              onLabel={t.activeLabel}
+              offLabel={t.inactiveLabel}
+              onChange={onToggleCustomCursor}
             />
           </div>
 

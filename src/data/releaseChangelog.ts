@@ -20,6 +20,518 @@ export interface ReleaseChangelogEntry {
 }
 
 const LOCAL_CHANGELOG: Record<string, Record<AppLanguage, ReleaseChangelogEntry>> = {
+  '1.0.7': {
+    en: {
+      version: '1.0.7',
+      releaseTitle: 'UI Modernization, Clickable Studios & Smart Update Timeline',
+      summary:
+        'Streamlines Home Hero & Latest Release sizes, adds clickable Developer Studios on Games & Tools, redesigns the Library toolbar, automates Notification Center sync, and upgrades Update History.',
+      publishedAt: null,
+      items: [
+        {
+          category: 'feature',
+          title: 'Clickable Developer Studios on Games & Tools',
+          description:
+            'Resolves studio references across Games, Hypervisor, SteamTools, and Tools cards and detail pages—click any studio name to jump directly to its full studio page.',
+        },
+        {
+          category: 'improvement',
+          title: 'Clean Home Hero Card & Inline Latest Release Sizes',
+          description:
+            'Removed the size footer strip and image zoom on the Home hero card, placing compact repack and original sizes inline inside Latest Release.',
+        },
+        {
+          category: 'improvement',
+          title: 'Single-Line Library Filter & Auto-Syncing Notifications',
+          description:
+            'Redesigned Library controls around a modern single-line Can Run It dropdown + search bar, and simplified Notification Center to Important Tabs and Just News with automatic background syncing.',
+        },
+        {
+          category: 'feature',
+          title: 'Smart Update History & Dev/Installed Detection',
+          description:
+            'Automatically detects Installed vs. In-Development vs. Published updates, refreshes live from GitHub Releases, and highlights New, Changed, and Fixed counts per build.',
+        },
+        {
+          category: 'feature',
+          title: 'Custom Animated Desktop Cursor & Click Sound Effects',
+          description:
+            'Replaced the default pointer with a responsive vector cursor featuring ripple & radial click bursts, hover rings, animated spinner/hourglass states, and tactile click audio.',
+        },
+        {
+          category: 'feature',
+          title: 'Navbar Popular Repacks Spin Wheel',
+          description:
+            'Added a continuously animated Spin Wheel button in the Navbar that picks a random game from Most Popular Games (PopularRepacks) with peg-tick physics, Can Run It filters, and quick launch.',
+        },
+      ],
+    },
+    fr: {
+      version: '1.0.7',
+      releaseTitle: 'Modernisation UI, Studios cliquables & Historique intelligent',
+      summary:
+        'Épure la carte Hero et les tailles dans Dernière Sortie, ajoute les studios cliquables sur Jeux & Outils, modernise la barre Bibliothèque et automatise Notifications & Historique.',
+      publishedAt: null,
+      items: [
+        {
+          category: 'feature',
+          title: 'Studios développeurs cliquables sur Jeux & Outils',
+          description:
+            'Résout les liens de studios sur les cartes et fiches Jeux, Hypervisor, SteamTools et Outils pour ouvrir directement la page du studio.',
+        },
+        {
+          category: 'improvement',
+          title: 'Carte Hero épurée & tailles intégrées dans Dernière Sortie',
+          description:
+            'Suppression du bandeau de taille et du zoom sur l’image Hero, avec affichage compact des tailles directement dans Dernière Sortie.',
+        },
+        {
+          category: 'improvement',
+          title: 'Barre Bibliothèque sur une ligne & Notifications auto',
+          description:
+            'Contrôle moderne Can Run It sur une seule ligne avec la recherche, et Centre de notifications simplifié (Onglets importants / Actualités) synchronisé en arrière-plan.',
+        },
+        {
+          category: 'feature',
+          title: 'Historique intelligent & détection Dev / Installée',
+          description:
+            'Détecte automatiquement les versions installées, en développement ou publiées sur GitHub avec le détail Nouveautés, Modifiés et Corrigés.',
+        },
+        {
+          category: 'feature',
+          title: 'Curseur animé personnalisé & effets sonores de clic',
+          description:
+            'Curseur vectoriel fluide avec ondes de clic, anneaux de survol, états animés et retour sonore tactile dans tous les thèmes.',
+        },
+        {
+          category: 'feature',
+          title: 'Roue des Repacks Populaires dans la barre de navigation',
+          description:
+            'Bouton Roue animé en continu tirant au sort un jeu parmi Most Popular Games (PopularRepacks) avec physique réaliste, sons de crans et filtres Can Run It.',
+        },
+      ],
+    },
+    es: {
+      version: '1.0.7',
+      releaseTitle: 'Rediseño UI, Estudios clicables e Historial inteligente',
+      summary:
+        'Limpia la tarjeta Hero y mueve tamaños a Último Lanzamiento, añade estudios clicables en Juegos y Herramientas, moderniza Biblioteca y automatiza Notificaciones e Historial.',
+      publishedAt: null,
+      items: [
+        {
+          category: 'feature',
+          title: 'Estudios desarrolladores clicables en Juegos y Herramientas',
+          description:
+            'Resuelve los estudios asociados en tarjetas y detalles de Juegos, Hypervisor, SteamTools y Herramientas para abrir su ficha con un clic.',
+        },
+        {
+          category: 'improvement',
+          title: 'Tarjeta Hero limpia y tamaños en Último Lanzamiento',
+          description:
+            'Se eliminó la franja inferior y el zoom de la portada Hero, mostrando los tamaños compacto y original en la cabecera de Último Lanzamiento.',
+        },
+        {
+          category: 'improvement',
+          title: 'Barra de Biblioteca en una línea y Notificaciones automáticas',
+          description:
+            'Selector moderno de Can Run It en una sola línea junto al buscador, y Centro de Notificaciones simplificado a Pestañas clave y Noticias con sincronización automática.',
+        },
+        {
+          category: 'feature',
+          title: 'Historial inteligente y detección de Modo Dev / Instalado',
+          description:
+            'Detecta automáticamente si cada versión está instalada, en desarrollo o publicada en GitHub, detallando Nuevas, Cambios y Correcciones.',
+        },
+        {
+          category: 'feature',
+          title: 'Cursor animado personalizado y sonidos de clic',
+          description:
+            'Nuevo cursor vectorial de escritorio con ondas de clic, anillo de enfoque, estados animados y audio táctil en todos los temas.',
+        },
+        {
+          category: 'feature',
+          title: 'Ruleta de Repacks Populares en la barra superior',
+          description:
+            'Botón animado de forma continua que gira la ruleta para elegir un juego aleatorio de Most Popular Games (PopularRepacks) con efectos sonoros y filtros Can Run It.',
+        },
+      ],
+    },
+    ar: {
+      version: '1.0.7',
+      releaseTitle: 'تحديث الواجهة، استوديوهات قابلة للنقر وسجل تحديثات ذكي',
+      summary:
+        'تبسيط بطاقة الواجهة الرئيسية، وإضافة روابط استوديوهات التطوير في الألعاب والأدوات، وتصميم عصري لصفحة المكتبة، ومزامنة تلقائية للإشعارات وسجل التحديثات.',
+      publishedAt: null,
+      items: [
+        {
+          category: 'feature',
+          title: 'أسماء استوديوهات التطوير القابلة للنقر في الألعاب والأدوات',
+          description:
+            'ربط الألعاب وHypervisor وSteamTools والأدوات باستوديوهات التطوير تلقائياً مع إمكانية النقر لفتح صفحة الاستوديو مباشرة.',
+        },
+        {
+          category: 'improvement',
+          title: 'تنظيف بطاقة الواجهة الرئيسية وعرض الأحجام في أحدث إصدار',
+          description:
+            'إزالة شريط الأحجام وتكبير الصورة من البطاقة الرئيسية وعرض الأحجام بشكل أنيق داخل سطر أحدث إصدار.',
+        },
+        {
+          category: 'improvement',
+          title: 'شريط مكتبة بسطر واحد وإشعارات متزامنة تلقائياً',
+          description:
+            'تصميم عصري لزر Can Run It بجانب البحث في سطر واحد دائماً، وتبسيط مركز الإشعارات للتبويبات المهمة والأخبار فقط مع مزامنة خلفية تلقائية.',
+        },
+        {
+          category: 'feature',
+          title: 'سجل تحديثات ذكي مع كشف وضع التطوير والإصدار المثبت',
+          description:
+            'يميز تلقائياً بين النسخة المثبتة، وقيد التطوير، والتحديثات المنشورة على GitHub مع عدادات الجديد والتحسينات والإصلاحات.',
+        },
+        {
+          category: 'feature',
+          title: 'مؤشر سطح مكتب مخصص متحرك مع مؤثرات صوتية للنقر',
+          description:
+            'مؤشر مرسوم متجاوب مع تموجات وانبثاقات النقر، وحلقة تمرير متقطعة، وحالات تحميل متحركة، وصوت نقر فوري في كل السمات.',
+        },
+        {
+          category: 'feature',
+          title: 'عجلة الحظ للألعاب الشائعة في شريط التنقل',
+          description:
+            'زر عجلة متحرك باستمرار في شريط التنقل يختار لعبة عشوائية من قائمة الألعاب الأكثر شعبية (PopularRepacks) مع مؤثرات صوتية وفلاتر التوافق.',
+        },
+      ],
+    },
+  },
+  '1.0.6': {
+    en: {
+      version: '1.0.6',
+      releaseTitle: 'Desktop Telemetry Fixes, Console Theme Polish & Sync Stability',
+      summary:
+        'Hardens hardware adapter detection, fixes laptop display/GPU telemetry edge cases, refines PS5 & Xbox UI styling, and improves live catalog diff reliability.',
+      publishedAt: '2026-11-24T20:00:00Z',
+      items: [
+        {
+          category: 'fix',
+          title: 'GPU & Laptop Display Adapter Telemetry Stability',
+          description:
+            'Resolved intermittent adapter readouts across NVIDIA, AMD, Intel, and hybrid laptop GPUs inside Hardware Monitor and PresentMon sessions.',
+        },
+        {
+          category: 'improvement',
+          title: 'PS5 & Xbox Console Theme Contrast & Spacing',
+          description:
+            'Refined frosted overlays, button focus rings, and light/dark mode contrast across library cards and detail views.',
+        },
+        {
+          category: 'fix',
+          title: 'Catalog Live Diff & Notification Deduplication',
+          description:
+            'Prevented duplicate live feed entries when switching sections or re-syncing Google Sheets snapshots offline.',
+        },
+      ],
+    },
+    fr: {
+      version: '1.0.6',
+      releaseTitle: 'Correctifs Télémétrie, Thèmes Console & Stabilité Sync',
+      summary:
+        'Renforce la détection GPU/écran portable, affine les thèmes PS5 & Xbox et fiabilise la détection différentielle du catalogue.',
+      publishedAt: '2026-11-24T20:00:00Z',
+      items: [
+        {
+          category: 'fix',
+          title: 'Stabilité des adaptateurs GPU & écrans portables',
+          description:
+            'Correction des lectures intermittentes sur GPU NVIDIA, AMD, Intel et configurations hybrides dans le Moniteur Matériel.',
+        },
+        {
+          category: 'improvement',
+          title: 'Contraste & finitions des thèmes PS5 et Xbox',
+          description:
+            'Amélioration des surfaces translucides, contours de focus et contraste clair/sombre sur les cartes et fiches.',
+        },
+        {
+          category: 'fix',
+          title: 'Déduplication des notifications du catalogue',
+          description:
+            'Suppression des doublons lors des synchronisations répétées ou reconnexions après mode hors-ligne.',
+        },
+      ],
+    },
+    es: {
+      version: '1.0.6',
+      releaseTitle: 'Correcciones de Telemetría, Temas de Consola y Sincronización',
+      summary:
+        'Estabiliza la lectura de adaptadores GPU y portátiles, mejora el contraste de los temas PS5 y Xbox y corrige duplicados en notificaciones.',
+      publishedAt: '2026-11-24T20:00:00Z',
+      items: [
+        {
+          category: 'fix',
+          title: 'Estabilidad en adaptadores GPU y pantallas portátiles',
+          description:
+            'Resueltas lecturas intermitentes en tarjetas NVIDIA, AMD, Intel y gráficas híbridas dentro del Monitor de Hardware.',
+        },
+        {
+          category: 'improvement',
+          title: 'Refinamiento de temas PS5, Xbox y modo claro/oscuro',
+          description:
+            'Mejor contraste en superposiciones, estados de enfoque y legibilidad de tarjetas y modales.',
+        },
+        {
+          category: 'fix',
+          title: 'Deduplicación en alertas del catálogo en vivo',
+          description:
+            'Evita entradas repetidas al resincronizar cambios desde Google Sheets o volver de modo sin conexión.',
+        },
+      ],
+    },
+    ar: {
+      version: '1.0.6',
+      releaseTitle: 'إصلاحات قراءة العتاد، وتحسين سمات المنصات واستقرار المزامنة',
+      summary:
+        'معالجة استقرار قراءة كروت الشاشة والشاشات المحمولة، وتحسين تباين سمات PS5 و Xbox، ومنع تكرار تنبيهات الكتالوج.',
+      publishedAt: '2026-11-24T20:00:00Z',
+      items: [
+        {
+          category: 'fix',
+          title: 'استقرار قراءة كروت الشاشة الهجينة وشاشات اللابتوب',
+          description:
+            'إصلاح تقطع القراءات عبر محولات NVIDIA و AMD و Intel داخل مراقب العتاد وجلسات PresentMon.',
+        },
+        {
+          category: 'improvement',
+          title: 'تحسين تباين وتفاصيل سمات PS5 و Xbox',
+          description:
+            'تحسين وضوح النصوص والحدود في الوضعين الفاتح والداكن وداخل البطاقات والنوافذ.',
+        },
+        {
+          category: 'fix',
+          title: 'منع تكرار إشعارات تحديث الكتالوج',
+          description:
+            'حل مشكلة تكرار الأحداث عند إعادة المزامنة أو العودة من وضع عدم الاتصال.',
+        },
+      ],
+    },
+  },
+  '1.0.5': {
+    en: {
+      version: '1.0.5',
+      releaseTitle: 'Developer Studios Hub, Hypervisor Guide & Extras Center',
+      summary:
+        'Added the Studios directory with full game/tool portfolios, interactive Hypervisor installation guide, Section Source Badges, and Extras hub.',
+      publishedAt: '2026-11-20T16:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Developer Studios Directory & Studio Detail Pages',
+          description:
+            'Browse game and software studios with logos, descriptions, and linked Games, Hypervisor, SteamTools, and Tools catalogs.',
+        },
+        {
+          category: 'feature',
+          title: 'Interactive Hypervisor Guide & Extras View',
+          description:
+            'Step-by-step Hypervisor setup walkthrough plus dedicated Extras hub for Savegames, Popular Repacks, and Upcoming queues.',
+        },
+        {
+          category: 'improvement',
+          title: 'Section Source Badges & Request Tracking',
+          description:
+            'Added clear source badges across multi-section cards and improved community request submission feedback.',
+        },
+      ],
+    },
+    fr: {
+      version: '1.0.5',
+      releaseTitle: 'Annuaire des Studios, Guide Hypervisor & Espace Extras',
+      summary:
+        'Ajoute l’annuaire des studios avec leurs catalogues complets, le guide Hypervisor interactif, les badges de section et l’espace Extras.',
+      publishedAt: '2026-11-20T16:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Répertoire des Studios & pages dédiées',
+          description:
+            'Explorez chaque studio avec son logo, sa présentation et ses titres liés (Jeux, Hypervisor, SteamTools, Outils).',
+        },
+        {
+          category: 'feature',
+          title: 'Guide Hypervisor interactif & vue Extras',
+          description:
+            'Assistant détaillé pour Hypervisor et onglet Extras regroupant sauvegardes, repacks populaires et sorties à venir.',
+        },
+        {
+          category: 'improvement',
+          title: 'Badges de section & suivi des demandes',
+          description:
+            'Identification rapide de la provenance de chaque carte et meilleure validation des demandes communautaires.',
+        },
+      ],
+    },
+    es: {
+      version: '1.0.5',
+      releaseTitle: 'Directorio de Estudios, Guía Hypervisor y Centro de Extras',
+      summary:
+        'Incorpora el directorio completo de estudios, guía paso a paso de Hypervisor, insignias de sección y centro de Extras.',
+      publishedAt: '2026-11-20T16:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Directorio y páginas de Estudios',
+          description:
+            'Explora estudios con logotipos, descripción y sus catálogos vinculados de Juegos, Hypervisor, SteamTools y Herramientas.',
+        },
+        {
+          category: 'feature',
+          title: 'Guía Hypervisor y vista de Extras',
+          description:
+            'Tutorial guiado para Hypervisor y sección Extras para partidas guardadas, repacks populares y próximos lanzamientos.',
+        },
+        {
+          category: 'improvement',
+          title: 'Insignias de origen y mejoras en Solicitudes',
+          description:
+            'Identificación clara de sección en tarjetas mixtas y mejor respuesta al enviar peticiones.',
+        },
+      ],
+    },
+    ar: {
+      version: '1.0.5',
+      releaseTitle: 'دليل الاستوديوهات، دليل Hypervisor ومركز الإضافات',
+      summary:
+        'إضافة صفحة استوديوهات التطوير مع كافة أعمالها، ودليل التثبيت التفاعلي لـ Hypervisor، وشارات الأقسام وصفحة الإضافات.',
+      publishedAt: '2026-11-20T16:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'دليل استوديوهات التطوير وصفحاتها التفصيلية',
+          description:
+            'تصفح الاستوديوهات وشعاراتها ووصفها مع جميع الألعاب والأدوات المرتبطة بها في كل قسم.',
+        },
+        {
+          category: 'feature',
+          title: 'دليل Hypervisor التفاعلي ومركز Extras',
+          description:
+            'شرح خطوة بخطوة لتشغيل Hypervisor مع قسم خاص للتخزينات والألعاب القادمة والأكثر شعبية.',
+        },
+        {
+          category: 'improvement',
+          title: 'شارات مصدر الأقسام وتحسين الطلبات',
+          description:
+            'تمييز مصدر كل بطاقة بوضوح وتحسين تجربة إرسال طلبات الألعاب والأدوات.',
+        },
+      ],
+    },
+  },
+  '1.0.4': {
+    en: {
+      version: '1.0.4',
+      releaseTitle: 'Game Deals Hub, Live Player Counts & Price Alerts',
+      summary:
+        'Launched the multi-store Game Deals tracker with Steam live player counts, Free Games radar, currency switcher, game comparison, and price drop alerts.',
+      publishedAt: '2026-11-10T12:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Multi-Store Game Deals, Free Offers & Live Players',
+          description:
+            'Aggregates live discounts from CheapShark, IsThereAnyDeal, and Steam alongside free-to-keep giveaways and real-time Steam concurrent player charts.',
+        },
+        {
+          category: 'feature',
+          title: 'Price Alerts, Game Compare & Multi-Currency FX',
+          description:
+            'Track target price thresholds, compare editions side-by-side, and convert prices seamlessly across USD, EUR, GBP, MAD, SAR, and more.',
+        },
+        {
+          category: 'fix',
+          title: 'Electron Network Bridge & Rate-Limit Caching',
+          description:
+            'Added resilient Electron IPC proxying and response caching to keep store lookups fast and avoid rate-limit failures.',
+        },
+      ],
+    },
+    fr: {
+      version: '1.0.4',
+      releaseTitle: 'Bons Plans Jeux, Joueurs en direct & Alertes Prix',
+      summary:
+        'Lancement du hub Bons Plans multi-boutiques avec joueurs Steam en direct, jeux gratuits, conversion de devises, comparateur et alertes de prix.',
+      publishedAt: '2026-11-10T12:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Offres multi-boutiques, Jeux gratuits & Joueurs Steam',
+          description:
+            'Agrège CheapShark, IsThereAnyDeal et Steam avec suivi des jeux offerts et graphiques de joueurs actifs en temps réel.',
+        },
+        {
+          category: 'feature',
+          title: 'Alertes prix, Comparateur & Conversion de devises',
+          description:
+            'Définissez des seuils de prix, comparez plusieurs jeux et basculez entre USD, EUR, GBP, MAD, SAR et autres devises.',
+        },
+        {
+          category: 'fix',
+          title: 'Pont réseau Electron & mise en cache API',
+          description:
+            'Proxy IPC fiable et cache intelligent pour accélérer les requêtes et éviter les limitations API.',
+        },
+      ],
+    },
+    es: {
+      version: '1.0.4',
+      releaseTitle: 'Centro de Ofertas, Jugadores en vivo y Alertas de Precio',
+      summary:
+        'Estrena el rastreador de ofertas multi-tienda con jugadores activos de Steam, juegos gratis, conversor de divisas, comparador y alertas.',
+      publishedAt: '2026-11-10T12:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'Ofertas multi-tienda, Juegos gratis y Jugadores en vivo',
+          description:
+            'Reúne descuentos de CheapShark, IsThereAnyDeal y Steam junto a juegos gratuitos y estadísticas en vivo de jugadores.',
+        },
+        {
+          category: 'feature',
+          title: 'Alertas de precio, Comparador y Multidivisa',
+          description:
+            'Configura precios objetivo, compara títulos lado a lado y cambia entre USD, EUR, GBP, MAD, SAR y más monedas.',
+        },
+        {
+          category: 'fix',
+          title: 'Puente de red Electron y caché anti-límites',
+          description:
+            'Proxy IPC dedicado y almacenamiento temporal para evitar bloqueos por límite de peticiones.',
+        },
+      ],
+    },
+    ar: {
+      version: '1.0.4',
+      releaseTitle: 'مركز عروض الألعاب، اللاعبون المباشرون وتنبيهات الأسعار',
+      summary:
+        'إطلاق قسم عروض الألعاب والألعاب المجانية مع إحصائيات لاعبي Steam المباشرة، ومحول العملات، ومقارنة الألعاب وتنبيهات انخفاض السعر.',
+      publishedAt: '2026-11-10T12:00:00Z',
+      items: [
+        {
+          category: 'feature',
+          title: 'عروض المتاجر، الألعاب المجانية وإحصائيات اللاعبين',
+          description:
+            'تجميع التخفيضات من CheapShark و IsThereAnyDeal و Steam مع رصد الألعاب المجانية وعدد اللاعبين المباشر.',
+        },
+        {
+          category: 'feature',
+          title: 'تنبيهات الأسعار، مقارنة الألعاب وتبديل العملات',
+          description:
+            'متابعة الأسعار المستهدفة ومقارنة الألعاب وتحويل الأسعار بين الدولار واليورو والدرهم والريال وغيرها.',
+        },
+        {
+          category: 'fix',
+          title: 'جسر الشبكة في Electron والتخزين المؤقت للطلبات',
+          description:
+            'تحسين سرعة جلب بيانات المتاجر عبر Electron وتفادي أخطاء تجاوز حد الطلبات.',
+        },
+      ],
+    },
+  },
   '1.0.3': {
     en: {
       version: '1.0.3',
@@ -651,12 +1163,69 @@ export function parseGithubReleaseNotes(
   };
 }
 
+export interface ReleaseStatusClassification {
+  isInstalled: boolean;
+  isInDevelopment: boolean;
+  isUpdateAvailable: boolean;
+  isLatestPublished: boolean;
+  isPrevious: boolean;
+}
+
+export function getReleaseCategoryCounts(items: ReleaseNoteItem[]): {
+  feature: number;
+  improvement: number;
+  fix: number;
+} {
+  let feature = 0;
+  let improvement = 0;
+  let fix = 0;
+  for (const item of items) {
+    if (item.category === 'fix') fix += 1;
+    else if (item.category === 'improvement') improvement += 1;
+    else feature += 1;
+  }
+  return { feature, improvement, fix };
+}
+
+export function classifyReleaseStatus({
+  release,
+  currentVersion,
+  latestPublishedVersion,
+  isDevMode = false,
+}: {
+  release: ReleaseChangelogEntry;
+  currentVersion: string;
+  latestPublishedVersion: string | null;
+  isDevMode?: boolean;
+}): ReleaseStatusClassification {
+  const cmpCurrent = compareReleaseVersions(release.version, currentVersion);
+  const isPublished = release.source === 'github';
+  const isInstalled = cmpCurrent === 0;
+  const isInDevelopment =
+    (cmpCurrent > 0 && !isPublished) || (isInstalled && isDevMode && !isPublished);
+  const isUpdateAvailable = cmpCurrent > 0 && isPublished;
+  const isLatestPublished =
+    latestPublishedVersion !== null &&
+    compareReleaseVersions(release.version, latestPublishedVersion) === 0;
+  const isPrevious = cmpCurrent < 0;
+
+  return {
+    isInstalled,
+    isInDevelopment,
+    isUpdateAvailable,
+    isLatestPublished,
+    isPrevious,
+  };
+}
+
 export function buildMergedReleaseHistory({
   language,
   remoteReleases = [],
+  currentVersion,
 }: {
   language: AppLanguage;
   remoteReleases?: DesktopReleaseHistoryEntry[];
+  currentVersion?: string;
 }): ReleaseChangelogEntry[] {
   const byVersion = new Map<string, ReleaseChangelogEntry>();
 
@@ -675,6 +1244,8 @@ export function buildMergedReleaseHistory({
   for (const rel of remoteReleases) {
     const cleanVer = String(rel.version || '').replace(/^v/i, '').trim();
     if (!cleanVer) continue;
+    const hasGithubNotes = Boolean(rel.notes && rel.notes.trim().length > 0);
+    const localExisting = LOCAL_CHANGELOG[cleanVer]?.[language] || LOCAL_CHANGELOG[cleanVer]?.en;
     const parsed = parseGithubReleaseNotes(
       cleanVer,
       language,
@@ -683,10 +1254,22 @@ export function buildMergedReleaseHistory({
       rel.publishedAt,
       rel.htmlUrl
     );
+    const useLocalLocalizedNotes = !hasGithubNotes && Boolean(localExisting);
     byVersion.set(cleanVer, {
-      ...parsed,
+      ...(useLocalLocalizedNotes && localExisting ? localExisting : parsed),
+      publishedAt: rel.publishedAt || localExisting?.publishedAt || parsed.publishedAt || null,
+      htmlUrl: rel.htmlUrl || parsed.htmlUrl || null,
       source: rel.source === 'github' ? 'github' : parsed.source || 'local',
     });
+  }
+
+  // Ensure the active running version is always represented even if package.json was bumped ahead of LOCAL_CHANGELOG
+  const cleanCurrent = (currentVersion || '').replace(/^v/i, '').trim();
+  if (cleanCurrent && !byVersion.has(cleanCurrent)) {
+    byVersion.set(
+      cleanCurrent,
+      createGenericVersionEntry(cleanCurrent, language, `SecretArea v${cleanCurrent}`, null, null)
+    );
   }
 
   return Array.from(byVersion.values()).sort((a, b) =>

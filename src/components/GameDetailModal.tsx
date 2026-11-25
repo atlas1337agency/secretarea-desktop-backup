@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowSquareOut,
   ArrowUpRight,
+  Buildings,
   CalendarBlank,
   CaretLeft,
   CaretRight,
@@ -49,7 +50,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type { DownloadTask, GameItem, MirrorLink, SheetCatalogData } from '../types';
-import { isTruthyFlag } from '../utils/parsers';
+import { isTruthyFlag, resolveStudiosForItem } from '../utils/parsers';
 import { evaluateCanRunGame } from '../services/canRunIt';
 import type { SystemHardwareSpecs } from '../services/systemSpecs';
 import { CanRunItHeroBadge, CanRunItPanel } from './CanRunItPanel';
@@ -87,6 +88,8 @@ interface GameDetailModalProps {
   onResetCustomSpecs?: () => void;
   onToggleFavorite: (id: string) => void;
   onJumpToItem?: (item: GameItem) => void;
+  onSelectStudio?: (studio: GameItem) => void;
+  celebrateWinKey?: number;
   onClose: () => void;
 }
 
@@ -167,6 +170,8 @@ export function GameDetailModal({
   onSaveCustomSpecs,
   onResetCustomSpecs,
   onJumpToItem,
+  onSelectStudio,
+  celebrateWinKey = 0,
   onClose,
 }: GameDetailModalProps) {
   const tr = getTranslations(language);
@@ -179,6 +184,19 @@ export function GameDetailModal({
   const [copiedMirrorKey, setCopiedMirrorKey] = useState<string | null>(null);
   const [activeChannelFilter, setActiveChannelFilter] = useState<string>('all');
   const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const [showWinCelebration, setShowWinCelebration] = useState(false);
+
+  useEffect(() => {
+    if (!celebrateWinKey || !game) {
+      setShowWinCelebration(false);
+      return;
+    }
+    setShowWinCelebration(true);
+    const timer = window.setTimeout(() => {
+      setShowWinCelebration(false);
+    }, 3400);
+    return () => window.clearTimeout(timer);
+  }, [celebrateWinKey, game?.id, game?.tab]);
 
   const pageScrollRef = useRef<HTMLDivElement | null>(null);
   const mediaSectionRef = useRef<HTMLElement | null>(null);
@@ -189,6 +207,11 @@ export function GameDetailModal({
   const canRunEvaluation = useMemo(
     () => (game && canRunItEnabled && systemSpecs ? evaluateCanRunGame(game, systemSpecs) : null),
     [game, canRunItEnabled, systemSpecs]
+  );
+
+  const itemStudios = useMemo(
+    () => (game && catalog?.profil ? resolveStudiosForItem(game, catalog.profil) : []),
+    [game, catalog?.profil]
   );
 
   const mediaSlides = useMemo<MediaSlide[]>(() => {
@@ -504,6 +527,53 @@ export function GameDetailModal({
       aria-label={game.name}
       className="sa-ps5-modal fixed inset-0 z-50 w-screen h-screen bg-[#f4f6f9] dark:bg-[#141921] flex flex-col overflow-hidden"
     >
+      {/* Lightweight GPU Congratulations Effect when opened from Spin Wheel */}
+      {showWinCelebration && (
+        <div
+          aria-live="polite"
+          className="fixed inset-x-0 top-14 z-[60] pointer-events-none flex flex-col items-center overflow-hidden h-72"
+        >
+          <div className="relative w-full max-w-2xl h-full">
+            {Array.from({ length: 20 }, (_, idx) => {
+              const colors = ['#ef4444', '#fbbf0d', '#00c25c', '#0094df', '#a855f7'];
+              const leftPct = 6 + ((idx * 4.7) % 88);
+              const driftX = ((idx % 2 === 0 ? 1 : -1) * (20 + (idx % 5) * 18)) + 'px';
+              const dropY = 190 + (idx % 4) * 32 + 'px';
+              const rot = (idx % 2 === 0 ? 1 : -1) * (280 + idx * 24) + 'deg';
+              const delay = ((idx % 6) * 0.05).toFixed(2) + 's';
+              const dur = (2.1 + (idx % 4) * 0.25).toFixed(2) + 's';
+              return (
+                <span
+                  key={idx}
+                  aria-hidden="true"
+                  style={{
+                    left: `${leftPct}%`,
+                    top: '4px',
+                    backgroundColor: colors[idx % colors.length],
+                    ['--sa-cx' as string]: driftX,
+                    ['--sa-cy' as string]: dropY,
+                    ['--sa-cr' as string]: rot,
+                    ['--sa-delay' as string]: delay,
+                    ['--sa-cd' as string]: dur,
+                  }}
+                  className="sa-confetti-piece absolute w-2.5 h-3.5 rounded-[2px] shadow-sm"
+                />
+              );
+            })}
+          </div>
+
+          <div className="absolute top-3 px-4 py-2 rounded-2xl bg-slate-900/92 dark:bg-[#111927]/95 border border-amber-400/50 shadow-xl flex items-center gap-2.5 text-white">
+            <Sparkle weight="fill" className="w-4.5 h-4.5 text-amber-400 shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-amber-300">
+              {tr.spinWheel.congratsTitle}
+            </span>
+            <span className="text-xs text-slate-200 truncate max-w-[240px] sm:max-w-xs">
+              {game.name}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Top Game Page Navigation Header */}
       <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3 bg-white/95 dark:bg-[#10151e]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/[0.08] shrink-0">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-3">
@@ -762,6 +832,39 @@ export function GameDetailModal({
                               </span>
                               <span className="text-white/70 font-mono-tabular">
                                 {formattedDateAdded}
+                              </span>
+                            </>
+                          )}
+                          {itemStudios.length > 0 && (
+                            <>
+                              <span aria-hidden="true" className="text-white/35">
+                                ·
+                              </span>
+                              <span className="inline-flex flex-wrap items-center gap-1.5">
+                                {itemStudios.map((studio, sIdx) => (
+                                  <span key={studio.id} className="inline-flex items-center gap-1.5">
+                                    {sIdx > 0 && (
+                                      <span aria-hidden="true" className="text-white/35">
+                                        /
+                                      </span>
+                                    )}
+                                    {onSelectStudio ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => onSelectStudio(studio)}
+                                        className="inline-flex items-center gap-1 text-[#7dd3fc] hover:text-white underline decoration-[#38bdf8]/45 underline-offset-2 transition-colors cursor-pointer"
+                                      >
+                                        <Buildings weight="fill" className="w-3 h-3 shrink-0" />
+                                        <span>{studio.name}</span>
+                                      </button>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 text-[#cbd5e1]">
+                                        <Buildings weight="fill" className="w-3 h-3 shrink-0" />
+                                        <span>{studio.name}</span>
+                                      </span>
+                                    )}
+                                  </span>
+                                ))}
                               </span>
                             </>
                           )}
@@ -1065,7 +1168,7 @@ export function GameDetailModal({
               <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
             </div>
 
-            <dl className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-5">
+            <dl className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-5">
               {isSteamTools ? (
                 <div className="flex items-start gap-3 min-w-0">
                   <Hash className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
@@ -1242,6 +1345,37 @@ export function GameDetailModal({
                   </div>
                 </>
               )}
+              <div className="flex items-start gap-3 min-w-0">
+                <Buildings className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
+                    {t.developerStudio}
+                  </dt>
+                  <dd className="text-[13.5px] sm:text-[14px] font-semibold text-slate-800 dark:text-[#e5e9f0] break-words">
+                    {itemStudios.length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                        {itemStudios.map((studio) =>
+                          onSelectStudio ? (
+                            <button
+                              key={studio.id}
+                              type="button"
+                              onClick={() => onSelectStudio(studio)}
+                              className="inline-flex items-center gap-1 text-[#0284c7] hover:text-slate-950 dark:text-[#38bdf8] dark:hover:text-white underline decoration-[#0284c7]/35 dark:decoration-[#38bdf8]/40 underline-offset-2 transition-colors cursor-pointer text-start"
+                            >
+                              <span>{studio.name}</span>
+                              <ArrowUpRight weight="bold" className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                            </button>
+                          ) : (
+                            <span key={studio.id}>{studio.name}</span>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      '—'
+                    )}
+                  </dd>
+                </div>
+              </div>
             </dl>
           </motion.section>
 
