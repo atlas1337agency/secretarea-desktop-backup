@@ -1,20 +1,22 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
+  Buildings,
+  CaretDown,
   CaretLeft,
   CaretRight,
+  Check,
   CheckCircle,
   Laptop,
   MagnifyingGlass,
   PushPin,
   SealCheck,
-  SortDescending,
   Sparkle,
-  Tag,
   WarningCircle,
   X,
 } from '@phosphor-icons/react';
 import type { GameItem, LibrarySectionTab, SortOption } from '../types';
-import { LIBRARY_SECTIONS } from '../utils/parsers';
+import { buildItemStudiosMap, LIBRARY_SECTIONS } from '../utils/parsers';
 import { evaluateCanRunGame } from '../services/canRunIt';
 import type { SystemHardwareSpecs } from '../services/systemSpecs';
 import { GameCover } from './GameCover';
@@ -42,6 +44,8 @@ interface LibraryViewProps {
   language?: AppLanguage;
   onToggleFavorite: (id: string) => void;
   onSelectGame: (game: GameItem) => void;
+  studios?: GameItem[];
+  onSelectStudio?: (studio: GameItem) => void;
 }
 
 const LIBRARY_PAGE_SIZE = 50;
@@ -65,6 +69,211 @@ function getPageWindow(currentPage: number, totalPages: number): (number | 'elli
   return out;
 }
 
+interface FilterDropdownOption<T extends string> {
+  value: T;
+  label: string;
+  tone?: 'default' | 'emerald' | 'rose';
+}
+
+interface LibraryFilterDropdownProps<T extends string> {
+  ariaLabel: string;
+  value: T;
+  options: FilterDropdownOption<T>[];
+  onChange: (value: T) => void;
+  icon: ReactNode;
+  prefixLabel?: string;
+  activeTone?: 'default' | 'sky' | 'emerald' | 'rose';
+  isActive?: boolean;
+  menuMinWidth?: number;
+}
+
+function LibraryFilterDropdown<T extends string>({
+  ariaLabel,
+  value,
+  options,
+  onChange,
+  icon,
+  prefixLabel,
+  activeTone = 'default',
+  isActive = false,
+  menuMinWidth = 200,
+}: LibraryFilterDropdownProps<T>) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [coords, setCoords] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    minWidth: number;
+  }>({ top: 0, left: 0, minWidth: menuMinWidth });
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  const updatePosition = useCallback(() => {
+    const btn = triggerRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+    const isRtl = document.documentElement.dir === 'rtl';
+    const width = Math.max(menuMinWidth, Math.min(rect.width + 24, 280));
+    const spaceBelow = viewportH - rect.bottom - 12;
+    const placeAbove = spaceBelow < 200 && rect.top > spaceBelow;
+    const rawLeft = isRtl ? rect.right - width : rect.left;
+    const clampedLeft = Math.max(12, Math.min(rawLeft, viewportW - width - 12));
+
+    setCoords(
+      placeAbove
+        ? {
+            bottom: viewportH - rect.top + 6,
+            left: clampedLeft,
+            minWidth: width,
+          }
+        : {
+            top: rect.bottom + 6,
+            left: clampedLeft,
+            minWidth: width,
+          }
+    );
+  }, [menuMinWidth]);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePosition();
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) {
+        return;
+      }
+      setOpen(false);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+
+    const handleScroll = (e: Event) => {
+      const target = e.target as Node | null;
+      if (target && menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+
+    window.addEventListener('mousedown', handlePointerDown);
+    window.addEventListener('touchstart', handlePointerDown, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', handleScroll, true);
+
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown);
+      window.removeEventListener('touchstart', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [open, updatePosition]);
+
+  const toneClasses = useMemo(() => {
+    if (activeTone === 'emerald') {
+      return 'bg-emerald-500/12 hover:bg-emerald-500/18 border-emerald-500/40 text-emerald-700 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/22 dark:border-emerald-400/45 dark:text-[#4ade80]';
+    }
+    if (activeTone === 'rose') {
+      return 'bg-rose-500/12 hover:bg-rose-500/18 border-rose-500/40 text-rose-700 dark:bg-rose-500/15 dark:hover:bg-rose-500/22 dark:border-rose-400/45 dark:text-[#f87171]';
+    }
+    if (open || isActive || activeTone === 'sky') {
+      return 'bg-[#0284c7]/[0.09] hover:bg-[#0284c7]/[0.14] border-[#0284c7]/45 text-[#0369a1] dark:bg-[#1a9fff]/15 dark:hover:bg-[#1a9fff]/22 dark:border-[#38bdf8]/50 dark:text-[#7dd3fc] shadow-[0_0_0_1px_rgba(56,189,248,0.16)]';
+    }
+    return 'bg-white/95 hover:bg-white border-slate-200/95 hover:border-slate-300 text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] dark:border-white/[0.1] dark:hover:border-white/[0.2] dark:text-[#e5e9f0] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_2px_6px_rgba(0,0,0,0.2)]';
+  }, [activeTone, isActive, open]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((prev) => !prev)}
+        className={`sa-ps5-select-wrap h-9 px-2.5 sm:px-3 rounded-xl border inline-flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0 text-[12px] font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]/50 ${toneClasses}`}
+      >
+        <span className="shrink-0 flex items-center">{icon}</span>
+        {prefixLabel && (
+          <span className="hidden xl:inline text-[10.5px] font-semibold tracking-[0.06em] uppercase text-slate-400 dark:text-[#7a8ca5] shrink-0">
+            {prefixLabel}
+          </span>
+        )}
+        <span className="truncate max-w-[118px] sm:max-w-[160px] lg:max-w-[185px]">
+          {selectedOption?.label}
+        </span>
+        <CaretDown
+          weight="bold"
+          className={`w-3 h-3 shrink-0 opacity-65 transition-transform duration-150 ${
+            open ? 'rotate-180 opacity-100' : ''
+          }`}
+        />
+      </button>
+
+      {open &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="listbox"
+            aria-label={ariaLabel}
+            style={{
+              top: coords.top,
+              bottom: coords.bottom,
+              left: coords.left,
+              minWidth: coords.minWidth,
+            }}
+            className="fixed z-[140] max-w-[min(300px,calc(100vw-24px))] max-h-[min(320px,55vh)] overflow-y-auto rounded-xl border border-slate-200/95 dark:border-white/[0.12] bg-white/98 dark:bg-[#141b24]/98 backdrop-blur-xl p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.16)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.68)]"
+          >
+            {options.map((opt) => {
+              const selected = opt.value === value;
+              const optTone =
+                opt.tone === 'emerald'
+                  ? 'text-emerald-700 dark:text-[#4ade80]'
+                  : opt.tone === 'rose'
+                    ? 'text-rose-700 dark:text-[#f87171]'
+                    : selected
+                      ? 'text-[#0284c7] dark:text-[#7dd3fc]'
+                      : 'text-slate-700 dark:text-[#dbe3ec]';
+
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] text-start transition-colors cursor-pointer ${
+                    selected
+                      ? 'bg-[#0284c7]/10 dark:bg-[#1a9fff]/18 font-semibold'
+                      : 'font-medium hover:bg-slate-100 dark:hover:bg-white/[0.07]'
+                  } ${optTone}`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {selected && <Check weight="bold" className="w-3.5 h-3.5 shrink-0" />}
+                </button>
+              );
+            })}
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 export function LibraryView({
   activeSectionTab,
   games,
@@ -72,17 +281,15 @@ export function LibraryView({
   searchQuery,
   onSearchChange,
   sortBy,
-  onSortChange,
   genreFilter,
-  onGenreFilterChange,
   canRunFilter = 'all',
   onCanRunFilterChange,
   canRunItEnabled = true,
-  onClearAllFilters,
-  availableGenres,
   systemSpecs,
   language = 'en',
   onSelectGame,
+  studios = [],
+  onSelectStudio,
 }: LibraryViewProps) {
   const t = getTranslations(language).library;
   const [page, setPage] = useState(0);
@@ -100,20 +307,30 @@ export function LibraryView({
     return games.slice(start, start + LIBRARY_PAGE_SIZE);
   }, [games, safePage]);
 
+  const studiosByItemKey = useMemo(
+    () => buildItemStudiosMap(studios),
+    [studios]
+  );
+
   const sectionLabel =
     LIBRARY_SECTIONS.find((s) => s.key === activeSectionTab)?.label || 'Games';
   const sectionVisual = getSectionVisualMeta(activeSectionTab);
   const SectionIcon = sectionVisual.icon;
-  const hasActiveFilters =
-    genreFilter !== 'all' ||
-    (canRunItEnabled && canRunFilter !== 'all') ||
-    searchQuery.trim() !== '';
 
   const goToPage = (nextPage: number) => {
     const bounded = Math.max(0, Math.min(nextPage, totalPages - 1));
     setPage(bounded);
     scrollSectionRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const canRunOptions = useMemo<FilterDropdownOption<'all' | 'can-run' | 'cannot-run'>[]>(
+    () => [
+      { value: 'all', label: t.canRunAll },
+      { value: 'can-run', label: t.canRunPass, tone: 'emerald' },
+      { value: 'cannot-run', label: t.canRunFail, tone: 'rose' },
+    ],
+    [t.canRunAll, t.canRunFail, t.canRunPass]
+  );
 
   const pageTokens = getPageWindow(safePage, totalPages);
 
@@ -145,103 +362,55 @@ export function LibraryView({
         )}
       </div>
 
-      {/* Sort By (Smart Sort + All Genres) & Main Smart Search Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-          {/* Smart Sort By */}
-          <div className="flex items-center gap-2 w-full sm:w-auto px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#2a3340] border border-slate-300 dark:border-white/[0.08]">
-            <SortDescending className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-            <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-slate-500 dark:text-[#8b9bb4] shrink-0">
-              {t.sortBy}
-            </span>
-            <select
-              aria-label={t.sortBy}
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value as SortOption)}
-              className="flex-1 sm:flex-initial bg-transparent text-[12px] font-medium text-slate-900 dark:text-[#e5e9f0] focus:outline-none cursor-pointer"
-            >
-              <option value="smart" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortSmart}</option>
-              <option value="latest" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortLatest}</option>
-              <option value="alphabetical" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortAz}</option>
-              <option value="alphabetical-desc" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortZa}</option>
-              <option value="favorites" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortFavorites}</option>
-              <option value="size-asc" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortSizeAsc}</option>
-              <option value="size-desc" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortSizeDesc}</option>
-              <option value="mirrors" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.sortMirrors}</option>
-            </select>
-          </div>
+      {/* Modern Single-Line Can Run It Button & Smart Search Toolbar */}
+      <div className="flex flex-nowrap items-center justify-between gap-2 sm:gap-3 mb-5">
+        {canRunItEnabled && onCanRunFilterChange ? (
+          <LibraryFilterDropdown
+            ariaLabel={t.canRunAll}
+            value={canRunFilter}
+            options={canRunOptions}
+            onChange={onCanRunFilterChange}
+            activeTone={
+              canRunFilter === 'can-run'
+                ? 'emerald'
+                : canRunFilter === 'cannot-run'
+                  ? 'rose'
+                  : 'default'
+            }
+            menuMinWidth={190}
+            icon={
+              <Laptop
+                weight="bold"
+                className={`w-3.5 h-3.5 ${
+                  canRunFilter === 'can-run'
+                    ? 'text-emerald-600 dark:text-[#4ade80]'
+                    : canRunFilter === 'cannot-run'
+                      ? 'text-rose-600 dark:text-[#f87171]'
+                      : 'text-[#0284c7] dark:text-[#38bdf8]'
+                }`}
+              />
+            }
+          />
+        ) : (
+          <div />
+        )}
 
-          {/* All Genres Dropdown */}
-          <div className="inline-flex items-center gap-1.5 w-full sm:w-auto px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#2a3340] border border-slate-300 dark:border-white/[0.08]">
-            <Tag className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-            <select
-              aria-label={t.allGenres}
-              value={genreFilter}
-              onChange={(e) => onGenreFilterChange(e.target.value)}
-              className="flex-1 sm:flex-initial bg-transparent text-[12px] font-medium text-slate-900 dark:text-[#e5e9f0] focus:outline-none cursor-pointer"
-            >
-              <option value="all" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">{t.allGenres}</option>
-              {availableGenres.map((genre) => (
-                <option key={genre} value={genre} className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">
-                  {genre}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Can Run It PC Compatibility Filter */}
-          {canRunItEnabled && onCanRunFilterChange && (
-            <div className="sa-ps5-select-wrap inline-flex items-center gap-1.5 w-full sm:w-auto px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#2a3340] border border-slate-300 dark:border-white/[0.08]">
-              <Laptop className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-              <select
-                aria-label={t.canRunAll}
-                value={canRunFilter}
-                onChange={(e) =>
-                  onCanRunFilterChange(e.target.value as 'all' | 'can-run' | 'cannot-run')
-                }
-                className="flex-1 sm:flex-initial bg-transparent text-[12px] font-medium text-slate-900 dark:text-[#e5e9f0] focus:outline-none cursor-pointer"
-              >
-                <option value="all" className="bg-white text-slate-900 dark:bg-[#1b222c] dark:text-white">
-                  {t.canRunAll}
-                </option>
-                <option value="can-run" className="bg-white text-emerald-700 dark:bg-[#1b222c] dark:text-[#4ade80]">
-                  {t.canRunPass}
-                </option>
-                <option value="cannot-run" className="bg-white text-rose-700 dark:bg-[#1b222c] dark:text-[#f87171]">
-                  {t.canRunFail}
-                </option>
-              </select>
-            </div>
-          )}
-
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={onClearAllFilters}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-[11.5px] font-medium text-slate-700 dark:text-[#c6d4df] transition-colors cursor-pointer"
-            >
-              <X weight="bold" className="w-3 h-3" />
-              <span>{t.clear}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Single Smart Search Bar */}
-        <div className="relative w-full md:w-64 lg:w-72 shrink-0">
-          <MagnifyingGlass className="w-4 h-4 text-slate-400 dark:text-[#7a8ca5] absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        {/* Single Smart Search Bar (always on the same single line across all screens) */}
+        <div className="relative flex-1 min-w-0 sm:flex-initial sm:w-64 lg:w-72">
+          <MagnifyingGlass className="w-4 h-4 text-slate-400 dark:text-[#7a8ca5] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={`${t.searchPlaceholder} ${sectionLabel.toLowerCase()}...`}
-            className="w-full ps-8.5 pe-7 py-1.5 rounded-lg bg-white dark:bg-[#141b24] border border-slate-300 dark:border-white/[0.08] text-[12px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+            className="sa-ps5-select-wrap w-full h-9 ps-9 pe-8 rounded-xl bg-white/95 dark:bg-[#141b24]/95 border border-slate-200/95 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus:outline-none focus:border-[#1a9fff] focus:ring-2 focus:ring-[#1a9fff]/20 transition-all"
           />
           {searchQuery && (
             <button
               type="button"
               aria-label={t.clear}
               onClick={() => onSearchChange('')}
-              className="absolute end-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800 dark:text-[#677487] dark:hover:text-white cursor-pointer"
+              className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-800 dark:text-[#677487] dark:hover:text-white cursor-pointer"
             >
               <X weight="bold" className="w-3.5 h-3.5" />
             </button>
@@ -264,6 +433,7 @@ export function LibraryView({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             {pageGames.map((game, index) => {
               const metaBadge = game.repackSize || game.version || game.category;
+              const itemStudios = studiosByItemKey.get(`${game.tab}:${game.id}`) || [];
               const canRunEval =
                 canRunItEnabled && systemSpecs
                   ? evaluateCanRunGame(game, systemSpecs)
@@ -308,6 +478,31 @@ export function LibraryView({
                     <p className="text-[12px] sm:text-[12.5px] font-semibold text-white leading-snug line-clamp-2">
                       {game.name}
                     </p>
+                    {itemStudios.length > 0 && (
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] font-medium text-[#7dd3fc]">
+                        <Buildings weight="fill" className="w-3 h-3 shrink-0 opacity-90" />
+                        {itemStudios.map((studio, sIdx) => (
+                          <span key={studio.id} className="inline-flex items-center gap-1 min-w-0">
+                            {sIdx > 0 && <span className="text-white/40">/</span>}
+                            {onSelectStudio ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSelectStudio(studio);
+                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
+                                className="truncate hover:text-white underline decoration-[#38bdf8]/40 underline-offset-2 transition-colors cursor-pointer text-start"
+                              >
+                                {studio.name}
+                              </button>
+                            ) : (
+                              <span className="truncate">{studio.name}</span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-1 flex items-center justify-between gap-2 text-[10.5px] sm:text-[11px] text-[#aeb9c7] font-mono-tabular">
                       <span className="truncate">{metaBadge}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
@@ -357,23 +552,23 @@ export function LibraryView({
 
           {/* Pagination when > 50 items */}
           {totalPages > 1 && (
-            <div className="mt-6 pt-4 pb-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 dark:border-white/[0.07]">
-              <div className="flex flex-wrap items-center gap-1.5">
+            <div className="mt-6 pt-4 pb-2 flex items-center justify-between gap-2.5 border-t border-slate-200 dark:border-white/[0.07]">
+              <div className="flex items-center flex-nowrap gap-1.5 min-w-0 overflow-x-auto no-scrollbar py-0.5">
                 <button
                   type="button"
                   disabled={safePage === 0}
                   onClick={() => goToPage(safePage - 1)}
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-slate-300 dark:border-white/[0.08] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] cursor-pointer"
+                  className="sa-ps5-select-wrap h-9 inline-flex items-center gap-1 px-3 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] disabled:opacity-40 disabled:pointer-events-none border border-slate-200/95 dark:border-white/[0.1] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] shadow-[0_1px_2px_rgba(15,23,42,0.05)] whitespace-nowrap shrink-0 transition-all cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
-                  <span>{t.previous}</span>
+                  <span className="hidden min-[440px]:inline">{t.previous}</span>
                 </button>
 
                 {pageTokens.map((token, idx) =>
                   token === 'ellipsis' ? (
                     <span
                       key={`ellipsis-${idx}`}
-                      className="px-2 text-[12px] text-slate-500 dark:text-[#6b788b] select-none"
+                      className="px-1.5 text-[12px] text-slate-500 dark:text-[#6b788b] select-none shrink-0"
                     >
                       …
                     </span>
@@ -382,10 +577,10 @@ export function LibraryView({
                       key={token}
                       type="button"
                       onClick={() => goToPage(token)}
-                      className={`min-w-[34px] h-[34px] px-2 rounded-lg text-[12px] font-mono-tabular font-semibold transition-colors cursor-pointer ${
+                      className={`min-w-[36px] h-9 px-2.5 rounded-xl text-[12px] font-mono-tabular font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                         token === safePage
-                          ? 'bg-[#1a9fff] text-white'
-                          : 'bg-white text-slate-700 hover:bg-slate-200 hover:text-slate-950 border border-slate-300 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.06]'
+                          ? 'bg-[#1a9fff] text-white shadow-[0_4px_12px_rgba(26,159,255,0.3)]'
+                          : 'bg-white/95 text-slate-700 hover:bg-white hover:text-slate-950 border border-slate-200/95 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.08]'
                       }`}
                     >
                       {token + 1}
@@ -397,9 +592,9 @@ export function LibraryView({
                   type="button"
                   disabled={safePage >= totalPages - 1}
                   onClick={() => goToPage(safePage + 1)}
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] disabled:opacity-40 disabled:pointer-events-none border border-slate-300 dark:border-white/[0.08] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] cursor-pointer"
+                  className="sa-ps5-select-wrap h-9 inline-flex items-center gap-1 px-3 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] disabled:opacity-40 disabled:pointer-events-none border border-slate-200/95 dark:border-white/[0.1] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] shadow-[0_1px_2px_rgba(15,23,42,0.05)] whitespace-nowrap shrink-0 transition-all cursor-pointer"
                 >
-                  <span>{t.next}</span>
+                  <span className="hidden min-[440px]:inline">{t.next}</span>
                   <CaretRight weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                 </button>
               </div>
@@ -408,7 +603,7 @@ export function LibraryView({
                 <button
                   type="button"
                   onClick={() => goToPage(safePage + 1)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  className="hidden sm:inline-flex h-9 items-center gap-2 px-4 rounded-xl bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold shadow-[0_4px_14px_rgba(26,159,255,0.28)] transition-all whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span>{t.next50}</span>
                   <CaretRight weight="bold" className="w-4 h-4 rtl:rotate-180" />
@@ -417,7 +612,7 @@ export function LibraryView({
                 <button
                   type="button"
                   onClick={() => goToPage(0)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-slate-800 dark:text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  className="hidden sm:inline-flex h-9 items-center gap-2 px-4 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] border border-slate-200/95 dark:border-white/[0.1] text-slate-800 dark:text-[#dce4ee] text-[12.5px] font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span>{t.backToPage1}</span>
                 </button>

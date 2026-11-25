@@ -19,15 +19,58 @@ import { getTranslations } from '../i18n/translations';
 interface NavbarProps {
   activeSection: PrimarySection;
   onSelectSection: (section: PrimarySection) => void;
+  onOpenSpinWheel?: () => void;
   activeTheme?: AppThemeMode;
   compactNavbar?: boolean;
   language?: AppLanguage;
   activeDownloadsCount?: number;
 }
 
+function MiniSpinWheelIcon({ sizeClass = 'w-8 h-8' }: { sizeClass?: string }) {
+  return (
+    <span className={`relative inline-flex items-center justify-center ${sizeClass} shrink-0`}>
+      {/* Top golden pointer triangle */}
+      <svg
+        viewBox="0 0 12 10"
+        className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-2.5 h-2 z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]"
+        aria-hidden="true"
+      >
+        <path d="M1.5 1.5H10.5L6 8.5L1.5 1.5Z" fill="#fbbf0d" stroke="#f59e0b" strokeWidth="1.2" />
+      </svg>
+
+      {/* Continuously spinning miniature 8-wedge colorful wheel */}
+      <svg viewBox="0 0 32 32" className="w-full h-full sa-spin-wheel-idle" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill="#1e2d3d" />
+        {/* 8 slices: Red, Gold, Green, Blue alternating */}
+        <path d="M16 16 L11.4 4.9 A12 12 0 0 1 20.6 4.9 Z" fill="#ef4444" />
+        <path d="M16 16 L20.6 4.9 A12 12 0 0 1 27.1 11.4 Z" fill="#fbbf0d" />
+        <path d="M16 16 L27.1 11.4 A12 12 0 0 1 27.1 20.6 Z" fill="#00c25c" />
+        <path d="M16 16 L27.1 20.6 A12 12 0 0 1 20.6 27.1 Z" fill="#0094df" />
+        <path d="M16 16 L20.6 27.1 A12 12 0 0 1 11.4 27.1 Z" fill="#ef4444" />
+        <path d="M16 16 L11.4 27.1 A12 12 0 0 1 4.9 20.6 Z" fill="#fbbf0d" />
+        <path d="M16 16 L4.9 20.6 A12 12 0 0 1 4.9 11.4 Z" fill="#00c25c" />
+        <path d="M16 16 L4.9 11.4 A12 12 0 0 1 11.4 4.9 Z" fill="#0094df" />
+        {/* Rim dots */}
+        <circle cx="16" cy="2.3" r="0.9" fill="#ffffff" />
+        <circle cx="25.7" cy="6.3" r="0.9" fill="#ffffff" />
+        <circle cx="29.7" cy="16" r="0.9" fill="#ffffff" />
+        <circle cx="25.7" cy="25.7" r="0.9" fill="#ffffff" />
+        <circle cx="16" cy="29.7" r="0.9" fill="#ffffff" />
+        <circle cx="6.3" cy="25.7" r="0.9" fill="#ffffff" />
+        <circle cx="2.3" cy="16" r="0.9" fill="#ffffff" />
+        <circle cx="6.3" cy="6.3" r="0.9" fill="#ffffff" />
+        {/* Center white hub */}
+        <circle cx="16" cy="16" r="4.6" fill="#1e2d3d" />
+        <circle cx="16" cy="16" r="3.4" fill="#ffffff" />
+      </svg>
+    </span>
+  );
+}
+
 export function Navbar({
   activeSection,
   onSelectSection,
+  onOpenSpinWheel,
   activeTheme = 'default',
   compactNavbar = false,
   language = 'en',
@@ -284,8 +327,25 @@ export function Navbar({
             })}
           </nav>
 
-          {/* Zone 3: Console Glyphs & Mobile Menu Button */}
+          {/* Zone 3: Spin Wheel, Console Glyphs & Mobile Menu Button */}
           <div className="flex items-center justify-end gap-2 shrink-0 lg:min-w-[84px]">
+            {onOpenSpinWheel && (
+              <button
+                type="button"
+                onClick={onOpenSpinWheel}
+                title={t.nav.spin}
+                aria-label={t.nav.spin}
+                className={`group inline-flex items-center justify-center p-0.5 bg-transparent border-0 shadow-none rounded-full shrink-0 transition-transform duration-150 hover:scale-110 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 ${
+                  isPs5Theme
+                    ? 'focus-visible:ring-[#7cc4ff]'
+                    : isXboxTheme
+                    ? 'focus-visible:ring-[#6ee755]'
+                    : 'focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]'
+                }`}
+              >
+                <MiniSpinWheelIcon sizeClass="w-8 h-8" />
+              </button>
+            )}
             {isPs5Theme && (
               <div
                 aria-hidden="true"
@@ -414,6 +474,38 @@ export function Navbar({
                   </div>
                 );
               })}
+              {onOpenSpinWheel && (
+                <>
+                  <div
+                    className={`my-2 border-t ${
+                      isPs5Theme
+                        ? 'border-white/[0.12]'
+                        : isXboxTheme
+                        ? 'border-[#52e042]/20'
+                        : 'border-slate-200 dark:border-white/[0.08]'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onOpenSpinWheel();
+                    }}
+                    className={`group w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-[14px] font-semibold transition-colors cursor-pointer ${
+                      isPs5Theme
+                        ? 'bg-white/[0.08] hover:bg-white/[0.15] text-white'
+                        : isXboxTheme
+                        ? 'bg-[#107C10]/30 hover:bg-[#107C10]/50 text-[#ecfdf0]'
+                        : 'bg-sky-500/[0.08] hover:bg-sky-500/[0.14] text-[#0284c7] dark:text-[#38bdf8]'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3 min-w-0">
+                      <MiniSpinWheelIcon sizeClass="w-6 h-6" />
+                      <span className="truncate">{t.nav.spin}</span>
+                    </span>
+                  </button>
+                </>
+              )}
             </nav>
           </div>
         )}

@@ -20,6 +20,7 @@ import type {
   CloseBehaviorMode,
   DownloadManagerSnapshot,
   GameItem,
+  HardwareMonitorSnapshot,
   LibrarySectionTab,
   MirrorLink,
   PresentMonSetupState,
@@ -53,6 +54,7 @@ import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
 import { UpdateHistoryModal } from './components/UpdateHistoryModal';
 import { NotificationCenterDrawer } from './components/NotificationCenterDrawer';
+import { SpinWheelModal } from './components/SpinWheelModal';
 import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
 import { PresentMonSetupModal } from './components/PresentMonSetupModal';
 import {
@@ -86,6 +88,7 @@ import {
   getDesktopPresentMonSetupBridge,
   PRESENTMON_OFFICIAL_RELEASES_URL,
 } from './services/presentMonSetup';
+import { getDesktopHardwareMonitorBridge } from './services/hardwareMonitor';
 import {
   applyDocumentLanguageSettings,
   applyDocumentThemeSettings,
@@ -121,6 +124,12 @@ import {
   stopXboxAmbientSound,
 } from './utils/xboxSounds';
 import {
+  playCursorClickSound,
+  playCursorHoverSound,
+  setUiCursorVolume,
+} from './utils/uiCursorSounds';
+import { CustomCursorOverlay } from './components/CustomCursorOverlay';
+import {
   detectAutoSystemSpecs,
   detectBrowserSystemSpecs,
   loadSavedCustomSystemSpecs,
@@ -131,7 +140,6 @@ import { evaluateCanRunGame } from './services/canRunIt';
 import {
   buildNotificationFeed,
   ensureInitialUnreadSeeding,
-  getLastNotificationSyncAt,
   loadPersistedLiveNotificationEvents,
   reconcileCatalogNotifications,
   saveReadNotificationIds,
@@ -248,19 +256,21 @@ export default function App() {
   const hasAutoPromptedPresentMonRef = useRef(false);
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isUpdateHistoryOpen, setIsUpdateHistoryOpen] = useState(false);
-  const [isSyncingNotifications, setIsSyncingNotifications] = useState(false);
+  const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
+  const [celebrateWinKey, setCelebrateWinKey] = useState(0);
   const [liveNotificationEvents, setLiveNotificationEvents] = useState<CatalogNotificationItem[]>(
     () => loadPersistedLiveNotificationEvents()
   );
   const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(() => new Set());
   const hasSeededReadIdsRef = useRef(false);
-  const [lastNotificationSyncAt, setLastNotificationSyncAt] = useState<number | null>(() =>
-    getLastNotificationSyncAt()
-  );
   const isDesktopApp = Boolean(settingsBridge || qbitSetupBridge || downloadsBridge);
+  const hardwareBridge = useMemo(() => getDesktopHardwareMonitorBridge(), []);
+  const [topHardwareSnapshot, setTopHardwareSnapshot] =
+    useState<HardwareMonitorSnapshot | null>(null);
   const [resolvedAppVersion, setResolvedAppVersion] = useState<string>(() =>
     getAppVersionString()
   );
+  const [isPackagedBuild, setIsPackagedBuild] = useState<boolean>(() => !import.meta.env.DEV);
   const [fetchedUpdateReleaseNotes, setFetchedUpdateReleaseNotes] =
     useState<DesktopReleaseNotesPayload | null>(null);
   const [onboardingPhase, setOnboardingPhase] = useState<'checking' | 'active' | 'completed'>(() => {
@@ -290,6 +300,9 @@ export default function App() {
         if (!active) return;
         const currentVer = desktopSettings?.appVersion?.trim() || getAppVersionString();
         setResolvedAppVersion(currentVer);
+        if (typeof desktopSettings?.isPackaged === 'boolean') {
+          setIsPackagedBuild(desktopSettings.isPackaged);
+        }
 
         if (!desktopSettings) {
           setOnboardingPhase(isLocalOnboardingCompleted() ? 'completed' : 'active');
@@ -559,6 +572,7 @@ export default function App() {
     const normalized = launcherSettings.soundVolume / 100;
     setPsVolume(normalized);
     setXboxVolume(normalized);
+    setUiCursorVolume(normalized);
   }, [launcherSettings.soundVolume]);
 
   // Ambient console background music/soundscape based on active Settings theme & ambient music toggle
@@ -581,10 +595,9 @@ export default function App() {
     };
   }, [activeTheme, soundEnabled, launcherSettings.ambientMusicEnabled, hasSoundVolume]);
 
-  // Global console hover & click sound effects when PS5 or Xbox theme is active and UI sounds are enabled
+  // Global interactive & custom cursor click + hover sound effects across all themes
   useEffect(() => {
     if (
-      activeTheme === 'default' ||
       !soundEnabled ||
       !launcherSettings.uiClickSoundsEnabled ||
       !hasSoundVolume
@@ -592,11 +605,23 @@ export default function App() {
       return;
     }
 
+    const interactiveSelector =
+      'button, a, [role="button"], [role="tab"], [role="menuitem"], select, input[type="checkbox"], input[type="radio"], input[type="range"]';
+
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const interactive = target.closest('button, a, [role="button"], select');
+      const interactive = target.closest(interactiveSelector);
       if (!interactive) return;
+
+      const isDisabled =
+        interactive.hasAttribute('disabled') ||
+        interactive.getAttribute('aria-disabled') === 'true';
+
+      if (isDisabled) {
+        playCursorClickSound('disabled');
+        return;
+      }
 
       const label = (
         interactive.getAttribute('aria-label') ||
@@ -617,13 +642,25 @@ export default function App() {
         } else {
           playXboxClickSound();
         }
-      } else {
+      } else if (activeTheme === 'ps5') {
         if (isBackAction) {
           playPsBackSound();
         } else {
           playPsClickSound();
         }
+      } else {
+        playCursorClickSound(isBackAction ? 'back' : 'primary');
       }
+    };
+
+    const handleCanvasPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' || e.button !== 0) return;
+      if (!launcherSettings.customCursorEnabled) return;
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      // Interactive controls & inputs trigger their dedicated click/focus sound on click
+      if (target.closest(`${interactiveSelector}, input, textarea, label`)) return;
+      playCursorClickSound('soft');
     };
 
     const handleGlobalHover = (e: MouseEvent) => {
@@ -635,18 +672,28 @@ export default function App() {
       if (related && interactive.contains(related)) return;
       if (activeTheme === 'xbox') {
         playXboxHoverSound();
-      } else {
+      } else if (activeTheme === 'ps5') {
         playPsHoverSound();
+      } else if (launcherSettings.customCursorEnabled) {
+        playCursorHoverSound();
       }
     };
 
     document.addEventListener('click', handleGlobalClick, true);
+    document.addEventListener('pointerdown', handleCanvasPointerDown, true);
     document.addEventListener('mouseover', handleGlobalHover, true);
     return () => {
       document.removeEventListener('click', handleGlobalClick, true);
+      document.removeEventListener('pointerdown', handleCanvasPointerDown, true);
       document.removeEventListener('mouseover', handleGlobalHover, true);
     };
-  }, [activeTheme, soundEnabled, launcherSettings.uiClickSoundsEnabled, hasSoundVolume]);
+  }, [
+    activeTheme,
+    soundEnabled,
+    launcherSettings.uiClickSoundsEnabled,
+    launcherSettings.customCursorEnabled,
+    hasSoundVolume,
+  ]);
 
   // Sync native Fullscreen changes without altering the active launcher theme
   useEffect(() => {
@@ -671,6 +718,49 @@ export default function App() {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [windowBridge]);
+
+  // Keep TopUtilityBar hardware metrics synced cleanly with zero redundant polling when HardwareMonitorView is open
+  useEffect(() => {
+    if (!hardwareBridge) return;
+    let active = true;
+
+    const unsubscribe = hardwareBridge.onUpdate((snap) => {
+      if (active && snap) {
+        setTopHardwareSnapshot(snap);
+      }
+    });
+
+    const fetchOnce = () => {
+      if (!active || document.hidden) return;
+      void hardwareBridge.getSnapshot().then((snap) => {
+        if (active && snap) {
+          setTopHardwareSnapshot(snap);
+        }
+      });
+    };
+
+    fetchOnce();
+
+    if (activeSection === 'hardware') {
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    }
+
+    const timer = window.setInterval(fetchOnce, 2500);
+    const handleVisibility = () => {
+      if (!document.hidden) fetchOnce();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      active = false;
+      unsubscribe();
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [hardwareBridge, activeSection]);
 
   const handleToggleFullscreen = useCallback(async () => {
     if (windowBridge) {
@@ -810,6 +900,10 @@ export default function App() {
     setLauncherSettings((prev) => ({ ...prev, compactNavbar: enabled }));
   }, []);
 
+  const handleToggleCustomCursor = useCallback((enabled: boolean) => {
+    setLauncherSettings((prev) => ({ ...prev, customCursorEnabled: enabled }));
+  }, []);
+
   const handleToggleLightMode = useCallback((enabled: boolean) => {
     setLauncherSettings((prev) => ({
       ...prev,
@@ -910,6 +1004,7 @@ export default function App() {
     const normalized = clamped / 100;
     setPsVolume(normalized);
     setXboxVolume(normalized);
+    setUiCursorVolume(normalized);
     if (clamped > 0) {
       setSoundEnabled(true);
     }
@@ -920,8 +1015,10 @@ export default function App() {
     if (launcherSettings.soundVolume <= 0) return;
     if (activeTheme === 'xbox') {
       playXboxClickSound();
-    } else {
+    } else if (activeTheme === 'ps5') {
       playPsClickSound();
+    } else {
+      playCursorClickSound('primary');
     }
   }, [activeTheme, launcherSettings.soundVolume]);
 
@@ -1356,9 +1453,6 @@ export default function App() {
         if (reconciled.newEvents.length > 0) {
           setLiveNotificationEvents(reconciled.allEvents);
         }
-        if (isLiveSync) {
-          setLastNotificationSyncAt(getLastNotificationSyncAt() || Date.now());
-        }
       }
 
       return { changed: anyChanged, newNotificationsCount };
@@ -1491,6 +1585,33 @@ export default function App() {
       window.clearInterval(intervalId);
     };
   }, [gasUrl, isOnline, refreshCatalogSilently]);
+
+  // Automatically sync catalog & check desktop updates in the background when Notification Center opens or periodically
+  useEffect(() => {
+    if (isNotificationCenterOpen && gasUrl && isOnline) {
+      void refreshCatalogSilently(gasUrl);
+    }
+  }, [isNotificationCenterOpen, gasUrl, isOnline, refreshCatalogSilently]);
+
+  useEffect(() => {
+    if (!updaterBridge || !isOnline) return;
+    const startupCheckTimer = window.setTimeout(() => {
+      void updaterBridge.checkForUpdates().then((nextState) => {
+        if (nextState) setDesktopUpdateState(nextState);
+      });
+    }, 5000);
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void updaterBridge.checkForUpdates().then((nextState) => {
+          if (nextState) setDesktopUpdateState(nextState);
+        });
+      }
+    }, 1800000);
+    return () => {
+      window.clearTimeout(startupCheckTimer);
+      window.clearInterval(intervalId);
+    };
+  }, [updaterBridge, isOnline]);
 
   // Keep selectedGame and selectedStudio synchronized with live catalog updates without abruptly closing them
   useEffect(() => {
@@ -1686,11 +1807,16 @@ export default function App() {
   ]);
 
   const handleOpenGame = useCallback(
-    (game: GameItem, mode: 'overview' | 'trailer' | 'downloads' = 'overview') => {
+    (
+      game: GameItem,
+      mode: 'overview' | 'trailer' | 'downloads' = 'overview',
+      options?: { celebrateWin?: boolean }
+    ) => {
       if (game.tab === 'profil') {
         setSelectedStudio(game);
         return;
       }
+      setCelebrateWinKey(options?.celebrateWin ? Date.now() : 0);
       setModalViewMode(mode);
       setSelectedGame(game);
       updateGameUrlParam(toGameSlug(game.name) || game.id);
@@ -1700,6 +1826,7 @@ export default function App() {
 
   const handleCloseGame = useCallback(() => {
     setSelectedGame(null);
+    setCelebrateWinKey(0);
     updateGameUrlParam(null);
   }, []);
 
@@ -1778,33 +1905,6 @@ export default function App() {
     });
   }, [notificationFeed]);
 
-  const handleSyncNotificationsNow = useCallback(async () => {
-    if (!gasUrl || isSyncingNotifications) return;
-    setIsSyncingNotifications(true);
-    try {
-      const { synced, newNotificationsCount } = await refreshCatalogSilently(gasUrl, true);
-      if (synced) {
-        if (newNotificationsCount > 0) {
-          notify(
-            `${newNotificationsCount} ${t.notificationCenter.newUpdatesToastPrefix}`,
-            'success'
-          );
-        } else {
-          notify(t.notificationCenter.syncedToast, 'info');
-        }
-      }
-    } finally {
-      setIsSyncingNotifications(false);
-    }
-  }, [
-    gasUrl,
-    isSyncingNotifications,
-    refreshCatalogSilently,
-    notify,
-    t.notificationCenter.newUpdatesToastPrefix,
-    t.notificationCenter.syncedToast,
-  ]);
-
   if (onboardingPhase === 'checking') {
     return (
       <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[#f4f6f9] dark:bg-[#0e141b]">
@@ -1815,26 +1915,32 @@ export default function App() {
 
   if (onboardingPhase === 'active') {
     return (
-      <FirstLaunchOnboarding
-        isDesktopApp={isDesktopApp}
-        desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
-        settings={launcherSettings}
-        activeTheme={activeTheme}
-        setupState={qbitSetupState}
-        torrentConfig={downloadSnapshot.torrentConfig}
-        torrentConnected={downloadSnapshot.torrentConnected}
-        onSelectTheme={handleSelectOnboardingTheme}
-        onUpdateCustomTheme={handleUpdateCustomTheme}
-        onResetCustomTheme={handleResetCustomTheme}
-        onChangeLanguage={handleChangeLanguage}
-        onRecheckQbit={handleRecheckQbitSetup}
-        onStartQbitInstall={handleStartQbitInstall}
-        onLaunchQbitClient={handleLaunchQbitClient}
-        onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
-        onGenerateQbitPassword={handleGenerateQbitPassword}
-        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
-        onCompleteOnboarding={handleCompleteOnboarding}
-      />
+      <>
+        <FirstLaunchOnboarding
+          isDesktopApp={isDesktopApp}
+          desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+          settings={launcherSettings}
+          activeTheme={activeTheme}
+          setupState={qbitSetupState}
+          torrentConfig={downloadSnapshot.torrentConfig}
+          torrentConnected={downloadSnapshot.torrentConnected}
+          onSelectTheme={handleSelectOnboardingTheme}
+          onUpdateCustomTheme={handleUpdateCustomTheme}
+          onResetCustomTheme={handleResetCustomTheme}
+          onChangeLanguage={handleChangeLanguage}
+          onRecheckQbit={handleRecheckQbitSetup}
+          onStartQbitInstall={handleStartQbitInstall}
+          onLaunchQbitClient={handleLaunchQbitClient}
+          onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
+          onGenerateQbitPassword={handleGenerateQbitPassword}
+          onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+          onCompleteOnboarding={handleCompleteOnboarding}
+        />
+        <CustomCursorOverlay
+          enabled={launcherSettings.customCursorEnabled}
+          activeTheme={activeTheme}
+        />
+      </>
     );
   }
 
@@ -1858,12 +1964,14 @@ export default function App() {
         unreadNotificationsCount={unreadNotificationsCount}
         isNotificationCenterOpen={isNotificationCenterOpen}
         onOpenNotifications={() => setIsNotificationCenterOpen((prev) => !prev)}
+        hardwareSnapshot={topHardwareSnapshot}
         language={launcherSettings.language}
       />
 
       <Navbar
         activeSection={activeSection}
         onSelectSection={setActiveSection}
+        onOpenSpinWheel={() => setIsSpinWheelOpen(true)}
         activeTheme={activeTheme}
         compactNavbar={launcherSettings.compactNavbar}
         language={launcherSettings.language}
@@ -1921,6 +2029,8 @@ export default function App() {
               language={launcherSettings.language}
               onToggleFavorite={handleToggleFavorite}
               onSelectGame={(game) => handleOpenGame(game, 'overview')}
+              studios={catalog.profil}
+              onSelectStudio={(studio) => handleOpenGame(studio, 'overview')}
             />
           </>
         )}
@@ -2028,6 +2138,7 @@ export default function App() {
             onExitApplication={handleExitApplication}
             onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
             onToggleCompactNavbar={handleToggleCompactNavbar}
+            onToggleCustomCursor={handleToggleCustomCursor}
             onToggleLightMode={handleToggleLightMode}
             onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
             onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
@@ -2090,6 +2201,11 @@ export default function App() {
         onResetCustomSpecs={handleResetSystemSpecs}
         onToggleFavorite={handleToggleFavorite}
         onJumpToItem={(item) => handleOpenGame(item, 'overview')}
+        onSelectStudio={(studio) => {
+          handleCloseGame();
+          setSelectedStudio(studio);
+        }}
+        celebrateWinKey={celebrateWinKey}
         onClose={handleCloseGame}
       />
 
@@ -2116,18 +2232,11 @@ export default function App() {
         language={launcherSettings.language}
         feed={notificationFeed}
         readIds={readNotificationIds}
-        lastSyncedAt={lastNotificationSyncAt}
-        isSyncing={isSyncingNotifications}
         onClose={() => setIsNotificationCenterOpen(false)}
-        onSyncNow={() => void handleSyncNotificationsNow()}
         onMarkRead={handleMarkNotificationRead}
         onMarkAllRead={handleMarkAllNotificationsRead}
         onOpenGame={(item) => handleOpenGame(item, 'overview')}
         onOpenNewsSection={() => setActiveSection('extras')}
-        onOpenUpdateHistory={() => {
-          setIsNotificationCenterOpen(false);
-          setIsUpdateHistoryOpen(true);
-        }}
       />
 
       <UpdateHistoryModal
@@ -2135,6 +2244,8 @@ export default function App() {
         activeTheme={activeTheme}
         language={launcherSettings.language}
         currentVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+        isDevMode={!isPackagedBuild || import.meta.env.DEV}
+        availableUpdateVersion={desktopUpdateState?.availableVersion || null}
         updaterBridge={updaterBridge}
         onClose={() => setIsUpdateHistoryOpen(false)}
         onCheckForUpdates={
@@ -2146,6 +2257,20 @@ export default function App() {
               }
             : undefined
         }
+      />
+
+      <SpinWheelModal
+        isOpen={isSpinWheelOpen}
+        catalog={catalog}
+        activeTheme={activeTheme}
+        language={launcherSettings.language}
+        enableSounds={
+          soundEnabled && launcherSettings.uiClickSoundsEnabled && hasSoundVolume
+        }
+        onSelectGame={(game) =>
+          handleOpenGame(game, 'overview', { celebrateWin: true })
+        }
+        onClose={() => setIsSpinWheelOpen(false)}
       />
 
       <QbitSetupWizardModal
@@ -2222,6 +2347,10 @@ export default function App() {
           ))}
         </div>
       )}
+      <CustomCursorOverlay
+        enabled={launcherSettings.customCursorEnabled}
+        activeTheme={activeTheme}
+      />
     </div>
   );
 }

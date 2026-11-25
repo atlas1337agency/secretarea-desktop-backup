@@ -661,7 +661,7 @@ export function StoreView({
                         src={activeFeatured.coverImage}
                         alt={activeFeatured.name}
                         priority
-                        imgClassName="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
+                        imgClassName="w-full h-full object-cover"
                       />
                     </button>
 
@@ -694,6 +694,25 @@ export function StoreView({
                             </span>
                           </>
                         )}
+                        {(activeFeatured.repackSize || activeFeatured.originalSize) && (
+                          <>
+                            <span aria-hidden="true" className="text-white/35">
+                              ·
+                            </span>
+                            <span className="inline-flex items-baseline gap-1.5 font-mono-tabular normal-case tracking-normal">
+                              {activeFeatured.repackSize && (
+                                <span className="text-[#66c0f4] font-bold">
+                                  {activeFeatured.repackSize}
+                                </span>
+                              )}
+                              {activeFeatured.originalSize && (
+                                <span className="text-white/55 line-through font-medium">
+                                  {activeFeatured.originalSize}
+                                </span>
+                              )}
+                            </span>
+                          </>
+                        )}
                       </motion.div>
 
                       {/* Hero Display Title */}
@@ -709,20 +728,6 @@ export function StoreView({
                       >
                         {activeFeatured.name}
                       </motion.h1>
-
-                      {/* Mobile Inline Repack Size */}
-                      {(activeFeatured.repackSize || activeFeatured.originalSize) && (
-                        <div className="md:hidden flex items-baseline gap-2 pt-0.5 font-mono-tabular">
-                          <span className="text-[13px] font-bold text-[#66c0f4]">
-                            {activeFeatured.repackSize || 'N/A'}
-                          </span>
-                          {activeFeatured.originalSize && (
-                            <span className="text-[11px] text-[#8ea0b8] line-through">
-                              {activeFeatured.originalSize}
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -794,16 +799,15 @@ export function StoreView({
               </AnimatePresence>
             </div>
 
-            {/* End Column (Tablet & Desktop md+): Modern Animated Featured Cover Card */}
+            {/* End Column (Tablet & Desktop md+): Featured Cover Image Card */}
             <div className="hidden md:flex md:col-span-5 justify-end">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`hero-card-${activeFeatured.id}`}
-                  initial={{ opacity: 0, y: 22, scale: 0.94 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -12, scale: 0.96 }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  whileHover={{ y: -6, scale: 1.015 }}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                   className="md:w-[190px] lg:w-[235px] xl:w-[285px] 2xl:w-[320px] shrink-0"
                 >
                   <div
@@ -824,34 +828,8 @@ export function StoreView({
                         src={activeFeatured.coverImage}
                         alt={activeFeatured.name}
                         priority
-                        imgClassName="w-full h-full object-cover group-hover:scale-[1.045] transition-transform duration-500 ease-out"
+                        imgClassName="w-full h-full object-cover"
                       />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-gradient-to-t from-[#090d14] via-transparent to-white/[0.06] pointer-events-none"
-                      />
-                    </div>
-
-                    {/* Clean Integrated Card Footer Strip */}
-                    <div className="px-3.5 py-2.5 lg:px-4 lg:py-3 bg-[#0b1018]/92 border-t border-white/[0.08] flex items-center justify-between gap-2.5">
-                      <div className="min-w-0">
-                        <div className="text-[9.5px] lg:text-[10px] uppercase tracking-[0.09em] text-[#8ea0b8] truncate">
-                          {t.repackVsOriginal}
-                        </div>
-                        <div className="mt-0.5 flex items-baseline gap-2 font-mono-tabular">
-                          <span className="text-[13.5px] lg:text-[15px] xl:text-base font-bold text-[#66c0f4]">
-                            {activeFeatured.repackSize || 'N/A'}
-                          </span>
-                          {activeFeatured.originalSize && (
-                            <span className="text-[11px] lg:text-[11.5px] text-[#6d7b8e] line-through">
-                              {activeFeatured.originalSize}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <span className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg bg-white/[0.08] group-hover:bg-[#1a9fff] text-white/80 group-hover:text-white flex items-center justify-center transition-colors shrink-0">
-                        <ArrowUpRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </span>
                     </div>
                   </div>
                 </motion.div>
