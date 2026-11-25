@@ -17,7 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import type { HardwareMonitorSnapshot, PrimarySection } from '../types';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
-import { formatStorageBytes, isValidMetric } from '../services/hardwareMonitor';
+import { formatStorageBytes, isValidMetric, selectPrimaryGpu } from '../services/hardwareMonitor';
 import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
@@ -86,7 +86,7 @@ export function TopUtilityBar({
   const isXboxTheme = activeTheme === 'xbox';
   const hasConsoleAudio = isPs5Theme || isXboxTheme;
 
-  const primaryGpu = hardwareSnapshot?.gpus?.[0] || null;
+  const primaryGpu = selectPrimaryGpu(hardwareSnapshot?.gpus);
   const gpuUtil = primaryGpu?.utilizationPercent ?? null;
   const cpuUtil = hardwareSnapshot?.cpu?.usagePercent ?? null;
   const ramUtil = hardwareSnapshot?.ram?.usagePercent ?? null;
@@ -95,8 +95,16 @@ export function TopUtilityBar({
     hardwareSnapshot?.network?.activeInterface?.downloadBytesPerSec ??
     null;
   const cpuTemp = hardwareSnapshot?.cpu?.temperatureCelsius ?? null;
-  const gpuTemp = primaryGpu?.temperatureCelsius ?? null;
-  const validTemps = [cpuTemp, gpuTemp].filter(
+  const gpuTemps = (hardwareSnapshot?.gpus || [])
+    .map((g) => g?.temperatureCelsius)
+    .filter((temp): temp is number => isValidMetric(temp) && temp > 0);
+  const gpuTemp =
+    isValidMetric(primaryGpu?.temperatureCelsius) && primaryGpu.temperatureCelsius > 0
+      ? primaryGpu.temperatureCelsius
+      : gpuTemps.length > 0
+      ? Math.max(...gpuTemps)
+      : null;
+  const validTemps = [cpuTemp, ...gpuTemps].filter(
     (temp): temp is number => isValidMetric(temp) && temp > 0
   );
   const pcTemp = validTemps.length > 0 ? Math.max(...validTemps) : null;

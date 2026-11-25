@@ -40,6 +40,7 @@ import {
   formatVramMB,
   getDesktopHardwareMonitorBridge,
   isValidMetric,
+  selectPrimaryGpu,
 } from '../services/hardwareMonitor';
 
 interface HardwareMonitorViewProps {
@@ -492,14 +493,18 @@ export function HardwareMonitorView({
     setSnapshot(next);
     if (next.timestamp && next.timestamp !== lastSampleTsRef.current) {
       lastSampleTsRef.current = next.timestamp;
-      const primaryGpu = next.gpus[0] || null;
+      const primaryGpu = selectPrimaryGpu(next.gpus);
+      const fallbackGpuTemp =
+        (next.gpus || [])
+          .map((g) => g.temperatureCelsius)
+          .find((v): v is number => isValidMetric(v) && v > 0) ?? null;
       const sample: TelemetrySample = {
         timestamp: next.timestamp,
         cpuPercent: next.cpu.usagePercent,
         ramPercent: next.ram.usagePercent,
         gpuPercent: primaryGpu?.utilizationPercent ?? null,
         cpuTempC: next.cpu.temperatureCelsius,
-        gpuTempC: primaryGpu?.temperatureCelsius ?? null,
+        gpuTempC: primaryGpu?.temperatureCelsius ?? fallbackGpuTemp,
         netDownBytes: next.network.totalDownloadBytesPerSec,
         netUpBytes: next.network.totalUploadBytesPerSec,
       };
@@ -579,7 +584,7 @@ export function HardwareMonitorView({
     }
   }, [bridge, isRefreshingOnce, appendSnapshot]);
 
-  const primaryGpu = snapshot.gpus[0] || null;
+  const primaryGpu = selectPrimaryGpu(snapshot.gpus);
   const activeNet = snapshot.network.activeInterface;
 
   const timestamps = useMemo(() => history.map((h) => h.timestamp), [history]);

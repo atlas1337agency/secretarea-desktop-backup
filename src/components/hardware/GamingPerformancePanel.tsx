@@ -31,6 +31,7 @@ import {
   formatVramMB,
   getDesktopGamingMonitorBridge,
   isValidMetric,
+  selectPrimaryGpu,
 } from '../../services/hardwareMonitor';
 
 interface GamingPerformancePanelProps {
@@ -245,7 +246,7 @@ export function GamingPerformancePanel({
     setCompareIdB('');
   }, [gamingBridge]);
 
-  const primaryGpu = snapshot.gpus[0] || null;
+  const primaryGpu = selectPrimaryGpu(snapshot.gpus);
   const sessionA = historyList.find((s) => s.sessionId === compareIdA) || null;
   const sessionB = historyList.find((s) => s.sessionId === compareIdB) || null;
 

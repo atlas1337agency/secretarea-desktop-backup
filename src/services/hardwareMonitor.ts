@@ -5,6 +5,7 @@ import type {
   GamingProcessCandidate,
   GamingSessionHistoryItem,
   GamingSessionState,
+  HardwareGpuMetrics,
   HardwareMonitorSnapshot,
   HardwareNetworkInterfaceMetrics,
   HardwareStorageDriveMetrics,
@@ -301,4 +302,69 @@ export function getActiveNetworkLabel(
 ): string {
   if (!iface) return naLabel;
   return iface.displayName || iface.iface || naLabel;
+}
+
+export function selectPrimaryGpu(
+  gpus: HardwareGpuMetrics[] | null | undefined
+): HardwareGpuMetrics | null {
+  if (!gpus || gpus.length === 0) return null;
+  if (gpus.length === 1) return gpus[0];
+
+  const scoreGpu = (gpu: HardwareGpuMetrics): number => {
+    const model = String(gpu.model || '').toLowerCase();
+    const mfg = String(gpu.manufacturer || '').toLowerCase();
+    let score = 0;
+
+    if (
+      model.includes('microsoft basic') ||
+      model.includes('virtual') ||
+      model.includes('parsec') ||
+      model.includes('vnc') ||
+      model.includes('citrix') ||
+      model.includes('mirage')
+    ) {
+      score -= 100;
+    } else if (
+      mfg.includes('nvidia') ||
+      model.includes('geforce') ||
+      model.includes('rtx') ||
+      model.includes('gtx') ||
+      model.includes('quadro')
+    ) {
+      score += 100;
+    } else if (
+      /\brx\s*\d{3,4}/i.test(model) ||
+      model.includes('radeon pro') ||
+      (mfg.includes('intel') && /\barc\b.*\b[ab]\d{3}/i.test(model))
+    ) {
+      score += 90;
+    } else if (mfg.includes('amd') || model.includes('radeon')) {
+      const isIgpu =
+        model.includes('radeon(tm) graphics') ||
+        model.includes('radeon graphics') ||
+        /\b[678]\d0m\b/.test(model);
+      score += isIgpu ? 30 : 55;
+    } else if (mfg.includes('intel') || model.includes('uhd') || model.includes('iris')) {
+      score += 25;
+    } else {
+      score += 10;
+    }
+
+    if (isValidMetric(gpu.temperatureCelsius) && gpu.temperatureCelsius > 0) score += 15;
+    if (isValidMetric(gpu.vramTotalMB) && gpu.vramTotalMB >= 2048) score += 12;
+    if (isValidMetric(gpu.utilizationPercent)) score += 6;
+    if (isValidMetric(gpu.powerWatts)) score += 4;
+    return score;
+  };
+
+  let best = gpus[0];
+  let bestScore = scoreGpu(best);
+  for (let i = 1; i < gpus.length; i++) {
+    const s = scoreGpu(gpus[i]);
+    if (s > bestScore) {
+      best = gpus[i];
+      bestScore = s;
+    }
+  }
+  return best;
 }
