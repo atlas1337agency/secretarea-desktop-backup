@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   ArrowLeft,
   ArrowSquareOut,
@@ -166,7 +166,7 @@ const UPCOMING_COLUMNS: { key: string; label: string }[] = [
   { key: 'savegames', label: 'SaveGames' },
 ];
 
-export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
+export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
   const t = getTranslations(language).extras;
   const trailersScrollerRef = useRef<HTMLDivElement | null>(null);
   const seriesScrollerRef = useRef<HTMLDivElement | null>(null);
@@ -652,7 +652,7 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
                         allowFullScreen
                         className="w-full h-full border-0"
                       />
-                    ) : currentLink?.watchUrl ? (
+                    ) : currentLink?.watchUrl && /^https?:\/\//i.test(currentLink.watchUrl) ? (
                       <div className="w-full h-full flex flex-col items-center justify-center gap-3 p-6 text-center">
                         <FilmStrip className="w-10 h-10 text-[#66c0f4]" />
                         <a
@@ -871,4 +871,4 @@ export function ExtrasView({ catalog, language = 'en' }: ExtrasViewProps) {
       )}
     </div>
   );
-}
+});

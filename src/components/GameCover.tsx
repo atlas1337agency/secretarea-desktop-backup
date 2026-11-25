@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { GameController } from '@phosphor-icons/react';
 
 interface GameCoverProps {
@@ -10,7 +10,7 @@ interface GameCoverProps {
   compact?: boolean;
 }
 
-export function GameCover({
+export const GameCover = memo(function GameCover({
   src,
   alt,
   className = '',
@@ -61,4 +61,4 @@ export function GameCover({
       className={`${imgClassName} ${className}`}
     />
   );
-}
+});

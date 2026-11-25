@@ -18,6 +18,34 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
+      {
+        name: 'inject-production-csp',
+        apply: 'build',
+        transformIndexHtml() {
+          const csp = [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src 'self' data: https://fonts.gstatic.com",
+            "img-src 'self' data: blob: https: http:",
+            "media-src 'self' data: blob: https: http:",
+            "frame-src https://*.youtube.com https://*.youtube-nocookie.com https://trocador.app",
+            "connect-src 'self' https:",
+            "object-src 'none'",
+            "base-uri 'self'",
+          ].join('; ');
+          return [
+            {
+              tag: 'meta',
+              attrs: {
+                'http-equiv': 'Content-Security-Policy',
+                content: csp,
+              },
+              injectTo: 'head',
+            },
+          ];
+        },
+      },
       // Copies src/assets into dist/ so root-relative URLs like
       // "/src/assets/images/..." (e.g. generate_image output) still resolve
       // in production builds. Do not remove.
@@ -43,6 +71,9 @@ export default defineConfig(() => {
       },
     },
     server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: true as const,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

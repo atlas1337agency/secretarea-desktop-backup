@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Buildings,
@@ -20,7 +20,7 @@ interface StudiosViewProps {
 
 const STUDIOS_PER_PAGE = 30;
 
-export function StudioEmblem({ studio }: { studio: GameItem }) {
+export const StudioEmblem = memo(function StudioEmblem({ studio }: { studio: GameItem }) {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -50,15 +50,16 @@ export function StudioEmblem({ studio }: { studio: GameItem }) {
         alt={studio.name}
         title={studio.name}
         loading="lazy"
+        decoding="async"
         referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
         className="max-h-full max-w-full object-contain group-hover:scale-[1.04] transition-transform duration-200"
       />
     </div>
   );
-}
+});
 
-export function StudiosView({ studios, language = 'en', onSelectStudio, onBackHome }: StudiosViewProps) {
+export const StudiosView = memo(function StudiosView({ studios, language = 'en', onSelectStudio, onBackHome }: StudiosViewProps) {
   const t = getTranslations(language).studios;
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(0);
@@ -146,7 +147,7 @@ export function StudiosView({ studios, language = 'en', onSelectStudio, onBackHo
                   title={studio.name}
                   aria-label={`${studio.name} (${totalGames} ${t.gamePlural})`}
                   onClick={() => onSelectStudio(studio)}
-                  className="group p-3 rounded bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 transition-all duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                  className="sa-contain-card group p-3 rounded bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                 >
                   <StudioEmblem studio={studio} />
                   <span className="text-[12px] font-semibold font-mono-tabular text-slate-700 group-hover:text-slate-900 dark:text-[#c6d4df] dark:group-hover:text-white">
@@ -211,4 +212,4 @@ export function StudiosView({ studios, language = 'en', onSelectStudio, onBackHo
       </div>
     </div>
   );
-}
+});

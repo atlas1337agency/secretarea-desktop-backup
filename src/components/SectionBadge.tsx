@@ -115,7 +115,7 @@ export function SectionSourceBadge({
   return (
     <span
       title={`From ${meta.label}`}
-      className={`inline-flex items-center gap-1 px-2 py-[3px] rounded-full border backdrop-blur-md text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none pointer-events-none select-none ${
+      className={`inline-flex items-center gap-1 px-2 py-[3px] rounded-full border text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none pointer-events-none select-none ${
         meta.badgeClass
       } ${hasTopRibbon ? 'top-7' : 'top-2'} ${className}`}
     >

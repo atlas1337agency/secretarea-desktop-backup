@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Buildings,
@@ -274,7 +274,7 @@ function LibraryFilterDropdown<T extends string>({
   );
 }
 
-export function LibraryView({
+export const LibraryView = memo(function LibraryView({
   activeSectionTab,
   games,
   totalCount,
@@ -450,7 +450,7 @@ export function LibraryView({
                   }}
                   role="button"
                   tabIndex={0}
-                  className="group relative aspect-[2/3] rounded-xl overflow-hidden bg-slate-200 dark:bg-[#10151c] border border-slate-300/90 dark:border-white/[0.09] hover:border-[#0284c7] dark:hover:border-[#1a9fff] shadow-sm dark:shadow-md hover:shadow-xl hover:shadow-black/25 dark:hover:shadow-black/60 transition-all duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9fff]"
+                  className="sa-contain-card group relative aspect-[2/3] rounded-xl overflow-hidden bg-slate-200 dark:bg-[#10151c] border border-slate-300/90 dark:border-white/[0.09] hover:border-[#0284c7] dark:hover:border-[#1a9fff] shadow-sm dark:shadow-md hover:shadow-xl hover:shadow-black/25 dark:hover:shadow-black/60 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9fff]"
                 >
                   <GameCover
                     src={game.coverImage}
@@ -461,7 +461,7 @@ export function LibraryView({
 
                   {/* Modern Floating New Release Badge */}
                   {game.isNew && (
-                    <span className="absolute top-2 end-2 inline-flex items-center gap-1 px-2 py-[3px] rounded-full bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] border border-white/25 backdrop-blur-md text-white text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none shadow-[0_4px_14px_rgba(2,132,199,0.5)] pointer-events-none select-none">
+                    <span className="absolute top-2 end-2 inline-flex items-center gap-1 px-2 py-[3px] rounded-full bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] border border-white/25 text-white text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none shadow-[0_4px_14px_rgba(2,132,199,0.5)] pointer-events-none select-none">
                       <Sparkle weight="fill" className="w-2.5 h-2.5 shrink-0" />
                       <span>NEW</span>
                     </span>
@@ -623,4 +623,4 @@ export function LibraryView({
       )}
     </section>
   );
-}
+});

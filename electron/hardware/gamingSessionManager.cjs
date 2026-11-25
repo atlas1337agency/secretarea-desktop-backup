@@ -689,7 +689,20 @@ function createGamingSessionManager({ getMainWindow, getUserDataPath, getPresent
 
   function ingestHardwareSnapshot(snapshot) {
     if (!snapshot) return;
-    const primaryGpu = Array.isArray(snapshot.gpus) && snapshot.gpus[0] ? snapshot.gpus[0] : null;
+    const gpus = Array.isArray(snapshot.gpus) ? snapshot.gpus : [];
+    const primaryGpu =
+      gpus.find((g) => {
+        const m = String(g?.model || '').toLowerCase();
+        const v = String(g?.manufacturer || '').toLowerCase();
+        return (
+          v.includes('nvidia') ||
+          /\brx\s*\d{3,4}/i.test(m) ||
+          (v.includes('intel') && /\barc\b.*\b[ab]\d{3}/i.test(m))
+        );
+      }) ||
+      gpus.find((g) => typeof g?.temperatureCelsius === 'number' || typeof g?.utilizationPercent === 'number') ||
+      gpus[0] ||
+      null;
     const sample = {
       cpuPercent: snapshot.cpu?.usagePercent ?? null,
       coreLoads: Array.isArray(snapshot.cpu?.coreLoads) ? snapshot.cpu.coreLoads : [],

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CaretDown,
   CaretUp,
@@ -28,7 +28,7 @@ interface LibrarySidebarProps {
   onSelectGame: (game: GameItem) => void;
 }
 
-export function LibrarySidebar({
+export const LibrarySidebar = memo(function LibrarySidebar({
   activeSectionTab,
   onSelectSectionTab,
   sectionCounts,
@@ -236,7 +236,7 @@ export function LibrarySidebar({
                 key={`${game.tab}-${game.id}`}
                 type="button"
                 onClick={() => onSelectGame(game)}
-                className={`w-full px-3 py-1.5 flex items-center gap-2.5 text-start transition-colors cursor-pointer ${
+                className={`sa-sidebar-row w-full px-3 py-1.5 flex items-center gap-2.5 text-start transition-colors cursor-pointer ${
                   isSelected
                     ? 'bg-sky-100 text-sky-950 font-semibold dark:bg-[#2d3e52] dark:text-white'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-[#aeb9c7] dark:hover:bg-white/[0.04] dark:hover:text-white'
@@ -263,4 +263,4 @@ export function LibrarySidebar({
       </div>
     </aside>
   );
-}
+});
