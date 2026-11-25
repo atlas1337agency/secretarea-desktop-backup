@@ -3,8 +3,10 @@ import {
   AppWindow,
   ArrowCounterClockwise,
   ArrowSquareOut,
+  Bell,
   Check,
   CheckCircle,
+  ClockCounterClockwise,
   CursorClick,
   DownloadSimple,
   FloppyDisk,
@@ -88,6 +90,8 @@ interface SettingsViewProps {
     userConfirmed: boolean,
     mode?: 'auto' | 'install' | 'update' | 'repair' | 'reinstall'
   ) => Promise<void> | void;
+  onOpenUpdateHistory?: () => void;
+  onOpenNotifications?: () => void;
   onReplayOnboarding?: () => void;
 }
 
@@ -233,6 +237,8 @@ export function SettingsView({
   onOpenPresentMonManager,
   onCheckPresentMonUpdates,
   onStartPresentMonInstallOrUpdate,
+  onOpenUpdateHistory,
+  onOpenNotifications,
   onReplayOnboarding,
 }: SettingsViewProps) {
   const tr = getTranslations(settings.language);
@@ -1623,6 +1629,59 @@ export function SettingsView({
             </div>
           </div>
         </section>
+
+        {/* 8. App Version, Update History & Notifications */}
+        {(onOpenUpdateHistory || onOpenNotifications) && (
+          <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-3.5 shadow-sm dark:shadow-lg">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                  <ClockCounterClockwise className="w-4.5 h-4.5" />
+                </span>
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-[14.5px] font-bold text-slate-900 dark:text-white tracking-tight">
+                      {tr.updateHistory.settingsCardTitle}
+                    </h2>
+                    <span
+                      dir="ltr"
+                      className="text-[12px] font-mono-tabular font-semibold text-[#0284c7] dark:text-[#38bdf8]"
+                    >
+                      v{currentVersion}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                    {tr.updateHistory.settingsCardDesc}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {onOpenNotifications && (
+                  <button
+                    type="button"
+                    onClick={onOpenNotifications}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-slate-800 dark:text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  >
+                    <Bell className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
+                    <span>{tr.notificationCenter.title}</span>
+                  </button>
+                )}
+
+                {onOpenUpdateHistory && (
+                  <button
+                    type="button"
+                    onClick={onOpenUpdateHistory}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  >
+                    <ClockCounterClockwise className="w-4 h-4" />
+                    <span>{tr.updateHistory.openHistoryBtn}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
       </div>
     </div>

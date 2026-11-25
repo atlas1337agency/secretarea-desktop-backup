@@ -2,6 +2,7 @@ import {
   ArrowCounterClockwise,
   ArrowsClockwise,
   CheckCircle,
+  ClockCounterClockwise,
   DownloadSimple,
   Info,
   Lightning,
@@ -37,6 +38,7 @@ interface DesktopUpdaterUIProps {
   onInstallAndRestart: () => void;
   onPostponeUpdate: () => void;
   onOpenModal: () => void;
+  onOpenUpdateHistory?: () => void;
 }
 
 export function DesktopUpdaterModal({
@@ -51,9 +53,11 @@ export function DesktopUpdaterModal({
   onInstallAndRestart,
   onPostponeUpdate,
   onOpenModal,
+  onOpenUpdateHistory,
 }: DesktopUpdaterUIProps) {
   if (!state) return null;
-  const t = getTranslations(language).updater;
+  const fullTranslations = getTranslations(language);
+  const t = fullTranslations.updater;
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
 
@@ -468,19 +472,39 @@ export function DesktopUpdaterModal({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onCheckForUpdates}
-                  disabled={isChecking || isDownloading}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-50 disabled:cursor-not-allowed text-[12px] font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
-                    isPs5Theme || isXboxTheme
-                      ? 'bg-white/[0.08] hover:bg-white/[0.14] text-white border-white/[0.1]'
-                      : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] dark:text-white dark:border-white/[0.1]'
-                  }`}
-                >
-                  <ArrowsClockwise className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin' : ''}`} />
-                  <span>{isChecking ? t.checkingBtn : t.checkBtn}</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {onOpenUpdateHistory && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenUpdateHistory();
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                        isPs5Theme || isXboxTheme
+                          ? 'bg-white/[0.06] hover:bg-white/[0.12] text-[#dce4ee] border-white/[0.1]'
+                          : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] dark:text-[#dce4ee] dark:border-white/[0.1]'
+                      }`}
+                    >
+                      <ClockCounterClockwise className="w-3.5 h-3.5" />
+                      <span>{fullTranslations.updateHistory.openHistoryBtn}</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={onCheckForUpdates}
+                    disabled={isChecking || isDownloading}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md disabled:opacity-50 disabled:cursor-not-allowed text-[12px] font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                      isPs5Theme || isXboxTheme
+                        ? 'bg-white/[0.08] hover:bg-white/[0.14] text-white border-white/[0.1]'
+                        : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] dark:text-white dark:border-white/[0.1]'
+                    }`}
+                  >
+                    <ArrowsClockwise className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin' : ''}`} />
+                    <span>{isChecking ? t.checkingBtn : t.checkBtn}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Status Feedback */}

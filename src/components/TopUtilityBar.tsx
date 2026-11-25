@@ -2,6 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import {
   ArrowSquareOut,
   ArrowsIn,
+  Bell,
   Clock,
   CornersOut,
   Cpu,
@@ -27,6 +28,10 @@ interface TopUtilityBarProps {
   desktopVersion?: string | null;
   updateBadgeStatus?: 'none' | 'checking' | 'available' | 'downloading' | 'downloaded';
   onOpenUpdates?: () => void;
+  onOpenUpdateHistory?: () => void;
+  unreadNotificationsCount?: number;
+  isNotificationCenterOpen?: boolean;
+  onOpenNotifications?: () => void;
   language?: AppLanguage;
 }
 
@@ -42,6 +47,10 @@ export function TopUtilityBar({
   desktopVersion = null,
   updateBadgeStatus = 'none',
   onOpenUpdates,
+  onOpenUpdateHistory,
+  unreadNotificationsCount = 0,
+  isNotificationCenterOpen = false,
+  onOpenNotifications,
   language = 'en',
 }: TopUtilityBarProps) {
   const [now, setNow] = useState<Date>(() => new Date());
@@ -207,6 +216,22 @@ export function TopUtilityBar({
               />
             )}
           </button>
+        ) : desktopVersion && onOpenUpdateHistory ? (
+          <button
+            type="button"
+            onClick={onOpenUpdateHistory}
+            title={t.updateHistory.title}
+            aria-label={t.updateHistory.title}
+            className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-all cursor-pointer shrink-0 ${
+              isPs5Theme
+                ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
+                : isXboxTheme
+                ? 'rounded-md bg-[#122b15] hover:bg-[#183b1c] text-[#e7fce9] border border-[#52e042]/30 hover:border-[#6ee755]/75'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
+            }`}
+          >
+            <span dir="ltr">v{desktopVersion}</span>
+          </button>
         ) : desktopVersion ? (
           <span
             dir="ltr"
@@ -332,6 +357,45 @@ export function TopUtilityBar({
             );
           })}
         </nav>
+
+        {onOpenNotifications && (
+          <button
+            type="button"
+            onClick={onOpenNotifications}
+            title={t.notificationCenter.buttonLabel}
+            aria-label={t.notificationCenter.buttonLabel}
+            aria-expanded={isNotificationCenterOpen}
+            className={`relative inline-flex items-center gap-1 p-1.5 rounded transition-all cursor-pointer shrink-0 border ${
+              isPs5Theme
+                ? isNotificationCenterOpen
+                  ? 'rounded-full bg-white/[0.24] border-white/[0.45] text-white shadow-[0_0_14px_rgba(96,178,255,0.4)]'
+                  : 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] border-white/[0.16] text-white/85 hover:text-white'
+                : isXboxTheme
+                ? isNotificationCenterOpen
+                  ? 'rounded-md bg-[#107C10]/85 border-[#6ee755]/85 text-white shadow-[0_0_12px_rgba(82,224,66,0.3)]'
+                  : 'rounded-md bg-[#122b15] hover:bg-[#183c1d] border-[#52e042]/35 hover:border-[#6ee755] text-[#e7fce9]'
+                : isNotificationCenterOpen
+                ? 'rounded bg-sky-500/[0.14] border-sky-500/35 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:border-[#38bdf8]/40 dark:text-[#38bdf8]'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5 shrink-0" />
+            {unreadNotificationsCount > 0 && (
+              <span
+                dir="ltr"
+                className={`font-mono-tabular text-[10px] font-bold leading-none ${
+                  isPs5Theme
+                    ? 'text-[#7cc4ff]'
+                    : isXboxTheme
+                    ? 'text-[#6ee755]'
+                    : 'text-[#0284c7] dark:text-[#38bdf8]'
+                }`}
+              >
+                {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+        )}
 
         <button
           type="button"

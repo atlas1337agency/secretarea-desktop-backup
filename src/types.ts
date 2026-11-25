@@ -169,6 +169,7 @@ export interface ItemRequestPayload {
 export type PrimarySection =
   | 'store'
   | 'library'
+  | 'deals'
   | 'extras'
   | 'downloads'
   | 'requests'

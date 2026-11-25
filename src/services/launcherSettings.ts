@@ -128,7 +128,7 @@ export function getAppVersionString(): string {
   } catch {
     // ignore undefined define during isolated tests
   }
-  return '1.0.3';
+  return '1.0.5';
 }
 
 function normalizeLanguage(value: unknown): AppLanguage {

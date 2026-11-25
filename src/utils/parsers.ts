@@ -30,14 +30,23 @@ export const ALL_SHEET_TABS: SheetTabKey[] = [
 export function sanitizeUrl(raw?: unknown): string {
   if (typeof raw !== 'string') return '';
   let trimmed = raw.trim();
-  if (!trimmed) return '';
+  if (!trimmed || /[\x00-\x1f\x7f]/.test(trimmed)) return '';
   if (trimmed.startsWith('https://https//')) {
     trimmed = 'https://' + trimmed.slice('https://https//'.length);
   }
   if (trimmed.startsWith('http://http//')) {
     trimmed = 'http://' + trimmed.slice('http://http//'.length);
   }
-  return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    const proto = parsed.protocol.toLowerCase();
+    if ((proto === 'http:' || proto === 'https:') && parsed.hostname) {
+      return trimmed;
+    }
+  } catch {
+    return '';
+  }
+  return '';
 }
 
 export function isTruthyFlag(value: unknown): boolean {

@@ -735,6 +735,7 @@ function createQbitSetupManager({
       try {
         const csRes = await net.fetch(selected.checksumAssetUrl, {
           headers: { 'User-Agent': SETUP_USER_AGENT },
+          signal: AbortSignal.timeout(10000),
         });
         if (csRes.ok) {
           const csText = await csRes.text();
@@ -749,6 +750,7 @@ function createQbitSetupManager({
       try {
         const webRes = await net.fetch(OFFICIAL_QBIT_DOWNLOAD_URL, {
           headers: { 'User-Agent': SETUP_USER_AGENT },
+          signal: AbortSignal.timeout(10000),
         });
         if (webRes.ok) {
           const html = await webRes.text();
@@ -889,10 +891,13 @@ function createQbitSetupManager({
     }
 
     const cacheDir = getSetupCacheDir();
-    const safeAssetName = path.basename(String(releaseInfo.assetName || 'qbittorrent_x64_setup.exe')).replace(
+    let safeAssetName = path.basename(String(releaseInfo.assetName || 'qbittorrent_x64_setup.exe')).replace(
       /[<>:"/\\|?*\x00-\x1f]/g,
       '_'
     );
+    if (!safeAssetName.toLowerCase().endsWith('.exe')) {
+      safeAssetName = `${safeAssetName}.exe`;
+    }
     const targetPath = path.resolve(path.join(cacheDir, safeAssetName));
     if (!targetPath.startsWith(cacheDir + path.sep)) {
       throw new Error('Security check failed: Invalid destination path.');
@@ -1310,13 +1315,19 @@ function createQbitSetupManager({
 
   async function launchQbitClient() {
     const info = await inspectInstalledState();
-    if (info.executablePath && fs.existsSync(info.executablePath)) {
-      const errMsg = await shell.openPath(info.executablePath);
+    const exePath = info.executablePath ? path.resolve(String(info.executablePath)) : '';
+    const base = exePath ? path.basename(exePath).toLowerCase() : '';
+    const allowedName =
+      process.platform === 'win32'
+        ? base === 'qbittorrent.exe'
+        : base === 'qbittorrent' || base === 'qbittorrent.app';
+    if (exePath && path.isAbsolute(exePath) && allowedName && fs.existsSync(exePath)) {
+      const errMsg = await shell.openPath(exePath);
       if (!errMsg) {
         setTimeout(() => {
           void refreshLocalOnly();
         }, 1200);
-        return { ok: true, executablePath: info.executablePath };
+        return { ok: true, executablePath: exePath };
       }
       return { ok: false, error: errMsg };
     }

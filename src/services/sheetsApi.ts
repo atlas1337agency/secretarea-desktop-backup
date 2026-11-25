@@ -23,11 +23,23 @@ const COMMENTS_STORAGE_KEY = 'secretarea_local_comments';
 const FAVORITES_STORAGE_KEY = 'secretarea_favorites';
 const REQUESTS_STORAGE_KEY = 'secretarea_requests';
 
+function isValidHttpsEndpoint(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl.trim());
+    return parsed.protocol === 'https:' && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function getSavedGasUrl(): string {
   try {
     const stored = localStorage.getItem(GAS_URL_STORAGE_KEY);
     if (stored === OFFLINE_MODE_SENTINEL) return '';
-    return stored || DEFAULT_GAS_URL;
+    if (stored && isValidHttpsEndpoint(stored)) {
+      return stored.trim();
+    }
+    return DEFAULT_GAS_URL;
   } catch {
     return DEFAULT_GAS_URL;
   }
@@ -38,7 +50,7 @@ export function saveGasUrl(url: string): void {
     const trimmed = url.trim();
     if (!trimmed) {
       localStorage.setItem(GAS_URL_STORAGE_KEY, OFFLINE_MODE_SENTINEL);
-    } else {
+    } else if (isValidHttpsEndpoint(trimmed)) {
       localStorage.setItem(GAS_URL_STORAGE_KEY, trimmed);
     }
   } catch {

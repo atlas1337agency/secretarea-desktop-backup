@@ -9,6 +9,7 @@ import {
   List,
   Shield,
   Stack,
+  Tag,
   X,
 } from '@phosphor-icons/react';
 import type { PrimarySection } from '../types';
@@ -48,6 +49,7 @@ export function Navbar({
   }[] = [
     { id: 'store', label: t.nav.home, icon: House },
     { id: 'library', label: t.nav.library, icon: Books },
+    { id: 'deals', label: t.nav.gameDeals, icon: Tag },
     { id: 'extras', label: t.nav.extras, icon: Stack },
     { id: 'requests', label: t.nav.requests, icon: ChatTeardropText },
   ];

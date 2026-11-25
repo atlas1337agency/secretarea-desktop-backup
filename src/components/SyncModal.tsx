@@ -63,7 +63,7 @@ export function SyncModal({
           <div className="flex items-center gap-2.5">
             <Database className="w-4 h-4 text-[#0284c7] dark:text-[#1a9fff]" />
             <h2 className="font-display text-[16px] font-semibold text-slate-900 dark:text-white">
-              Google Sheet &amp; Apps Script Sync
+              Catalog &amp; Remote Sync
             </h2>
           </div>
           <button
@@ -82,20 +82,20 @@ export function SyncModal({
               htmlFor="gas-url-input"
               className="block text-[12px] font-semibold uppercase tracking-wider text-slate-700 dark:text-[#b8c6db] mb-1.5"
             >
-              Apps Script Web App URL
+              Remote Sync Endpoint URL
             </label>
             <input
               id="gas-url-input"
               type="url"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="https://script.google.com/macros/s/.../exec"
+              placeholder="https://..."
               className="w-full px-3 py-2.5 rounded bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-[#0e141b] dark:border-white/[0.12] dark:text-white dark:placeholder-[#566376] text-[13px] focus:outline-none focus:border-[#1a9fff]"
               required
             />
             <p className="mt-1.5 text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-              Connected to your Google Sheet &lsquo;doGet&rsquo; / &lsquo;doPost&rsquo; Web App
-              for live catalog sync across all 17 tabs, community comments, and game requests.
+              Connected to your live catalog endpoint for real-time sync across all 17 tabs,
+              community comments, and game requests.
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export function SyncModal({
             <div>
               <div className="text-slate-500 dark:text-[#8b9bb4]">Source</div>
               <div className="text-[13px] font-medium text-[#0284c7] dark:text-[#66c0f4] mt-0.5 truncate">
-                {currentUrl ? 'Live Google Sheet' : 'Offline Snapshot'}
+                {currentUrl ? 'Live Catalog' : 'Offline Snapshot'}
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ export function SyncModal({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] disabled:opacity-50 text-white text-[12px] font-semibold cursor-pointer"
               >
                 <ArrowsClockwise className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Syncing...' : 'Save & Sync Sheet'}
+                {isSyncing ? 'Syncing...' : 'Save & Sync'}
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const https = require('https');
+const { fileURLToPath } = require('url');
 const { execFile } = require('child_process');
 const { createDownloadManager } = require('./downloadManager.cjs');
 const { createQbitSetupManager } = require('./qbitSetupManager.cjs');
@@ -11,6 +12,8 @@ const { createHardwareMonitor } = require('./hardwareMonitor.cjs');
 const { createGamingSessionManager } = require('./hardware/gamingSessionManager.cjs');
 const { createPresentMonManager } = require('./hardware/presentMonManager.cjs');
 const { createPcCleaner } = require('./hardware/pcCleaner.cjs');
+const { registerDealsNetworkBridge } = require('./deals/dealsNetworkBridge.cjs');
+const { createDealsCredentialsManager } = require('./deals/dealsCredentialsManager.cjs');
 
 const GITHUB_OWNER = 'secretarea1337';
 const GITHUB_REPO = 'secretarea-desktop';
@@ -111,15 +114,51 @@ function patchUpdateState(patch) {
   emitUpdateState();
 }
 
+const PACKAGED_DIST_DIR = path.resolve(__dirname, '../dist');
+const PACKAGED_INDEX_HTML = path.resolve(PACKAGED_DIST_DIR, 'index.html');
+
+function isPathInsideDir(targetPath, baseDir) {
+  if (!targetPath || !baseDir || typeof targetPath !== 'string' || typeof baseDir !== 'string') {
+    return false;
+  }
+  const cleanTarget = path.resolve(targetPath);
+  const cleanBase = path.resolve(baseDir);
+  if (cleanTarget.includes('\0') || cleanBase.includes('\0')) return false;
+  if (process.platform === 'win32') {
+    const t = cleanTarget.toLowerCase();
+    const b = cleanBase.toLowerCase();
+    return t === b || t.startsWith(b + path.sep);
+  }
+  return cleanTarget === cleanBase || cleanTarget.startsWith(cleanBase + path.sep);
+}
+
+function isAllowedAppUrl(rawUrl) {
+  if (typeof rawUrl !== 'string' || !rawUrl.trim()) return false;
+  const trimmed = rawUrl.trim();
+  const devServerUrl = process.env.VITE_DEV_SERVER_URL;
+  if (devServerUrl) {
+    try {
+      const candidate = new URL(trimmed);
+      const expected = new URL(devServerUrl);
+      return candidate.origin === expected.origin;
+    } catch {
+      return false;
+    }
+  }
+  if (!trimmed.toLowerCase().startsWith('file://')) return false;
+  try {
+    const filePath = path.resolve(fileURLToPath(trimmed));
+    return isPathInsideDir(filePath, PACKAGED_DIST_DIR);
+  } catch {
+    return false;
+  }
+}
+
 function isTrustedSender(event) {
   if (!mainWindow || mainWindow.isDestroyed()) return false;
   if (event.sender !== mainWindow.webContents) return false;
   const senderUrl = event.senderFrame?.url || '';
-  const devServerUrl = process.env.VITE_DEV_SERVER_URL;
-  if (devServerUrl && senderUrl.startsWith(devServerUrl)) {
-    return true;
-  }
-  return senderUrl.startsWith('file://');
+  return isAllowedAppUrl(senderUrl);
 }
 
 function configureAutoUpdater() {
@@ -220,9 +259,12 @@ function configureAutoUpdater() {
 
   autoUpdater.on('error', (err) => {
     const rawMsg = err instanceof Error ? err.message : String(err || 'Update check failed.');
-    const friendlyMsg = rawMsg.includes('ERR_INTERNET_DISCONNECTED') || rawMsg.includes('ENOTFOUND')
+    const scrubbedMsg = rawMsg
+      .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [redacted]')
+      .replace(/([?&](?:token|access_token|key|secret)=)[^&\s]+/gi, '$1[redacted]');
+    const friendlyMsg = scrubbedMsg.includes('ERR_INTERNET_DISCONNECTED') || scrubbedMsg.includes('ENOTFOUND')
       ? 'Unable to reach GitHub Releases. Please check your internet connection.'
-      : rawMsg.split('\n')[0].slice(0, 220);
+      : scrubbedMsg.split('\n')[0].slice(0, 220);
 
     patchUpdateState({
       status: 'error',
@@ -362,6 +404,11 @@ function registerUpdaterIpc() {
     return fetchReleaseNotesForVersion(requestedVersion);
   });
 
+  ipcMain.handle('updater:get-release-history', async (event, forceRefresh) => {
+    if (!isTrustedSender(event)) return [];
+    return fetchReleaseHistory(Boolean(forceRefresh));
+  });
+
   ipcMain.handle('window:is-fullscreen', (event) => {
     if (!isTrustedSender(event) || !mainWindow || mainWindow.isDestroyed()) return false;
     return mainWindow.isFullScreen();
@@ -407,13 +454,16 @@ function registerUpdaterIpc() {
       typeof payload === 'object' && payload !== null
         ? Boolean(payload.completed ?? true)
         : Boolean(payload);
-    const version =
+    const rawVersion =
       typeof payload === 'object' &&
       payload !== null &&
       typeof payload.version === 'string' &&
       payload.version.trim()
         ? payload.version.trim()
         : readPackageVersion();
+    const version = /^[0-9A-Za-z._-]{1,32}$/.test(rawVersion)
+      ? rawVersion
+      : readPackageVersion();
     writeDesktopLauncherSettings({
       onboardingCompleted: completed,
       lastOnboardedVersion: completed ? version : null,
@@ -445,7 +495,7 @@ function fetchGithubReleaseJson(apiPath) {
         let body = '';
         res.setEncoding('utf8');
         res.on('data', (chunk) => {
-          if (body.length < 64 * 1024) {
+          if (body.length < 512 * 1024) {
             body += chunk;
           }
         });
@@ -513,6 +563,60 @@ async function fetchReleaseNotesForVersion(rawVersion) {
   };
   releaseNotesCache.set(cleanVersion, parsed);
   return parsed;
+}
+
+const RELEASE_HISTORY_TTL_MS = 10 * 60 * 1000;
+let releaseHistoryCache = { items: null, fetchedAt: 0 };
+
+async function fetchReleaseHistory(forceRefresh = false) {
+  if (
+    !forceRefresh &&
+    Array.isArray(releaseHistoryCache.items) &&
+    Date.now() - releaseHistoryCache.fetchedAt < RELEASE_HISTORY_TTL_MS
+  ) {
+    return releaseHistoryCache.items;
+  }
+
+  const data = await fetchGithubReleaseJson(
+    `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases?per_page=25`
+  );
+  if (!Array.isArray(data)) {
+    return Array.isArray(releaseHistoryCache.items) ? releaseHistoryCache.items : [];
+  }
+
+  const parsedList = data
+    .filter((rel) => rel && !rel.draft)
+    .map((rel) => {
+      const rawTag = String(rel.tag_name || rel.name || '').trim();
+      const version = rawTag.replace(/^v/i, '').trim();
+      const notes =
+        typeof rel.body === 'string' && rel.body.trim()
+          ? stripHtmlNotes(rel.body) || rel.body.trim()
+          : '';
+      return {
+        version,
+        tagName: rawTag || (version ? `v${version}` : ''),
+        releaseName:
+          typeof rel.name === 'string' && rel.name.trim()
+            ? rel.name.trim()
+            : `SecretArea v${version}`,
+        notes,
+        publishedAt: typeof rel.published_at === 'string' ? rel.published_at : null,
+        htmlUrl:
+          typeof rel.html_url === 'string' && /^https:\/\/github\.com\//i.test(rel.html_url)
+            ? rel.html_url
+            : null,
+        prerelease: Boolean(rel.prerelease),
+        source: 'github',
+      };
+    })
+    .filter((entry) => Boolean(entry.version));
+
+  releaseHistoryCache = {
+    items: parsedList,
+    fetchedAt: Date.now(),
+  };
+  return parsedList;
 }
 
 function getLauncherSettingsPath() {
@@ -1012,13 +1116,24 @@ function resolveAppIcon() {
   return undefined;
 }
 
-function isExternalUrl(targetUrl) {
-  return (
-    targetUrl.startsWith('http://') ||
-    targetUrl.startsWith('https://') ||
-    targetUrl.startsWith('magnet:') ||
-    targetUrl.startsWith('tg:')
-  );
+function parseSafeExternalUrl(targetUrl) {
+  if (typeof targetUrl !== 'string') return '';
+  const trimmed = targetUrl.trim();
+  if (!trimmed || /[\x00-\x1f\x7f]/.test(trimmed)) return '';
+  try {
+    const parsed = new URL(trimmed);
+    const proto = parsed.protocol.toLowerCase();
+    if (proto === 'http:' || proto === 'https:') {
+      if (!parsed.hostname) return '';
+      return trimmed;
+    }
+    if (proto === 'magnet:' || proto === 'tg:') {
+      return trimmed;
+    }
+    return '';
+  } catch {
+    return '';
+  }
 }
 
 function createWindow(options = {}) {
@@ -1039,6 +1154,9 @@ function createWindow(options = {}) {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      webviewTag: false,
     },
   });
 
@@ -1092,31 +1210,28 @@ function createWindow(options = {}) {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
-      return { action: 'deny' };
+    const safeUrl = parseSafeExternalUrl(url);
+    if (safeUrl) {
+      void shell.openExternal(safeUrl);
     }
-    return { action: 'allow' };
+    return { action: 'deny' };
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    const devServerUrl = process.env.VITE_DEV_SERVER_URL;
-    if (devServerUrl && url.startsWith(devServerUrl)) {
+    if (isAllowedAppUrl(url)) {
       return;
     }
-    if (url.startsWith('file://')) {
-      return;
-    }
-    if (isExternalUrl(url)) {
-      event.preventDefault();
-      void shell.openExternal(url);
+    event.preventDefault();
+    const safeUrl = parseSafeExternalUrl(url);
+    if (safeUrl) {
+      void shell.openExternal(safeUrl);
     }
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     void mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
-    void mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    void mainWindow.loadFile(PACKAGED_INDEX_HTML);
   }
 
   mainWindow.on('closed', () => {
@@ -1172,7 +1287,54 @@ function configureYouTubeEmbedHeaders() {
   });
 }
 
+function configureSecurityPolicies() {
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    const isMain = mainWindow && !mainWindow.isDestroyed() && webContents === mainWindow.webContents;
+    const allowed = isMain && (permission === 'fullscreen' || permission === 'clipboard-sanitized-write');
+    callback(Boolean(allowed));
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
+    const isMain = mainWindow && !mainWindow.isDestroyed() && webContents === mainWindow.webContents;
+    return Boolean(isMain && (permission === 'fullscreen' || permission === 'clipboard-sanitized-write'));
+  });
+
+  const isDevMode = Boolean(process.env.VITE_DEV_SERVER_URL);
+  const scriptSrc = isDevMode ? "script-src 'self' 'unsafe-inline'" : "script-src 'self'";
+  const connectSrc = isDevMode ? "connect-src 'self' https: ws: wss:" : "connect-src 'self' https:";
+  const cspHeader = [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https: http:",
+    "media-src 'self' data: blob: https: http:",
+    "frame-src https://*.youtube.com https://*.youtube-nocookie.com https://trocador.app",
+    connectSrc,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+  ].join('; ');
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    if (details.resourceType === 'mainFrame' && isAllowedAppUrl(details.url)) {
+      const responseHeaders = { ...(details.responseHeaders || {}) };
+      responseHeaders['Content-Security-Policy'] = [cspHeader];
+      callback({ responseHeaders });
+      return;
+    }
+    callback({ cancel: false });
+  });
+}
+
+app.on('web-contents-created', (_event, contents) => {
+  contents.on('will-attach-webview', (attachEvent) => {
+    attachEvent.preventDefault();
+  });
+});
+
 app.whenReady().then(() => {
+  configureSecurityPolicies();
   configureYouTubeEmbedHeaders();
   configureAutoUpdater();
   registerUpdaterIpc();
@@ -1236,6 +1398,11 @@ app.whenReady().then(() => {
     },
   });
   hardwareMonitor.registerIpc(ipcMain, isTrustedSender);
+
+  const dealsCredentialsManager = createDealsCredentialsManager({
+    getUserDataPath: () => app.getPath('userData'),
+  });
+  registerDealsNetworkBridge(ipcMain, isTrustedSender, readPackageVersion, dealsCredentialsManager);
 
   const persisted = readDesktopLauncherSettings();
   const launchInTray = isTrayLaunchRequested();
