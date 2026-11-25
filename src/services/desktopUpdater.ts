@@ -36,7 +36,18 @@ export interface DesktopReleaseNotesPayload {
   source: 'github' | 'updater';
 }
 
-interface SecretAreaUpdaterBridge {
+export interface DesktopReleaseHistoryEntry {
+  version: string;
+  tagName: string;
+  releaseName: string;
+  notes: string;
+  publishedAt: string | null;
+  htmlUrl: string | null;
+  prerelease: boolean;
+  source: 'github' | 'local';
+}
+
+export interface SecretAreaUpdaterBridge {
   getVersion: () => Promise<string>;
   getState: () => Promise<DesktopUpdateState | null>;
   checkForUpdates: () => Promise<DesktopUpdateState | null>;
@@ -44,6 +55,7 @@ interface SecretAreaUpdaterBridge {
   postponeUpdate: () => Promise<DesktopUpdateState | null>;
   installUpdate: () => Promise<void>;
   getReleaseNotes?: (version?: string) => Promise<DesktopReleaseNotesPayload | null>;
+  getReleaseHistory?: (forceRefresh?: boolean) => Promise<DesktopReleaseHistoryEntry[]>;
   onStateChange: (callback: (state: DesktopUpdateState) => void) => () => void;
 }
 

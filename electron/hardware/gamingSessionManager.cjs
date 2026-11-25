@@ -22,7 +22,10 @@ function runExec(cmd, args, timeoutMs = 2800) {
 function isValidPingTarget(host) {
   if (!host || typeof host !== 'string') return false;
   const trimmed = host.trim();
-  return /^[a-zA-Z0-9.-]{1,120}$/.test(trimmed) && !trimmed.startsWith('-');
+  if (trimmed.length === 0 || trimmed.length > 120) return false;
+  return /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/.test(
+    trimmed
+  );
 }
 
 function parsePingOutput(stdout) {
@@ -617,10 +620,12 @@ function createGamingSessionManager({ getMainWindow, getUserDataPath, getPresent
     }
 
     const pmPath = detectPresentMonBinary();
+    const numPid = Number(pid);
+    const safePid = Number.isInteger(numPid) && numPid > 0 && numPid <= 4194304 ? numPid : null;
     activeSession = {
       sessionId: `gs-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      pid: Number(pid) || null,
-      processName: processName ? String(processName) : 'System Gaming Session',
+      pid: safePid,
+      processName: processName ? String(processName).slice(0, 120) : 'System Gaming Session',
       startedAt: Date.now(),
       frameTimesMs: [],
       totalFramesCaptured: 0,

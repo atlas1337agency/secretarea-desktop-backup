@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  ArrowClockwise,
   ArrowLeft,
   ArrowRight,
-  ArrowClockwise,
   ArrowSquareOut,
+  CaretRight,
   Check,
   CheckCircle,
   Desktop,
   DownloadSimple,
   Eye,
   EyeSlash,
+  Gauge,
   Gear,
   Globe,
+  House,
   Key,
   Magnet,
   Moon,
@@ -19,6 +22,7 @@ import {
   Play,
   Shield,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkle,
   SpinnerGap,
   Sun,
@@ -138,11 +142,9 @@ export function FirstLaunchOnboarding({
   const [qbitLogoFailed, setQbitLogoFailed] = useState(false);
   const [torrentSkipped, setTorrentSkipped] = useState(false);
 
-  // qBittorrent install auto-advance tracking
   const installStartedHereRef = useRef(false);
   const [justInstalledBanner, setJustInstalledBanner] = useState(false);
 
-  // Step 4: Integration credentials state
   const [port, setPort] = useState<number>(torrentConfig.port || 8080);
   const [username, setUsername] = useState<string>(torrentConfig.username || 'admin');
   const [password, setPassword] = useState<string>('');
@@ -150,8 +152,8 @@ export function FirstLaunchOnboarding({
   const [isVerifyingWebUi, setIsVerifyingWebUi] = useState(false);
   const [webUiTestResult, setWebUiTestResult] = useState<TorrentConnectionTestResult | null>(null);
 
-  // Step 5: Congratulations animated progress & smooth launch exit
   const [congratsProgress, setCongratsProgress] = useState(0);
+  const [launchTarget, setLaunchTarget] = useState<'store' | 'settings'>('store');
   const [isLaunchingOut, setIsLaunchingOut] = useState(false);
 
   const currentThemeChoice: OnboardingThemeChoice = settings.alwaysPs5Theme
@@ -169,7 +171,6 @@ export function FirstLaunchOnboarding({
   const DirectionalArrow = isRtl ? ArrowLeft : ArrowRight;
   const BackArrow = isRtl ? ArrowRight : ArrowLeft;
 
-  // Trigger a clean local + release check as soon as the user reaches Step 3
   const hasTriggeredStep3CheckRef = useRef(false);
   useEffect(() => {
     if (step !== 'qbit_check') {
@@ -184,7 +185,6 @@ export function FirstLaunchOnboarding({
     }
   }, [step, isDesktopApp, onRecheckQbit]);
 
-  // If user initiated qBittorrent install in Step 3 and it finishes cleanly, advance to Step 4 Integration
   useEffect(() => {
     if (
       step === 'qbit_check' &&
@@ -201,7 +201,6 @@ export function FirstLaunchOnboarding({
     }
   }, [step, setupState.installed, setupState.stage]);
 
-  // Pre-fill Web UI fields from detected qBittorrent.ini / saved config on Step 4
   useEffect(() => {
     if (step !== 'qbit_integration') return;
     setPort(
@@ -223,7 +222,6 @@ export function FirstLaunchOnboarding({
     torrentConfig.username,
   ]);
 
-  // Animate Congratulations progress ring smoothly from 0 -> 100 on Step 5
   useEffect(() => {
     if (step !== 'complete') {
       setCongratsProgress(0);
@@ -245,7 +243,6 @@ export function FirstLaunchOnboarding({
     const tick = (now: number) => {
       const elapsed = now - startAt;
       const ratio = Math.min(1, elapsed / durationMs);
-      // Smooth easeOutCubic
       const eased = 1 - Math.pow(1 - ratio, 3);
       setCongratsProgress(Math.round(eased * 100));
       if (ratio < 1) {
@@ -376,27 +373,27 @@ export function FirstLaunchOnboarding({
       ? t.finalizingPhase2
       : t.finalizingPhase3;
 
-  const ringRadius = 46;
+  const ringRadius = 44;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringDashOffset = ringCircumference * (1 - congratsProgress / 100);
 
   return (
     <div
-      className={`sa-app-shell h-dvh w-full overflow-y-auto flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#0e141b] dark:text-[#e5e9f0] ${
+      className={`sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#0e141b] dark:text-[#e5e9f0] ${
         isLaunchingOut ? 'sa-onboard-launch-out' : ''
       }`}
     >
-      {/* Top Minimal Brand + Step Progress Header */}
+      {/* Top Minimal Brand + 5-Step Progress Header */}
       <header
         className={`relative z-20 shrink-0 border-b backdrop-blur-md transition-colors ${
           isPs5Theme
-            ? 'bg-[#021233]/80 border-white/[0.12] text-white'
+            ? 'bg-[#021233]/85 border-white/[0.12] text-white'
             : isXboxTheme
-            ? 'bg-[#081a0b]/84 border-[#52e042]/20 text-[#ecfdf0]'
-            : 'bg-white/90 dark:bg-[#0f141c]/90 border-slate-200 dark:border-white/[0.08]'
+            ? 'bg-[#081a0b]/88 border-[#52e042]/20 text-[#ecfdf0]'
+            : 'bg-white/95 dark:bg-[#0f141c]/95 border-slate-200 dark:border-white/[0.08]'
         }`}
       >
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
           {/* Brand Mark */}
           <div className="flex items-center gap-2.5 shrink-0">
             {!brandLogoFailed ? (
@@ -404,11 +401,11 @@ export function FirstLaunchOnboarding({
                 src="./img/logo01.png"
                 alt="SecretArea"
                 onError={() => setBrandLogoFailed(true)}
-                className="h-7 sm:h-8 w-auto max-w-[120px] object-contain shrink-0"
+                className="h-7 w-auto max-w-[110px] object-contain shrink-0"
               />
             ) : (
               <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                   isXboxTheme
                     ? 'bg-gradient-to-br from-[#107C10] to-[#0a520a]'
                     : 'bg-gradient-to-br from-[#0284c7] to-[#1d4ed8]'
@@ -417,28 +414,28 @@ export function FirstLaunchOnboarding({
                 <Shield weight="duotone" className="w-4 h-4 text-white" />
               </div>
             )}
-            <span className="font-display text-[16px] sm:text-[17px] font-bold tracking-tight whitespace-nowrap">
+            <span className="font-display text-[15.5px] font-bold tracking-tight whitespace-nowrap">
               SecretArea
             </span>
-            {desktopVersion && (
+            {currentVersion && (
               <span
                 dir="ltr"
-                className="hidden sm:inline text-[11.5px] font-mono-tabular text-slate-500 dark:text-[#8b9bb4]"
+                className="hidden sm:inline text-[11px] font-mono-tabular text-slate-500 dark:text-[#8b9bb4]"
               >
-                · v{desktopVersion}
+                · v{currentVersion}
               </span>
             )}
           </div>
 
-          {/* 5-Step Progress Indicator (Desktop & Tablet) */}
-          <nav aria-label="Setup steps" className="hidden lg:flex items-center gap-4 min-w-0">
+          {/* 5-Step Progress Indicator (Desktop) */}
+          <nav aria-label="Setup steps" className="hidden lg:flex items-center gap-3.5 min-w-0">
             {wizardSteps.map((ws, idx) => {
               const isDone = idx < activeStepIdx;
               const isCurrent = idx === activeStepIdx;
               return (
                 <div key={ws.id} className="flex items-center gap-2 shrink-0">
                   <span
-                    className={`font-mono-tabular text-[11px] font-bold w-6 h-6 rounded-full inline-flex items-center justify-center border transition-colors ${
+                    className={`font-mono-tabular text-[11px] font-bold w-5 h-5 rounded-full inline-flex items-center justify-center border transition-colors ${
                       isDone
                         ? 'bg-emerald-600 border-emerald-600 text-white'
                         : isCurrent
@@ -448,10 +445,10 @@ export function FirstLaunchOnboarding({
                         : 'border-slate-300 dark:border-white/[0.16] text-slate-500 dark:text-[#7f91a8]'
                     }`}
                   >
-                    {isDone ? <Check weight="bold" className="w-3.5 h-3.5" /> : ws.num}
+                    {isDone ? <Check weight="bold" className="w-3 h-3" /> : ws.num}
                   </span>
                   <span
-                    className={`text-[12.5px] whitespace-nowrap ${
+                    className={`text-[12px] whitespace-nowrap ${
                       isCurrent
                         ? 'font-bold text-slate-900 dark:text-white'
                         : isDone
@@ -464,7 +461,7 @@ export function FirstLaunchOnboarding({
                   {idx < wizardSteps.length - 1 && (
                     <span
                       aria-hidden="true"
-                      className="text-slate-300 dark:text-white/20 ms-1"
+                      className="text-slate-300 dark:text-white/20 ms-0.5"
                     >
                       /
                     </span>
@@ -479,7 +476,7 @@ export function FirstLaunchOnboarding({
             <div
               role="group"
               aria-label={tr.nav.selectLanguage}
-              className="sa-ps5-pill-group inline-flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08]"
+              className="sa-ps5-pill-group inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08]"
             >
               {LANGUAGE_OPTIONS.map((opt) => {
                 const selected = settings.language === opt.code;
@@ -505,9 +502,9 @@ export function FirstLaunchOnboarding({
         </div>
       </header>
 
-      {/* Mobile Compact Step Bar */}
-      <div className="lg:hidden relative z-10 px-4 pt-3 max-w-5xl w-full mx-auto">
-        <div className="flex items-center justify-between text-[12px] font-semibold text-slate-600 dark:text-[#9cb0c9] mb-1.5">
+      {/* Mobile & Tablet Compact Step Bar */}
+      <div className="lg:hidden relative z-10 shrink-0 px-4 pt-2.5 max-w-6xl w-full mx-auto">
+        <div className="flex items-center justify-between text-[11.5px] font-semibold text-slate-600 dark:text-[#9cb0c9] mb-1">
           <span>
             {wizardSteps[activeStepIdx]?.num} · {wizardSteps[activeStepIdx]?.label}
           </span>
@@ -515,7 +512,7 @@ export function FirstLaunchOnboarding({
             {activeStepIdx + 1} / {wizardSteps.length}
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
+        <div className="h-1 w-full rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
               isXboxTheme ? 'bg-[#52e042]' : 'bg-[#0284c7] dark:bg-[#38bdf8]'
@@ -525,33 +522,34 @@ export function FirstLaunchOnboarding({
         </div>
       </div>
 
-      {/* Main Centered Onboarding Canvas */}
-      <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex flex-col justify-center">
-        {/* ======================== STEP 1: MODERN WELCOME / WHAT'S NEW ======================== */}
+      {/* Main 100% Full-Height Onboarding Canvas (No Page Scroll) */}
+      <main className="relative z-10 flex-1 min-h-0 w-full max-w-6xl mx-auto px-3 sm:px-5 lg:px-8 py-3 sm:py-4 flex flex-col">
+        {/* ======================== STEP 1: MODERN WELCOME ======================== */}
         {step === 'welcome' && (
           <section
             key="step-welcome"
-            className="sa-onboard-step-in sa-ps5-panel relative rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel relative flex-1 min-h-0 flex flex-col rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
             {/* Subtle GPU-friendly radial aura */}
             <div
               aria-hidden="true"
-              className="sa-welcome-aura pointer-events-none absolute -top-28 -end-24 w-72 h-72 sm:w-96 sm:h-96 rounded-full blur-3xl opacity-75"
+              className="sa-welcome-aura pointer-events-none absolute -top-24 -end-20 w-72 h-72 sm:w-96 sm:h-96 rounded-full blur-3xl opacity-70"
               style={{
                 background: isXboxTheme
-                  ? 'radial-gradient(circle, rgba(82,224,66,0.22) 0%, transparent 70%)'
+                  ? 'radial-gradient(circle, rgba(82,224,66,0.2) 0%, transparent 70%)'
                   : isCustomThemeActive
-                  ? `radial-gradient(circle, ${settings.customTheme.accentColor}38 0%, transparent 70%)`
-                  : 'radial-gradient(circle, rgba(26,159,255,0.22) 0%, transparent 70%)',
+                  ? `radial-gradient(circle, ${settings.customTheme.accentColor}34 0%, transparent 70%)`
+                  : 'radial-gradient(circle, rgba(26,159,255,0.2) 0%, transparent 70%)',
               }}
             />
 
-            <div className="relative z-10 p-5 sm:p-8 lg:p-11 space-y-7">
-              <div className="grid grid-cols-1 lg:grid-cols-[1.12fr_0.88fr] gap-7 lg:gap-10 items-start">
-                {/* Left Hero Column */}
-                <div className="space-y-6">
-                  <div className="sa-welcome-stagger-1 flex items-center gap-4">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center p-2.5 shrink-0 shadow-sm">
+            {/* Full-Height Split Grid (scrolls internally only on ultra-short mobile viewports) */}
+            <div className="relative z-10 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-[1.18fr_0.82fr] divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-white/[0.08]">
+              {/* Left Hero & 3 Setup Pillars */}
+              <div className="p-5 sm:p-6 lg:p-8 flex flex-col justify-between gap-4 sm:gap-5 min-w-0">
+                <div className="space-y-4 sm:space-y-5">
+                  <div className="sa-welcome-stagger-1 flex items-center gap-3.5">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center p-2 shrink-0">
                       {!brandLogoFailed ? (
                         <img
                           src="./img/logo01.png"
@@ -562,146 +560,147 @@ export function FirstLaunchOnboarding({
                       ) : (
                         <Shield
                           weight="duotone"
-                          className="w-10 h-10 text-[#0284c7] dark:text-[#38bdf8]"
+                          className="w-8 h-8 text-[#0284c7] dark:text-[#38bdf8]"
                         />
                       )}
                     </div>
 
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
-                        <span>{t.welcomeEyebrow}</span>
-                        <span aria-hidden="true">·</span>
-                        <span dir="ltr" className="font-mono-tabular">
-                          v{currentVersion}
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4]">
-                        {t.firstTimeNotice}
-                      </p>
+                    <div className="flex flex-wrap items-center gap-x-2 text-[12.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                      <span>{t.welcomeEyebrow}</span>
+                      <span aria-hidden="true">·</span>
+                      <span dir="ltr" className="font-mono-tabular">
+                        v{currentVersion}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="sa-welcome-stagger-2 space-y-3">
-                    <h1 className="font-display text-3xl sm:text-4xl lg:text-[42px] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1] [text-wrap:balance]">
+                  <div className="sa-welcome-stagger-2 space-y-2.5">
+                    <h1 className="font-display text-2xl sm:text-3xl lg:text-[40px] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.08] [text-wrap:balance]">
                       {t.welcomeTitle}
                     </h1>
 
-                    <p className="text-[14.5px] sm:text-[15.5px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed max-w-xl">
+                    <p className="text-[13.5px] sm:text-[15px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed max-w-xl">
                       {t.welcomeSubtitle}
                     </p>
                   </div>
 
-                  {/* Three Clean Setup Steps Summary */}
-                  <div className="sa-welcome-stagger-3 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-200 dark:border-white/[0.08]">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
-                        <Palette className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-                        <span>{t.welcomeFeature1Title}</span>
-                      </div>
-                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                        {t.welcomeFeature1Desc}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
-                        <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-                        <span>{t.welcomeFeature2Title}</span>
-                      </div>
-                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                        {t.welcomeFeature2Desc}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-[#4ade80] shrink-0" />
-                        <span>{t.welcomeFeature3Title}</span>
-                      </div>
-                      <p className="text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
-                        {t.welcomeFeature3Desc}
-                      </p>
-                    </div>
+                  {/* Step 1 Visitor Guide */}
+                  <div className="p-3 sm:p-3.5 rounded-xl bg-sky-50/75 dark:bg-[#111a26] border border-sky-200/80 dark:border-[#1a9fff]/20 text-[12px] sm:text-[12.5px] text-sky-950 dark:text-[#bdd7f2] leading-relaxed">
+                    <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                      {t.stepGuideLabel}:
+                    </span>
+                    <span>{t.step1Guide}</span>
                   </div>
                 </div>
 
-                {/* Right Column: What is SecretArea? Visitor Overview */}
-                <div className="sa-welcome-stagger-2 sa-ps5-subpanel rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.08] p-5 sm:p-6 space-y-4">
-                  <div className="space-y-1.5 pb-3.5 border-b border-slate-200 dark:border-white/[0.07]">
-                    <div className="flex items-center gap-2 text-[14.5px] font-bold text-slate-900 dark:text-white">
-                      <Sparkle weight="duotone" className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
-                      <span>{t.whatIsSecretAreaTitle}</span>
+                {/* 3 Editorial Setup Pillars (Responsive Single-Line Headings) */}
+                <div className="sa-welcome-stagger-3 grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-3 lg:gap-3.5 xl:gap-4 pt-4 border-t border-slate-200 dark:border-white/[0.08]">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 text-[13px] sm:text-[11.5px] md:text-[12px] lg:text-[11.5px] xl:text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <Palette className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                      <span className="truncate">{t.welcomeFeature1Title}</span>
                     </div>
-                    <p className="text-[13px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
-                      {t.whatIsSecretAreaBody}
+                    <p className="text-[11.5px] sm:text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                      {t.welcomeFeature1Desc}
                     </p>
                   </div>
 
-                  <ul className="space-y-3.5">
-                    <li className="flex items-start gap-3">
-                      <span className="w-7 h-7 rounded-lg bg-[#0284c7]/10 dark:bg-[#1a9fff]/15 text-[#0284c7] dark:text-[#38bdf8] flex items-center justify-center shrink-0 mt-0.5">
-                        <Desktop className="w-4 h-4" />
-                      </span>
-                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
-                        {t.whatIsSecretAreaPoint1}
-                      </p>
-                    </li>
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 text-[13px] sm:text-[11.5px] md:text-[12px] lg:text-[11.5px] xl:text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <DownloadSimple className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                      <span className="truncate">{t.welcomeFeature2Title}</span>
+                    </div>
+                    <p className="text-[11.5px] sm:text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                      {t.welcomeFeature2Desc}
+                    </p>
+                  </div>
 
-                    <li className="flex items-start gap-3">
-                      <span className="w-7 h-7 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-[#4ade80] flex items-center justify-center shrink-0 mt-0.5">
-                        <DownloadSimple className="w-4 h-4" />
-                      </span>
-                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
-                        {t.whatIsSecretAreaPoint2}
-                      </p>
-                    </li>
-
-                    <li className="flex items-start gap-3">
-                      <span className="w-7 h-7 rounded-lg bg-violet-500/10 dark:bg-violet-500/15 text-violet-600 dark:text-violet-300 flex items-center justify-center shrink-0 mt-0.5">
-                        <Palette className="w-4 h-4" />
-                      </span>
-                      <p className="text-[12.5px] text-slate-700 dark:text-[#cbd6e4] leading-relaxed">
-                        {t.whatIsSecretAreaPoint3}
-                      </p>
-                    </li>
-                  </ul>
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 text-[13px] sm:text-[11.5px] md:text-[12px] lg:text-[11.5px] xl:text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <ShieldCheck className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-emerald-600 dark:text-[#4ade80] shrink-0" />
+                      <span className="truncate">{t.welcomeFeature3Title}</span>
+                    </div>
+                    <p className="text-[11.5px] sm:text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                      {t.welcomeFeature3Desc}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Visitor Step Guide */}
-              <div className="p-3.5 rounded-xl bg-sky-50/80 dark:bg-[#111a26] border border-sky-200/80 dark:border-[#1a9fff]/20 text-[12.5px] text-sky-950 dark:text-[#bdd7f2] leading-relaxed">
-                <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
-                  {t.stepGuideLabel}:
-                </span>
-                <span>{t.step1Guide}</span>
-              </div>
-
-              {/* Action Row */}
-              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-[12px] text-slate-500 dark:text-[#8b9bb4]">
-                  <Desktop className="w-4 h-4 shrink-0 text-[#0284c7] dark:text-[#38bdf8]" />
-                  <span>{t.platformHint}</span>
+              {/* Right Column: What is SecretArea? */}
+              <div className="sa-welcome-stagger-2 sa-ps5-subpanel bg-slate-50/75 dark:bg-[#10161e]/85 p-5 sm:p-6 lg:p-7 flex flex-col justify-center gap-3.5 min-w-0">
+                <div className="space-y-2 pb-3 border-b border-slate-200 dark:border-white/[0.08]">
+                  <div className="flex items-center gap-2 text-[14.5px] font-bold text-slate-900 dark:text-white">
+                    <Sparkle weight="duotone" className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                    <span>{t.whatIsSecretAreaTitle}</span>
+                  </div>
+                  <p className="text-[13px] sm:text-[13.5px] font-medium text-slate-700 dark:text-[#c7d5e8] leading-relaxed">
+                    {t.whatIsSecretAreaBody}
+                  </p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-end gap-2.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleLaunchIntoDesktop('store')}
-                    className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <span>{t.skipAllBtn}</span>
-                  </button>
+                <ul className="divide-y divide-slate-200/80 dark:divide-white/[0.06]">
+                  <li className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-3">
+                    <span className="w-7 h-7 rounded-lg bg-[#0284c7]/10 dark:bg-[#1a9fff]/15 text-[#0284c7] dark:text-[#38bdf8] flex items-center justify-center shrink-0 mt-0.5">
+                      <Desktop className="w-4 h-4" />
+                    </span>
+                    <p className="text-[12px] sm:text-[12.5px] text-slate-600 dark:text-[#b5c3d6] leading-relaxed">
+                      {t.whatIsSecretAreaPoint1}
+                    </p>
+                  </li>
 
-                  <button
-                    type="button"
-                    onClick={() => setStep('preferences')}
-                    className="inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[14px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <span>{t.getStartedBtn}</span>
-                    <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
-                  </button>
-                </div>
+                  <li className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-3">
+                    <span className="w-7 h-7 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-[#4ade80] flex items-center justify-center shrink-0 mt-0.5">
+                      <DownloadSimple className="w-4 h-4" />
+                    </span>
+                    <p className="text-[12px] sm:text-[12.5px] text-slate-600 dark:text-[#b5c3d6] leading-relaxed">
+                      {t.whatIsSecretAreaPoint2}
+                    </p>
+                  </li>
+
+                  <li className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-3">
+                    <span className="w-7 h-7 rounded-lg bg-sky-500/10 dark:bg-[#38bdf8]/15 text-[#0284c7] dark:text-[#38bdf8] flex items-center justify-center shrink-0 mt-0.5">
+                      <Palette className="w-4 h-4" />
+                    </span>
+                    <p className="text-[12px] sm:text-[12.5px] text-slate-600 dark:text-[#b5c3d6] leading-relaxed">
+                      {t.whatIsSecretAreaPoint3}
+                    </p>
+                  </li>
+
+                  <li className="py-2.5 first:pt-0 last:pb-0 flex items-start gap-3">
+                    <span className="w-7 h-7 rounded-lg bg-amber-500/10 dark:bg-amber-400/15 text-amber-600 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+                      <Gauge className="w-4 h-4" />
+                    </span>
+                    <p className="text-[12px] sm:text-[12.5px] text-slate-600 dark:text-[#b5c3d6] leading-relaxed">
+                      {t.whatIsSecretAreaPoint4}
+                    </p>
+                  </li>
+                </ul>
               </div>
+            </div>
+
+            {/* Anchored Footer Action Row */}
+            <div className="relative z-10 shrink-0 px-5 sm:px-7 lg:px-9 py-3 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#11161f] flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleLaunchIntoDesktop('store')}
+                className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg text-[13px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/[0.06] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <span>{t.skipAllBtn}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStep('preferences')}
+                className={`inline-flex items-center gap-2 min-h-[42px] px-6 py-2 rounded-lg text-white text-[13.5px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  isXboxTheme
+                    ? 'bg-[#107C10] hover:bg-[#159315]'
+                    : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff]'
+                }`}
+              >
+                <span>{t.getStartedBtn}</span>
+                <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
+              </button>
             </div>
           </section>
         )}
@@ -710,29 +709,31 @@ export function FirstLaunchOnboarding({
         {step === 'preferences' && (
           <section
             key="step-preferences"
-            className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel flex-1 min-h-0 flex flex-col rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
-            <div className="p-6 sm:p-8 lg:p-10 space-y-7">
-              <div className="space-y-3 border-b border-slate-200 dark:border-white/[0.08] pb-5">
-                <div className="space-y-1.5">
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white [text-wrap:balance]">
-                    {t.appearanceTitle}
-                  </h2>
-                  <p className="text-[14px] text-slate-600 dark:text-[#9cb0c9]">
-                    {t.appearanceSubtitle}
-                  </p>
-                </div>
-                <p className="p-3 rounded-lg bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
-                  <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
-                    {t.stepGuideLabel}:
-                  </span>
-                  <span>{t.step2Guide}</span>
+            {/* Step Header */}
+            <div className="shrink-0 px-5 sm:px-7 py-4 border-b border-slate-200 dark:border-white/[0.08] space-y-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white [text-wrap:balance]">
+                  {t.appearanceTitle}
+                </h2>
+                <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9]">
+                  {t.appearanceSubtitle}
                 </p>
               </div>
+              <p className="text-[12px] text-slate-600 dark:text-[#b8c7dc] leading-relaxed">
+                <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
+                  {t.stepGuideLabel}:
+                </span>
+                <span>{t.step2Guide}</span>
+              </p>
+            </div>
 
+            {/* Scroll-Safe Inner Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 py-4 space-y-4">
               {/* Theme Picker */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2 text-[13px] font-bold text-slate-900 dark:text-white">
                   <Palette className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
                   <span>{t.themePickerLabel}</span>
                 </div>
@@ -743,25 +744,25 @@ export function FirstLaunchOnboarding({
                     type="button"
                     aria-pressed={currentThemeChoice === 'dark'}
                     onClick={() => onSelectTheme('dark')}
-                    className={`sa-ps5-subpanel p-4 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                    className={`sa-ps5-subpanel p-3.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                       currentThemeChoice === 'dark'
                         ? 'bg-sky-50 dark:bg-[#162538] border-[#1a9fff] ring-1 ring-[#1a9fff]/50'
                         : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-[#11161d] dark:border-white/[0.08] dark:hover:border-white/[0.2]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-9 h-9 rounded-lg bg-[#0f172a] border border-white/[0.12] text-[#38bdf8] flex items-center justify-center">
-                        <Moon className="w-4.5 h-4.5" />
+                      <span className="w-8 h-8 rounded-lg bg-[#0f172a] border border-white/[0.12] text-[#38bdf8] flex items-center justify-center">
+                        <Moon className="w-4 h-4" />
                       </span>
                       {currentThemeChoice === 'dark' && (
-                        <Check weight="bold" className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8]" />
+                        <Check weight="bold" className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
                       )}
                     </div>
                     <div>
-                      <div className="text-[14px] font-bold text-slate-900 dark:text-white">
+                      <div className="text-[13.5px] font-bold text-slate-900 dark:text-white">
                         {t.themeDarkName}
                       </div>
-                      <div className="text-[12px] text-slate-500 dark:text-[#8b9bb4] leading-snug mt-0.5">
+                      <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] leading-snug mt-0.5">
                         {t.themeDarkDesc}
                       </div>
                     </div>
@@ -772,25 +773,25 @@ export function FirstLaunchOnboarding({
                     type="button"
                     aria-pressed={currentThemeChoice === 'light'}
                     onClick={() => onSelectTheme('light')}
-                    className={`sa-ps5-subpanel p-4 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                    className={`sa-ps5-subpanel p-3.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                       currentThemeChoice === 'light'
                         ? 'bg-amber-50 border-amber-500 ring-1 ring-amber-500/45'
                         : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-[#11161d] dark:border-white/[0.08] dark:hover:border-white/[0.2]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-9 h-9 rounded-lg bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center">
-                        <Sun className="w-4.5 h-4.5" />
+                      <span className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-700 flex items-center justify-center">
+                        <Sun className="w-4 h-4" />
                       </span>
                       {currentThemeChoice === 'light' && (
-                        <Check weight="bold" className="w-4.5 h-4.5 text-amber-600" />
+                        <Check weight="bold" className="w-4 h-4 text-amber-600" />
                       )}
                     </div>
                     <div>
-                      <div className="text-[14px] font-bold text-slate-900 dark:text-white">
+                      <div className="text-[13.5px] font-bold text-slate-900 dark:text-white">
                         {t.themeLightName}
                       </div>
-                      <div className="text-[12px] text-slate-500 dark:text-[#8b9bb4] leading-snug mt-0.5">
+                      <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] leading-snug mt-0.5">
                         {t.themeLightDesc}
                       </div>
                     </div>
@@ -801,30 +802,30 @@ export function FirstLaunchOnboarding({
                     type="button"
                     aria-pressed={currentThemeChoice === 'ps5'}
                     onClick={() => onSelectTheme('ps5')}
-                    className={`sa-ps5-subpanel p-4 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                    className={`sa-ps5-subpanel p-3.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                       currentThemeChoice === 'ps5'
                         ? 'bg-[#10203a] border-[#38bdf8] ring-1 ring-[#38bdf8]/55 text-white'
                         : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-[#11161d] dark:border-white/[0.08] dark:hover:border-white/[0.2]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-9 h-9 rounded-lg bg-[#0d2752] border border-[#38bdf8]/40 text-[#7cc4ff] flex items-center justify-center">
-                        <Ps5Icon className="w-5 h-5" />
+                      <span className="w-8 h-8 rounded-lg bg-[#0d2752] border border-[#38bdf8]/40 text-[#7cc4ff] flex items-center justify-center">
+                        <Ps5Icon className="w-4.5 h-4.5" />
                       </span>
                       {currentThemeChoice === 'ps5' && (
-                        <Check weight="bold" className="w-4.5 h-4.5 text-[#7cc4ff]" />
+                        <Check weight="bold" className="w-4 h-4 text-[#7cc4ff]" />
                       )}
                     </div>
                     <div>
                       <div
-                        className={`text-[14px] font-bold ${
+                        className={`text-[13.5px] font-bold ${
                           currentThemeChoice === 'ps5' ? 'text-white' : 'text-slate-900 dark:text-white'
                         }`}
                       >
                         {t.themePs5Name}
                       </div>
                       <div
-                        className={`text-[12px] leading-snug mt-0.5 ${
+                        className={`text-[11.5px] leading-snug mt-0.5 ${
                           currentThemeChoice === 'ps5'
                             ? 'text-[#b7d6f2]'
                             : 'text-slate-500 dark:text-[#8b9bb4]'
@@ -840,14 +841,14 @@ export function FirstLaunchOnboarding({
                     type="button"
                     aria-pressed={currentThemeChoice === 'xbox'}
                     onClick={() => onSelectTheme('xbox')}
-                    className={`sa-ps5-subpanel p-4 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                    className={`sa-ps5-subpanel p-3.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                       currentThemeChoice === 'xbox'
                         ? 'bg-[#0c2611] border-[#52e042] ring-1 ring-[#52e042]/55 text-white'
                         : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-[#11161d] dark:border-white/[0.08] dark:hover:border-white/[0.2]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="w-9 h-9 rounded-lg bg-[#0e2e13] border border-[#52e042]/45 text-[#6ee755] flex items-center justify-center">
+                      <span className="w-8 h-8 rounded-lg bg-[#0e2e13] border border-[#52e042]/45 text-[#6ee755] flex items-center justify-center">
                         <svg
                           viewBox="0 0 24 24"
                           fill="none"
@@ -856,7 +857,7 @@ export function FirstLaunchOnboarding({
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           aria-hidden="true"
-                          className="w-5 h-5"
+                          className="w-4.5 h-4.5"
                         >
                           <circle cx="12" cy="12" r="9.2" />
                           <path d="M7.2 6.8c2.2 1.2 4.8 3.6 7.5 7.4 1 1.4 1.7 2.8 2 4" />
@@ -864,19 +865,19 @@ export function FirstLaunchOnboarding({
                         </svg>
                       </span>
                       {currentThemeChoice === 'xbox' && (
-                        <Check weight="bold" className="w-4.5 h-4.5 text-[#6ee755]" />
+                        <Check weight="bold" className="w-4 h-4 text-[#6ee755]" />
                       )}
                     </div>
                     <div>
                       <div
-                        className={`text-[14px] font-bold ${
+                        className={`text-[13.5px] font-bold ${
                           currentThemeChoice === 'xbox' ? 'text-white' : 'text-slate-900 dark:text-white'
                         }`}
                       >
                         {t.themeXboxName}
                       </div>
                       <div
-                        className={`text-[12px] leading-snug mt-0.5 ${
+                        className={`text-[11.5px] leading-snug mt-0.5 ${
                           currentThemeChoice === 'xbox'
                             ? 'text-[#b7dab9]'
                             : 'text-slate-500 dark:text-[#8b9bb4]'
@@ -889,7 +890,7 @@ export function FirstLaunchOnboarding({
                 </div>
               </div>
 
-              {/* Custom Default Theme Builder (Colors, Surface, Buttons & Cards) */}
+              {/* Custom Default Theme Builder */}
               <CustomThemeBuilder
                 compact
                 language={settings.language}
@@ -900,13 +901,13 @@ export function FirstLaunchOnboarding({
               />
 
               {/* Language Picker */}
-              <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-white/[0.08]">
-                <div className="flex items-center gap-2 text-[13.5px] font-bold text-slate-900 dark:text-white">
+              <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-white/[0.08]">
+                <div className="flex items-center gap-2 text-[13px] font-bold text-slate-900 dark:text-white">
                   <Globe className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
                   <span>{t.languagePickerLabel}</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {LANGUAGE_OPTIONS.map((opt) => {
                     const selected = settings.language === opt.code;
                     return (
@@ -915,64 +916,60 @@ export function FirstLaunchOnboarding({
                         type="button"
                         aria-pressed={selected}
                         onClick={() => onChangeLanguage(opt.code)}
-                        className={`sa-ps5-subpanel p-3.5 rounded-xl border text-start transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                        className={`sa-ps5-subpanel p-3 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${
                           selected
                             ? 'bg-sky-50 dark:bg-[#162538] border-[#1a9fff] ring-1 ring-[#1a9fff]/45'
                             : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-[#11161d] dark:border-white/[0.08] dark:hover:border-white/[0.2]'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold font-mono-tabular ${
-                              selected
-                                ? 'bg-[#1a9fff] text-white'
-                                : 'bg-slate-200 text-slate-700 dark:bg-white/[0.08] dark:text-[#9fb0c7]'
-                            }`}
-                          >
-                            {opt.shortLabel}
-                          </span>
-                          <span className="text-[10.5px] font-semibold text-slate-500 dark:text-[#8b9bb4]">
-                            {opt.direction === 'rtl' ? ts.rtlBadge : ts.ltrBadge}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-[14px] font-bold text-slate-900 dark:text-white">
+                        <div className="min-w-0">
+                          <div className="text-[13.5px] font-bold text-slate-900 dark:text-white truncate">
                             {opt.nativeName}
                           </div>
-                          <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4]">
-                            {opt.name}
+                          <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4] truncate">
+                            {opt.name} · {opt.direction === 'rtl' ? ts.rtlBadge : ts.ltrBadge}
                           </div>
                         </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[11px] font-bold font-mono-tabular shrink-0 ${
+                            selected
+                              ? 'bg-[#1a9fff] text-white'
+                              : 'bg-slate-200 text-slate-700 dark:bg-white/[0.08] dark:text-[#9fb0c7]'
+                          }`}
+                        >
+                          {opt.shortLabel}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
+            </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4]">
-                  {t.settingsEditableNote}
-                </p>
+            {/* Anchored Footer */}
+            <div className="shrink-0 px-5 sm:px-7 py-3 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#11161f] flex flex-wrap items-center justify-between gap-3">
+              <p className="hidden sm:block text-[12px] text-slate-500 dark:text-[#8b9bb4]">
+                {t.settingsEditableNote}
+              </p>
 
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setStep('welcome')}
-                    className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <BackArrow className="w-4 h-4 shrink-0" />
-                    <span>{t.backBtn}</span>
-                  </button>
+              <div className="flex items-center justify-end gap-2.5 ms-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setStep('welcome')}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <BackArrow className="w-4 h-4 shrink-0" />
+                  <span>{t.backBtn}</span>
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => setStep('qbit_check')}
-                    className="inline-flex items-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <span>{t.continueBtn}</span>
-                    <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep('qbit_check')}
+                  className="inline-flex items-center gap-2 min-h-[40px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <span>{t.continueBtn}</span>
+                  <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
+                </button>
               </div>
             </div>
           </section>
@@ -982,48 +979,50 @@ export function FirstLaunchOnboarding({
         {step === 'qbit_check' && (
           <section
             key="step-qbit-check"
-            className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel flex-1 min-h-0 flex flex-col rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
-            <div className="p-6 sm:p-8 lg:p-10 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/[0.08] pb-5">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center shrink-0 p-1.5 overflow-hidden">
-                    {!qbitLogoFailed ? (
-                      <img
-                        src={QBIT_OFFICIAL_LOGO_URL}
-                        alt="qBittorrent logo"
-                        referrerPolicy="no-referrer"
-                        onError={() => setQbitLogoFailed(true)}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <Magnet weight="duotone" className="w-6 h-6 text-[#0284c7] dark:text-[#38bdf8]" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white [text-wrap:balance]">
-                      {t.qbitCheckTitle}
-                    </h2>
-                    <p className="text-[13.5px] text-slate-600 dark:text-[#9cb0c9]">
-                      {t.qbitCheckSubtitle}
-                    </p>
-                  </div>
+            {/* Header */}
+            <div className="shrink-0 px-5 sm:px-7 py-4 border-b border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#0e141b] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center shrink-0 p-1.5 overflow-hidden">
+                  {!qbitLogoFailed ? (
+                    <img
+                      src={QBIT_OFFICIAL_LOGO_URL}
+                      alt="qBittorrent logo"
+                      referrerPolicy="no-referrer"
+                      onError={() => setQbitLogoFailed(true)}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Magnet weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8]" />
+                  )}
                 </div>
-
-                {isDesktopApp && (
-                  <button
-                    type="button"
-                    disabled={isBusyInstall}
-                    onClick={() => void onRecheckQbit()}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer self-start sm:self-center"
-                  >
-                    <ArrowClockwise className={`w-4 h-4 ${isScanningOnly ? 'animate-spin' : ''}`} />
-                    <span>{tq.recheckBtn}</span>
-                  </button>
-                )}
+                <div className="min-w-0">
+                  <h2 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white [text-wrap:balance]">
+                    {t.qbitCheckTitle}
+                  </h2>
+                  <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9] truncate">
+                    {t.qbitCheckSubtitle}
+                  </p>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
+              {isDesktopApp && (
+                <button
+                  type="button"
+                  disabled={isBusyInstall}
+                  onClick={() => void onRecheckQbit()}
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[12px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <ArrowClockwise className={`w-3.5 h-3.5 ${isScanningOnly ? 'animate-spin' : ''}`} />
+                  <span>{tq.recheckBtn}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Middle Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 py-4 sm:py-5 space-y-4">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12px] sm:text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
                 <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
                   {t.stepGuideLabel}:
                 </span>
@@ -1031,7 +1030,7 @@ export function FirstLaunchOnboarding({
               </div>
 
               {!isDesktopApp && (
-                <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/30 text-[12.5px] text-sky-900 dark:text-[#b7d6f2]">
+                <div className="p-3 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/30 text-[12px] text-sky-900 dark:text-[#b7d6f2]">
                   {tq.webPreviewNotice}
                 </div>
               )}
@@ -1039,7 +1038,7 @@ export function FirstLaunchOnboarding({
               {/* Environment Readout */}
               <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07]">
                 <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8]">
                     {tq.installedLabel}
                   </dt>
                   <dd className="mt-1 text-[14px] font-bold font-mono-tabular text-slate-900 dark:text-white">
@@ -1052,7 +1051,7 @@ export function FirstLaunchOnboarding({
                 </div>
 
                 <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8]">
                     {tq.latestLabel}
                   </dt>
                   <dd className="mt-1 text-[14px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
@@ -1061,7 +1060,7 @@ export function FirstLaunchOnboarding({
                 </div>
 
                 <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
+                  <dt className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8]">
                     {tq.processLabel}
                   </dt>
                   <dd
@@ -1076,28 +1075,27 @@ export function FirstLaunchOnboarding({
                 </div>
               </dl>
 
-              {/* Scanning state */}
               {isScanningOnly && !setupState.installed && (
-                <div className="p-4 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/30 flex items-center gap-3 text-[13.5px] font-medium text-sky-900 dark:text-[#cbe3fb]">
+                <div className="p-4 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/30 flex items-center gap-3 text-[13px] font-medium text-sky-900 dark:text-[#cbe3fb]">
                   <SpinnerGap className="w-5 h-5 animate-spin text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
                   <span>{t.scanningText}</span>
                 </div>
               )}
 
-              {/* Branch A: qBittorrent ALREADY Installed before SecretArea.exe */}
+              {/* Branch A: qBittorrent ALREADY Installed */}
               {!isScanningOnly && setupState.installed && (
                 <div className="space-y-4">
                   <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-300 dark:border-emerald-500/35 flex items-start gap-3 text-emerald-950 dark:text-emerald-100">
                     <CheckCircle weight="fill" className="w-5 h-5 text-emerald-600 dark:text-[#4ade80] shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <div className="text-[14.5px] font-bold">
+                      <div className="text-[14px] font-bold">
                         {justInstalledBanner ? t.installCompleteAdvanceMsg : t.alreadyInstalledTitle}
                       </div>
-                      <p className="text-[13px] opacity-90 leading-relaxed">
+                      <p className="text-[12.5px] opacity-90 leading-relaxed">
                         {t.alreadyInstalledDesc}
                       </p>
                       {setupState.executablePath && (
-                        <p dir="ltr" className="text-[11.5px] font-mono-tabular opacity-75 pt-0.5 break-all">
+                        <p dir="ltr" className="text-[11px] font-mono-tabular opacity-75 pt-0.5 break-all">
                           {setupState.executablePath}
                         </p>
                       )}
@@ -1112,7 +1110,7 @@ export function FirstLaunchOnboarding({
                         setTorrentSkipped(false);
                         setStep('qbit_integration');
                       }}
-                      className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-55 text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      className="inline-flex items-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-55 text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       <span>{t.goIntegrationBtn}</span>
                       <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
@@ -1123,7 +1121,7 @@ export function FirstLaunchOnboarding({
                         type="button"
                         disabled={isBusyInstall}
                         onClick={handleInstallClick}
-                        className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <DownloadSimple className="w-4 h-4" />
                         <span>{t.updateFirstBtn}</span>
@@ -1135,7 +1133,7 @@ export function FirstLaunchOnboarding({
 
               {/* Branch B: qBittorrent NOT Installed Yet */}
               {!isScanningOnly && !setupState.installed && (
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   <div
                     className={`p-4 rounded-xl border flex items-start gap-3 ${
                       setupState.stage === 'error'
@@ -1145,16 +1143,16 @@ export function FirstLaunchOnboarding({
                   >
                     <WarningCircle weight="fill" className="w-5 h-5 shrink-0 mt-0.5" />
                     <div className="space-y-1 min-w-0 flex-1">
-                      <div className="text-[14.5px] font-bold">
+                      <div className="text-[14px] font-bold">
                         {setupState.stage === 'error' && setupState.error
                           ? setupState.error
                           : t.notInstalledTitle}
                       </div>
-                      <p className="text-[13px] opacity-90 leading-relaxed">
+                      <p className="text-[12.5px] opacity-90 leading-relaxed">
                         {t.notInstalledDesc}
                       </p>
                       {setupState.latestRelease?.assetName && (
-                        <p dir="ltr" className="text-[11.5px] font-mono-tabular opacity-80 pt-0.5 truncate">
+                        <p dir="ltr" className="text-[11px] font-mono-tabular opacity-80 pt-0.5 truncate">
                           {setupState.latestRelease.assetName}
                           {setupState.latestRelease.assetSizeBytes > 0
                             ? ` · ${formatBytes(setupState.latestRelease.assetSizeBytes)}`
@@ -1164,7 +1162,6 @@ export function FirstLaunchOnboarding({
                     </div>
                   </div>
 
-                  {/* 7-Stage Pipeline Checklist + Download Progress */}
                   {(isBusyInstall || setupState.verification || setupState.stage === 'error') && (
                     <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] space-y-3">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
@@ -1215,7 +1212,7 @@ export function FirstLaunchOnboarding({
                           </div>
                           <div
                             dir="ltr"
-                            className="flex flex-wrap items-center justify-between gap-2 text-[11.5px] font-mono-tabular text-slate-600 dark:text-[#9cb0c9]"
+                            className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-tabular text-slate-600 dark:text-[#9cb0c9]"
                           >
                             <span>
                               {formatBytes(setupState.downloadProgress.downloadedBytes)} /{' '}
@@ -1261,7 +1258,7 @@ export function FirstLaunchOnboarding({
                   )}
 
                   {isDesktopApp && (
-                    <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4] leading-relaxed">
+                    <p className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] leading-relaxed">
                       {tq.consentNote}
                     </p>
                   )}
@@ -1272,7 +1269,7 @@ export function FirstLaunchOnboarding({
                         type="button"
                         disabled={isBusyInstall}
                         onClick={handleInstallClick}
-                        className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-55 text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-55 text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <DownloadSimple weight="bold" className="w-4 h-4 shrink-0" />
                         <span>
@@ -1286,7 +1283,7 @@ export function FirstLaunchOnboarding({
                           setTorrentSkipped(false);
                           setStep('qbit_integration');
                         }}
-                        className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <span>{t.goIntegrationBtn}</span>
                         <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
@@ -1296,7 +1293,7 @@ export function FirstLaunchOnboarding({
                     <button
                       type="button"
                       onClick={onOpenOfficialQbitDownload}
-                      className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       <ArrowSquareOut className="w-4 h-4" />
                       <span>{tq.officialDownloadBtn}</span>
@@ -1304,30 +1301,31 @@ export function FirstLaunchOnboarding({
                   </div>
                 </div>
               )}
+            </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  disabled={isBusyInstall}
-                  onClick={() => setStep('preferences')}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <BackArrow className="w-4 h-4 shrink-0" />
-                  <span>{t.backBtn}</span>
-                </button>
+            {/* Anchored Footer */}
+            <div className="shrink-0 px-5 sm:px-7 py-3 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#11161f] flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                disabled={isBusyInstall}
+                onClick={() => setStep('preferences')}
+                className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <BackArrow className="w-4 h-4 shrink-0" />
+                <span>{t.backBtn}</span>
+              </button>
 
-                <button
-                  type="button"
-                  disabled={isBusyInstall}
-                  onClick={() => {
-                    setTorrentSkipped(true);
-                    setStep('complete');
-                  }}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] disabled:opacity-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <span>{t.skipTorrentBtn}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={isBusyInstall}
+                onClick={() => {
+                  setTorrentSkipped(true);
+                  setStep('complete');
+                }}
+                className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/[0.06] disabled:opacity-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <span>{t.skipTorrentBtn}</span>
+              </button>
             </div>
           </section>
         )}
@@ -1336,32 +1334,34 @@ export function FirstLaunchOnboarding({
         {step === 'qbit_integration' && (
           <section
             key="step-qbit-integration"
-            className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel flex-1 min-h-0 flex flex-col rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
-            <div className="p-6 sm:p-8 lg:p-10 space-y-6">
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 dark:border-white/[0.08] pb-5">
-                <div className="space-y-1 min-w-0 flex-1">
-                  <h2 className="font-display text-xl sm:text-2xl font-bold text-slate-900 dark:text-white [text-wrap:balance]">
-                    {t.integrationTitle}
-                  </h2>
-                  <p className="text-[13.5px] text-slate-600 dark:text-[#9cb0c9]">
-                    {t.integrationSubtitle}
-                  </p>
-                </div>
-
-                {isDesktopApp && setupState.installed && (
-                  <button
-                    type="button"
-                    onClick={() => void onLaunchQbitClient()}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <Play weight="fill" className="w-3.5 h-3.5 text-emerald-600 dark:text-[#4ade80]" />
-                    <span>{tq.launchQbitBtn}</span>
-                  </button>
-                )}
+            {/* Header */}
+            <div className="shrink-0 px-5 sm:px-7 py-4 border-b border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white [text-wrap:balance]">
+                  {t.integrationTitle}
+                </h2>
+                <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9] truncate">
+                  {t.integrationSubtitle}
+                </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12.5px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
+              {isDesktopApp && setupState.installed && (
+                <button
+                  type="button"
+                  onClick={() => void onLaunchQbitClient()}
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <Play weight="fill" className="w-3.5 h-3.5 text-emerald-600 dark:text-[#4ade80]" />
+                  <span>{tq.launchQbitBtn}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Middle Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 py-4 space-y-4">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] text-[12px] text-slate-700 dark:text-[#b8c7dc] leading-relaxed">
                 <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
                   {t.stepGuideLabel}:
                 </span>
@@ -1369,20 +1369,19 @@ export function FirstLaunchOnboarding({
               </div>
 
               {isVerifiedConnected && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-500/35 text-[13px] font-semibold text-emerald-800 dark:text-emerald-200 flex items-center gap-2.5">
+                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-500/35 text-[12.5px] font-semibold text-emerald-800 dark:text-emerald-200 flex items-center gap-2.5">
                   <CheckCircle weight="fill" className="w-5 h-5 shrink-0" />
                   <span>{tq.webUiConnectedMsg}</span>
                 </div>
               )}
 
-              {/* Quick Guide */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] space-y-2">
-                <div className="text-[13px] font-bold text-slate-900 dark:text-white">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07] space-y-1.5">
+                <div className="text-[12.5px] font-bold text-slate-900 dark:text-white">
                   {setupState.webUiConfig.webUiEnabled
                     ? tq.webUiDetectedEnabled
                     : tq.webUiNotEnabledHint}
                 </div>
-                <ol className="space-y-1 text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
+                <ol className="space-y-1 text-[11.5px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
                   <li>{tq.webUiGuide1}</li>
                   <li>{tq.webUiGuide2}</li>
                   <li>{tq.webUiGuide3}</li>
@@ -1393,7 +1392,7 @@ export function FirstLaunchOnboarding({
 
               {/* Credentials Inputs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="block text-[12px] font-semibold text-slate-700 dark:text-[#b8c6d8]">
                     {ts.torrentHostLabel}
                   </label>
@@ -1402,11 +1401,11 @@ export function FirstLaunchOnboarding({
                     dir="ltr"
                     readOnly
                     value="127.0.0.1"
-                    className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-slate-100 dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-600 dark:text-[#9cb0c9] focus:outline-none"
+                    className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-600 dark:text-[#9cb0c9] focus:outline-none"
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label
                     htmlFor="onboard-qbit-port"
                     className="block text-[12px] font-semibold text-slate-700 dark:text-[#b8c6d8]"
@@ -1421,11 +1420,11 @@ export function FirstLaunchOnboarding({
                     max={65535}
                     value={port}
                     onChange={(e) => setPort(Number(e.target.value) || 8080)}
-                    className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                    className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label
                     htmlFor="onboard-qbit-user"
                     className="block text-[12px] font-semibold text-slate-700 dark:text-[#b8c6d8]"
@@ -1439,11 +1438,11 @@ export function FirstLaunchOnboarding({
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="admin"
-                    className="w-full min-h-[40px] px-3 py-2 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                    className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label
                     htmlFor="onboard-qbit-pass"
                     className="block text-[12px] font-semibold text-slate-700 dark:text-[#b8c6d8]"
@@ -1460,7 +1459,7 @@ export function FirstLaunchOnboarding({
                       placeholder={
                         torrentConfig.hasSavedPassword ? ts.torrentPasswordSavedPlaceholder : '••••••••'
                       }
-                      className="w-full min-h-[40px] ps-3 pe-9 py-2 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                      className="w-full min-h-[38px] ps-3 pe-9 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
                     />
                     <button
                       type="button"
@@ -1474,7 +1473,7 @@ export function FirstLaunchOnboarding({
                 </div>
               </div>
 
-              <p className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4]">
+              <p className="text-[11px] text-slate-500 dark:text-[#8b9bb4]">
                 {t.hostLoopbackHint}
               </p>
 
@@ -1489,7 +1488,7 @@ export function FirstLaunchOnboarding({
                 <button
                   type="button"
                   onClick={handleGeneratePwd}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <Key className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
                   <span>{tq.generatePasswordBtn}</span>
@@ -1499,64 +1498,92 @@ export function FirstLaunchOnboarding({
                   type="button"
                   disabled={isVerifyingWebUi}
                   onClick={handleVerifyWebUi}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   <span>{isVerifyingWebUi ? tq.verifyingBtn : tq.saveAndVerifyBtn}</span>
                 </button>
               </div>
+            </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setStep('qbit_check')}
-                  className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <BackArrow className="w-4 h-4 shrink-0" />
-                  <span>{t.backBtn}</span>
-                </button>
+            {/* Anchored Footer */}
+            <div className="shrink-0 px-5 sm:px-7 py-3 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#11161f] flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setStep('qbit_check')}
+                className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[13px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <BackArrow className="w-4 h-4 shrink-0" />
+                <span>{t.backBtn}</span>
+              </button>
 
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {!isVerifiedConnected && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTorrentSkipped(true);
-                        setStep('complete');
-                      }}
-                      className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                    >
-                      <span>{t.skipIntegrationBtn}</span>
-                    </button>
-                  )}
-
+              <div className="flex flex-wrap items-center gap-2.5">
+                {!isVerifiedConnected && (
                   <button
                     type="button"
                     onClick={() => {
-                      setTorrentSkipped(false);
+                      setTorrentSkipped(true);
                       setStep('complete');
                     }}
-                    className="inline-flex items-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg text-[12.5px] font-semibold text-slate-600 hover:text-slate-900 dark:text-[#9cb0c9] dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-white/[0.06] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <span>{t.finishSetupBtn}</span>
-                    <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
+                    <span>{t.skipIntegrationBtn}</span>
                   </button>
-                </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTorrentSkipped(false);
+                    setStep('complete');
+                  }}
+                  className="inline-flex items-center gap-2 min-h-[40px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <span>{t.finishSetupBtn}</span>
+                  <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
+                </button>
               </div>
             </div>
           </section>
         )}
 
-        {/* ============= STEP 5: ANIMATED CONGRATULATIONS & LAUNCH ============= */}
+        {/* ============= STEP 5: SMART LAUNCH READINESS CONSOLE ============= */}
         {step === 'complete' && (
           <section
             key="step-complete"
-            className="sa-onboard-step-in sa-ps5-panel rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
+            className="sa-onboard-step-in sa-ps5-panel relative flex-1 min-h-0 flex flex-col rounded-2xl bg-white dark:bg-[#151c25] border border-slate-200 dark:border-white/[0.08] shadow-xl overflow-hidden"
           >
-            <div className="p-6 sm:p-10 lg:p-12 space-y-7 text-center">
-              {/* Animated Radial Progress Ring -> Checkmark Badge */}
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative w-28 h-28 flex items-center justify-center">
+            {/* Subtle theme-reactive radial aura */}
+            <div
+              aria-hidden="true"
+              className="sa-welcome-aura pointer-events-none absolute -top-24 -end-20 w-72 h-72 sm:w-96 sm:h-96 rounded-full blur-3xl opacity-65"
+              style={{
+                background:
+                  congratsProgress >= 100
+                    ? isXboxTheme
+                      ? 'radial-gradient(circle, rgba(82,224,66,0.22) 0%, transparent 70%)'
+                      : 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)'
+                    : isCustomThemeActive
+                    ? `radial-gradient(circle, ${settings.customTheme.accentColor}30 0%, transparent 70%)`
+                    : 'radial-gradient(circle, rgba(26,159,255,0.2) 0%, transparent 70%)',
+              }}
+            />
+
+            {/* Top Orbital Hero Header (Full-Width, Single-Line Typography) */}
+            <div className="relative z-10 shrink-0 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-slate-200 dark:border-white/[0.08] flex items-center justify-between gap-3.5 sm:gap-5">
+              <div className="flex items-center gap-3.5 sm:gap-5 min-w-0 flex-1">
+                {/* Dual-Ring Animated Orbital Progress Dial */}
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 lg:w-[70px] lg:h-[70px] shrink-0 flex items-center justify-center">
+                  {congratsProgress >= 100 && (
+                    <span
+                      aria-hidden="true"
+                      className={`sa-ready-ripple absolute inset-1 rounded-full border ${
+                        isXboxTheme
+                          ? 'border-[#52e042]/60'
+                          : 'border-emerald-500/55 dark:border-[#4ade80]/55'
+                      }`}
+                    />
+                  )}
                   <svg
                     viewBox="0 0 112 112"
                     className="w-full h-full -rotate-90"
@@ -1565,10 +1592,20 @@ export function FirstLaunchOnboarding({
                     <circle
                       cx="56"
                       cy="56"
+                      r={51}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeDasharray="4 6"
+                      className="sa-ready-orbit text-slate-300 dark:text-white/[0.16]"
+                    />
+                    <circle
+                      cx="56"
+                      cy="56"
                       r={ringRadius}
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="7"
+                      strokeWidth="6.5"
                       className="text-slate-200 dark:text-white/[0.09]"
                     />
                     <circle
@@ -1577,13 +1614,15 @@ export function FirstLaunchOnboarding({
                       r={ringRadius}
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="7"
+                      strokeWidth="6.5"
                       strokeLinecap="round"
                       strokeDasharray={ringCircumference}
                       strokeDashoffset={ringDashOffset}
                       className={
                         congratsProgress >= 100
-                          ? 'text-emerald-500 dark:text-[#4ade80]'
+                          ? isXboxTheme
+                            ? 'text-[#6ee755]'
+                            : 'text-emerald-500 dark:text-[#4ade80]'
                           : isXboxTheme
                           ? 'text-[#52e042]'
                           : 'text-[#0284c7] dark:text-[#38bdf8]'
@@ -1591,15 +1630,21 @@ export function FirstLaunchOnboarding({
                     />
                   </svg>
 
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center">
                     {congratsProgress >= 100 ? (
-                      <div className="sa-onboard-ring-pop flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-[#4ade80]">
-                        <Sparkle weight="fill" className="w-8 h-8" />
+                      <div
+                        className={`sa-onboard-ring-pop flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full ${
+                          isXboxTheme
+                            ? 'bg-[#52e042]/20 text-[#6ee755]'
+                            : 'bg-emerald-500/15 text-emerald-600 dark:text-[#4ade80]'
+                        }`}
+                      >
+                        <CheckCircle weight="fill" className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                     ) : (
                       <span
                         dir="ltr"
-                        className="font-mono-tabular text-xl font-bold text-slate-900 dark:text-white"
+                        className="font-mono-tabular text-[12px] sm:text-[13px] font-bold text-slate-900 dark:text-white"
                       >
                         {congratsProgress}%
                       </span>
@@ -1607,87 +1652,382 @@ export function FirstLaunchOnboarding({
                   </div>
                 </div>
 
-                <div className="space-y-2 max-w-xl mx-auto">
-                  <p className="text-[12.5px] font-semibold text-emerald-700 dark:text-[#4ade80]">
-                    {congratsProgress >= 100 ? t.congratsEyebrow : finalizingMessage}
-                  </p>
-                  <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white [text-wrap:balance]">
+                {/* Single-Line Hero Copy */}
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center gap-2 min-w-0 text-[11px] sm:text-[12px] font-semibold whitespace-nowrap">
+                    <span
+                      className={`truncate ${
+                        congratsProgress >= 100
+                          ? isXboxTheme
+                            ? 'text-[#6ee755]'
+                            : 'text-emerald-700 dark:text-[#4ade80]'
+                          : 'text-[#0284c7] dark:text-[#38bdf8]'
+                      }`}
+                    >
+                      {congratsProgress >= 100 ? t.congratsEyebrow : finalizingMessage}
+                    </span>
+                    <span aria-hidden="true" className="text-slate-300 dark:text-white/25 shrink-0">
+                      ·
+                    </span>
+                    <span
+                      dir="ltr"
+                      className="font-mono-tabular text-slate-500 dark:text-[#8b9bb4] shrink-0"
+                    >
+                      v{currentVersion}
+                    </span>
+                  </div>
+
+                  <h2 className="font-display text-[13.5px] min-[420px]:text-[15.5px] sm:text-[20px] lg:text-[23px] font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap truncate">
                     {congratsProgress >= 100 ? t.congratsTitle : finalizingMessage}
                   </h2>
-                  {congratsProgress >= 100 && (
-                    <p className="text-[14.5px] text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
-                      {t.congratsSubtitle}
-                    </p>
-                  )}
+
+                  <p className="text-[11px] sm:text-[12.5px] text-slate-600 dark:text-[#9cb0c9] whitespace-nowrap truncate">
+                    {t.congratsSubtitle}
+                  </p>
                 </div>
               </div>
 
-              {/* Configuration Summary Grid */}
-              <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-start p-4 rounded-xl bg-slate-50 dark:bg-[#10161e] border border-slate-200 dark:border-white/[0.07]">
-                <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
-                    {t.summaryThemeLabel}
-                  </dt>
-                  <dd className="mt-0.5 text-[13.5px] font-bold text-slate-900 dark:text-white">
-                    {activeThemeLabel}
-                  </dd>
+              {/* Right Monospace Readiness Counter (Desktop & Tablet) */}
+              <div className="hidden md:flex items-center gap-2 shrink-0 whitespace-nowrap font-mono-tabular text-[12px] font-bold">
+                <span
+                  dir="ltr"
+                  className={
+                    congratsProgress >= 100
+                      ? isXboxTheme
+                        ? 'text-[#6ee755]'
+                        : 'text-emerald-600 dark:text-[#4ade80]'
+                      : 'text-[#0284c7] dark:text-[#38bdf8]'
+                  }
+                >
+                  {congratsProgress}%
+                </span>
+                <span aria-hidden="true" className="text-slate-300 dark:text-white/20">
+                  ·
+                </span>
+                <span className="text-slate-600 dark:text-[#9cb0c9]">
+                  {congratsProgress >= 100 ? t.readyStatusDone : t.readyStatusSyncing}
+                </span>
+              </div>
+            </div>
+
+            {/* Middle 2-Column Smart Workspace Grid */}
+            <div className="relative z-10 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-white/[0.08]">
+              {/* Left Column: Interactive Workspace Summary & Live Check Timeline */}
+              <div className="sa-welcome-stagger-1 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-4 min-w-0">
+                <div className="space-y-2.5 min-w-0">
+                  <div className="flex items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 text-[13px] font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <SlidersHorizontal className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                      <span className="truncate">{t.readySummaryHeading}</span>
+                    </div>
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8] whitespace-nowrap shrink-0">
+                      {t.readyClickToEdit}
+                    </span>
+                  </div>
+
+                  {/* Interactive Single-Line Configuration Rows (Click to Jump Back & Edit) */}
+                  <div className="divide-y divide-slate-200/80 dark:divide-white/[0.07] border-y border-slate-200/80 dark:border-white/[0.07]">
+                    <button
+                      type="button"
+                      onClick={() => setStep('preferences')}
+                      className="w-full py-2.5 px-1.5 -mx-1.5 rounded-lg flex items-center justify-between gap-3 text-start hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group min-w-0"
+                    >
+                      <span className="flex items-center gap-2 min-w-0 text-[12px] font-medium text-slate-500 dark:text-[#8b9bb4] whitespace-nowrap">
+                        <Palette className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <span className="truncate">{t.summaryThemeLabel}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 min-w-0 shrink-0 max-w-[58%]">
+                        <span className="text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap truncate">
+                          {activeThemeLabel}
+                        </span>
+                        <CaretRight
+                          weight="bold"
+                          className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:group-hover:text-[#38bdf8] shrink-0 rtl:rotate-180 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+                        />
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setStep('preferences')}
+                      className="w-full py-2.5 px-1.5 -mx-1.5 rounded-lg flex items-center justify-between gap-3 text-start hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group min-w-0"
+                    >
+                      <span className="flex items-center gap-2 min-w-0 text-[12px] font-medium text-slate-500 dark:text-[#8b9bb4] whitespace-nowrap">
+                        <Globe className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <span className="truncate">{t.summaryLanguageLabel}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 min-w-0 shrink-0 max-w-[58%]">
+                        <span className="text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap truncate">
+                          {activeLanguageLabel}
+                        </span>
+                        <CaretRight
+                          weight="bold"
+                          className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:group-hover:text-[#38bdf8] shrink-0 rtl:rotate-180 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+                        />
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setStep(setupState.installed ? 'qbit_integration' : 'qbit_check')
+                      }
+                      className="w-full py-2.5 px-1.5 -mx-1.5 rounded-lg flex items-center justify-between gap-3 text-start hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group min-w-0"
+                    >
+                      <span className="flex items-center gap-2 min-w-0 text-[12px] font-medium text-slate-500 dark:text-[#8b9bb4] whitespace-nowrap">
+                        <Magnet className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <span className="truncate">{t.summaryTorrentLabel}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 min-w-0 shrink-0 max-w-[58%]">
+                        <span
+                          className={`text-[12.5px] font-bold whitespace-nowrap truncate ${
+                            isVerifiedConnected
+                              ? 'text-emerald-700 dark:text-[#4ade80]'
+                              : 'text-slate-800 dark:text-[#dce4ee]'
+                          }`}
+                        >
+                          {qbitSummaryStatus}
+                        </span>
+                        <CaretRight
+                          weight="bold"
+                          className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:group-hover:text-[#38bdf8] shrink-0 rtl:rotate-180 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+                        />
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
-                    {t.summaryLanguageLabel}
-                  </dt>
-                  <dd className="mt-0.5 text-[13.5px] font-bold text-slate-900 dark:text-white">
-                    {activeLanguageLabel}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-[11.5px] font-medium text-slate-500 dark:text-[#7f91a8]">
-                    {t.summaryTorrentLabel}
-                  </dt>
-                  <dd
-                    className={`mt-0.5 text-[13.5px] font-bold ${
-                      isVerifiedConnected
-                        ? 'text-emerald-700 dark:text-[#4ade80]'
-                        : 'text-slate-700 dark:text-[#cbd6e4]'
-                    }`}
-                  >
-                    {qbitSummaryStatus}
-                  </dd>
-                </div>
-              </dl>
-
-              {/* Settings Reminder & Step Guide */}
-              <div className="max-w-2xl mx-auto p-3.5 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/25 text-[12.5px] text-sky-900 dark:text-[#b7d6f2] leading-relaxed space-y-1">
-                <p>
-                  <span className="font-bold text-[#0284c7] dark:text-[#38bdf8] me-1.5">
-                    {t.stepGuideLabel}:
-                  </span>
-                  <span>{t.step5Guide}</span>
-                </p>
-                <p className="opacity-90">{t.changeLaterHint}</p>
+                {/* Live Sequential 3-Phase Readiness Checks (All Single-Line) */}
+                <ul className="space-y-2 pt-1">
+                  {[
+                    { label: t.finalizingPhase1, threshold: 40 },
+                    { label: t.finalizingPhase2, threshold: 84 },
+                    { label: t.finalizingPhase3, threshold: 100 },
+                  ].map((phase, idx) => {
+                    const done = congratsProgress >= phase.threshold;
+                    const active =
+                      !done &&
+                      (idx === 0 ||
+                        congratsProgress >= [0, 40, 84][idx]);
+                    return (
+                      <li
+                        key={phase.label}
+                        className="flex items-center justify-between gap-3 text-[12px] min-w-0"
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          {done ? (
+                            <CheckCircle
+                              weight="fill"
+                              className="w-4 h-4 text-emerald-600 dark:text-[#4ade80] shrink-0"
+                            />
+                          ) : active ? (
+                            <SpinnerGap className="w-4 h-4 animate-spin text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                          ) : (
+                            <span className="w-4 h-4 rounded-full border border-slate-300 dark:border-white/20 shrink-0" />
+                          )}
+                          <span
+                            className={`whitespace-nowrap truncate ${
+                              done
+                                ? 'font-semibold text-slate-800 dark:text-[#e5e9f0]'
+                                : active
+                                ? 'font-medium text-slate-700 dark:text-[#b8c7dc]'
+                                : 'text-slate-400 dark:text-[#66778f]'
+                            }`}
+                          >
+                            {phase.label}
+                          </span>
+                        </span>
+                        <span
+                          className={`font-mono-tabular text-[11px] font-semibold whitespace-nowrap shrink-0 ${
+                            done
+                              ? 'text-emerald-700 dark:text-[#4ade80]'
+                              : active
+                              ? 'text-[#0284c7] dark:text-[#38bdf8]'
+                              : 'text-slate-400 dark:text-[#66778f]'
+                          }`}
+                        >
+                          {done ? t.readyStatusDone : active ? t.readyStatusSyncing : '—'}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
 
-              {/* Primary Launch CTA */}
-              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              {/* Right Column: Smart Launchpad Selector & Single-Line Advisories */}
+              <div className="sa-welcome-stagger-2 sa-ps5-subpanel bg-slate-50/75 dark:bg-[#10161e]/85 p-4 sm:p-6 lg:p-7 flex flex-col justify-between gap-4 min-w-0">
+                <div className="space-y-2.5 min-w-0">
+                  <div className="flex items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 text-[13px] font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                      <Sparkle
+                        weight="duotone"
+                        className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0"
+                      />
+                      <span className="truncate">{t.readyLaunchHeading}</span>
+                    </div>
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8] whitespace-nowrap shrink-0">
+                      {t.readyDestinationHint}
+                    </span>
+                  </div>
+
+                  {/* Interactive Destination Selector */}
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      aria-pressed={launchTarget === 'store'}
+                      onClick={() => setLaunchTarget('store')}
+                      className={`sa-ps5-subpanel w-full px-3.5 py-2.5 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-3 min-w-0 ${
+                        launchTarget === 'store'
+                          ? isXboxTheme
+                            ? 'bg-[#0c2611] border-[#52e042] ring-1 ring-[#52e042]/45'
+                            : 'bg-sky-50 dark:bg-[#162538] border-[#1a9fff] ring-1 ring-[#1a9fff]/45'
+                          : 'bg-white border-slate-200 hover:border-slate-300 dark:bg-[#131a23] dark:border-white/[0.08] dark:hover:border-white/[0.18]'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3 min-w-0 flex-1">
+                        <span
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            launchTarget === 'store'
+                              ? isXboxTheme
+                                ? 'bg-[#107C10] text-white'
+                                : 'bg-[#0284c7] dark:bg-[#1a9fff] text-white'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-[#9cb0c9]'
+                          }`}
+                        >
+                          <House weight="duotone" className="w-4 h-4" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap truncate">
+                            {t.readyStartStoreTitle}
+                          </span>
+                          <span className="block text-[11px] text-slate-500 dark:text-[#8b9bb4] whitespace-nowrap truncate">
+                            {t.readyStartStoreDesc}
+                          </span>
+                        </span>
+                      </span>
+                      {launchTarget === 'store' && (
+                        <Check
+                          weight="bold"
+                          className={`w-4 h-4 shrink-0 ${
+                            isXboxTheme
+                              ? 'text-[#6ee755]'
+                              : 'text-[#0284c7] dark:text-[#38bdf8]'
+                          }`}
+                        />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-pressed={launchTarget === 'settings'}
+                      onClick={() => setLaunchTarget('settings')}
+                      className={`sa-ps5-subpanel w-full px-3.5 py-2.5 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-3 min-w-0 ${
+                        launchTarget === 'settings'
+                          ? isXboxTheme
+                            ? 'bg-[#0c2611] border-[#52e042] ring-1 ring-[#52e042]/45'
+                            : 'bg-sky-50 dark:bg-[#162538] border-[#1a9fff] ring-1 ring-[#1a9fff]/45'
+                          : 'bg-white border-slate-200 hover:border-slate-300 dark:bg-[#131a23] dark:border-white/[0.08] dark:hover:border-white/[0.18]'
+                      }`}
+                    >
+                      <span className="flex items-center gap-3 min-w-0 flex-1">
+                        <span
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            launchTarget === 'settings'
+                              ? isXboxTheme
+                                ? 'bg-[#107C10] text-white'
+                                : 'bg-[#0284c7] dark:bg-[#1a9fff] text-white'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-[#9cb0c9]'
+                          }`}
+                        >
+                          <Gear weight="duotone" className="w-4 h-4" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[12.5px] font-bold text-slate-900 dark:text-white whitespace-nowrap truncate">
+                            {t.readyStartSettingsTitle}
+                          </span>
+                          <span className="block text-[11px] text-slate-500 dark:text-[#8b9bb4] whitespace-nowrap truncate">
+                            {t.readyStartSettingsDesc}
+                          </span>
+                        </span>
+                      </span>
+                      {launchTarget === 'settings' && (
+                        <Check
+                          weight="bold"
+                          className={`w-4 h-4 shrink-0 ${
+                            isXboxTheme
+                              ? 'text-[#6ee755]'
+                              : 'text-[#0284c7] dark:text-[#38bdf8]'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Single-Line Advisories (PresentMon & Editable Settings) */}
+                <ul className="divide-y divide-slate-200/80 dark:divide-white/[0.07] border-t border-slate-200/80 dark:border-white/[0.07] pt-1">
+                  <li className="py-2.5 flex items-center justify-between gap-3 min-w-0">
+                    <span className="flex items-center gap-2 min-w-0 text-[12px] font-semibold text-slate-800 dark:text-white whitespace-nowrap shrink-0">
+                      <Gauge className="w-4 h-4 text-amber-600 dark:text-amber-300 shrink-0" />
+                      <span>{t.presentMonShortLabel}</span>
+                    </span>
+                    <span className="text-[11.5px] text-slate-600 dark:text-[#9cb0c9] whitespace-nowrap truncate">
+                      {t.presentMonShortDesc}
+                    </span>
+                  </li>
+
+                  <li className="py-2.5 pb-0 flex items-center justify-between gap-3 min-w-0">
+                    <span className="flex items-center gap-2 min-w-0 text-[12px] font-semibold text-slate-800 dark:text-white whitespace-nowrap shrink-0">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-[#4ade80] shrink-0" />
+                      <span>{t.readyEditableShortLabel}</span>
+                    </span>
+                    <span className="text-[11.5px] text-slate-600 dark:text-[#9cb0c9] whitespace-nowrap truncate">
+                      {t.readyEditableShortDesc}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Anchored Single-Line Launch Footer */}
+            <div className="relative z-10 shrink-0 px-4 sm:px-6 lg:px-8 py-3 border-t border-slate-200 dark:border-white/[0.08] bg-slate-50/70 dark:bg-[#11161f] flex items-center justify-end gap-3">
+              <div className="flex items-center justify-end gap-2 sm:gap-2.5 ms-auto w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setStep(torrentSkipped ? 'qbit_check' : 'qbit_integration')
+                  }
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <BackArrow className="w-4 h-4 shrink-0" />
+                  <span>{t.backBtn}</span>
+                </button>
+
                 <button
                   type="button"
                   disabled={congratsProgress < 100 || isLaunchingOut}
                   onClick={() => handleLaunchIntoDesktop('settings')}
-                  className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-45 text-[13px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="hidden sm:inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] disabled:opacity-45 text-[12.5px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Gear className="w-4 h-4" />
+                  <Gear className="w-4 h-4 shrink-0" />
                   <span>{t.openSettingsPageBtn}</span>
                 </button>
 
                 <button
                   type="button"
                   disabled={congratsProgress < 100 || isLaunchingOut}
-                  onClick={() => handleLaunchIntoDesktop('store')}
-                  className="inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-45 text-white text-[14px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  onClick={() => handleLaunchIntoDesktop(launchTarget)}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 min-h-[40px] px-5 sm:px-6 py-2 rounded-lg disabled:opacity-45 text-white text-[13px] sm:text-[13.5px] font-semibold shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    congratsProgress >= 100 ? 'sa-ready-cta-sheen' : ''
+                  } ${
+                    isXboxTheme
+                      ? 'bg-[#107C10] hover:bg-[#159315]'
+                      : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff]'
+                  }`}
                 >
-                  <span>{t.enterAppBtn}</span>
+                  <span className="truncate">
+                    {launchTarget === 'settings' ? t.openSettingsPageBtn : t.enterAppBtn}
+                  </span>
                   <DirectionalArrow weight="bold" className="w-4 h-4 shrink-0" />
                 </button>
               </div>

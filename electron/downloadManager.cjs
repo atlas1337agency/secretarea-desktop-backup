@@ -1,4 +1,10 @@
-const { app, BrowserWindow, dialog, net, safeStorage, shell, session } = require('electron');
+let electronApi = {};
+try {
+  electronApi = require('electron');
+} catch {
+  electronApi = {};
+}
+const { app, BrowserWindow, dialog, net, safeStorage, shell, session } = electronApi;
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -16,6 +22,14 @@ const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 const QBIT_DOWNLOAD_URL = 'https://www.qbittorrent.org/download';
 
+const DANGEROUS_OPEN_EXTENSIONS = new Set([
+  '.exe', '.msi', '.bat', '.cmd', '.ps1', '.vbs', '.vbe', '.js', '.jse',
+  '.wsf', '.wsh', '.scr', '.com', '.pif', '.hta', '.jar', '.lnk', '.reg',
+  '.msc', '.cpl', '.dll',
+]);
+
+const RESERVED_WINDOWS_NAMES = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?$/i;
+
 function isLoopbackHost(host) {
   const clean = String(host || '').trim().toLowerCase();
   return (
@@ -24,6 +38,85 @@ function isLoopbackHost(host) {
     clean === '::1' ||
     clean === '[::1]'
   );
+}
+
+function isPrivateOrLoopbackHostname(rawHostname) {
+  const host = String(rawHostname || '').trim().toLowerCase().replace(/^\[|\]$/g, '');
+  if (!host) return true;
+  if (
+    host === 'localhost' ||
+    host === 'localhost.localdomain' ||
+    host === '0.0.0.0' ||
+    host === '::' ||
+    host === '::1' ||
+    host.endsWith('.localhost') ||
+    host.endsWith('.local') ||
+    host.endsWith('.internal')
+  ) {
+    return true;
+  }
+
+  const ipVer = netTcp.isIP(host);
+  if (ipVer === 4) {
+    const parts = host.split('.').map((n) => parseInt(n, 10));
+    const [a, b] = parts;
+    if (a === 127 || a === 10 || a === 0) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    return false;
+  }
+  if (ipVer === 6) {
+    if (host === '::1' || host === '::') return true;
+    if (/^fe[89ab][0-9a-f]:/i.test(host)) return true; // link-local fe80::/10
+    if (/^f[cd][0-9a-f]{2}:/i.test(host)) return true; // ULA fc00::/7
+    if (host.startsWith('::ffff:')) {
+      return isPrivateOrLoopbackHostname(host.slice('::ffff:'.length));
+    }
+    return false;
+  }
+  return false;
+}
+
+function isSafeRemoteDownloadUrl(rawUrl) {
+  if (typeof rawUrl !== 'string') return false;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || /[\x00-\x1f\x7f]/.test(trimmed)) return false;
+  try {
+    const parsed = new URL(trimmed);
+    const proto = parsed.protocol.toLowerCase();
+    if (proto !== 'http:' && proto !== 'https:') return false;
+    if (!parsed.hostname || isPrivateOrLoopbackHostname(parsed.hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isPathInsideDir(targetPath, baseDir) {
+  if (!targetPath || !baseDir || typeof targetPath !== 'string' || typeof baseDir !== 'string') {
+    return false;
+  }
+  const cleanTarget = path.resolve(targetPath);
+  const cleanBase = path.resolve(baseDir);
+  if (cleanTarget.includes('\0') || cleanBase.includes('\0')) return false;
+  if (process.platform === 'win32') {
+    const t = cleanTarget.toLowerCase();
+    const b = cleanBase.toLowerCase();
+    return t.startsWith(b + path.sep);
+  }
+  return cleanTarget.startsWith(cleanBase + path.sep);
+}
+
+function isValidInfoHash(hash) {
+  return typeof hash === 'string' && /^[A-Za-z0-9]{32,64}$/.test(hash.trim());
+}
+
+function scrubSensitiveText(text) {
+  return String(text || '')
+    .replace(/Bearer\s+[A-Za-z0-9._+/=-]+/gi, 'Bearer [redacted]')
+    .replace(/(SID=)[^;\s]+/gi, '$1[redacted]');
 }
 
 function compareSemver(a, b) {
@@ -120,27 +213,33 @@ function parseTorrentBufferMetadata(buf, fallbackName) {
   };
 }
 
+function stripMultipartHeaderControls(val) {
+  return String(val || '').replace(/[\r\n\0"]+/g, '_');
+}
+
 function buildMultipartFormBody(fields, files) {
-  const boundary = `----SecretAreaQbit${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`;
+  const boundary = `----SecretAreaQbit${Date.now().toString(16)}${crypto.randomBytes(6).toString('hex')}`;
   const chunks = [];
 
   for (const [key, value] of Object.entries(fields || {})) {
     if (value === undefined || value === null || value === '') continue;
+    const safeKey = stripMultipartHeaderControls(key);
+    const safeVal = String(value).replace(/[\r\n\0]+/g, '');
     chunks.push(
       Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${String(value)}\r\n`,
+        `--${boundary}\r\nContent-Disposition: form-data; name="${safeKey}"\r\n\r\n${safeVal}\r\n`,
         'utf8'
       )
     );
   }
 
   for (const file of files || []) {
-    const safeFilename = String(file.filename || 'upload.torrent').replace(/"/g, '_');
+    const safeField = stripMultipartHeaderControls(file.field || 'torrents');
+    const safeFilename = stripMultipartHeaderControls(file.filename || 'upload.torrent');
+    const safeType = String(file.contentType || 'application/x-bittorrent').replace(/[\r\n\0]+/g, '');
     chunks.push(
       Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="${file.field}"; filename="${safeFilename}"\r\nContent-Type: ${
-          file.contentType || 'application/x-bittorrent'
-        }\r\n\r\n`,
+        `--${boundary}\r\nContent-Disposition: form-data; name="${safeField}"; filename="${safeFilename}"\r\nContent-Type: ${safeType}\r\n\r\n`,
         'utf8'
       )
     );
@@ -221,15 +320,11 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
   function validateDownloadUrl(rawUrl) {
     if (typeof rawUrl !== 'string') return '';
     const trimmed = rawUrl.trim();
-    if (!trimmed) return '';
-    if (
-      trimmed.startsWith('http://') ||
-      trimmed.startsWith('https://') ||
-      trimmed.startsWith('magnet:?')
-    ) {
-      return trimmed;
+    if (!trimmed || /[\x00-\x1f\x7f]/.test(trimmed)) return '';
+    if (trimmed.toLowerCase().startsWith('magnet:?')) {
+      return /\s/.test(trimmed) ? '' : trimmed;
     }
-    return '';
+    return isSafeRemoteDownloadUrl(trimmed) ? trimmed : '';
   }
 
   function sanitizeFileName(rawName, fallback = 'download.bin') {
@@ -240,9 +335,12 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       // keep raw
     }
     candidate = path.basename(candidate.split('?')[0].split('#')[0]);
-    candidate = candidate.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim();
+    candidate = candidate.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').replace(/[. ]+$/, '').trim();
     if (!candidate || candidate === '.' || candidate === '..') {
       candidate = fallback;
+    }
+    if (RESERVED_WINDOWS_NAMES.test(candidate)) {
+      candidate = `_${candidate}`;
     }
     if (candidate.length > 180) {
       const ext = path.extname(candidate);
@@ -344,13 +442,23 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     }
   }
 
+  function isSafeStorageReady() {
+    try {
+      return Boolean(
+        safeStorage &&
+          typeof safeStorage.isEncryptionAvailable === 'function' &&
+          safeStorage.isEncryptionAvailable()
+      );
+    } catch {
+      return false;
+    }
+  }
+
   function decryptSecretValue(encoded) {
     if (typeof encoded !== 'string' || !encoded) return '';
+    if (!isSafeStorageReady()) return '';
     try {
-      if (safeStorage.isEncryptionAvailable()) {
-        return safeStorage.decryptString(Buffer.from(encoded, 'base64'));
-      }
-      return Buffer.from(encoded, 'base64').toString('utf8');
+      return safeStorage.decryptString(Buffer.from(encoded, 'base64'));
     } catch {
       return '';
     }
@@ -358,13 +466,11 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
 
   function encryptSecretValue(plain) {
     if (typeof plain !== 'string' || !plain) return '';
+    if (!isSafeStorageReady()) return null;
     try {
-      if (safeStorage.isEncryptionAvailable()) {
-        return safeStorage.encryptString(plain).toString('base64');
-      }
-      return Buffer.from(plain, 'utf8').toString('base64');
+      return safeStorage.encryptString(plain).toString('base64');
     } catch {
-      return '';
+      return null;
     }
   }
 
@@ -378,6 +484,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       apiKey: '',
       hasSavedPassword: Boolean(cfg.password),
       hasSavedApiKey: Boolean(cfg.apiKey),
+      safeStorageAvailable: isSafeStorageReady(),
       pollIntervalMs: Number(cfg.pollIntervalMs) || 1500,
     };
   }
@@ -387,12 +494,13 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       const filePath = getTorrentSecretPath();
       if (!fs.existsSync(filePath)) return;
       const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      const plainPassword =
-        typeof parsed.encryptedPassword === 'string' && parsed.encryptedPassword
-          ? decryptSecretValue(parsed.encryptedPassword)
-          : typeof parsed.password === 'string'
-          ? parsed.password
-          : '';
+      let plainPassword = '';
+      if (typeof parsed.encryptedPassword === 'string' && parsed.encryptedPassword) {
+        plainPassword = decryptSecretValue(parsed.encryptedPassword);
+      } else if (typeof parsed.password === 'string' && parsed.password) {
+        // Migrate legacy plaintext field cleanly if OS encryption is available; ignore otherwise
+        plainPassword = isSafeStorageReady() ? parsed.password : '';
+      }
       const plainApiKey =
         typeof parsed.encryptedApiKey === 'string' && parsed.encryptedApiKey
           ? decryptSecretValue(parsed.encryptedApiKey)
@@ -408,6 +516,11 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         apiKey: plainApiKey,
         pollIntervalMs: 1500,
       };
+
+      // Strip legacy plaintext `password` field if present on disk
+      if (typeof parsed.password === 'string' && parsed.password) {
+        writePersistedTorrentConfig(torrentConfig);
+      }
     } catch {
       // ignore read errors
     }
@@ -417,15 +530,19 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     try {
       const filePath = getTorrentSecretPath();
       ensureDirExists(path.dirname(filePath));
+      const safeReady = isSafeStorageReady();
+      const encPassword = safeReady && nextCfg.password ? encryptSecretValue(nextCfg.password) : '';
+      const encApiKey = safeReady && nextCfg.apiKey ? encryptSecretValue(nextCfg.apiKey) : '';
       const payload = {
         enabled: Boolean(nextCfg.enabled),
         host: isLoopbackHost(nextCfg.host) ? nextCfg.host.trim() : '127.0.0.1',
         port: nextCfg.port,
         username: nextCfg.username,
-        encryptedPassword: encryptSecretValue(nextCfg.password),
-        encryptedApiKey: encryptSecretValue(nextCfg.apiKey),
+        encryptedPassword: typeof encPassword === 'string' ? encPassword : '',
+        encryptedApiKey: typeof encApiKey === 'string' ? encApiKey : '',
+        storageMode: safeReady ? 'safeStorage' : 'session_memory',
       };
-      fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+      fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), { encoding: 'utf8', mode: 0o600 });
     } catch {
       // ignore disk errors
     }
@@ -573,22 +690,60 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     return rawUrl;
   }
 
+  async function fetchWithSafeRedirects(initialUrl, fetchOptions = {}, maxRedirects = 6) {
+    let currentUrl = initialUrl;
+    for (let hop = 0; hop <= maxRedirects; hop += 1) {
+      if (!isSafeRemoteDownloadUrl(currentUrl)) {
+        throw new Error('Blocked unsafe or private network download target.');
+      }
+      const res = await net.fetch(currentUrl, {
+        ...fetchOptions,
+        redirect: 'manual',
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get('location');
+        if (!location) {
+          return { response: res, finalUrl: currentUrl };
+        }
+        const resolvedNext = new URL(location, currentUrl).toString();
+        if (!isSafeRemoteDownloadUrl(resolvedNext)) {
+          throw new Error('Blocked unsafe redirect to private or unsupported address.');
+        }
+        currentUrl = resolvedNext;
+        continue;
+      }
+      return { response: res, finalUrl: currentUrl };
+    }
+    throw new Error('Too many redirects while resolving download URL.');
+  }
+
   async function resolveMediaFireDirectUrl(pageUrl) {
+    if (!isSafeRemoteDownloadUrl(pageUrl)) {
+      throw new Error('Blocked unsafe MediaFire target URL.');
+    }
     if (/^https?:\/\/download\d*\.mediafire\.com\//i.test(pageUrl)) {
       return pageUrl;
     }
-    const res = await net.fetch(pageUrl, {
-      headers: {
-        'User-Agent': DEFAULT_USER_AGENT,
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      redirect: 'follow',
-    });
+    const timeoutController = new AbortController();
+    const timer = setTimeout(() => timeoutController.abort('timeout'), 15000);
+    let res;
+    let finalUrl;
+    try {
+      ({ response: res, finalUrl } = await fetchWithSafeRedirects(pageUrl, {
+        headers: {
+          'User-Agent': DEFAULT_USER_AGENT,
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: timeoutController.signal,
+      }));
+    } finally {
+      clearTimeout(timer);
+    }
 
     const contentType = (res.headers.get('content-type') || '').toLowerCase();
     const contentDisp = (res.headers.get('content-disposition') || '').toLowerCase();
     if (!contentType.includes('text/html') || contentDisp.includes('attachment')) {
-      return res.url || pageUrl;
+      return isSafeRemoteDownloadUrl(finalUrl) ? finalUrl : pageUrl;
     }
 
     const html = await res.text();
@@ -601,13 +756,28 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     for (const pattern of patterns) {
       const match = html.match(pattern);
       if (match && match[1]) {
-        return match[1].replace(/&amp;/g, '&');
+        const candidate = match[1].replace(/&amp;/g, '&');
+        if (isSafeRemoteDownloadUrl(candidate)) {
+          return candidate;
+        }
       }
     }
     return null;
   }
 
   function openInAppDownloadBrowser(targetUrl, task) {
+    if (!isSafeRemoteDownloadUrl(targetUrl)) {
+      patchTask(
+        task.id,
+        {
+          status: 'failed',
+          error: 'Blocked unsafe URL before opening Download Browser.',
+        },
+        true
+      );
+      return;
+    }
+
     const mainWindow = getMainWindow();
     const win = new BrowserWindow({
       width: 1020,
@@ -620,6 +790,9 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
+        webSecurity: true,
+        allowRunningInsecureContent: false,
+        webviewTag: false,
       },
     });
 
@@ -645,8 +818,24 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       true
     );
 
+    win.webContents.on('will-attach-webview', (event) => {
+      event.preventDefault();
+    });
+
+    win.webContents.on('will-navigate', (event, navUrl) => {
+      if (!isSafeRemoteDownloadUrl(navUrl)) {
+        event.preventDefault();
+      }
+    });
+
+    win.webContents.on('will-redirect', (event, redirectUrl) => {
+      if (!isSafeRemoteDownloadUrl(redirectUrl)) {
+        event.preventDefault();
+      }
+    });
+
     win.webContents.setWindowOpenHandler(({ url }) => {
-      if (url.startsWith('http://') || url.startsWith('https://')) {
+      if (isSafeRemoteDownloadUrl(url)) {
         void win.loadURL(url);
       }
       return { action: 'deny' };
@@ -679,6 +868,9 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
 
     try {
       let targetUrl = task.resolvedUrl || rewriteKnownDirectUrl(task.url);
+      if (!isSafeRemoteDownloadUrl(targetUrl)) {
+        throw new Error('Blocked unsafe or private network download target.');
+      }
 
       if (task.source === 'mediafire' && !task.resolvedUrl) {
         patchTask(taskId, { status: 'resolving', error: null }, true);
@@ -695,11 +887,16 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       const currentTask = findTask(taskId);
       if (!currentTask || controller.signal.aborted) return;
 
-      const partPath = currentTask.savePath ? `${currentTask.savePath}.part` : '';
+      const { downloadFolder } = getDownloadSettings();
+      const existingPartCandidate = currentTask.savePath ? `${currentTask.savePath}.part` : '';
       let existingBytes = 0;
-      if (partPath && fs.existsSync(partPath)) {
+      if (
+        existingPartCandidate &&
+        isPathInsideDir(currentTask.savePath, downloadFolder) &&
+        fs.existsSync(existingPartCandidate)
+      ) {
         try {
-          existingBytes = fs.statSync(partPath).size;
+          existingBytes = fs.statSync(existingPartCandidate).size;
         } catch {
           existingBytes = 0;
         }
@@ -713,9 +910,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       }
 
       patchTask(taskId, { status: 'resolving', error: null }, true);
-      const response = await net.fetch(targetUrl, {
+      const { response, finalUrl } = await fetchWithSafeRedirects(targetUrl, {
         headers: requestHeaders,
-        redirect: 'follow',
         signal: controller.signal,
       });
 
@@ -729,16 +925,15 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       if (contentType.includes('text/html') && !contentDisp.includes('attachment')) {
         controller.abort('html-page');
         activeHttpControllers.delete(taskId);
-        openInAppDownloadBrowser(response.url || targetUrl, findTask(taskId) || task);
+        openInAppDownloadBrowser(finalUrl || targetUrl, findTask(taskId) || task);
         return;
       }
 
-      const { downloadFolder } = getDownloadSettings();
-      const resolvedFileName = parseFilenameFromHeaders(response.headers, response.url || targetUrl);
+      const resolvedFileName = parseFilenameFromHeaders(response.headers, finalUrl || targetUrl);
       const latestTask = findTask(taskId);
       const finalSavePath =
-        latestTask?.savePath && latestTask.savePath.startsWith(path.resolve(downloadFolder))
-          ? latestTask.savePath
+        latestTask?.savePath && isPathInsideDir(latestTask.savePath, downloadFolder)
+          ? path.resolve(latestTask.savePath)
           : resolveUniqueFilePath(downloadFolder, resolvedFileName);
 
       const finalPartPath = `${finalSavePath}.part`;
@@ -765,7 +960,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         {
           fileName: path.basename(finalSavePath),
           savePath: finalSavePath,
-          resolvedUrl: response.url || targetUrl,
+          resolvedUrl: finalUrl || targetUrl,
           status: 'downloading',
           downloadedBytes: startOffset,
           totalBytes,
@@ -904,8 +1099,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       const { downloadFolder } = getDownloadSettings();
       const latestTask = findTask(taskId);
       const finalSavePath =
-        latestTask?.savePath && latestTask.savePath.startsWith(path.resolve(downloadFolder))
-          ? latestTask.savePath
+        latestTask?.savePath && isPathInsideDir(latestTask.savePath, downloadFolder)
+          ? path.resolve(latestTask.savePath)
           : resolveUniqueFilePath(downloadFolder, megaFile.name || 'mega-download.bin');
       const finalPartPath = `${finalSavePath}.part`;
       ensureDirExists(path.dirname(finalPartPath));
@@ -1317,6 +1512,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       try {
         const res = await net.fetch(`http://127.0.0.1:${p}/api/v2/app/version`, {
           headers: { Referer: `http://127.0.0.1:${p}` },
+          redirect: 'manual',
+          signal: AbortSignal.timeout(2500),
         });
         if (res.status === 200 || res.status === 401 || res.status === 403) {
           verifiedRunning = true;
@@ -1365,6 +1562,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         Origin: baseUrl,
       },
       body,
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10000),
     });
 
     if (res.status === 403) {
@@ -1421,6 +1620,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         method,
         headers,
         body: bodyPayload,
+        redirect: 'manual',
+        signal: AbortSignal.timeout(10000),
       });
     };
 
@@ -1449,6 +1650,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
           : options.formParams
           ? new URLSearchParams(options.formParams).toString()
           : undefined,
+        redirect: 'manual',
+        signal: AbortSignal.timeout(10000),
       });
     }
 
@@ -1466,6 +1669,9 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
   }
 
   async function callQbitPauseOrResume(cfg, action, hashesCsv) {
+    if (!isValidInfoHash(hashesCsv)) {
+      throw new Error('Invalid torrent hash format.');
+    }
     // qBittorrent 5.0+ (WebAPI >= 2.11.0) uses /stop and /start; 4.x used /pause and /resume
     const isLegacyV4 =
       torrentWebApiVersion && compareSemver(torrentWebApiVersion, '2.11.0') < 0;
@@ -1497,7 +1703,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
   }
 
   function diagnoseQbitError(err, cfg, installedCheck = null) {
-    const raw = err instanceof Error ? err.message : String(err || 'Connection failed');
+    const raw = scrubSensitiveText(err instanceof Error ? err.message : String(err || 'Connection failed'));
     const lower = raw.toLowerCase();
 
     if (installedCheck && !installedCheck.installed) {
@@ -1903,7 +2109,10 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     }
 
     if (task.url) {
-      await shell.openExternal(task.url);
+      const safeExternal = validateDownloadUrl(task.url);
+      if (safeExternal) {
+        await shell.openExternal(safeExternal);
+      }
     }
     patchTask(
       taskId,
@@ -2133,7 +2342,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     const task = findTask(id);
     if (!task) return getSnapshot();
 
-    if (task.source === 'qbittorrent' && task.torrentHash && torrentConfig.enabled) {
+    if (task.source === 'qbittorrent' && isValidInfoHash(task.torrentHash) && torrentConfig.enabled) {
       try {
         await callQbitApi(torrentConfig, '/api/v2/torrents/delete', {
           method: 'POST',
@@ -2170,9 +2379,17 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       activeHttpControllers.delete(id);
     }
 
-    if (task.savePath && fs.existsSync(`${task.savePath}.part`)) {
+    const { downloadFolder: activeDownloadFolder } = getDownloadSettings();
+    if (
+      task.savePath &&
+      isPathInsideDir(task.savePath, activeDownloadFolder) &&
+      fs.existsSync(`${task.savePath}.part`)
+    ) {
       try {
-        fs.unlinkSync(`${task.savePath}.part`);
+        const partFile = `${path.resolve(task.savePath)}.part`;
+        if (!fs.lstatSync(partFile).isSymbolicLink()) {
+          fs.unlinkSync(partFile);
+        }
       } catch {
         // ignore cleanup error
       }
@@ -2210,7 +2427,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     );
 
     if (task.source === 'qbittorrent') {
-      if (torrentConfig.enabled && task.torrentHash) {
+      if (torrentConfig.enabled && isValidInfoHash(task.torrentHash)) {
         try {
           const existing = await callQbitApi(
             torrentConfig,
@@ -2245,7 +2462,7 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     const task = findTask(id);
     if (!task) return getSnapshot();
 
-    if (task.source === 'qbittorrent' && task.torrentHash && torrentConfig.enabled) {
+    if (task.source === 'qbittorrent' && isValidInfoHash(task.torrentHash) && torrentConfig.enabled) {
       try {
         await callQbitApi(torrentConfig, '/api/v2/torrents/delete', {
           method: 'POST',
@@ -2297,6 +2514,28 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
     return getSnapshot();
   }
 
+  function isUnsafeDownloadFolderChoice(folderPath) {
+    const resolved = path.resolve(String(folderPath || ''));
+    const parsedRoot = path.parse(resolved).root;
+    if (!resolved || resolved === parsedRoot || resolved === '/' || /^[A-Za-z]:\\?$/.test(resolved)) {
+      return true;
+    }
+    const lower = resolved.toLowerCase();
+    const blockedPrefixes = [
+      (process.env.SystemRoot || 'C:\\Windows').toLowerCase(),
+      (process.env.ProgramFiles || 'C:\\Program Files').toLowerCase(),
+      (process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)').toLowerCase(),
+      '/bin',
+      '/sbin',
+      '/usr',
+      '/etc',
+      '/system',
+    ];
+    return blockedPrefixes.some(
+      (prefix) => lower === prefix || lower.startsWith(prefix + path.sep)
+    );
+  }
+
   async function chooseDownloadFolder() {
     const mainWindow = getMainWindow();
     const { downloadFolder } = getDownloadSettings();
@@ -2309,6 +2548,14 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
       return getSnapshot();
     }
     const chosen = path.resolve(res.filePaths[0]);
+    if (isUnsafeDownloadFolderChoice(chosen)) {
+      await dialog.showMessageBox(mainWindow || undefined, {
+        type: 'warning',
+        title: 'Protected System Folder',
+        message: 'Downloads cannot be saved directly to a drive root or operating system directory.',
+      });
+      return getSnapshot();
+    }
     ensureDirExists(chosen);
     const prev = readSettings ? readSettings() : {};
     if (writeSettings) {
@@ -2319,21 +2566,30 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
   }
 
   async function openFolder(idOrEmpty) {
+    const { downloadFolder } = getDownloadSettings();
     if (idOrEmpty) {
       const task = findTask(idOrEmpty);
       if (task?.savePath) {
-        if (fs.existsSync(task.savePath)) {
-          shell.showItemInFolder(task.savePath);
+        const resolved = path.resolve(String(task.savePath));
+        const allowedPath =
+          task.source === 'qbittorrent'
+            ? path.isAbsolute(resolved)
+            : isPathInsideDir(resolved, downloadFolder);
+        if (allowedPath && fs.existsSync(resolved)) {
+          shell.showItemInFolder(resolved);
           return true;
         }
-        const parentDir = path.dirname(task.savePath);
-        if (fs.existsSync(parentDir)) {
+        const parentDir = path.dirname(resolved);
+        const allowedParent =
+          task.source === 'qbittorrent'
+            ? path.isAbsolute(parentDir)
+            : isPathInsideDir(parentDir, downloadFolder);
+        if (allowedParent && fs.existsSync(parentDir)) {
           await shell.openPath(parentDir);
           return true;
         }
       }
     }
-    const { downloadFolder } = getDownloadSettings();
     ensureDirExists(downloadFolder);
     await shell.openPath(downloadFolder);
     return true;
@@ -2341,10 +2597,42 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
 
   async function openFile(id) {
     const task = findTask(id);
-    if (!task?.savePath || !fs.existsSync(task.savePath)) {
+    if (!task?.savePath) return false;
+    const { downloadFolder } = getDownloadSettings();
+    const resolved = path.resolve(String(task.savePath));
+    if (task.source !== 'qbittorrent' && !isPathInsideDir(resolved, downloadFolder)) {
       return false;
     }
-    const err = await shell.openPath(task.savePath);
+    if (!fs.existsSync(resolved)) {
+      return false;
+    }
+    try {
+      const st = fs.lstatSync(resolved);
+      if (st.isSymbolicLink()) return false;
+    } catch {
+      return false;
+    }
+
+    const ext = path.extname(resolved).toLowerCase();
+    if (DANGEROUS_OPEN_EXTENSIONS.has(ext)) {
+      const mainWindow = getMainWindow();
+      const confirm = await dialog.showMessageBox(mainWindow || undefined, {
+        type: 'warning',
+        buttons: ['Run File', 'Cancel'],
+        defaultId: 1,
+        cancelId: 1,
+        noLink: true,
+        title: 'Security Confirmation',
+        message: `Run "${path.basename(resolved)}"?`,
+        detail:
+          'This downloaded file is an executable or script that can modify your computer. Only proceed if you trust the source.',
+      });
+      if (confirm.response !== 0) {
+        return false;
+      }
+    }
+
+    const err = await shell.openPath(resolved);
     return !err;
   }
 
@@ -2506,4 +2794,12 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
   };
 }
 
-module.exports = { createDownloadManager };
+module.exports = {
+  createDownloadManager,
+  isPrivateOrLoopbackHostname,
+  isSafeRemoteDownloadUrl,
+  isPathInsideDir,
+  isValidInfoHash,
+  buildMultipartFormBody,
+  scrubSensitiveText,
+};

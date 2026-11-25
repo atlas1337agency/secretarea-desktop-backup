@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
     postponeUpdate: () => ipcRenderer.invoke('updater:postpone'),
     installUpdate: () => ipcRenderer.invoke('updater:install'),
     getReleaseNotes: (version) => ipcRenderer.invoke('updater:get-release-notes', version),
+    getReleaseHistory: (forceRefresh) =>
+      ipcRenderer.invoke('updater:get-release-history', Boolean(forceRefresh)),
     onStateChange: (callback) => {
       if (typeof callback !== 'function') {
         return () => {};
@@ -189,6 +191,14 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
         ipcRenderer.removeListener('cleaner:progress', listener);
       };
     },
+  },
+  dealsBridge: {
+    fetchJson: (url) => ipcRenderer.invoke('deals:fetch-json', url),
+    fetchProviderJson: (payload) => ipcRenderer.invoke('deals:fetch-provider-json', payload),
+    getCredentialStatus: () => ipcRenderer.invoke('deals:get-credential-status'),
+    setCredential: (providerId, apiKey) =>
+      ipcRenderer.invoke('deals:set-credential', { providerId, apiKey }),
+    clearCredential: (providerId) => ipcRenderer.invoke('deals:clear-credential', providerId),
   },
 });
 

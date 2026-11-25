@@ -518,6 +518,11 @@ function createPcCleaner({ getMainWindow, getUserDataPath }) {
             continue;
           }
           try {
+            const st = await fsp.lstat(item.path);
+            if (st.isSymbolicLink() || !st.isFile()) {
+              catSkipped += 1;
+              continue;
+            }
             await fsp.unlink(item.path);
             catBytes += item.size;
             catFiles += 1;

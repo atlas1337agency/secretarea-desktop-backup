@@ -1284,6 +1284,18 @@ function createPresentMonManager({
     }
     const psScript = [
       '$ErrorActionPreference = "Stop";',
+      'Add-Type -AssemblyName System.IO.Compression.FileSystem;',
+      '$destFull = [System.IO.Path]::GetFullPath($env:PM_EXTRACT_DIR);',
+      'if (-not $destFull.EndsWith([System.IO.Path]::DirectorySeparatorChar)) { $destFull = $destFull + [System.IO.Path]::DirectorySeparatorChar };',
+      '$zip = [System.IO.Compression.ZipFile]::OpenRead($env:PM_ZIP_PATH);',
+      'try {',
+      '  foreach ($entry in $zip.Entries) {',
+      '    $full = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($destFull, $entry.FullName));',
+      '    if (-not $full.StartsWith($destFull, [System.StringComparison]::OrdinalIgnoreCase)) {',
+      '      throw "Blocked unsafe archive entry path: $($entry.FullName)";',
+      '    }',
+      '  }',
+      '} finally { $zip.Dispose() };',
       'Expand-Archive -LiteralPath $env:PM_ZIP_PATH -DestinationPath $env:PM_EXTRACT_DIR -Force;',
     ].join(' ');
     const res = await execHelper(
@@ -1455,6 +1467,9 @@ function createPresentMonManager({
           await promoteVerifiedExecutableAtomically(extractedExe, release, verification);
         } else if (release.assetKind === 'msi') {
           const stagedMsi = path.resolve(stagingDir, safeFileName);
+          if (!stagedMsi.startsWith(stagingDir + path.sep)) {
+            throw new Error('Blocked unsafe staging MSI path.');
+          }
           safeRemoveSync(stagedMsi);
           await fsp.rename(stagedFilePath, stagedMsi);
           stagedFilePath = stagedMsi;

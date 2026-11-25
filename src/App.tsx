@@ -48,8 +48,11 @@ import { RequestsView } from './components/RequestsView';
 import { DownloadsView } from './components/DownloadsView';
 import { HardwareMonitorView } from './components/HardwareMonitorView';
 import { SettingsView } from './components/SettingsView';
+import { GameDealsView } from './components/deals/GameDealsView';
 import { GameDetailModal } from './components/GameDetailModal';
 import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
+import { UpdateHistoryModal } from './components/UpdateHistoryModal';
+import { NotificationCenterDrawer } from './components/NotificationCenterDrawer';
 import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
 import { PresentMonSetupModal } from './components/PresentMonSetupModal';
 import {
@@ -125,6 +128,15 @@ import {
   type SystemHardwareSpecs,
 } from './services/systemSpecs';
 import { evaluateCanRunGame } from './services/canRunIt';
+import {
+  buildNotificationFeed,
+  ensureInitialUnreadSeeding,
+  getLastNotificationSyncAt,
+  loadPersistedLiveNotificationEvents,
+  reconcileCatalogNotifications,
+  saveReadNotificationIds,
+  type CatalogNotificationItem,
+} from './services/notificationCenter';
 
 interface ToastItem {
   id: string;
@@ -174,7 +186,10 @@ export default function App() {
   const [gasUrl] = useState<string>(() => getSavedGasUrl());
   const tabSignaturesRef = useRef<Partial<Record<keyof SheetCatalogData, string>>>({});
 
-  const [activeSection, setActiveSection] = useState<PrimarySection>('store');
+  const [activeSection, setActiveSection] = useState<PrimarySection>(() => {
+    const sectionParam = new URLSearchParams(window.location.search).get('section');
+    return sectionParam === 'deals' ? 'deals' : 'store';
+  });
   const [selectedGame, setSelectedGame] = useState<GameItem | null>(() => {
     const slug = new URLSearchParams(window.location.search).get('game');
     return slug ? findItemBySlug(DEFAULT_CATALOG, slug) : null;
@@ -231,6 +246,17 @@ export default function App() {
   );
   const [isPresentMonModalOpen, setIsPresentMonModalOpen] = useState(false);
   const hasAutoPromptedPresentMonRef = useRef(false);
+  const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
+  const [isUpdateHistoryOpen, setIsUpdateHistoryOpen] = useState(false);
+  const [isSyncingNotifications, setIsSyncingNotifications] = useState(false);
+  const [liveNotificationEvents, setLiveNotificationEvents] = useState<CatalogNotificationItem[]>(
+    () => loadPersistedLiveNotificationEvents()
+  );
+  const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(() => new Set());
+  const hasSeededReadIdsRef = useRef(false);
+  const [lastNotificationSyncAt, setLastNotificationSyncAt] = useState<number | null>(() =>
+    getLastNotificationSyncAt()
+  );
   const isDesktopApp = Boolean(settingsBridge || qbitSetupBridge || downloadsBridge);
   const [resolvedAppVersion, setResolvedAppVersion] = useState<string>(() =>
     getAppVersionString()
@@ -680,7 +706,16 @@ export default function App() {
 
   // Allow Escape key to exit fullscreen when no modal is open
   useEffect(() => {
-    if (!isFullscreen || selectedGame || selectedStudio || isUpdaterModalOpen) return;
+    if (
+      !isFullscreen ||
+      selectedGame ||
+      selectedStudio ||
+      isUpdaterModalOpen ||
+      isNotificationCenterOpen ||
+      isUpdateHistoryOpen
+    ) {
+      return;
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         void handleToggleFullscreen();
@@ -688,7 +723,15 @@ export default function App() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, selectedGame, selectedStudio, isUpdaterModalOpen, handleToggleFullscreen]);
+  }, [
+    isFullscreen,
+    selectedGame,
+    selectedStudio,
+    isUpdaterModalOpen,
+    isNotificationCenterOpen,
+    isUpdateHistoryOpen,
+    handleToggleFullscreen,
+  ]);
 
   const notify = useCallback(
     (message: string, type: 'success' | 'info' | 'error' = 'info') => {
@@ -1266,57 +1309,79 @@ export default function App() {
   const isBackgroundRefreshingRef = useRef(false);
   const lastRefreshAttemptAtRef = useRef(0);
 
-  const applyCatalogDiffSilently = useCallback((incoming: SheetCatalogData): boolean => {
-    const prev = catalogRef.current;
-    let anyChanged = false;
-    const merged: SheetCatalogData = { ...prev };
+  const applyCatalogDiffSilently = useCallback(
+    (
+      incoming: SheetCatalogData,
+      isLiveSync = false
+    ): { changed: boolean; newNotificationsCount: number } => {
+      const prev = catalogRef.current;
+      let anyChanged = false;
+      const merged: SheetCatalogData = { ...prev };
 
-    for (const tab of ALL_SHEET_TABS) {
-      const nextItems =
-        tab === 'game' && (!incoming.game || incoming.game.length === 0)
-          ? prev.game.length > 0
-            ? prev.game
-            : DEFAULT_CATALOG.game
-          : incoming[tab] || [];
+      for (const tab of ALL_SHEET_TABS) {
+        const nextItems =
+          tab === 'game' && (!incoming.game || incoming.game.length === 0)
+            ? prev.game.length > 0
+              ? prev.game
+              : DEFAULT_CATALOG.game
+            : incoming[tab] || [];
 
-      const prevSig =
-        tabSignaturesRef.current[tab] ??
-        (tabSignaturesRef.current[tab] = JSON.stringify(prev[tab] || []));
-      const nextSig = JSON.stringify(nextItems);
+        const prevSig =
+          tabSignaturesRef.current[tab] ??
+          (tabSignaturesRef.current[tab] = JSON.stringify(prev[tab] || []));
+        const nextSig = JSON.stringify(nextItems);
 
-      if (nextSig !== prevSig) {
-        tabSignaturesRef.current[tab] = nextSig;
-        merged[tab] = nextItems;
-        anyChanged = true;
-      } else {
-        merged[tab] = prev[tab];
+        if (nextSig !== prevSig) {
+          tabSignaturesRef.current[tab] = nextSig;
+          merged[tab] = nextItems;
+          anyChanged = true;
+        } else {
+          merged[tab] = prev[tab];
+        }
       }
-    }
 
-    if (anyChanged) {
-      setCatalog(merged);
-      window.setTimeout(() => {
-        void saveCachedCatalog(merged);
-      }, 0);
-    }
+      if (anyChanged) {
+        setCatalog(merged);
+        window.setTimeout(() => {
+          void saveCachedCatalog(merged);
+        }, 0);
+      }
 
-    return anyChanged;
-  }, []);
+      let newNotificationsCount = 0;
+      if (isLiveSync || anyChanged) {
+        const reconciled = reconcileCatalogNotifications(anyChanged ? merged : prev, {
+          isLiveSync,
+        });
+        newNotificationsCount = reconciled.newEvents.length;
+        if (reconciled.newEvents.length > 0) {
+          setLiveNotificationEvents(reconciled.allEvents);
+        }
+        if (isLiveSync) {
+          setLastNotificationSyncAt(getLastNotificationSyncAt() || Date.now());
+        }
+      }
+
+      return { changed: anyChanged, newNotificationsCount };
+    },
+    []
+  );
 
   const refreshCatalogSilently = useCallback(
-    async (url: string, force = false) => {
+    async (url: string, force = false): Promise<{ synced: boolean; newNotificationsCount: number }> => {
       const clean = url.trim();
-      if (!clean || isBackgroundRefreshingRef.current) return;
+      if (!clean || isBackgroundRefreshingRef.current) {
+        return { synced: false, newNotificationsCount: 0 };
+      }
 
       const now = Date.now();
       if (!force && now - lastRefreshAttemptAtRef.current < 60000) {
-        return;
+        return { synced: false, newNotificationsCount: 0 };
       }
 
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setIsOnline(false);
         setConnectivityBadge('offline');
-        return;
+        return { synced: false, newNotificationsCount: 0 };
       }
 
       lastRefreshAttemptAtRef.current = now;
@@ -1324,15 +1389,17 @@ export default function App() {
       try {
         const latest = await fetchCatalogFromGas(clean);
         hasCompletedLiveSyncRef.current = true;
-        const changed = applyCatalogDiffSilently(latest);
+        const { changed, newNotificationsCount } = applyCatalogDiffSilently(latest, true);
         if (changed) {
           void precacheCatalogImages(latest);
         }
+        return { synced: true, newNotificationsCount };
       } catch {
         if (typeof navigator !== 'undefined' && !navigator.onLine) {
           setIsOnline(false);
           setConnectivityBadge('offline');
         }
+        return { synced: false, newNotificationsCount: 0 };
       } finally {
         isBackgroundRefreshingRef.current = false;
       }
@@ -1669,6 +1736,75 @@ export default function App() {
     [downloadSnapshot.tasks]
   );
 
+  const notificationFeed = useMemo(
+    () => buildNotificationFeed(catalog, liveNotificationEvents),
+    [catalog, liveNotificationEvents]
+  );
+
+  useEffect(() => {
+    if (!hasSeededReadIdsRef.current && notificationFeed.length > 0) {
+      hasSeededReadIdsRef.current = true;
+      setReadNotificationIds(ensureInitialUnreadSeeding(notificationFeed));
+    }
+  }, [notificationFeed]);
+
+  const unreadNotificationsCount = useMemo(
+    () =>
+      notificationFeed.reduce(
+        (acc, item) => acc + (readNotificationIds.has(item.id) ? 0 : 1),
+        0
+      ),
+    [notificationFeed, readNotificationIds]
+  );
+
+  const handleMarkNotificationRead = useCallback((id: string) => {
+    setReadNotificationIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      saveReadNotificationIds(next);
+      return next;
+    });
+  }, []);
+
+  const handleMarkAllNotificationsRead = useCallback(() => {
+    setReadNotificationIds((prev) => {
+      const next = new Set(prev);
+      for (const item of notificationFeed) {
+        next.add(item.id);
+      }
+      saveReadNotificationIds(next);
+      return next;
+    });
+  }, [notificationFeed]);
+
+  const handleSyncNotificationsNow = useCallback(async () => {
+    if (!gasUrl || isSyncingNotifications) return;
+    setIsSyncingNotifications(true);
+    try {
+      const { synced, newNotificationsCount } = await refreshCatalogSilently(gasUrl, true);
+      if (synced) {
+        if (newNotificationsCount > 0) {
+          notify(
+            `${newNotificationsCount} ${t.notificationCenter.newUpdatesToastPrefix}`,
+            'success'
+          );
+        } else {
+          notify(t.notificationCenter.syncedToast, 'info');
+        }
+      }
+    } finally {
+      setIsSyncingNotifications(false);
+    }
+  }, [
+    gasUrl,
+    isSyncingNotifications,
+    refreshCatalogSilently,
+    notify,
+    t.notificationCenter.newUpdatesToastPrefix,
+    t.notificationCenter.syncedToast,
+  ]);
+
   if (onboardingPhase === 'checking') {
     return (
       <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[#f4f6f9] dark:bg-[#0e141b]">
@@ -1718,6 +1854,10 @@ export default function App() {
         onOpenUpdates={
           updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
         }
+        onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
+        unreadNotificationsCount={unreadNotificationsCount}
+        isNotificationCenterOpen={isNotificationCenterOpen}
+        onOpenNotifications={() => setIsNotificationCenterOpen((prev) => !prev)}
         language={launcherSettings.language}
       />
 
@@ -1807,6 +1947,15 @@ export default function App() {
             language={launcherSettings.language}
             onSelectStudio={(studio) => handleOpenGame(studio, 'overview')}
             onBackHome={() => setActiveSection('store')}
+          />
+        )}
+
+        {activeSection === 'deals' && (
+          <GameDealsView
+            language={launcherSettings.language}
+            activeTheme={activeTheme}
+            onOpenExternal={handleOpenExternalUrl}
+            onNotify={notify}
           />
         )}
 
@@ -1901,6 +2050,8 @@ export default function App() {
             onOpenPresentMonManager={handleOpenPresentMonManager}
             onCheckPresentMonUpdates={handleCheckPresentMonUpdates}
             onStartPresentMonInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+            onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
+            onOpenNotifications={() => setIsNotificationCenterOpen(true)}
             onReplayOnboarding={!isDesktopApp ? handleReplayOnboarding : undefined}
           />
         )}
@@ -1955,8 +2106,47 @@ export default function App() {
           onInstallAndRestart={handleInstallAndRestart}
           onPostponeUpdate={handlePostponeUpdate}
           onOpenModal={() => setIsUpdaterModalOpen(true)}
+          onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
         />
       )}
+
+      <NotificationCenterDrawer
+        isOpen={isNotificationCenterOpen}
+        activeTheme={activeTheme}
+        language={launcherSettings.language}
+        feed={notificationFeed}
+        readIds={readNotificationIds}
+        lastSyncedAt={lastNotificationSyncAt}
+        isSyncing={isSyncingNotifications}
+        onClose={() => setIsNotificationCenterOpen(false)}
+        onSyncNow={() => void handleSyncNotificationsNow()}
+        onMarkRead={handleMarkNotificationRead}
+        onMarkAllRead={handleMarkAllNotificationsRead}
+        onOpenGame={(item) => handleOpenGame(item, 'overview')}
+        onOpenNewsSection={() => setActiveSection('extras')}
+        onOpenUpdateHistory={() => {
+          setIsNotificationCenterOpen(false);
+          setIsUpdateHistoryOpen(true);
+        }}
+      />
+
+      <UpdateHistoryModal
+        isOpen={isUpdateHistoryOpen}
+        activeTheme={activeTheme}
+        language={launcherSettings.language}
+        currentVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+        updaterBridge={updaterBridge}
+        onClose={() => setIsUpdateHistoryOpen(false)}
+        onCheckForUpdates={
+          updaterBridge
+            ? () => {
+                setIsUpdateHistoryOpen(false);
+                setIsUpdaterModalOpen(true);
+                handleCheckForUpdates();
+              }
+            : undefined
+        }
+      />
 
       <QbitSetupWizardModal
         isOpen={isQbitSetupModalOpen}
