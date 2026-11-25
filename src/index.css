@@ -625,10 +625,10 @@ html.theme-ps5 ::-webkit-scrollbar-thumb:hover {
 
 @keyframes xbox-mesh-drift {
   0% {
-    background-position: 0 0;
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    background-position: 180px 180px;
+    transform: translate3d(180px, 180px, 0);
   }
 }
 
@@ -655,12 +655,13 @@ html.theme-xbox body {
 .theme-xbox .sa-app-shell::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -180px 0 0 -180px;
   pointer-events: none;
   z-index: 0;
   opacity: 0.42;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%2352e042' stroke-width='0.85' stroke-opacity='0.42'%3E%3Cpath d='M0 0 L90 42 L180 0 M0 180 L90 138 L180 180 M0 0 L46 90 L0 180 M180 0 L134 90 L180 180 M46 90 L90 42 L134 90 L90 138 Z M90 42 L90 138 M46 90 L134 90 M0 90 L46 90 M134 90 L180 90'/%3E%3C/g%3E%3Ccircle cx='90' cy='42' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='46' cy='90' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='134' cy='90' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3Ccircle cx='90' cy='138' r='1.6' fill='%2384f553' fill-opacity='0.55'/%3E%3C/svg%3E");
   background-size: 180px 180px;
+  will-change: transform;
   animation: xbox-mesh-drift 48s linear infinite;
 }
 
@@ -1531,4 +1532,44 @@ html.theme-custom body {
   animation: sa-confetti-fall var(--sa-cd, 2.4s) cubic-bezier(0.16, 0.84, 0.36, 1) var(--sa-delay, 0s) forwards;
 }
 
+/* ==========================================================================
+   Scroll Containment & Inactive Window / Paused Cursor Animation Throttling
+   ========================================================================== */
+.sa-cursor-overlay {
+  contain: strict;
+}
+
+.sa-contain-card {
+  contain: layout style paint;
+}
+
+.sa-sidebar-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 32px;
+}
+
+.sa-cursor-paused *,
+.sa-cursor-paused .sa-cursor-dashed-orbit,
+.sa-cursor-paused .sa-cursor-spinner-rotate,
+.sa-cursor-paused .sa-cursor-hourglass-flip,
+.sa-cursor-ring-paused .sa-cursor-dashed-orbit {
+  animation-play-state: paused !important;
+}
+
+html.sa-window-inactive .theme-ps5 .sa-app-shell::before,
+html.sa-window-inactive .theme-ps5 .sa-app-shell::after,
+html.sa-window-inactive .theme-xbox .sa-app-shell::before,
+html.sa-window-inactive .theme-xbox .sa-app-shell::after,
+html.sa-window-inactive .sa-ps5-eq-bar-1,
+html.sa-window-inactive .sa-ps5-eq-bar-2,
+html.sa-window-inactive .sa-ps5-eq-bar-3,
+html.sa-window-inactive .sa-spin-wheel-idle,
+html.sa-window-inactive .sa-spin-bulb-even,
+html.sa-window-inactive .sa-spin-bulb-odd,
+html.sa-window-inactive .sa-spin-hub-glow,
+html.sa-window-inactive .sa-cursor-dashed-orbit,
+html.sa-window-inactive .sa-cursor-spinner-rotate,
+html.sa-window-inactive .sa-cursor-hourglass-flip {
+  animation-play-state: paused !important;
+}
 

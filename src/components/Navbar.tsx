@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import { memo, useEffect, useState, type ComponentType } from 'react';
 import {
   Books,
   ChatTeardropText,
@@ -67,7 +67,7 @@ function MiniSpinWheelIcon({ sizeClass = 'w-8 h-8' }: { sizeClass?: string }) {
   );
 }
 
-export function Navbar({
+export const Navbar = memo(function Navbar({
   activeSection,
   onSelectSection,
   onOpenSpinWheel,
@@ -154,7 +154,7 @@ export function Navbar({
             ? 'bg-[#021233]/80 border-white/[0.12] backdrop-blur-md shadow-[0_8px_28px_rgba(0,6,20,0.42)]'
             : isXboxTheme
             ? 'bg-[#081a0b]/84 border-[#52e042]/20 backdrop-blur-md shadow-[0_8px_28px_rgba(2,14,4,0.48)]'
-            : 'bg-white/90 dark:bg-[#0f141c]/90 backdrop-blur-xl border-slate-200/85 dark:border-white/[0.08] shadow-[0_1px_16px_rgba(15,23,42,0.05)] dark:shadow-[0_6px_24px_rgba(0,0,0,0.35)]'
+            : 'bg-white/[0.97] dark:bg-[#0f141c]/[0.97] border-slate-200/85 dark:border-white/[0.08] shadow-[0_1px_16px_rgba(15,23,42,0.05)] dark:shadow-[0_6px_24px_rgba(0,0,0,0.35)]'
         }`}
       >
         <div className="w-full max-w-[1600px] mx-auto h-14 sm:h-[60px] px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 lg:gap-8">
@@ -174,6 +174,7 @@ export function Navbar({
               <img
                 src="./img/logo01.png"
                 alt="SecretArea"
+                decoding="async"
                 onError={() => setLogoError(true)}
                 className="h-7 sm:h-8 w-auto max-w-[110px] sm:max-w-[140px] object-contain shrink-0"
               />
@@ -512,4 +513,4 @@ export function Navbar({
       </header>
     </>
   );
-}
+});

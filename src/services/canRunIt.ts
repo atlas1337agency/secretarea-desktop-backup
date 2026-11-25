@@ -487,7 +487,30 @@ function formatDeltaPercent(delta: number): string {
   return rounded >= 0 ? `+${absFormatted}%` : `-${absFormatted}%`;
 }
 
+const canRunEvalCache = new WeakMap<
+  SystemHardwareSpecs,
+  WeakMap<GameItem, CanRunEvaluation>
+>();
+
 export function evaluateCanRunGame(
+  game: GameItem,
+  specs: SystemHardwareSpecs
+): CanRunEvaluation {
+  let byGame = canRunEvalCache.get(specs);
+  if (byGame) {
+    const cached = byGame.get(game);
+    if (cached) return cached;
+  }
+  const result = computeCanRunGame(game, specs);
+  if (!byGame) {
+    byGame = new WeakMap<GameItem, CanRunEvaluation>();
+    canRunEvalCache.set(specs, byGame);
+  }
+  byGame.set(game, result);
+  return result;
+}
+
+function computeCanRunGame(
   game: GameItem,
   specs: SystemHardwareSpecs
 ): CanRunEvaluation {

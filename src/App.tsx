@@ -20,7 +20,6 @@ import type {
   CloseBehaviorMode,
   DownloadManagerSnapshot,
   GameItem,
-  HardwareMonitorSnapshot,
   LibrarySectionTab,
   MirrorLink,
   PresentMonSetupState,
@@ -88,7 +87,6 @@ import {
   getDesktopPresentMonSetupBridge,
   PRESENTMON_OFFICIAL_RELEASES_URL,
 } from './services/presentMonSetup';
-import { getDesktopHardwareMonitorBridge } from './services/hardwareMonitor';
 import {
   applyDocumentLanguageSettings,
   applyDocumentThemeSettings,
@@ -264,9 +262,6 @@ export default function App() {
   const [readNotificationIds, setReadNotificationIds] = useState<Set<string>>(() => new Set());
   const hasSeededReadIdsRef = useRef(false);
   const isDesktopApp = Boolean(settingsBridge || qbitSetupBridge || downloadsBridge);
-  const hardwareBridge = useMemo(() => getDesktopHardwareMonitorBridge(), []);
-  const [topHardwareSnapshot, setTopHardwareSnapshot] =
-    useState<HardwareMonitorSnapshot | null>(null);
   const [resolvedAppVersion, setResolvedAppVersion] = useState<string>(() =>
     getAppVersionString()
   );
@@ -719,48 +714,32 @@ export default function App() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [windowBridge]);
 
-  // Keep TopUtilityBar hardware metrics synced cleanly with zero redundant polling when HardwareMonitorView is open
+  // Pause heavy CSS ambient animations cleanly when the desktop window is blurred or minimized/hidden
   useEffect(() => {
-    if (!hardwareBridge) return;
-    let active = true;
-
-    const unsubscribe = hardwareBridge.onUpdate((snap) => {
-      if (active && snap) {
-        setTopHardwareSnapshot(snap);
-      }
-    });
-
-    const fetchOnce = () => {
-      if (!active || document.hidden) return;
-      void hardwareBridge.getSnapshot().then((snap) => {
-        if (active && snap) {
-          setTopHardwareSnapshot(snap);
-        }
-      });
+    const root = document.documentElement;
+    const syncActiveState = (inactive: boolean) => {
+      root.classList.toggle('sa-window-inactive', inactive);
     };
 
-    fetchOnce();
+    syncActiveState(Boolean(document.hidden));
 
-    if (activeSection === 'hardware') {
-      return () => {
-        active = false;
-        unsubscribe();
-      };
-    }
-
-    const timer = window.setInterval(fetchOnce, 2500);
+    const handleBlur = () => syncActiveState(true);
+    const handleFocus = () => syncActiveState(Boolean(document.hidden));
     const handleVisibility = () => {
-      if (!document.hidden) fetchOnce();
+      syncActiveState(Boolean(document.hidden));
     };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      active = false;
-      unsubscribe();
-      window.clearInterval(timer);
+      root.classList.remove('sa-window-inactive');
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [hardwareBridge, activeSection]);
+  }, []);
 
   const handleToggleFullscreen = useCallback(async () => {
     if (windowBridge) {
@@ -1669,7 +1648,7 @@ export default function App() {
       : 'SecretArea — Desktop Game Launcher & Catalog';
   }, [selectedGame]);
 
-  const handleToggleFavorite = (id: string) => {
+  const handleToggleFavorite = useCallback((id: string) => {
     setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -1680,7 +1659,7 @@ export default function App() {
       saveFavorites(Array.from(next));
       return next;
     });
-  };
+  }, []);
 
   const activeSectionItems = catalog[libraryTab] || [];
 
@@ -1836,16 +1815,53 @@ export default function App() {
     setCanRunFilter('all');
   }, []);
 
-  const handleBrowseLatestInLibrary = () => {
+  const handleBrowseLatestInLibrary = useCallback(() => {
     setLibraryTab('game');
     setGenreFilter('all');
     setSortBy('latest');
     setActiveSection('library');
-  };
+  }, []);
 
-  const handleOpenStudiosPage = () => {
+  const handleOpenStudiosPage = useCallback(() => {
     setActiveSection('studios');
-  };
+  }, []);
+
+  const handleToggleSound = useCallback(() => {
+    setSoundEnabled((prev) => !prev);
+  }, []);
+
+  const handleOpenUpdaterModal = useCallback(() => {
+    setIsUpdaterModalOpen(true);
+  }, []);
+
+  const handleOpenUpdateHistoryModal = useCallback(() => {
+    setIsUpdateHistoryOpen(true);
+  }, []);
+
+  const handleToggleNotificationCenter = useCallback(() => {
+    setIsNotificationCenterOpen((prev) => !prev);
+  }, []);
+
+  const handleOpenSpinWheel = useCallback(() => {
+    setIsSpinWheelOpen(true);
+  }, []);
+
+  const handleClearAllLibraryFilters = useCallback(() => {
+    setSearchQuery('');
+    setGenreFilter('all');
+    setCanRunFilter('all');
+  }, []);
+
+  const handleSelectGameOverview = useCallback(
+    (game: GameItem) => {
+      handleOpenGame(game, 'overview');
+    },
+    [handleOpenGame]
+  );
+
+  const handleBackHome = useCallback(() => {
+    setActiveSection('store');
+  }, []);
 
   const effectiveSoundEnabled =
     soundEnabled &&
@@ -1953,25 +1969,22 @@ export default function App() {
         activeDownloadsCount={activeDownloadsCount}
         soundEnabled={effectiveSoundEnabled}
         isFullscreen={isFullscreen}
-        onToggleSound={() => setSoundEnabled((prev) => !prev)}
+        onToggleSound={handleToggleSound}
         onToggleFullscreen={handleToggleFullscreen}
         desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
         updateBadgeStatus={updateBadgeStatus}
-        onOpenUpdates={
-          updaterBridge ? () => setIsUpdaterModalOpen(true) : undefined
-        }
-        onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
+        onOpenUpdates={updaterBridge ? handleOpenUpdaterModal : undefined}
+        onOpenUpdateHistory={handleOpenUpdateHistoryModal}
         unreadNotificationsCount={unreadNotificationsCount}
         isNotificationCenterOpen={isNotificationCenterOpen}
-        onOpenNotifications={() => setIsNotificationCenterOpen((prev) => !prev)}
-        hardwareSnapshot={topHardwareSnapshot}
+        onOpenNotifications={handleToggleNotificationCenter}
         language={launcherSettings.language}
       />
 
       <Navbar
         activeSection={activeSection}
         onSelectSection={setActiveSection}
-        onOpenSpinWheel={() => setIsSpinWheelOpen(true)}
+        onOpenSpinWheel={handleOpenSpinWheel}
         activeTheme={activeTheme}
         compactNavbar={launcherSettings.compactNavbar}
         language={launcherSettings.language}
@@ -2001,7 +2014,7 @@ export default function App() {
               availableGenres={availableGenres}
               favorites={favorites}
               language={launcherSettings.language}
-              onSelectGame={(game) => handleOpenGame(game, 'overview')}
+              onSelectGame={handleSelectGameOverview}
             />
             <LibraryView
               activeSectionTab={libraryTab}
@@ -2018,19 +2031,15 @@ export default function App() {
                 launcherSettings.enableCanRunIt ? setCanRunFilter : undefined
               }
               canRunItEnabled={launcherSettings.enableCanRunIt}
-              onClearAllFilters={() => {
-                setSearchQuery('');
-                setGenreFilter('all');
-                setCanRunFilter('all');
-              }}
+              onClearAllFilters={handleClearAllLibraryFilters}
               availableGenres={availableGenres}
               favorites={favorites}
               systemSpecs={systemSpecs}
               language={launcherSettings.language}
               onToggleFavorite={handleToggleFavorite}
-              onSelectGame={(game) => handleOpenGame(game, 'overview')}
+              onSelectGame={handleSelectGameOverview}
               studios={catalog.profil}
-              onSelectStudio={(studio) => handleOpenGame(studio, 'overview')}
+              onSelectStudio={handleSelectGameOverview}
             />
           </>
         )}
@@ -2055,8 +2064,8 @@ export default function App() {
           <StudiosView
             studios={catalog.profil}
             language={launcherSettings.language}
-            onSelectStudio={(studio) => handleOpenGame(studio, 'overview')}
-            onBackHome={() => setActiveSection('store')}
+            onSelectStudio={handleSelectGameOverview}
+            onBackHome={handleBackHome}
           />
         )}
 
@@ -2074,7 +2083,7 @@ export default function App() {
             catalog={catalog}
             hasLiveUrl={Boolean(gasUrl)}
             language={launcherSettings.language}
-            onSelectItem={(item) => handleOpenGame(item, 'overview')}
+            onSelectItem={handleSelectGameOverview}
           />
         )}
 

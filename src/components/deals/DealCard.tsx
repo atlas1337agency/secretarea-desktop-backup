@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import {
   ArrowSquareOut,
   Bell,
@@ -40,7 +40,7 @@ interface DealCardProps {
   compact?: boolean;
 }
 
-export function DealCard({
+export const DealCard = memo(function DealCard({
   game,
   locale,
   activeTheme,
@@ -101,7 +101,7 @@ export function DealCard({
       }}
       role="button"
       tabIndex={0}
-      className={`sa-ps5-subpanel group rounded-xl border overflow-hidden transition-all duration-150 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 ${
+      className={`sa-contain-card sa-ps5-subpanel group rounded-xl border overflow-hidden transition-[transform,border-color,background-color] duration-150 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 ${
         isXbox
           ? 'bg-[#0c2110]/85 border-[#52e042]/20 hover:border-[#6ee755]/70 focus-visible:ring-[#6ee755]'
           : isPs5
@@ -116,6 +116,7 @@ export function DealCard({
             src={game.thumbUrl}
             alt={game.title}
             loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setImgFailed(true)}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
@@ -161,6 +162,7 @@ export function DealCard({
                 src={offer.storeIconUrl}
                 alt={offer.storeName}
                 loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
                 onError={() => setLogoFailed(true)}
                 className="w-4 h-4 rounded-sm object-contain shrink-0 bg-black/40"
@@ -305,4 +307,4 @@ export function DealCard({
       </div>
     </article>
   );
-}
+});

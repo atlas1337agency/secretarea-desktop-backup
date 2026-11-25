@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import { memo, useEffect, useMemo, useState, type ComponentType } from 'react';
 import {
   ArrowSquareOut,
   ArrowsIn,
@@ -17,7 +17,12 @@ import {
 } from '@phosphor-icons/react';
 import type { HardwareMonitorSnapshot, PrimarySection } from '../types';
 import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
-import { formatStorageBytes, isValidMetric, selectPrimaryGpu } from '../services/hardwareMonitor';
+import {
+  formatStorageBytes,
+  getDesktopHardwareMonitorBridge,
+  isValidMetric,
+  selectPrimaryGpu,
+} from '../services/hardwareMonitor';
 import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
@@ -61,30 +66,79 @@ function formatCompactTemp(celsius: number | null | undefined): string {
   return `${Math.round(celsius)}°C`;
 }
 
-export function TopUtilityBar({
+const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
   activeTheme,
   activeSection,
   onSelectSection,
-  activeDownloadsCount = 0,
-  soundEnabled,
-  isFullscreen,
-  onToggleSound,
-  onToggleFullscreen,
-  desktopVersion = null,
-  updateBadgeStatus = 'none',
-  onOpenUpdates,
-  onOpenUpdateHistory,
-  unreadNotificationsCount = 0,
-  isNotificationCenterOpen = false,
-  onOpenNotifications,
-  hardwareSnapshot = null,
-  language = 'en',
-}: TopUtilityBarProps) {
-  const t = getTranslations(language);
+  hasConsoleAudio,
+  externalSnapshot,
+  label,
+}: {
+  activeTheme: AppThemeMode;
+  activeSection: PrimarySection;
+  onSelectSection: (section: PrimarySection) => void;
+  hasConsoleAudio: boolean;
+  externalSnapshot?: HardwareMonitorSnapshot | null;
+  label: string;
+}) {
+  const hardwareBridge = useMemo(() => getDesktopHardwareMonitorBridge(), []);
+  const [liveSnapshot, setLiveSnapshot] = useState<HardwareMonitorSnapshot | null>(null);
 
+  useEffect(() => {
+    if (!hardwareBridge) return;
+    let active = true;
+
+    const unsubscribe = hardwareBridge.onUpdate((snap) => {
+      if (active && snap) {
+        setLiveSnapshot(snap);
+      }
+    });
+
+    const fetchOnce = () => {
+      if (!active || document.hidden || !document.hasFocus()) return;
+      void hardwareBridge.getSnapshot().then((snap) => {
+        if (active && snap) {
+          setLiveSnapshot(snap);
+        }
+      });
+    };
+
+    if (!document.hidden) {
+      void hardwareBridge.getSnapshot().then((snap) => {
+        if (active && snap) {
+          setLiveSnapshot(snap);
+        }
+      });
+    }
+
+    if (activeSection === 'hardware') {
+      return () => {
+        active = false;
+        unsubscribe();
+      };
+    }
+
+    const timer = window.setInterval(fetchOnce, 3500);
+    const handleRestore = () => {
+      if (!document.hidden && document.hasFocus()) {
+        fetchOnce();
+      }
+    };
+    document.addEventListener('visibilitychange', handleRestore);
+    window.addEventListener('focus', handleRestore);
+
+    return () => {
+      active = false;
+      unsubscribe();
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleRestore);
+      window.removeEventListener('focus', handleRestore);
+    };
+  }, [hardwareBridge, activeSection]);
+
+  const hardwareSnapshot = externalSnapshot ?? liveSnapshot;
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
-  const hasConsoleAudio = isPs5Theme || isXboxTheme;
 
   const primaryGpu = selectPrimaryGpu(hardwareSnapshot?.gpus);
   const gpuUtil = primaryGpu?.utilizationPercent ?? null;
@@ -168,6 +222,126 @@ export function TopUtilityBar({
     .filter(Boolean)
     .join(' · ') || `PC Temperature: ${formatCompactTemp(pcTemp)}`;
 
+  return (
+    <button
+      type="button"
+      dir="ltr"
+      onClick={() => onSelectSection('hardware')}
+      title={label}
+      aria-label={label}
+      className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-x-auto no-scrollbar font-mono-tabular text-start cursor-pointer hover:opacity-90 transition-opacity"
+    >
+      {/* GPU */}
+      <span
+        title={gpuTooltip}
+        className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+      >
+        <GraphicsCard className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(gpuUtil)}`} />
+        <span
+          className={`font-semibold ${
+            hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+          }`}
+        >
+          {formatCompactPercent(gpuUtil)}
+        </span>
+      </span>
+
+      {/* CPU */}
+      <span
+        title={cpuTooltip}
+        className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+      >
+        <Cpu className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(cpuUtil)}`} />
+        <span
+          className={`font-semibold ${
+            hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+          }`}
+        >
+          {formatCompactPercent(cpuUtil)}
+        </span>
+      </span>
+
+      {/* RAM */}
+      <span
+        title={ramTooltip}
+        className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+      >
+        <Memory className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(ramUtil)}`} />
+        <span
+          className={`font-semibold ${
+            hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+          }`}
+        >
+          {formatCompactPercent(ramUtil)}
+        </span>
+      </span>
+
+      {/* Wi-Fi / Network Speed */}
+      <span
+        title={wifiTooltip}
+        className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+      >
+        <WifiHigh
+          className={`w-3.5 h-3.5 shrink-0 ${
+            isPs5Theme
+              ? 'text-[#7cc4ff]'
+              : isXboxTheme
+              ? 'text-[#6ee755]'
+              : 'text-[#0284c7] dark:text-[#38bdf8]'
+          }`}
+        />
+        <span
+          className={`font-semibold ${
+            hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+          }`}
+        >
+          {formatCompactNetSpeed(netDownBytes)}
+        </span>
+      </span>
+
+      {/* PC Temperature */}
+      <span
+        title={tempTooltip}
+        className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+      >
+        <Thermometer className={`w-3.5 h-3.5 shrink-0 ${getTempColorClass(pcTemp)}`} />
+        <span
+          className={`font-semibold ${
+            hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
+          }`}
+        >
+          {formatCompactTemp(pcTemp)}
+        </span>
+      </span>
+    </button>
+  );
+});
+
+export const TopUtilityBar = memo(function TopUtilityBar({
+  activeTheme,
+  activeSection,
+  onSelectSection,
+  activeDownloadsCount = 0,
+  soundEnabled,
+  isFullscreen,
+  onToggleSound,
+  onToggleFullscreen,
+  desktopVersion = null,
+  updateBadgeStatus = 'none',
+  onOpenUpdates,
+  onOpenUpdateHistory,
+  unreadNotificationsCount = 0,
+  isNotificationCenterOpen = false,
+  onOpenNotifications,
+  hardwareSnapshot = null,
+  language = 'en',
+}: TopUtilityBarProps) {
+  const t = getTranslations(language);
+
+  const isPs5Theme = activeTheme === 'ps5';
+  const isXboxTheme = activeTheme === 'xbox';
+  const hasConsoleAudio = isPs5Theme || isXboxTheme;
+
   const utilityNavItems: {
     id: PrimarySection;
     label: string;
@@ -196,97 +370,14 @@ export function TopUtilityBar({
     >
       <div className="w-full max-w-[1600px] mx-auto h-full px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 text-[11.5px]">
       {/* Left Zone: Live Desktop Hardware Telemetry (GPU, CPU, RAM, Wi-Fi Speed, PC Temp — Icon & Value Only) */}
-      <button
-        type="button"
-        dir="ltr"
-        onClick={() => onSelectSection('hardware')}
-        title={t.nav.hardwareMonitor}
-        aria-label={t.nav.hardwareMonitor}
-        className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-x-auto no-scrollbar font-mono-tabular text-start cursor-pointer hover:opacity-90 transition-opacity"
-      >
-        {/* GPU */}
-        <span
-          title={gpuTooltip}
-          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-        >
-          <GraphicsCard className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(gpuUtil)}`} />
-          <span
-            className={`font-semibold ${
-              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
-            }`}
-          >
-            {formatCompactPercent(gpuUtil)}
-          </span>
-        </span>
-
-        {/* CPU */}
-        <span
-          title={cpuTooltip}
-          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-        >
-          <Cpu className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(cpuUtil)}`} />
-          <span
-            className={`font-semibold ${
-              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
-            }`}
-          >
-            {formatCompactPercent(cpuUtil)}
-          </span>
-        </span>
-
-        {/* RAM */}
-        <span
-          title={ramTooltip}
-          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-        >
-          <Memory className={`w-3.5 h-3.5 shrink-0 ${getLoadColorClass(ramUtil)}`} />
-          <span
-            className={`font-semibold ${
-              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
-            }`}
-          >
-            {formatCompactPercent(ramUtil)}
-          </span>
-        </span>
-
-        {/* Wi-Fi / Network Speed */}
-        <span
-          title={wifiTooltip}
-          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-        >
-          <WifiHigh
-            className={`w-3.5 h-3.5 shrink-0 ${
-              isPs5Theme
-                ? 'text-[#7cc4ff]'
-                : isXboxTheme
-                ? 'text-[#6ee755]'
-                : 'text-[#0284c7] dark:text-[#38bdf8]'
-            }`}
-          />
-          <span
-            className={`font-semibold ${
-              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
-            }`}
-          >
-            {formatCompactNetSpeed(netDownBytes)}
-          </span>
-        </span>
-
-        {/* PC Temperature */}
-        <span
-          title={tempTooltip}
-          className="inline-flex items-center gap-1 whitespace-nowrap shrink-0"
-        >
-          <Thermometer className={`w-3.5 h-3.5 shrink-0 ${getTempColorClass(pcTemp)}`} />
-          <span
-            className={`font-semibold ${
-              hasConsoleAudio ? 'text-white/95' : 'text-slate-800 dark:text-[#e2e8f0]'
-            }`}
-          >
-            {formatCompactTemp(pcTemp)}
-          </span>
-        </span>
-      </button>
+      <TopHardwareTelemetryStrip
+        activeTheme={activeTheme}
+        activeSection={activeSection}
+        onSelectSection={onSelectSection}
+        hasConsoleAudio={hasConsoleAudio}
+        externalSnapshot={hardwareSnapshot}
+        label={t.nav.hardwareMonitor}
+      />
 
       {/* Center Zone: Clickable SecretArea Web Version Link */}
       <div className="flex items-center justify-center shrink-0">
@@ -316,7 +407,7 @@ export function TopUtilityBar({
             onClick={onOpenUpdates}
             title={t.topbar.updatesTitle}
             aria-label={t.topbar.updatesTitle}
-            className={`relative inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-all cursor-pointer shrink-0 ${
+            className={`relative inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-colors cursor-pointer shrink-0 ${
               isPs5Theme
                 ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
                 : isXboxTheme
@@ -360,7 +451,7 @@ export function TopUtilityBar({
             onClick={onOpenUpdateHistory}
             title={t.updateHistory.title}
             aria-label={t.updateHistory.title}
-            className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-all cursor-pointer shrink-0 ${
+            className={`inline-flex items-center px-2 py-1 rounded text-[11px] font-semibold font-mono-tabular transition-colors cursor-pointer shrink-0 ${
               isPs5Theme
                 ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 border border-white/[0.16]'
                 : isXboxTheme
@@ -407,7 +498,7 @@ export function TopUtilityBar({
                 ? t.topbar.muteSounds
                 : t.topbar.enableSounds
             }
-            className={`inline-flex items-center gap-1.5 px-2 py-1 transition-all cursor-pointer shrink-0 border ${
+            className={`inline-flex items-center gap-1.5 px-2 py-1 transition-colors cursor-pointer shrink-0 border ${
               isXboxTheme
                 ? 'rounded-md bg-[#112914] hover:bg-[#193d1d] text-[#e8fcef] border-[#52e042]/35 hover:border-[#6ee755]/80'
                 : 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 hover:text-white border-white/[0.18]'
@@ -462,7 +553,7 @@ export function TopUtilityBar({
                 title={item.label}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
-                className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] whitespace-nowrap transition-all cursor-pointer shrink-0 border ${
+                className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] whitespace-nowrap transition-colors cursor-pointer shrink-0 border ${
                   isPs5Theme
                     ? isActive
                       ? 'rounded-full bg-white/[0.22] border-white/[0.4] text-white font-semibold shadow-[0_0_12px_rgba(96,178,255,0.35)]'
@@ -503,7 +594,7 @@ export function TopUtilityBar({
             title={t.notificationCenter.buttonLabel}
             aria-label={t.notificationCenter.buttonLabel}
             aria-expanded={isNotificationCenterOpen}
-            className={`relative inline-flex items-center gap-1 p-1.5 rounded transition-all cursor-pointer shrink-0 border ${
+            className={`relative inline-flex items-center gap-1 p-1.5 rounded transition-colors cursor-pointer shrink-0 border ${
               isPs5Theme
                 ? isNotificationCenterOpen
                   ? 'rounded-full bg-white/[0.24] border-white/[0.45] text-white shadow-[0_0_14px_rgba(96,178,255,0.4)]'
@@ -540,7 +631,7 @@ export function TopUtilityBar({
           onClick={onToggleFullscreen}
           title={isFullscreen ? t.topbar.exitFullscreen : t.topbar.enterFullscreen}
           aria-label={isFullscreen ? t.topbar.exitFullscreen : t.topbar.enterFullscreen}
-          className={`p-1.5 rounded transition-all cursor-pointer shrink-0 ${
+          className={`p-1.5 rounded transition-colors cursor-pointer shrink-0 ${
             isPs5Theme
               ? 'rounded-full bg-white/[0.12] hover:bg-white/[0.24] text-white ring-1 ring-white/40 hover:ring-white/80 shadow-[0_0_14px_rgba(0,118,255,0.4)]'
               : isXboxTheme
@@ -558,4 +649,4 @@ export function TopUtilityBar({
       </div>
     </div>
   );
-}
+});
