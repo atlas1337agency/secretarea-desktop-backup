@@ -28,6 +28,9 @@ export interface DesktopUpdateState {
   isManualCheck: boolean;
   postponed: boolean;
   lastCheckedAt: string | null;
+  linuxPackageType?: 'appimage' | 'deb' | 'rpm' | 'pacman' | 'snap' | 'unpacked' | null;
+  autoUpdateSupported?: boolean;
+  manualDownloadUrl?: string | null;
 }
 
 export interface DesktopReleaseNotesPayload {
@@ -89,9 +92,12 @@ export interface DesktopSettingsStatePayload {
   closeBehavior?: 'minimize-to-tray' | 'exit';
   onboardingCompleted?: boolean;
   lastOnboardedVersion?: string | null;
+  lastSeenVersion?: string | null;
   appVersion?: string;
   isPackaged: boolean;
   platform: string;
+  linuxPackageType?: 'appimage' | 'deb' | 'rpm' | 'pacman' | 'snap' | 'unpacked' | null;
+  autoUpdateSupported?: boolean;
   trayActive: boolean;
 }
 
@@ -105,6 +111,7 @@ interface SecretAreaSettingsBridge {
   completeOnboarding?: (
     payload?: boolean | { completed?: boolean; version?: string }
   ) => Promise<DesktopSettingsStatePayload | null>;
+  markVersionSeen?: (version?: string) => Promise<DesktopSettingsStatePayload | null>;
   setPerformanceSettings?: (
     payload: EffectivePerformanceConfig
   ) => Promise<{ ok: boolean; effective: EffectivePerformanceConfig } | null>;
@@ -184,3 +191,100 @@ export function formatTransferSpeed(bytesPerSecond: number): string {
   const kbps = bytesPerSecond / 1024;
   return `${Math.max(1, Math.round(kbps))} KB/s`;
 }
+
+export interface BackgroundUpdateSchedulerOptions {
+  isHidden: () => boolean;
+  pauseBackgroundWhenMinimized: boolean;
+  startupDelayMs: number;
+  intervalMs: number;
+  onCheck: () => Promise<void> | void;
+  doc?: {
+    addEventListener: (event: string, listener: () => void) => void;
+    removeEventListener: (event: string, listener: () => void) => void;
+  } | null;
+  timerApi?: {
+    setTimeout: (cb: () => void, ms: number) => ReturnType<typeof setTimeout>;
+    clearTimeout: (id: ReturnType<typeof setTimeout>) => void;
+    setInterval: (cb: () => void, ms: number) => ReturnType<typeof setInterval>;
+    clearInterval: (id: ReturnType<typeof setInterval>) => void;
+  };
+}
+
+export interface BackgroundUpdateScheduler {
+  handleVisibilityChange: () => void;
+  isPendingWhileHidden: () => boolean;
+  dispose: () => void;
+}
+
+export function createBackgroundUpdateScheduler(
+  options: BackgroundUpdateSchedulerOptions
+): BackgroundUpdateScheduler {
+  const timers = options.timerApi || {
+    setTimeout: globalThis.setTimeout.bind(globalThis),
+    clearTimeout: globalThis.clearTimeout.bind(globalThis),
+    setInterval: globalThis.setInterval.bind(globalThis),
+    clearInterval: globalThis.clearInterval.bind(globalThis),
+  };
+  const doc =
+    options.doc !== undefined
+      ? options.doc
+      : typeof document !== 'undefined'
+      ? document
+      : null;
+
+  let disposed = false;
+  let pendingWhileHidden = false;
+  let inFlight = false;
+
+  const triggerCheck = () => {
+    if (disposed || inFlight) return;
+    if (options.pauseBackgroundWhenMinimized && options.isHidden()) {
+      pendingWhileHidden = true;
+      return;
+    }
+    pendingWhileHidden = false;
+    inFlight = true;
+    Promise.resolve(options.onCheck())
+      .catch(() => {
+        // Ignore transient background updater errors cleanly
+      })
+      .finally(() => {
+        inFlight = false;
+      });
+  };
+
+  const handleVisibilityChange = () => {
+    if (disposed) return;
+    if (!options.isHidden() && pendingWhileHidden) {
+      triggerCheck();
+    }
+  };
+
+  if (doc) {
+    doc.addEventListener('visibilitychange', handleVisibilityChange);
+  }
+
+  const startupTimer = timers.setTimeout(() => {
+    triggerCheck();
+  }, options.startupDelayMs);
+
+  const intervalId = timers.setInterval(() => {
+    triggerCheck();
+  }, options.intervalMs);
+
+  return {
+    handleVisibilityChange,
+    isPendingWhileHidden: () => pendingWhileHidden,
+    dispose: () => {
+      if (disposed) return;
+      disposed = true;
+      pendingWhileHidden = false;
+      timers.clearTimeout(startupTimer);
+      timers.clearInterval(intervalId);
+      if (doc) {
+        doc.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    },
+  };
+}
+

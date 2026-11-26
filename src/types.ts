@@ -1438,6 +1438,8 @@ export interface InternalPerfProcessMetric {
 export interface InternalPerfMetricsSnapshot {
   sampledAt: number;
   mainCpuPercent: number;
+  rendererCpuPercent?: number | null;
+  gpuCpuPercent?: number | null;
   mainProcessRssMB: number;
   mainHeapUsedMB: number;
   rendererRssMB: number;

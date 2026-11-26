@@ -16,6 +16,11 @@ const { createHardwareIntelligenceManager } = require('./hardware/hardwareIntell
 const { createOpenSourceToolsManager } = require('./hardware/openSourceToolsManager.cjs');
 const { registerDealsNetworkBridge } = require('./deals/dealsNetworkBridge.cjs');
 const { createDealsCredentialsManager } = require('./deals/dealsCredentialsManager.cjs');
+const {
+  DEFAULT_DESKTOP_PERF_CONFIG,
+  normalizePerformancePayload,
+  applyPerformanceConfigToSubsystems: applyPerfConfigCore,
+} = require('./performanceConfig.cjs');
 
 const GITHUB_OWNER = 'secretarea1337';
 const GITHUB_REPO = 'secretarea-desktop';
@@ -88,6 +93,47 @@ function stripHtmlNotes(rawNotes) {
   return text || null;
 }
 
+function detectLinuxPackageType() {
+  if (process.platform !== 'linux') return null;
+  if (process.env.APPIMAGE) return 'appimage';
+  try {
+    const pkgTypePath = path.join(process.resourcesPath || '', 'package-type');
+    if (fs.existsSync(pkgTypePath)) {
+      const raw = fs.readFileSync(pkgTypePath, 'utf8').trim().toLowerCase();
+      if (raw === 'deb' || raw === 'rpm' || raw === 'pacman' || raw === 'snap') {
+        return raw;
+      }
+    }
+  } catch {
+    // ignore package-type detection failure
+  }
+  return app.isPackaged ? 'deb' : 'unpacked';
+}
+
+function isAutoUpdateSupported() {
+  if (process.platform === 'linux') {
+    return detectLinuxPackageType() === 'appimage';
+  }
+  return true;
+}
+
+function compareSemverVersions(a, b) {
+  const parse = (v) => {
+    const clean = String(v || '').replace(/^v/i, '').trim().split('-')[0];
+    return clean.split('.').map((n) => parseInt(n, 10) || 0);
+  };
+  const pa = parse(a);
+  const pb = parse(b);
+  const len = Math.max(pa.length, pb.length, 3);
+  for (let i = 0; i < len; i++) {
+    const va = pa[i] || 0;
+    const vb = pb[i] || 0;
+    if (va > vb) return 1;
+    if (va < vb) return -1;
+  }
+  return 0;
+}
+
 const updateState = {
   status: 'idle',
   currentVersion: readPackageVersion(),
@@ -100,12 +146,16 @@ const updateState = {
   isManualCheck: false,
   postponed: false,
   lastCheckedAt: null,
+  linuxPackageType: detectLinuxPackageType(),
+  autoUpdateSupported: isAutoUpdateSupported(),
+  manualDownloadUrl: null,
 };
 
 let hasCheckedOnStartup = false;
 let activeCheckPromise = null;
 let activeDownloadPromise = null;
 let lastProgressEmitAt = 0;
+const startupDeferredTimers = [];
 
 function emitUpdateState() {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -166,6 +216,10 @@ function isTrustedSender(event) {
 }
 
 function configureAutoUpdater() {
+  if (!isAutoUpdateSupported()) {
+    return;
+  }
+
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowPrerelease = false;
@@ -298,7 +352,7 @@ async function runUpdateCheck({ manual }) {
       patchUpdateState({
         status: 'error',
         isManualCheck: true,
-        error: 'Update checking is enabled in packaged Windows builds (.exe).',
+        error: 'Update checking is enabled in packaged desktop builds.',
         lastCheckedAt: new Date().toISOString(),
       });
     }
@@ -308,6 +362,81 @@ async function runUpdateCheck({ manual }) {
   updateState.isManualCheck = Boolean(manual);
   if (manual) {
     updateState.postponed = false;
+  }
+
+  // On Linux .deb / non-AppImage installs, electron-updater's DebUpdater requires root privileges
+  // and dpkg/apt integration; check GitHub Releases directly and direct users to download the .deb asset safely.
+  if (process.platform === 'linux' && !isAutoUpdateSupported() && app.isPackaged) {
+    activeCheckPromise = (async () => {
+      patchUpdateState({
+        status: 'checking',
+        error: null,
+        progress: null,
+      });
+      try {
+        const latestRel = await fetchGithubReleaseJson(
+          `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`
+        );
+        if (!latestRel || latestRel.draft || latestRel.prerelease) {
+          throw new Error('Unable to fetch latest release information from GitHub Releases.');
+        }
+        const latestVer = String(latestRel.tag_name || latestRel.name || '')
+          .replace(/^v/i, '')
+          .trim();
+        if (!latestVer) {
+          throw new Error('Latest release tag is missing a valid version number.');
+        }
+        const releaseUrl =
+          typeof latestRel.html_url === 'string' && /^https:\/\/github\.com\//i.test(latestRel.html_url)
+            ? latestRel.html_url
+            : `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+        if (compareSemverVersions(latestVer, updateState.currentVersion) > 0) {
+          patchUpdateState({
+            status: 'available',
+            availableVersion: latestVer,
+            releaseName:
+              typeof latestRel.name === 'string' && latestRel.name.trim()
+                ? latestRel.name.trim()
+                : `SecretArea v${latestVer}`,
+            releaseNotes:
+              typeof latestRel.body === 'string' && latestRel.body.trim()
+                ? stripHtmlNotes(latestRel.body) || latestRel.body.trim()
+                : null,
+            releaseDate: typeof latestRel.published_at === 'string' ? latestRel.published_at : null,
+            manualDownloadUrl: releaseUrl,
+            progress: null,
+            error: null,
+            postponed: false,
+            lastCheckedAt: new Date().toISOString(),
+          });
+        } else {
+          patchUpdateState({
+            status: 'not-available',
+            availableVersion: updateState.currentVersion,
+            releaseName: null,
+            releaseNotes: null,
+            releaseDate: null,
+            manualDownloadUrl: null,
+            progress: null,
+            error: null,
+            postponed: false,
+            lastCheckedAt: new Date().toISOString(),
+          });
+        }
+      } catch (err) {
+        patchUpdateState({
+          status: 'error',
+          progress: null,
+          error: err instanceof Error ? err.message : 'Unable to check GitHub Releases.',
+          lastCheckedAt: new Date().toISOString(),
+        });
+      } finally {
+        activeCheckPromise = null;
+      }
+    })();
+
+    await activeCheckPromise;
+    return { ...updateState };
   }
 
   activeCheckPromise = (async () => {
@@ -326,6 +455,16 @@ async function runUpdateCheck({ manual }) {
 
 async function runUpdateDownload() {
   if (updateState.status === 'downloaded') {
+    return { ...updateState };
+  }
+  if (process.platform === 'linux' && !isAutoUpdateSupported()) {
+    const safeUrl = parseSafeExternalUrl(
+      updateState.manualDownloadUrl ||
+        `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`
+    );
+    if (safeUrl) {
+      void shell.openExternal(safeUrl);
+    }
     return { ...updateState };
   }
   if (activeDownloadPromise) {
@@ -471,7 +610,19 @@ function registerUpdaterIpc() {
     writeDesktopLauncherSettings({
       onboardingCompleted: completed,
       lastOnboardedVersion: completed ? version : null,
+      lastSeenVersion: completed ? version : null,
     });
+    return getDesktopSettingsPayload();
+  });
+
+  ipcMain.handle('settings:mark-version-seen', (event, rawVersion) => {
+    if (!isTrustedSender(event)) return null;
+    const candidate =
+      typeof rawVersion === 'string' && rawVersion.trim()
+        ? rawVersion.trim()
+        : readPackageVersion();
+    const version = /^[0-9A-Za-z._-]{1,32}$/.test(candidate) ? candidate : readPackageVersion();
+    writeDesktopLauncherSettings({ lastSeenVersion: version });
     return getDesktopSettingsPayload();
   });
 
@@ -578,6 +729,13 @@ async function fetchReleaseNotesForVersion(rawVersion) {
     publishedAt: typeof data.published_at === 'string' ? data.published_at : null,
     source: 'github',
   };
+  const MAX_RELEASE_NOTES_CACHE = 24;
+  if (releaseNotesCache.size >= MAX_RELEASE_NOTES_CACHE) {
+    const oldestKey = releaseNotesCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      releaseNotesCache.delete(oldestKey);
+    }
+  }
   releaseNotesCache.set(cleanVersion, parsed);
   return parsed;
 }
@@ -718,8 +876,16 @@ function showAndFocusMainWindow() {
   mainWindow.focus();
 }
 
+function clearStartupDeferredTimers() {
+  while (startupDeferredTimers.length > 0) {
+    const timer = startupDeferredTimers.pop();
+    if (timer) clearTimeout(timer);
+  }
+}
+
 function performFullAppShutdown() {
   isQuitting = true;
+  clearStartupDeferredTimers();
   try {
     if (hardwareMonitor) hardwareMonitor.shutdown();
   } catch {
@@ -764,6 +930,14 @@ function performFullAppShutdown() {
   app.quit();
 }
 
+function getLinuxAutostartDesktopPath() {
+  const xdgConfigHome =
+    typeof process.env.XDG_CONFIG_HOME === 'string' && process.env.XDG_CONFIG_HOME.trim()
+      ? process.env.XDG_CONFIG_HOME.trim()
+      : path.join(os.homedir(), '.config');
+  return path.join(xdgConfigHome, 'autostart', 'secretarea.desktop');
+}
+
 function ensureSystemTray() {
   if (appTray && !appTray.isDestroyed()) return appTray;
   const iconPath = resolveAppIcon();
@@ -771,25 +945,30 @@ function ensureSystemTray() {
   if (!trayImg.isEmpty()) {
     trayImg = trayImg.resize({ width: 16, height: 16 });
   }
-  appTray = new Tray(trayImg);
-  appTray.setToolTip('SecretArea');
+  try {
+    appTray = new Tray(trayImg);
+    appTray.setToolTip('SecretArea');
 
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Open SecretArea',
-      click: () => showAndFocusMainWindow(),
-    },
-    { type: 'separator' },
-    {
-      label: 'Exit SecretArea Completely',
-      click: () => performFullAppShutdown(),
-    },
-  ]);
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Open SecretArea',
+        click: () => showAndFocusMainWindow(),
+      },
+      { type: 'separator' },
+      {
+        label: 'Exit SecretArea Completely',
+        click: () => performFullAppShutdown(),
+      },
+    ]);
 
-  appTray.setContextMenu(contextMenu);
-  appTray.on('click', () => showAndFocusMainWindow());
-  appTray.on('double-click', () => showAndFocusMainWindow());
-  return appTray;
+    appTray.setContextMenu(contextMenu);
+    appTray.on('click', () => showAndFocusMainWindow());
+    appTray.on('double-click', () => showAndFocusMainWindow());
+    return appTray;
+  } catch {
+    appTray = null;
+    return null;
+  }
 }
 
 function destroySystemTray() {
@@ -801,6 +980,40 @@ function destroySystemTray() {
 
 function syncLoginItemWithOs(enabled) {
   if (!app.isPackaged) return false;
+  if (process.platform === 'linux') {
+    try {
+      const desktopPath = getLinuxAutostartDesktopPath();
+      if (!enabled) {
+        if (fs.existsSync(desktopPath)) {
+          fs.unlinkSync(desktopPath);
+        }
+        return true;
+      }
+      const launchTarget =
+        (typeof process.env.APPIMAGE === 'string' && process.env.APPIMAGE.trim()) ||
+        process.execPath;
+      if (!launchTarget || /[\r\n\0"]/.test(launchTarget)) {
+        return false;
+      }
+      fs.mkdirSync(path.dirname(desktopPath), { recursive: true });
+      const desktopEntry = [
+        '[Desktop Entry]',
+        'Type=Application',
+        'Version=1.0',
+        'Name=SecretArea',
+        'Comment=SecretArea Desktop Game Launcher',
+        `Exec="${launchTarget}" --tray`,
+        'Terminal=false',
+        'Categories=Game;Utility;',
+        'X-GNOME-Autostart-enabled=true',
+        '',
+      ].join('\n');
+      fs.writeFileSync(desktopPath, desktopEntry, 'utf8');
+      return true;
+    } catch {
+      return false;
+    }
+  }
   if (process.platform !== 'win32' && process.platform !== 'darwin') return false;
   try {
     app.setLoginItemSettings({
@@ -830,6 +1043,12 @@ function getDesktopSettingsPayload() {
     } catch {
       // fallback to persisted setting
     }
+  } else if (app.isPackaged && process.platform === 'linux') {
+    try {
+      startWithComputer = fs.existsSync(getLinuxAutostartDesktopPath()) || persisted.startWithComputer;
+    } catch {
+      // fallback to persisted setting
+    }
   }
   return {
     startWithComputer,
@@ -839,9 +1058,15 @@ function getDesktopSettingsPayload() {
       typeof persisted.lastOnboardedVersion === 'string' && persisted.lastOnboardedVersion.trim()
         ? persisted.lastOnboardedVersion.trim()
         : null,
+    lastSeenVersion:
+      typeof persisted.lastSeenVersion === 'string' && persisted.lastSeenVersion.trim()
+        ? persisted.lastSeenVersion.trim()
+        : null,
     appVersion: readPackageVersion(),
     isPackaged: app.isPackaged,
     platform: process.platform,
+    linuxPackageType: detectLinuxPackageType(),
+    autoUpdateSupported: isAutoUpdateSupported(),
     trayActive: Boolean(appTray && !appTray.isDestroyed()),
   };
 }
@@ -870,70 +1095,15 @@ function applyCloseBehaviorSetting(rawBehavior) {
   return getDesktopSettingsPayload();
 }
 
-const DEFAULT_DESKTOP_PERF_CONFIG = {
-  mode: 'balanced',
-  pauseBackgroundWhenMinimized: true,
-  reduceVisualEffects: false,
-  hardwarePollIntervalMs: 2500,
-  downloadUiThrottleMs: 350,
-  torrentActivePollMs: 1500,
-  torrentIdlePollMs: 12000,
-  adaptiveTorrentPolling: true,
-  deferBackgroundChecks: true,
-};
-
 let activePerfConfig = { ...DEFAULT_DESKTOP_PERF_CONFIG };
 let prevMainCpuSample = process.cpuUsage();
 let prevMainCpuAt = Date.now();
 
-function normalizePerformancePayload(raw) {
-  const src = raw && typeof raw === 'object' ? raw : {};
-  const mode = src.mode === 'eco' || src.mode === 'performance' ? src.mode : 'balanced';
-  const clamp = (val, min, max, fallback) => {
-    const num = Number(val);
-    return Number.isFinite(num) ? Math.min(max, Math.max(min, Math.round(num))) : fallback;
-  };
-  return {
-    mode,
-    pauseBackgroundWhenMinimized:
-      typeof src.pauseBackgroundWhenMinimized === 'boolean'
-        ? src.pauseBackgroundWhenMinimized
-        : DEFAULT_DESKTOP_PERF_CONFIG.pauseBackgroundWhenMinimized,
-    reduceVisualEffects:
-      typeof src.reduceVisualEffects === 'boolean'
-        ? src.reduceVisualEffects
-        : DEFAULT_DESKTOP_PERF_CONFIG.reduceVisualEffects,
-    hardwarePollIntervalMs: clamp(src.hardwarePollIntervalMs, 1000, 10000, DEFAULT_DESKTOP_PERF_CONFIG.hardwarePollIntervalMs),
-    downloadUiThrottleMs: clamp(src.downloadUiThrottleMs, 150, 2000, DEFAULT_DESKTOP_PERF_CONFIG.downloadUiThrottleMs),
-    torrentActivePollMs: clamp(src.torrentActivePollMs, 1000, 10000, DEFAULT_DESKTOP_PERF_CONFIG.torrentActivePollMs),
-    torrentIdlePollMs: clamp(src.torrentIdlePollMs, 3000, 60000, DEFAULT_DESKTOP_PERF_CONFIG.torrentIdlePollMs),
-    adaptiveTorrentPolling:
-      typeof src.adaptiveTorrentPolling === 'boolean'
-        ? src.adaptiveTorrentPolling
-        : DEFAULT_DESKTOP_PERF_CONFIG.adaptiveTorrentPolling,
-    deferBackgroundChecks:
-      typeof src.deferBackgroundChecks === 'boolean'
-        ? src.deferBackgroundChecks
-        : DEFAULT_DESKTOP_PERF_CONFIG.deferBackgroundChecks,
-  };
-}
-
 function applyPerformanceConfigToSubsystems(cfg) {
-  activePerfConfig = normalizePerformancePayload(cfg);
-  if (downloadManager && typeof downloadManager.setPerformanceConfig === 'function') {
-    downloadManager.setPerformanceConfig({
-      throttleMs: activePerfConfig.downloadUiThrottleMs,
-      torrentActivePollMs: activePerfConfig.torrentActivePollMs,
-      torrentIdlePollMs: activePerfConfig.torrentIdlePollMs,
-      adaptiveTorrentPolling: activePerfConfig.adaptiveTorrentPolling,
-      pauseOnMinimize: activePerfConfig.pauseBackgroundWhenMinimized,
-    });
-  }
-  if (hardwareMonitor && typeof hardwareMonitor.setPerformanceConfig === 'function') {
-    hardwareMonitor.setPerformanceConfig({
-      pauseOnMinimize: activePerfConfig.pauseBackgroundWhenMinimized,
-    });
-  }
+  activePerfConfig = applyPerfConfigCore(cfg, {
+    downloadManager,
+    hardwareMonitor,
+  });
   return activePerfConfig;
 }
 
@@ -960,22 +1130,27 @@ function collectDesktopPerformanceMetrics() {
   }
 
   let rendererRssMB = 0;
+  let rendererCpuPercent = 0;
   let gpuProcessRssMB = 0;
+  let gpuCpuPercent = 0;
   const processes = rawAppMetrics.map((proc) => {
     const workingSetKB = Number(proc?.memory?.workingSetSize || 0);
     const rssMB = Number((workingSetKB / 1024).toFixed(1));
+    const cpuPct = Number((Number(proc?.cpu?.percentCPUUsage || 0)).toFixed(2));
     const type = String(proc?.type || 'Process');
     const lowerType = type.toLowerCase();
     if (lowerType.includes('tab') || lowerType.includes('renderer')) {
       rendererRssMB += rssMB;
+      rendererCpuPercent += cpuPct;
     } else if (lowerType.includes('gpu')) {
       gpuProcessRssMB += rssMB;
+      gpuCpuPercent += cpuPct;
     }
     return {
       pid: Number(proc?.pid || 0),
       type,
       name: typeof proc?.name === 'string' && proc.name ? proc.name : type,
-      cpuPercent: Number((Number(proc?.cpu?.percentCPUUsage || 0)).toFixed(2)),
+      cpuPercent: cpuPct,
       rssMB,
     };
   });
@@ -1004,6 +1179,8 @@ function collectDesktopPerformanceMetrics() {
   return {
     sampledAt: now,
     mainCpuPercent,
+    rendererCpuPercent: Number(rendererCpuPercent.toFixed(2)),
+    gpuCpuPercent: Number(gpuCpuPercent.toFixed(2)),
     mainProcessRssMB,
     mainHeapUsedMB,
     rendererRssMB: Number(rendererRssMB.toFixed(1)),
@@ -1562,7 +1739,6 @@ app.whenReady().then(() => {
     testTorrentConnection: () => downloadManager.testTorrentConnection(),
   });
   qbitSetupManager.registerIpc(ipcMain, isTrustedSender);
-  qbitSetupManager.initStartupCheck();
 
   presentMonManager = createPresentMonManager({
     getMainWindow: () => mainWindow,
@@ -1588,7 +1764,6 @@ app.whenReady().then(() => {
     getPresentMonInfo: () => (presentMonManager ? presentMonManager.getActiveExecutableInfo() : null),
   });
   gamingSessionManager.registerIpc(ipcMain, isTrustedSender);
-  presentMonManager.initStartupCheck();
 
   pcCleaner = createPcCleaner({
     getMainWindow: () => mainWindow,
@@ -1640,15 +1815,29 @@ app.whenReady().then(() => {
   } else {
     applyPerformanceConfigToSubsystems(DEFAULT_DESKTOP_PERF_CONFIG);
   }
-  if (activePerfConfig.deferBackgroundChecks) {
+
+  // Stagger background dependency/release checks cleanly so startup avoids concurrent subprocess + network spikes
+  const qbitDelayMs = activePerfConfig.deferBackgroundChecks ? 3500 : 800;
+  const toolsDelayMs = activePerfConfig.deferBackgroundChecks ? 6500 : 1500;
+  const presentMonDelayMs = activePerfConfig.deferBackgroundChecks ? 9500 : 2200;
+
+  startupDeferredTimers.push(
+    setTimeout(() => {
+      if (!isQuitting && qbitSetupManager) {
+        void qbitSetupManager.initStartupCheck();
+      }
+    }, qbitDelayMs),
     setTimeout(() => {
       if (!isQuitting && openSourceToolsManager) {
         void openSourceToolsManager.initStartupCheck();
       }
-    }, 6500);
-  } else {
-    void openSourceToolsManager.initStartupCheck();
-  }
+    }, toolsDelayMs),
+    setTimeout(() => {
+      if (!isQuitting && presentMonManager) {
+        void presentMonManager.initStartupCheck();
+      }
+    }, presentMonDelayMs)
+  );
 
   const launchInTray = isTrayLaunchRequested();
   if (persisted.startWithComputer || persisted.closeBehavior === 'minimize-to-tray' || launchInTray) {
@@ -1668,6 +1857,7 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  clearStartupDeferredTimers();
   if (hardwareMonitor) {
     hardwareMonitor.shutdown();
   }

@@ -1106,7 +1106,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
 
           const now = Date.now();
           const elapsedMs = now - windowStart;
-          if (elapsedMs >= 450) {
+          const patchIntervalMs = Math.max(150, Math.min(2000, Number(perfConfig.throttleMs) || 350));
+          if (elapsedMs >= patchIntervalMs) {
             const instantSpeed = (windowBytes * 1000) / elapsedMs;
             smoothedSpeed =
               smoothedSpeed > 0 ? smoothedSpeed * 0.6 + instantSpeed * 0.4 : instantSpeed;
@@ -1288,7 +1289,8 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
           windowBytes += chunk.length;
           const now = Date.now();
           const elapsedMs = now - windowStart;
-          if (elapsedMs >= 450) {
+          const patchIntervalMs = Math.max(150, Math.min(2000, Number(perfConfig.throttleMs) || 350));
+          if (elapsedMs >= patchIntervalMs) {
             const instant = (windowBytes * 1000) / elapsedMs;
             smoothedSpeed = smoothedSpeed > 0 ? smoothedSpeed * 0.6 + instant * 0.4 : instant;
             windowBytes = 0;
@@ -2284,6 +2286,11 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         prevPause !== perfConfig.pauseOnMinimize)
     ) {
       rescheduleTorrentPollerIfNeeded();
+    }
+    if (pendingEmitTimer) {
+      clearTimeout(pendingEmitTimer);
+      pendingEmitTimer = null;
+      emitSnapshot(true, false);
     }
     return { ...perfConfig };
   }

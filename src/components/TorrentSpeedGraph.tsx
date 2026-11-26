@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { CaretDown, CaretUp, ChartLineUp } from '@phosphor-icons/react';
 import type { AppLanguage } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
@@ -17,6 +17,7 @@ interface TorrentSpeedGraphProps {
   uploadBytesPerSec: number;
   hasActiveTransfers: boolean;
   language?: AppLanguage;
+  reduceVisualEffects?: boolean;
 }
 
 const PERIOD_SECONDS: Record<SpeedPeriodKey, number> = {
@@ -79,11 +80,12 @@ function downsampleSeries(samples: SpeedSample[], targetPoints: number): SpeedSa
   return out;
 }
 
-export function TorrentSpeedGraph({
+export const TorrentSpeedGraph = memo(function TorrentSpeedGraph({
   downloadBytesPerSec,
   uploadBytesPerSec,
   hasActiveTransfers,
   language = 'en',
+  reduceVisualEffects = false,
 }: TorrentSpeedGraphProps) {
   const tr = getTranslations(language);
   const t = tr.downloads;
@@ -100,7 +102,7 @@ export function TorrentSpeedGraph({
 
   const [history, setHistory] = useState<SpeedSample[]>(() => {
     const now = Date.now();
-    const initialCount = 90;
+    const initialCount = 30;
     const seed: SpeedSample[] = [];
     for (let i = initialCount - 1; i >= 1; i--) {
       seed.push({
@@ -165,9 +167,12 @@ export function TorrentSpeedGraph({
     return () => window.clearInterval(timer);
   }, [isCollapsed, isActiveGraph]);
 
-  // Subtle 30fps sub-second slide interpolation while transfers are active (respecting reduced-motion & visibility)
+  // Sub-second slide interpolation while transfers are active (disabled in Eco/reduced-effects & hidden states)
   useEffect(() => {
-    if (isCollapsed) return;
+    if (isCollapsed || reduceVisualEffects) {
+      setSubTickProgress(0);
+      return;
+    }
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -187,7 +192,7 @@ export function TorrentSpeedGraph({
         rafId = 0;
         return;
       }
-      if (ts - lastPaint >= 45) {
+      if (ts - lastPaint >= 95) {
         lastPaint = ts;
         const elapsed = Math.min(1, Math.max(0, (Date.now() - lastSampleTimeRef.current) / 1000));
         setSubTickProgress(elapsed);
@@ -198,7 +203,7 @@ export function TorrentSpeedGraph({
     return () => {
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [isCollapsed, isActiveGraph]);
+  }, [isCollapsed, isActiveGraph, reduceVisualEffects]);
 
   const visibleSamples = useMemo(() => {
     const targetSec = PERIOD_SECONDS[period];
@@ -538,4 +543,4 @@ export function TorrentSpeedGraph({
       )}
     </section>
   );
-}
+});

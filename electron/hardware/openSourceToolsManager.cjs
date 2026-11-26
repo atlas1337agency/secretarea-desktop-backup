@@ -1513,6 +1513,9 @@ function createOpenSourceToolsManager({
 
   async function initStartupCheck() {
     await refreshInstalledStatus('librehardwaremonitor');
+    if (effectivePlatform !== 'win32') {
+      return;
+    }
     const settings = typeof readSettings === 'function' ? readSettings() : {};
     const lastCheckedRaw = settings?.openSourceTools?.librehardwaremonitor?.lastCheckedAt;
     const lastCheckedMs = lastCheckedRaw ? Date.parse(lastCheckedRaw) : 0;

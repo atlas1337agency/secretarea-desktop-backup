@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowClockwise,
   ArrowDown,
@@ -143,7 +143,7 @@ function getTempTone(celsius: number | null): string {
   return 'text-emerald-600 dark:text-[#34d399]';
 }
 
-function RadialGauge({
+const RadialGauge = memo(function RadialGauge({
   value,
   label,
   accentClass,
@@ -200,7 +200,7 @@ function RadialGauge({
       </div>
     </div>
   );
-}
+});
 
 interface ChartSeriesConfig {
   key: string;
@@ -211,7 +211,7 @@ interface ChartSeriesConfig {
   formatValue: (v: number | null) => string;
 }
 
-function LiveTelemetryChart({
+const LiveTelemetryChart = memo(function LiveTelemetryChart({
   title,
   series,
   timestamps,
@@ -477,9 +477,9 @@ function LiveTelemetryChart({
       </div>
     </div>
   );
-}
+});
 
-function MetricRow({
+const MetricRow = memo(function MetricRow({
   label,
   value,
   valueClassName = 'text-slate-900 dark:text-white',
@@ -502,7 +502,7 @@ function MetricRow({
       </span>
     </div>
   );
-}
+});
 
 export function HardwareMonitorView({
   isDesktopApp,
@@ -837,7 +837,9 @@ export function HardwareMonitorView({
                     !hasDesktopTelemetry
                       ? 'bg-amber-500'
                       : isMonitoring
-                      ? 'bg-emerald-500 motion-safe:animate-pulse'
+                      ? effectivePerformance?.reduceVisualEffects
+                        ? 'bg-emerald-500'
+                        : 'bg-emerald-500 motion-safe:animate-pulse'
                       : 'bg-slate-400 dark:bg-slate-500'
                   }`}
                 />

@@ -53,7 +53,6 @@ async function benchmarkDownloadManager() {
   mockUserDataDir = tmpDir;
   const stateFile = path.join(tmpDir, 'downloads-state.json');
 
-  // Intercept synchronous writeFileSync & async writeFile calls inside tmpDir during benchmark
   const origWriteFileSync = fs.writeFileSync;
   const origWriteFile = fs.promises.writeFile;
   let syncWritesToState = 0;
@@ -79,10 +78,11 @@ async function benchmarkDownloadManager() {
   };
 
   let ipcSendCount = 0;
+  let windowMinimized = false;
   const fakeWindow = {
     isDestroyed: () => false,
-    isMinimized: () => false,
-    isVisible: () => true,
+    isMinimized: () => windowMinimized,
+    isVisible: () => !windowMinimized,
     webContents: {
       send: (channel) => {
         if (channel === 'downloads:updated') ipcSendCount += 1;
@@ -90,7 +90,6 @@ async function benchmarkDownloadManager() {
     },
   };
 
-  // Populate 60 realistic tasks as JSON array (matching readPersistedTasks format)
   const seedTasks = Array.from({ length: 60 }, (_, idx) => ({
     id: `dl-seed-${idx}`,
     title: `Game Archive Part ${idx + 1}`,
@@ -119,9 +118,7 @@ async function benchmarkDownloadManager() {
     };
 
     const dm = createDownloadManager({
-      app: {
-        getPath: () => tmpDir,
-      },
+      app: { getPath: () => tmpDir },
       shell: {},
       dialog: {},
       getMainWindow: () => fakeWindow,
@@ -131,7 +128,6 @@ async function benchmarkDownloadManager() {
 
     await new Promise((r) => setTimeout(r, 40));
 
-    // Mock local qBittorrent WebUI HTTP server
     const http = require('node:http');
     let progressTick = 0;
     let simulateIdle = false;
@@ -210,7 +206,14 @@ async function benchmarkDownloadManager() {
       ipcSendCount = 0;
       httpPollRequests = 0;
 
-      // Phase A: 3.3s with active downloading torrent advancing each second
+      // Phase A: Balanced mode 3.3s active
+      dm.setPerformanceConfig({
+        throttleMs: 350,
+        torrentActivePollMs: 1500,
+        torrentIdlePollMs: 6000,
+        adaptiveTorrentPolling: true,
+        pauseOnMinimize: true,
+      });
       const phaseAStart = performance.now();
       for (let i = 0; i < 6; i++) {
         progressTick += 1;
@@ -226,9 +229,32 @@ async function benchmarkDownloadManager() {
         syncWriteMs: Number(totalSyncWriteMs.toFixed(2)),
       };
 
-      // Phase B: All torrents paused/completed + zero changes for 3.3s
+      // Phase B: Minimized UI / hidden poller suppression during active downloads
+      windowMinimized = true;
+      ipcSendCount = 0;
+      httpPollRequests = 0;
+      dm.setPerformanceConfig({
+        throttleMs: 750,
+        torrentActivePollMs: 2500,
+        torrentIdlePollMs: 12000,
+        adaptiveTorrentPolling: true,
+        pauseOnMinimize: true,
+      });
+      dm.onWindowHidden();
+      for (let i = 0; i < 3; i++) {
+        progressTick += 1;
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      const minimizedRes = {
+        ipcBroadcastsWhenHidden: ipcSendCount,
+        pollRequestsWhileHidden: httpPollRequests,
+      };
+      windowMinimized = false;
+      dm.onWindowShown();
+
+      // Phase C: All torrents idle/completed + zero changes for 3.3s
       simulateIdle = true;
-      await new Promise((r) => setTimeout(r, 1650)); // let completion settle cleanly
+      await new Promise((r) => setTimeout(r, 1650));
       syncWritesToState = 0;
       asyncWritesToState = 0;
       totalSyncWriteMs = 0;
@@ -246,7 +272,11 @@ async function benchmarkDownloadManager() {
       };
 
       dm.shutdown();
-      return { activePhase: phaseARes, unchangedPhase: phaseBRes };
+      return {
+        activePhase: phaseARes,
+        minimizedPhase: minimizedRes,
+        unchangedPhase: phaseBRes,
+      };
     } finally {
       server.close();
     }
@@ -279,7 +309,10 @@ async function benchmarkHardwareMonitor() {
   const snap2 = await hw.getSnapshot();
   const cachedMs = performance.now() - t1;
 
-  // Start & immediate hide pause
+  // Performance Mode interval switch + hide/resume check
+  hw.setPerformanceConfig({ intervalMs: 3000, pauseOnMinimize: true });
+  const ecoStats = hw.getRuntimeStats();
+
   await hw.start(1500);
   const activeBeforeHide = hw.isActive();
   hw.pauseForHidden();
@@ -291,6 +324,7 @@ async function benchmarkHardwareMonitor() {
     cachedSnapshotMs: Number(cachedMs.toFixed(2)),
     hasCpu: Boolean(snap1?.cpu),
     hasRam: Boolean(snap2?.ram),
+    ecoConfiguredIntervalMs: ecoStats.intervalMs,
     activeBeforeHide,
     activeAfterHide,
     emittedEvents: sent,
@@ -362,53 +396,106 @@ function measureNotificationPayloadSize() {
 }
 
 function measureDistBundle() {
-  const assetsDir = path.resolve(__dirname, '../dist/assets');
+  const distRoot = path.resolve(__dirname, '../dist');
+  const assetsDir = path.join(distRoot, 'assets');
   if (!fs.existsSync(assetsDir)) return { exists: false };
+
+  let entryJsChunk = '';
+  const htmlPath = path.join(distRoot, 'index.html');
+  if (fs.existsSync(htmlPath)) {
+    const html = fs.readFileSync(htmlPath, 'utf8');
+    const match = html.match(/src="\/?assets\/([^"]+\.js)"/i);
+    if (match) entryJsChunk = match[1];
+  }
+
   const files = fs.readdirSync(assetsDir);
   let totalJsBytes = 0;
   let totalCssBytes = 0;
   let jsFiles = 0;
   let largestJsName = '';
   let largestJsBytes = 0;
+  let entryJsBytes = 0;
+  const topJsChunks = [];
+
   for (const f of files) {
     const stat = fs.statSync(path.join(assetsDir, f));
     if (f.endsWith('.js')) {
       jsFiles += 1;
       totalJsBytes += stat.size;
+      if (f === entryJsChunk) {
+        entryJsBytes = stat.size;
+      }
       if (stat.size > largestJsBytes) {
         largestJsBytes = stat.size;
         largestJsName = f;
       }
+      topJsChunks.push({ name: f, kb: Number((stat.size / 1024).toFixed(2)) });
     } else if (f.endsWith('.css')) {
       totalCssBytes += stat.size;
     }
   }
+  topJsChunks.sort((a, b) => b.kb - a.kb);
+
   return {
     exists: true,
     jsChunkCount: jsFiles,
+    entryJsChunk,
+    entryJsKB: Number((entryJsBytes / 1024).toFixed(2)),
     totalJsKB: Number((totalJsBytes / 1024).toFixed(2)),
     totalCssKB: Number((totalCssBytes / 1024).toFixed(2)),
     largestJsChunk: largestJsName,
     largestJsKB: Number((largestJsBytes / 1024).toFixed(2)),
+    topJsChunks: topJsChunks.slice(0, 10),
+  };
+}
+
+function measureExtendedCacheStability() {
+  const MAX = 120;
+  const cache = new Map();
+  const heapBefore = process.memoryUsage().heapUsed;
+  for (let i = 0; i < 2000; i += 1) {
+    const key = `url:${i}`;
+    if (cache.has(key)) cache.delete(key);
+    cache.set(key, { data: { id: i, payload: 'x'.repeat(512) }, cachedAt: Date.now(), expiresAt: Date.now() + 60000 });
+    while (cache.size > MAX) {
+      const oldest = cache.keys().next().value;
+      if (oldest === undefined) break;
+      cache.delete(oldest);
+    }
+  }
+  const heapAfter = process.memoryUsage().heapUsed;
+  return {
+    insertedCount: 2000,
+    retainedEntries: cache.size,
+    maxAllowedEntries: MAX,
+    heapDeltaKB: Number(((heapAfter - heapBefore) / 1024).toFixed(1)),
   };
 }
 
 async function main() {
+  const cpuStart = process.cpuUsage();
+  const wallStart = performance.now();
   const modules = await measureModuleLoads();
   const downloadManager = await benchmarkDownloadManager();
   const hardwareMonitor = await benchmarkHardwareMonitor();
   const notifications = measureNotificationPayloadSize();
+  const cacheStability = measureExtendedCacheStability();
   const distBundle = measureDistBundle();
+  const cpuUsed = process.cpuUsage(cpuStart);
+  const wallMs = performance.now() - wallStart;
 
   console.log(
     JSON.stringify(
       {
         capturedAt: new Date().toISOString(),
         nodeVersion: process.version,
+        auditCpuMs: Number(((cpuUsed.user + cpuUsed.system) / 1000).toFixed(2)),
+        auditWallMs: Number(wallMs.toFixed(1)),
         modules,
         downloadManager,
         hardwareMonitor,
         notifications,
+        cacheStability,
         distBundle,
       },
       null,

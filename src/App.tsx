@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle,
   Info,
@@ -6,7 +6,6 @@ import {
   WifiHigh,
   WifiSlash,
 } from '@phosphor-icons/react';
-import { DEFAULT_CATALOG } from './data/gamesCatalog';
 import {
   fetchCatalogFromGas,
   getSavedGasUrl,
@@ -22,6 +21,8 @@ import type {
   GameItem,
   LibrarySectionTab,
   MirrorLink,
+  PerformanceAdvancedSettings,
+  PerformanceMode,
   PresentMonSetupState,
   PrimarySection,
   QbitSetupState,
@@ -34,33 +35,79 @@ import type {
 import {
   ALL_SHEET_TABS,
   computeSmartSearchScore,
+  EMPTY_SHEET_CATALOG,
   toGameSlug,
 } from './utils/parsers';
 import { TopUtilityBar } from './components/TopUtilityBar';
 import { Navbar } from './components/Navbar';
-import { LibrarySidebar } from './components/LibrarySidebar';
-import { LibraryView } from './components/LibraryView';
 import { StoreView } from './components/StoreView';
-import { ExtrasView } from './components/ExtrasView';
-import { StudiosView } from './components/StudiosView';
-import { StudioDetailModal } from './components/StudioDetailModal';
-import { RequestsView } from './components/RequestsView';
-import { DownloadsView } from './components/DownloadsView';
-import { HardwareMonitorView } from './components/HardwareMonitorView';
-import { SettingsView } from './components/SettingsView';
-import { GameDealsView } from './components/deals/GameDealsView';
-import { GameDetailModal } from './components/GameDetailModal';
-import { DesktopUpdaterModal } from './components/DesktopUpdaterModal';
-import { UpdateHistoryModal } from './components/UpdateHistoryModal';
 import { NotificationCenterDrawer } from './components/NotificationCenterDrawer';
-import { SpinWheelModal } from './components/SpinWheelModal';
-import { QbitSetupWizardModal } from './components/QbitSetupWizardModal';
-import { PresentMonSetupModal } from './components/PresentMonSetupModal';
+import type { OnboardingThemeChoice } from './components/FirstLaunchOnboarding';
+
+const LibrarySidebar = lazy(() =>
+  import('./components/LibrarySidebar').then((m) => ({ default: m.LibrarySidebar }))
+);
+const LibraryView = lazy(() =>
+  import('./components/LibraryView').then((m) => ({ default: m.LibraryView }))
+);
+const ExtrasView = lazy(() =>
+  import('./components/ExtrasView').then((m) => ({ default: m.ExtrasView }))
+);
+const StudiosView = lazy(() =>
+  import('./components/StudiosView').then((m) => ({ default: m.StudiosView }))
+);
+const StudioDetailModal = lazy(() =>
+  import('./components/StudioDetailModal').then((m) => ({ default: m.StudioDetailModal }))
+);
+const RequestsView = lazy(() =>
+  import('./components/RequestsView').then((m) => ({ default: m.RequestsView }))
+);
+const DownloadsView = lazy(() =>
+  import('./components/DownloadsView').then((m) => ({ default: m.DownloadsView }))
+);
+const HardwareMonitorView = lazy(() =>
+  import('./components/HardwareMonitorView').then((m) => ({ default: m.HardwareMonitorView }))
+);
+const SettingsView = lazy(() =>
+  import('./components/SettingsView').then((m) => ({ default: m.SettingsView }))
+);
+const GameDealsView = lazy(() =>
+  import('./components/deals/GameDealsView').then((m) => ({ default: m.GameDealsView }))
+);
+const GameDetailModal = lazy(() =>
+  import('./components/GameDetailModal').then((m) => ({ default: m.GameDetailModal }))
+);
+const DesktopUpdaterModal = lazy(() =>
+  import('./components/DesktopUpdaterModal').then((m) => ({ default: m.DesktopUpdaterModal }))
+);
+const UpdateHistoryModal = lazy(() =>
+  import('./components/UpdateHistoryModal').then((m) => ({ default: m.UpdateHistoryModal }))
+);
+const SpinWheelModal = lazy(() =>
+  import('./components/SpinWheelModal').then((m) => ({ default: m.SpinWheelModal }))
+);
+const QbitSetupWizardModal = lazy(() =>
+  import('./components/QbitSetupWizardModal').then((m) => ({
+    default: m.QbitSetupWizardModal,
+  }))
+);
+const PresentMonSetupModal = lazy(() =>
+  import('./components/PresentMonSetupModal').then((m) => ({
+    default: m.PresentMonSetupModal,
+  }))
+);
+const FirstLaunchOnboarding = lazy(() =>
+  import('./components/FirstLaunchOnboarding').then((m) => ({
+    default: m.FirstLaunchOnboarding,
+  }))
+);
+const HypervisorGuideModal = lazy(() =>
+  import('./components/HypervisorGuideModal').then((m) => ({
+    default: m.HypervisorGuideModal,
+  }))
+);
 import {
-  FirstLaunchOnboarding,
-  type OnboardingThemeChoice,
-} from './components/FirstLaunchOnboarding';
-import {
+  createBackgroundUpdateScheduler,
   getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
   getDesktopWindowBridge,
@@ -89,14 +136,23 @@ import {
 } from './services/presentMonSetup';
 import {
   applyDocumentLanguageSettings,
+  applyDocumentPerformanceSettings,
   applyDocumentThemeSettings,
+  buildPerformancePayloadForDesktop,
+  compareAppVersions,
   DEFAULT_CUSTOM_THEME,
   DEFAULT_LAUNCHER_SETTINGS,
   getActiveConsoleTheme,
   getAppVersionString,
+  getEffectivePerformanceConfig,
+  getLastSeenAppVersion,
   isLocalOnboardingCompleted,
   loadLauncherSettings,
+  normalizeCustomTheme,
+  normalizePerformanceAdvanced,
+  normalizePerformanceMode,
   saveLauncherSettings,
+  setLastSeenAppVersion,
   setLocalOnboardingCompleted,
   type AppLanguage,
   type CustomThemeConfig,
@@ -150,6 +206,14 @@ interface ToastItem {
   type: 'success' | 'info' | 'error';
 }
 
+function ViewLoadingSpinner() {
+  return (
+    <div className="flex-1 min-h-0 flex items-center justify-center p-8">
+      <div className="w-7 h-7 rounded-full border-2 border-[#0284c7] dark:border-[#38bdf8] border-t-transparent animate-spin" />
+    </div>
+  );
+}
+
 function findItemBySlug(catalog: SheetCatalogData, slug: string): GameItem | null {
   const clean = slug.trim().toLowerCase();
   if (!clean) return null;
@@ -185,8 +249,21 @@ function updateGameUrlParam(slug: string | null, replace = false) {
   }
 }
 
+let defaultCatalogPromise: Promise<SheetCatalogData> | null = null;
+function loadDefaultCatalogSnapshot(): Promise<SheetCatalogData> {
+  if (!defaultCatalogPromise) {
+    defaultCatalogPromise = import('./data/gamesCatalog').then((m) => m.DEFAULT_CATALOG);
+  }
+  return defaultCatalogPromise;
+}
+
 export default function App() {
-  const [catalog, setCatalog] = useState<SheetCatalogData>(DEFAULT_CATALOG);
+  const [catalog, setCatalog] = useState<SheetCatalogData>(EMPTY_SHEET_CATALOG);
+  const [isCatalogHydrating, setIsCatalogHydrating] = useState(true);
+  const [catalogDataSource, setCatalogDataSource] = useState<
+    'loading' | 'fallback' | 'cached_live' | 'live'
+  >('loading');
+  const [isSyncingCatalog, setIsSyncingCatalog] = useState(false);
   const catalogRef = useRef<SheetCatalogData>(catalog);
   catalogRef.current = catalog;
   const [gasUrl] = useState<string>(() => getSavedGasUrl());
@@ -196,10 +273,7 @@ export default function App() {
     const sectionParam = new URLSearchParams(window.location.search).get('section');
     return sectionParam === 'deals' ? 'deals' : 'store';
   });
-  const [selectedGame, setSelectedGame] = useState<GameItem | null>(() => {
-    const slug = new URLSearchParams(window.location.search).get('game');
-    return slug ? findItemBySlug(DEFAULT_CATALOG, slug) : null;
-  });
+  const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
   const [selectedStudio, setSelectedStudio] = useState<GameItem | null>(null);
   const [modalViewMode, setModalViewMode] = useState<'overview' | 'trailer' | 'downloads'>('overview');
 
@@ -254,7 +328,15 @@ export default function App() {
   const hasAutoPromptedPresentMonRef = useRef(false);
   const [isNotificationCenterOpen, setIsNotificationCenterOpen] = useState(false);
   const [isUpdateHistoryOpen, setIsUpdateHistoryOpen] = useState(false);
+  const [isJustUpdatedOpen, setIsJustUpdatedOpen] = useState(false);
+  const [justUpdatedFromVersion, setJustUpdatedFromVersion] = useState<string | null>(null);
+  const hasCheckedPostUpdateNoticeRef = useRef(false);
   const [isSpinWheelOpen, setIsSpinWheelOpen] = useState(false);
+  const [isHypervisorGuideOpen, setIsHypervisorGuideOpen] = useState(false);
+  const [settingsFocusToolRequest, setSettingsFocusToolRequest] = useState<{
+    toolId: string;
+    nonce: number;
+  } | null>(null);
   const [celebrateWinKey, setCelebrateWinKey] = useState(0);
   const [liveNotificationEvents, setLiveNotificationEvents] = useState<CatalogNotificationItem[]>(
     () => loadPersistedLiveNotificationEvents()
@@ -328,6 +410,26 @@ export default function App() {
         if (desktopCompleted || isLocalOnboardingCompleted()) {
           setLocalOnboardingCompleted(true);
           setOnboardingPhase('completed');
+
+          if (!hasCheckedPostUpdateNoticeRef.current) {
+            hasCheckedPostUpdateNoticeRef.current = true;
+            const previousSeen =
+              desktopSettings.lastSeenVersion ||
+              desktopSettings.lastOnboardedVersion ||
+              getLastSeenAppVersion();
+            if (!previousSeen || compareAppVersions(currentVer, previousSeen) > 0) {
+              setJustUpdatedFromVersion(previousSeen || null);
+              setIsJustUpdatedOpen(true);
+              setIsUpdateHistoryOpen(true);
+              setLastSeenAppVersion(currentVer);
+              void settingsBridge.markVersionSeen?.(currentVer);
+            } else {
+              setLastSeenAppVersion(currentVer);
+              if (!desktopSettings.lastSeenVersion) {
+                void settingsBridge.markVersionSeen?.(currentVer);
+              }
+            }
+          }
         } else {
           setOnboardingPhase('active');
         }
@@ -560,6 +662,36 @@ export default function App() {
   useEffect(() => {
     applyDocumentThemeSettings(launcherSettings);
   }, [launcherSettings]);
+
+  const effectivePerformance = useMemo(
+    () => getEffectivePerformanceConfig(launcherSettings),
+    [launcherSettings.performanceMode, launcherSettings.performanceAdvanced]
+  );
+
+  const precacheOptionsRef = useRef({
+    deferBackground: effectivePerformance.deferBackgroundChecks,
+    maxEntries: effectivePerformance.maxImageCacheEntries,
+    pauseWhenHidden: effectivePerformance.pauseBackgroundWhenMinimized,
+  });
+  precacheOptionsRef.current = {
+    deferBackground: effectivePerformance.deferBackgroundChecks,
+    maxEntries: effectivePerformance.maxImageCacheEntries,
+    pauseWhenHidden: effectivePerformance.pauseBackgroundWhenMinimized,
+  };
+
+  useEffect(() => {
+    applyDocumentPerformanceSettings(launcherSettings);
+  }, [launcherSettings.performanceMode, launcherSettings.performanceAdvanced]);
+
+  const lastSyncedPerfSignatureRef = useRef<string>('');
+  useEffect(() => {
+    if (!settingsBridge?.setPerformanceSettings) return;
+    const payload = buildPerformancePayloadForDesktop(launcherSettings);
+    const sig = JSON.stringify(payload);
+    if (sig === lastSyncedPerfSignatureRef.current) return;
+    lastSyncedPerfSignatureRef.current = sig;
+    void settingsBridge.setPerformanceSettings(payload);
+  }, [settingsBridge, launcherSettings.performanceMode, launcherSettings.performanceAdvanced]);
 
   const hasSoundVolume = launcherSettings.soundVolume > 0;
 
@@ -1001,19 +1133,128 @@ export default function App() {
     }
   }, [activeTheme, launcherSettings.soundVolume]);
 
+  const handleChangePerformanceMode = useCallback((mode: PerformanceMode) => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      performanceMode: mode,
+    }));
+  }, []);
+
+  const handleUpdatePerformanceAdvanced = useCallback(
+    (patch: Partial<PerformanceAdvancedSettings>) => {
+      setLauncherSettings((prev) => ({
+        ...prev,
+        performanceAdvanced: {
+          ...prev.performanceAdvanced,
+          ...patch,
+        },
+      }));
+    },
+    []
+  );
+
   const handleResetLauncherSettings = useCallback(async () => {
-    const defaults = { ...DEFAULT_LAUNCHER_SETTINGS };
+    const defaults = {
+      ...DEFAULT_LAUNCHER_SETTINGS,
+      performanceAdvanced: { ...DEFAULT_LAUNCHER_SETTINGS.performanceAdvanced },
+    };
     setLauncherSettings(defaults);
     if (settingsBridge) {
       try {
         await settingsBridge.setStartWithComputer(false);
         await settingsBridge.setCloseBehavior?.(defaults.closeBehavior);
+        await settingsBridge.setPerformanceSettings?.(
+          buildPerformancePayloadForDesktop(defaults)
+        );
       } catch {
         // Ignore desktop reset error cleanly
       }
     }
     notify(getTranslations(defaults.language).settings.resetToast, 'info');
   }, [notify, settingsBridge]);
+
+  const handleImportLauncherSettings = useCallback(
+    async (raw: Partial<LauncherSettings>) => {
+      const nextLang: AppLanguage =
+        raw.language === 'fr' ||
+        raw.language === 'es' ||
+        raw.language === 'ar' ||
+        raw.language === 'en'
+          ? raw.language
+          : launcherSettings.language;
+      const nextPerfMode = normalizePerformanceMode(raw.performanceMode);
+      const nextPerfAdv = normalizePerformanceAdvanced(raw.performanceAdvanced, nextPerfMode);
+      const nextCustomTheme = normalizeCustomTheme(raw.customTheme);
+      const nextAlwaysXbox = Boolean(raw.alwaysXboxTheme);
+      const nextAlwaysPs5 = nextAlwaysXbox ? false : Boolean(raw.alwaysPs5Theme);
+      const nextLightMode =
+        nextAlwaysXbox || nextAlwaysPs5
+          ? false
+          : nextCustomTheme.enabled
+          ? nextCustomTheme.surfaceStyle === 'daylight'
+          : Boolean(raw.lightMode);
+      const nextSoundVol =
+        typeof raw.soundVolume === 'number' && Number.isFinite(raw.soundVolume)
+          ? Math.min(100, Math.max(0, Math.round(raw.soundVolume)))
+          : launcherSettings.soundVolume;
+
+      const merged: LauncherSettings = {
+        language: nextLang,
+        startWithComputer:
+          typeof raw.startWithComputer === 'boolean'
+            ? raw.startWithComputer
+            : launcherSettings.startWithComputer,
+        closeBehavior:
+          raw.closeBehavior === 'minimize-to-tray' || raw.closeBehavior === 'exit'
+            ? raw.closeBehavior
+            : launcherSettings.closeBehavior,
+        enableCanRunIt:
+          typeof raw.enableCanRunIt === 'boolean'
+            ? raw.enableCanRunIt
+            : launcherSettings.enableCanRunIt,
+        compactNavbar:
+          typeof raw.compactNavbar === 'boolean'
+            ? raw.compactNavbar
+            : launcherSettings.compactNavbar,
+        lightMode: nextLightMode,
+        alwaysPs5Theme: nextAlwaysPs5,
+        alwaysXboxTheme: nextAlwaysXbox,
+        ambientMusicEnabled:
+          typeof raw.ambientMusicEnabled === 'boolean'
+            ? raw.ambientMusicEnabled
+            : launcherSettings.ambientMusicEnabled,
+        uiClickSoundsEnabled:
+          typeof raw.uiClickSoundsEnabled === 'boolean'
+            ? raw.uiClickSoundsEnabled
+            : launcherSettings.uiClickSoundsEnabled,
+        customCursorEnabled:
+          typeof raw.customCursorEnabled === 'boolean'
+            ? raw.customCursorEnabled
+            : launcherSettings.customCursorEnabled,
+        soundVolume: nextSoundVol,
+        customTheme:
+          nextAlwaysXbox || nextAlwaysPs5
+            ? { ...nextCustomTheme, enabled: false }
+            : nextCustomTheme,
+        performanceMode: nextPerfMode,
+        performanceAdvanced: nextPerfAdv,
+      };
+
+      setLauncherSettings(merged);
+      if (settingsBridge) {
+        try {
+          await settingsBridge.setStartWithComputer(merged.startWithComputer);
+          await settingsBridge.setCloseBehavior?.(merged.closeBehavior);
+          await settingsBridge.setPerformanceSettings?.(
+            buildPerformancePayloadForDesktop(merged)
+          );
+        } catch {
+          // Ignore non-fatal desktop bridge sync failure cleanly
+        }
+      }
+    },
+    [launcherSettings, settingsBridge]
+  );
 
   const handleStartDownloadPayload = useCallback(
     async (payload: StartDownloadPayload) => {
@@ -1202,12 +1443,7 @@ export default function App() {
 
   const handleOpenTorrentSettings = useCallback(() => {
     setActiveSection('settings');
-    window.setTimeout(() => {
-      document.getElementById('torrent-integration-settings')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 80);
+    setSettingsFocusToolRequest({ toolId: 'qbittorrent', nonce: Date.now() });
   }, []);
 
   const handleOpenQbitSetupWizard = useCallback(() => {
@@ -1358,6 +1594,8 @@ export default function App() {
   const handleCompleteOnboarding = useCallback(
     (destination: 'store' | 'settings') => {
       setLocalOnboardingCompleted(true);
+      setLastSeenAppVersion(resolvedAppVersion);
+      hasCheckedPostUpdateNoticeRef.current = true;
       hasAutoPromptedQbitRef.current = true;
       setOnboardingPhase('completed');
       setActiveSection(destination);
@@ -1397,9 +1635,7 @@ export default function App() {
       for (const tab of ALL_SHEET_TABS) {
         const nextItems =
           tab === 'game' && (!incoming.game || incoming.game.length === 0)
-            ? prev.game.length > 0
-              ? prev.game
-              : DEFAULT_CATALOG.game
+            ? prev.game
             : incoming[tab] || [];
 
         const prevSig =
@@ -1418,15 +1654,22 @@ export default function App() {
 
       if (anyChanged) {
         setCatalog(merged);
+        if (isLiveSync) {
+          window.setTimeout(() => {
+            void saveCachedCatalog(merged);
+          }, 0);
+        }
+      } else if (isLiveSync) {
         window.setTimeout(() => {
           void saveCachedCatalog(merged);
         }, 0);
       }
 
       let newNotificationsCount = 0;
-      if (isLiveSync || anyChanged) {
+      if (isLiveSync) {
+        setCatalogDataSource('live');
         const reconciled = reconcileCatalogNotifications(anyChanged ? merged : prev, {
-          isLiveSync,
+          isLiveSync: true,
         });
         newNotificationsCount = reconciled.newEvents.length;
         if (reconciled.newEvents.length > 0) {
@@ -1459,12 +1702,13 @@ export default function App() {
 
       lastRefreshAttemptAtRef.current = now;
       isBackgroundRefreshingRef.current = true;
+      setIsSyncingCatalog(true);
       try {
         const latest = await fetchCatalogFromGas(clean);
         hasCompletedLiveSyncRef.current = true;
         const { changed, newNotificationsCount } = applyCatalogDiffSilently(latest, true);
         if (changed) {
-          void precacheCatalogImages(latest);
+          void precacheCatalogImages(latest, precacheOptionsRef.current);
         }
         return { synced: true, newNotificationsCount };
       } catch {
@@ -1475,23 +1719,37 @@ export default function App() {
         return { synced: false, newNotificationsCount: 0 };
       } finally {
         isBackgroundRefreshingRef.current = false;
+        setIsSyncingCatalog(false);
       }
     },
     [applyCatalogDiffSilently]
   );
 
-  // Hydrate catalog from IndexedDB immediately so offline sessions retain data & warm cover cache
+  // Hydrate catalog from verified live IndexedDB cache immediately; lazy-load bundled fallback snapshot only if cache is empty
   useEffect(() => {
     let cancelled = false;
-    void loadCachedCatalog().then((cached) => {
-      if (cancelled) return;
-      if (cached && !hasCompletedLiveSyncRef.current) {
-        applyCatalogDiffSilently(cached);
-        void precacheCatalogImages(cached);
-      } else {
-        void precacheCatalogImages(DEFAULT_CATALOG);
-      }
-    });
+    void loadCachedCatalog()
+      .then(async (cached) => {
+        if (cancelled) return;
+        if (cached && cached.game?.length > 0 && !hasCompletedLiveSyncRef.current) {
+          setCatalogDataSource((prev) => (prev === 'live' ? prev : 'cached_live'));
+          applyCatalogDiffSilently(cached, false);
+          void precacheCatalogImages(cached, precacheOptionsRef.current);
+          return;
+        }
+        if (!hasCompletedLiveSyncRef.current || catalogRef.current.game.length === 0) {
+          const fallback = await loadDefaultCatalogSnapshot();
+          if (cancelled || (hasCompletedLiveSyncRef.current && catalogRef.current.game.length > 0)) return;
+          setCatalogDataSource((prev) => (prev === 'loading' ? 'fallback' : prev));
+          applyCatalogDiffSilently(fallback, false);
+          void precacheCatalogImages(fallback, precacheOptionsRef.current);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsCatalogHydrating(false);
+        }
+      });
     return () => {
       cancelled = true;
     };
@@ -1523,7 +1781,7 @@ export default function App() {
       if (gasUrl) {
         void refreshCatalogSilently(gasUrl);
       } else {
-        void precacheCatalogImages(catalogRef.current);
+        void precacheCatalogImages(catalogRef.current, precacheOptionsRef.current);
       }
     };
 
@@ -1537,60 +1795,88 @@ export default function App() {
     };
   }, [gasUrl, refreshCatalogSilently]);
 
-  // Quietly check for catalog updates in the background (without blocking startup or focus switching)
+  // Quietly fetch live Google Sheet catalog updates shortly after launch & on schedule
   useEffect(() => {
     if (!gasUrl || !isOnline) return;
+    const initialDelay = effectivePerformance.mode === 'eco' ? 600 : 250;
+    const pollMs = effectivePerformance.mode === 'eco' ? 420000 : 180000;
+
     const initialTimer = window.setTimeout(() => {
+      if (effectivePerformance.pauseBackgroundWhenMinimized && document.hidden) return;
       void refreshCatalogSilently(gasUrl, true);
-    }, 1200);
+    }, initialDelay);
 
     const handleFocusOrVisible = () => {
-      if (document.visibilityState === 'visible') {
-        void refreshCatalogSilently(gasUrl);
-      }
+      if (document.visibilityState !== 'visible') return;
+      if (effectivePerformance.deferBackgroundChecks) return;
+      void refreshCatalogSilently(gasUrl);
     };
 
-    window.addEventListener('focus', handleFocusOrVisible);
-    document.addEventListener('visibilitychange', handleFocusOrVisible);
+    if (!effectivePerformance.deferBackgroundChecks) {
+      window.addEventListener('focus', handleFocusOrVisible);
+      document.addEventListener('visibilitychange', handleFocusOrVisible);
+    }
+
     const intervalId = window.setInterval(() => {
+      if (effectivePerformance.pauseBackgroundWhenMinimized && document.hidden) return;
       if (document.visibilityState === 'visible') {
         void refreshCatalogSilently(gasUrl);
       }
-    }, 180000);
+    }, pollMs);
     return () => {
       window.clearTimeout(initialTimer);
       window.removeEventListener('focus', handleFocusOrVisible);
       document.removeEventListener('visibilitychange', handleFocusOrVisible);
       window.clearInterval(intervalId);
     };
-  }, [gasUrl, isOnline, refreshCatalogSilently]);
+  }, [
+    gasUrl,
+    isOnline,
+    refreshCatalogSilently,
+    effectivePerformance.mode,
+    effectivePerformance.deferBackgroundChecks,
+    effectivePerformance.pauseBackgroundWhenMinimized,
+  ]);
 
-  // Automatically sync catalog & check desktop updates in the background when Notification Center opens or periodically
+  // Sync catalog quietly after drawer paint completes so Notification Center opens instantly with real Google Sheet data
   useEffect(() => {
-    if (isNotificationCenterOpen && gasUrl && isOnline) {
-      void refreshCatalogSilently(gasUrl);
-    }
+    if (!isNotificationCenterOpen || !gasUrl || !isOnline) return;
+    const forceInitialLiveSync = !hasCompletedLiveSyncRef.current;
+    const timerId = window.setTimeout(
+      () => {
+        void refreshCatalogSilently(gasUrl, forceInitialLiveSync);
+      },
+      forceInitialLiveSync ? 60 : 220
+    );
+    return () => window.clearTimeout(timerId);
   }, [isNotificationCenterOpen, gasUrl, isOnline, refreshCatalogSilently]);
 
   useEffect(() => {
     if (!updaterBridge || !isOnline) return;
-    const startupCheckTimer = window.setTimeout(() => {
-      void updaterBridge.checkForUpdates().then((nextState) => {
+    const startupDelayMs = effectivePerformance.deferBackgroundChecks ? 12000 : 5000;
+    const intervalMs = effectivePerformance.mode === 'eco' ? 3600000 : 1800000;
+    const scheduler = createBackgroundUpdateScheduler({
+      isHidden: () =>
+        typeof document !== 'undefined' &&
+        (document.hidden || document.visibilityState !== 'visible'),
+      pauseBackgroundWhenMinimized: effectivePerformance.pauseBackgroundWhenMinimized,
+      startupDelayMs,
+      intervalMs,
+      onCheck: async () => {
+        const nextState = await updaterBridge.checkForUpdates();
         if (nextState) setDesktopUpdateState(nextState);
-      });
-    }, 5000);
-    const intervalId = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        void updaterBridge.checkForUpdates().then((nextState) => {
-          if (nextState) setDesktopUpdateState(nextState);
-        });
-      }
-    }, 1800000);
+      },
+    });
     return () => {
-      window.clearTimeout(startupCheckTimer);
-      window.clearInterval(intervalId);
+      scheduler.dispose();
     };
-  }, [updaterBridge, isOnline]);
+  }, [
+    updaterBridge,
+    isOnline,
+    effectivePerformance.mode,
+    effectivePerformance.deferBackgroundChecks,
+    effectivePerformance.pauseBackgroundWhenMinimized,
+  ]);
 
   // Keep selectedGame and selectedStudio synchronized with live catalog updates without abruptly closing them
   useEffect(() => {
@@ -1636,11 +1922,11 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       const slug = new URLSearchParams(window.location.search).get('game');
-      setSelectedGame(slug ? findItemBySlug(catalog, slug) : null);
+      setSelectedGame(slug ? findItemBySlug(catalogRef.current, slug) : null);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [catalog]);
+  }, []);
 
   useEffect(() => {
     document.title = selectedGame
@@ -1676,6 +1962,7 @@ export default function App() {
   );
 
   const availableGenres = useMemo(() => {
+    if (activeSection !== 'library') return [];
     const counts = new Map<string, number>();
     for (const item of activeSectionItems) {
       const tags =
@@ -1691,9 +1978,10 @@ export default function App() {
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([genre]) => genre);
-  }, [activeSectionItems]);
+  }, [activeSection, activeSectionItems]);
 
   const filteredGames = useMemo(() => {
+    if (activeSection !== 'library') return [];
     const q = searchQuery.trim();
 
     const scoredMatches: { item: GameItem; score: number }[] = [];
@@ -1775,6 +2063,7 @@ export default function App() {
 
     return scoredMatches.map((entry) => entry.item);
   }, [
+    activeSection,
     activeSectionItems,
     searchQuery,
     genreFilter,
@@ -1835,6 +2124,8 @@ export default function App() {
   }, []);
 
   const handleOpenUpdateHistoryModal = useCallback(() => {
+    setIsJustUpdatedOpen(false);
+    setJustUpdatedFromVersion(null);
     setIsUpdateHistoryOpen(true);
   }, []);
 
@@ -1879,26 +2170,40 @@ export default function App() {
     [downloadSnapshot.tasks]
   );
 
+  const isLiveNotificationDataReady =
+    catalogDataSource === 'live' || catalogDataSource === 'cached_live';
+
   const notificationFeed = useMemo(
     () => buildNotificationFeed(catalog, liveNotificationEvents),
     [catalog, liveNotificationEvents]
   );
 
   useEffect(() => {
-    if (!hasSeededReadIdsRef.current && notificationFeed.length > 0) {
+    if (
+      !hasSeededReadIdsRef.current &&
+      isLiveNotificationDataReady &&
+      notificationFeed.length > 0
+    ) {
       hasSeededReadIdsRef.current = true;
       setReadNotificationIds(ensureInitialUnreadSeeding(notificationFeed));
     }
-  }, [notificationFeed]);
+  }, [isLiveNotificationDataReady, notificationFeed]);
 
   const unreadNotificationsCount = useMemo(
     () =>
-      notificationFeed.reduce(
-        (acc, item) => acc + (readNotificationIds.has(item.id) ? 0 : 1),
-        0
-      ),
-    [notificationFeed, readNotificationIds]
+      isLiveNotificationDataReady
+        ? notificationFeed.reduce(
+            (acc, item) => acc + (readNotificationIds.has(item.id) ? 0 : 1),
+            0
+          )
+        : 0,
+    [isLiveNotificationDataReady, notificationFeed, readNotificationIds]
   );
+
+  const handleManualNotificationSync = useCallback(() => {
+    if (!gasUrl || !isOnline) return;
+    void refreshCatalogSilently(gasUrl, true);
+  }, [gasUrl, isOnline, refreshCatalogSilently]);
 
   const handleMarkNotificationRead = useCallback((id: string) => {
     setReadNotificationIds((prev) => {
@@ -1932,26 +2237,28 @@ export default function App() {
   if (onboardingPhase === 'active') {
     return (
       <>
-        <FirstLaunchOnboarding
-          isDesktopApp={isDesktopApp}
-          desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
-          settings={launcherSettings}
-          activeTheme={activeTheme}
-          setupState={qbitSetupState}
-          torrentConfig={downloadSnapshot.torrentConfig}
-          torrentConnected={downloadSnapshot.torrentConnected}
-          onSelectTheme={handleSelectOnboardingTheme}
-          onUpdateCustomTheme={handleUpdateCustomTheme}
-          onResetCustomTheme={handleResetCustomTheme}
-          onChangeLanguage={handleChangeLanguage}
-          onRecheckQbit={handleRecheckQbitSetup}
-          onStartQbitInstall={handleStartQbitInstall}
-          onLaunchQbitClient={handleLaunchQbitClient}
-          onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
-          onGenerateQbitPassword={handleGenerateQbitPassword}
-          onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
-          onCompleteOnboarding={handleCompleteOnboarding}
-        />
+        <Suspense fallback={<div className="sa-app-shell h-dvh w-full bg-[#f4f6f9] dark:bg-[#0e141b]" />}>
+          <FirstLaunchOnboarding
+            isDesktopApp={isDesktopApp}
+            desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+            settings={launcherSettings}
+            activeTheme={activeTheme}
+            setupState={qbitSetupState}
+            torrentConfig={downloadSnapshot.torrentConfig}
+            torrentConnected={downloadSnapshot.torrentConnected}
+            onSelectTheme={handleSelectOnboardingTheme}
+            onUpdateCustomTheme={handleUpdateCustomTheme}
+            onResetCustomTheme={handleResetCustomTheme}
+            onChangeLanguage={handleChangeLanguage}
+            onRecheckQbit={handleRecheckQbitSetup}
+            onStartQbitInstall={handleStartQbitInstall}
+            onLaunchQbitClient={handleLaunchQbitClient}
+            onOpenOfficialQbitDownload={handleOpenOfficialQbitDownload}
+            onGenerateQbitPassword={handleGenerateQbitPassword}
+            onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+            onCompleteOnboarding={handleCompleteOnboarding}
+          />
+        </Suspense>
         <CustomCursorOverlay
           enabled={launcherSettings.customCursorEnabled}
           activeTheme={activeTheme}
@@ -1959,6 +2266,13 @@ export default function App() {
       </>
     );
   }
+
+  const shouldMountUpdaterModal =
+    Boolean(updaterBridge) &&
+    (isUpdaterModalOpen ||
+      desktopUpdateState?.status === 'available' ||
+      desktopUpdateState?.status === 'downloading' ||
+      desktopUpdateState?.status === 'downloaded');
 
   return (
     <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#141921] dark:text-[#e5e9f0]">
@@ -1978,6 +2292,7 @@ export default function App() {
         unreadNotificationsCount={unreadNotificationsCount}
         isNotificationCenterOpen={isNotificationCenterOpen}
         onOpenNotifications={handleToggleNotificationCenter}
+        telemetryIntervalMs={effectivePerformance.topBarTelemetryIntervalMs}
         language={launcherSettings.language}
       />
 
@@ -2001,52 +2316,10 @@ export default function App() {
       )}
 
       <main className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
-        {activeSection === 'library' && (
-          <>
-            <LibrarySidebar
-              activeSectionTab={libraryTab}
-              onSelectSectionTab={handleSelectLibraryTab}
-              sectionCounts={sectionCounts}
-              games={filteredGames}
-              selectedGameId={selectedGame?.id || null}
-              genreFilter={genreFilter}
-              onGenreFilterChange={setGenreFilter}
-              availableGenres={availableGenres}
-              favorites={favorites}
-              language={launcherSettings.language}
-              onSelectGame={handleSelectGameOverview}
-            />
-            <LibraryView
-              activeSectionTab={libraryTab}
-              games={filteredGames}
-              totalCount={activeSectionItems.length}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              genreFilter={genreFilter}
-              onGenreFilterChange={setGenreFilter}
-              canRunFilter={canRunFilter}
-              onCanRunFilterChange={
-                launcherSettings.enableCanRunIt ? setCanRunFilter : undefined
-              }
-              canRunItEnabled={launcherSettings.enableCanRunIt}
-              onClearAllFilters={handleClearAllLibraryFilters}
-              availableGenres={availableGenres}
-              favorites={favorites}
-              systemSpecs={systemSpecs}
-              language={launcherSettings.language}
-              onToggleFavorite={handleToggleFavorite}
-              onSelectGame={handleSelectGameOverview}
-              studios={catalog.profil}
-              onSelectStudio={handleSelectGameOverview}
-            />
-          </>
-        )}
-
         {activeSection === 'store' && (
           <StoreView
             catalog={catalog}
+            isCatalogLoading={isCatalogHydrating}
             favorites={favorites}
             systemSpecs={systemSpecs}
             canRunItEnabled={launcherSettings.enableCanRunIt}
@@ -2060,259 +2333,355 @@ export default function App() {
           />
         )}
 
-        {activeSection === 'studios' && (
-          <StudiosView
-            studios={catalog.profil}
-            language={launcherSettings.language}
-            onSelectStudio={handleSelectGameOverview}
-            onBackHome={handleBackHome}
-          />
-        )}
+        <Suspense fallback={<ViewLoadingSpinner />}>
+          {activeSection === 'library' && (
+            <>
+              <LibrarySidebar
+                activeSectionTab={libraryTab}
+                onSelectSectionTab={handleSelectLibraryTab}
+                sectionCounts={sectionCounts}
+                games={filteredGames}
+                selectedGameId={selectedGame?.id || null}
+                genreFilter={genreFilter}
+                onGenreFilterChange={setGenreFilter}
+                availableGenres={availableGenres}
+                favorites={favorites}
+                language={launcherSettings.language}
+                onSelectGame={handleSelectGameOverview}
+              />
+              <LibraryView
+                activeSectionTab={libraryTab}
+                games={filteredGames}
+                totalCount={activeSectionItems.length}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                genreFilter={genreFilter}
+                onGenreFilterChange={setGenreFilter}
+                canRunFilter={canRunFilter}
+                onCanRunFilterChange={
+                  launcherSettings.enableCanRunIt ? setCanRunFilter : undefined
+                }
+                canRunItEnabled={launcherSettings.enableCanRunIt}
+                onClearAllFilters={handleClearAllLibraryFilters}
+                availableGenres={availableGenres}
+                favorites={favorites}
+                systemSpecs={systemSpecs}
+                language={launcherSettings.language}
+                onToggleFavorite={handleToggleFavorite}
+                onSelectGame={handleSelectGameOverview}
+                studios={catalog.profil}
+                onSelectStudio={handleSelectGameOverview}
+              />
+            </>
+          )}
 
-        {activeSection === 'deals' && (
-          <GameDealsView
-            language={launcherSettings.language}
-            activeTheme={activeTheme}
-            onOpenExternal={handleOpenExternalUrl}
-            onNotify={notify}
-          />
-        )}
+          {activeSection === 'studios' && (
+            <StudiosView
+              studios={catalog.profil}
+              language={launcherSettings.language}
+              onSelectStudio={handleSelectGameOverview}
+              onBackHome={handleBackHome}
+            />
+          )}
 
-        {activeSection === 'extras' && (
-          <ExtrasView
+          {activeSection === 'deals' && (
+            <GameDealsView
+              language={launcherSettings.language}
+              activeTheme={activeTheme}
+              onOpenExternal={handleOpenExternalUrl}
+              onNotify={notify}
+            />
+          )}
+
+          {activeSection === 'extras' && (
+            <ExtrasView
+              catalog={catalog}
+              hasLiveUrl={Boolean(gasUrl)}
+              language={launcherSettings.language}
+              onSelectItem={handleSelectGameOverview}
+            />
+          )}
+
+          {activeSection === 'requests' && (
+            <RequestsView
+              gasUrl={gasUrl}
+              language={launcherSettings.language}
+              activeTheme={activeTheme}
+              lightMode={launcherSettings.lightMode}
+              onNotify={notify}
+            />
+          )}
+
+          {activeSection === 'downloads' && (
+            <DownloadsView
+              snapshot={downloadSnapshot}
+              isDesktopApp={Boolean(downloadsBridge)}
+              freeSpaceGB={systemSpecs.freeSpaceGB ?? null}
+              language={launcherSettings.language}
+              reduceVisualEffects={effectivePerformance.reduceVisualEffects}
+              onStartDownload={handleStartDownloadPayload}
+              onAddTorrentFile={handleAddTorrentFile}
+              onPauseDownload={handlePauseDownload}
+              onResumeDownload={handleResumeDownload}
+              onCancelDownload={handleCancelDownload}
+              onRetryDownload={handleRetryDownload}
+              onRemoveDownload={handleRemoveDownload}
+              onClearCompleted={handleClearCompletedDownloads}
+              onChooseFolder={handleChooseDownloadFolder}
+              onOpenFolder={handleOpenDownloadFolder}
+              onOpenFile={handleOpenDownloadedFile}
+              onOpenExternal={handleOpenExternalUrl}
+              onOpenTorrentSettings={handleOpenTorrentSettings}
+              onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+            />
+          )}
+
+          {activeSection === 'hardware' && (
+            <HardwareMonitorView
+              isDesktopApp={isDesktopApp}
+              language={launcherSettings.language}
+              presentMonSetupState={presentMonSetupState}
+              onOpenPresentMonManager={handleOpenPresentMonManager}
+              catalogGames={catalog.game}
+              effectivePerformance={effectivePerformance}
+            />
+          )}
+
+          {activeSection === 'settings' && (
+            <SettingsView
+              settings={launcherSettings}
+              isDesktopApp={isDesktopApp}
+              desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+              isUpdatingAutoLaunch={isUpdatingAutoLaunch}
+              downloadFolder={downloadSnapshot.downloadFolder}
+              torrentConfig={downloadSnapshot.torrentConfig}
+              torrentConnected={downloadSnapshot.torrentConnected}
+              torrentVersion={downloadSnapshot.torrentVersion}
+              torrentWebApiVersion={downloadSnapshot.torrentWebApiVersion}
+              torrentError={downloadSnapshot.torrentError}
+              onChangeLanguage={handleChangeLanguage}
+              onToggleStartWithComputer={handleToggleStartWithComputer}
+              onChangeCloseBehavior={handleChangeCloseBehavior}
+              onExitApplication={handleExitApplication}
+              onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
+              onToggleCompactNavbar={handleToggleCompactNavbar}
+              onToggleCustomCursor={handleToggleCustomCursor}
+              onToggleLightMode={handleToggleLightMode}
+              onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
+              onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
+              onUpdateCustomTheme={handleUpdateCustomTheme}
+              onResetCustomTheme={handleResetCustomTheme}
+              onToggleAmbientMusic={handleToggleAmbientMusic}
+              onToggleUiClickSounds={handleToggleUiClickSounds}
+              onChangeSoundVolume={handleChangeSoundVolume}
+              onPreviewSoundVolume={handlePreviewSoundVolume}
+              onResetDefaults={handleResetLauncherSettings}
+              onChooseDownloadFolder={handleChooseDownloadFolder}
+              onOpenDownloadFolder={() => handleOpenDownloadFolder()}
+              onOpenExternal={handleOpenExternalUrl}
+              onDetectTorrentClient={handleDetectTorrentClient}
+              onSaveTorrentConfig={handleSaveTorrentConfig}
+              onTestTorrentConnection={handleTestTorrentConnection}
+              qbitSetupState={qbitSetupState}
+              onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+              presentMonSetupState={presentMonSetupState}
+              onOpenPresentMonManager={handleOpenPresentMonManager}
+              onCheckPresentMonUpdates={handleCheckPresentMonUpdates}
+              onStartPresentMonInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+              onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
+              onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+              onReplayOnboarding={!isDesktopApp ? handleReplayOnboarding : undefined}
+              effectivePerformance={effectivePerformance}
+              onChangePerformanceMode={handleChangePerformanceMode}
+              onUpdatePerformanceAdvanced={handleUpdatePerformanceAdvanced}
+              systemSpecs={systemSpecs}
+              isRefreshingSpecs={isRefreshingSpecs}
+              onRefreshSpecs={handleRefreshSystemSpecs}
+              onSaveCustomSpecs={handleSaveCustomSystemSpecs}
+              onResetCustomSpecs={handleResetSystemSpecs}
+              desktopUpdateState={desktopUpdateState}
+              onOpenUpdater={() => setIsUpdaterModalOpen(true)}
+              onCheckForUpdates={handleCheckForUpdates}
+              onOpenSpinWheel={handleOpenSpinWheel}
+              onOpenHypervisorGuide={() => setIsHypervisorGuideOpen(true)}
+              onNavigateSection={setActiveSection}
+              onImportSettings={handleImportLauncherSettings}
+              onNotify={notify}
+              focusToolRequest={settingsFocusToolRequest}
+            />
+          )}
+        </Suspense>
+      </main>
+
+      <Suspense fallback={null}>
+        {selectedStudio && (
+          <StudioDetailModal
+            studio={selectedStudio}
             catalog={catalog}
-            hasLiveUrl={Boolean(gasUrl)}
+            favorites={favorites}
             language={launcherSettings.language}
-            onSelectItem={handleSelectGameOverview}
+            disableEscape={Boolean(selectedGame)}
+            onToggleFavorite={handleToggleFavorite}
+            onSelectItem={(item) => handleOpenGame(item, 'overview')}
+            onClose={() => setSelectedStudio(null)}
           />
         )}
 
-        {activeSection === 'requests' && (
-          <RequestsView
-            gasUrl={gasUrl}
-            language={launcherSettings.language}
-            activeTheme={activeTheme}
-            lightMode={launcherSettings.lightMode}
-            onNotify={notify}
-          />
-        )}
-
-        {activeSection === 'downloads' && (
-          <DownloadsView
-            snapshot={downloadSnapshot}
+        {selectedGame && (
+          <GameDetailModal
+            game={selectedGame}
+            catalog={catalog}
+            initialViewMode={modalViewMode}
+            favorites={favorites}
+            systemSpecs={systemSpecs}
+            canRunItEnabled={launcherSettings.enableCanRunIt}
+            isRefreshingSpecs={isRefreshingSpecs}
             isDesktopApp={Boolean(downloadsBridge)}
-            freeSpaceGB={systemSpecs.freeSpaceGB ?? null}
             language={launcherSettings.language}
-            onStartDownload={handleStartDownloadPayload}
-            onAddTorrentFile={handleAddTorrentFile}
+            downloadTasks={downloadSnapshot.tasks}
+            onStartDownload={handleStartMirrorDownload}
             onPauseDownload={handlePauseDownload}
             onResumeDownload={handleResumeDownload}
             onCancelDownload={handleCancelDownload}
-            onRetryDownload={handleRetryDownload}
-            onRemoveDownload={handleRemoveDownload}
-            onClearCompleted={handleClearCompletedDownloads}
-            onChooseFolder={handleChooseDownloadFolder}
-            onOpenFolder={handleOpenDownloadFolder}
-            onOpenFile={handleOpenDownloadedFile}
-            onOpenExternal={handleOpenExternalUrl}
-            onOpenTorrentSettings={handleOpenTorrentSettings}
-            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
+            onOpenDownloadFolder={handleOpenDownloadFolder}
+            onOpenDownloadsTab={() => setActiveSection('downloads')}
+            onRefreshSpecs={handleRefreshSystemSpecs}
+            onSaveCustomSpecs={handleSaveCustomSystemSpecs}
+            onResetCustomSpecs={handleResetSystemSpecs}
+            onToggleFavorite={handleToggleFavorite}
+            onJumpToItem={(item) => handleOpenGame(item, 'overview')}
+            onSelectStudio={(studio) => {
+              handleCloseGame();
+              setSelectedStudio(studio);
+            }}
+            celebrateWinKey={celebrateWinKey}
+            onClose={handleCloseGame}
           />
         )}
 
-        {activeSection === 'hardware' && (
-          <HardwareMonitorView
-            isDesktopApp={isDesktopApp}
+        {shouldMountUpdaterModal && (
+          <DesktopUpdaterModal
+            isOpen={isUpdaterModalOpen}
+            activeTheme={activeTheme}
             language={launcherSettings.language}
-            presentMonSetupState={presentMonSetupState}
-            onOpenPresentMonManager={handleOpenPresentMonManager}
-            catalogGames={catalog.game}
+            state={desktopUpdateState}
+            fetchedReleaseNotes={fetchedUpdateReleaseNotes}
+            onClose={() => setIsUpdaterModalOpen(false)}
+            onCheckForUpdates={handleCheckForUpdates}
+            onDownloadUpdate={handleDownloadUpdate}
+            onInstallAndRestart={handleInstallAndRestart}
+            onPostponeUpdate={handlePostponeUpdate}
+            onOpenModal={() => setIsUpdaterModalOpen(true)}
+            onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
           />
         )}
 
-        {activeSection === 'settings' && (
-          <SettingsView
-            settings={launcherSettings}
-            isDesktopApp={isDesktopApp}
-            desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
-            isUpdatingAutoLaunch={isUpdatingAutoLaunch}
-            downloadFolder={downloadSnapshot.downloadFolder}
+        {isUpdateHistoryOpen && (
+          <UpdateHistoryModal
+            isOpen={isUpdateHistoryOpen}
+            activeTheme={activeTheme}
+            language={launcherSettings.language}
+            currentVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
+            isDevMode={!isPackagedBuild || import.meta.env.DEV}
+            isJustUpdated={isJustUpdatedOpen}
+            justUpdatedFromVersion={justUpdatedFromVersion}
+            availableUpdateVersion={desktopUpdateState?.availableVersion || null}
+            updaterBridge={updaterBridge}
+            onClose={() => {
+              setIsUpdateHistoryOpen(false);
+              setIsJustUpdatedOpen(false);
+            }}
+            onCheckForUpdates={
+              updaterBridge
+                ? () => {
+                    setIsUpdateHistoryOpen(false);
+                    setIsJustUpdatedOpen(false);
+                    setIsUpdaterModalOpen(true);
+                    handleCheckForUpdates();
+                  }
+                : undefined
+            }
+          />
+        )}
+
+        {isSpinWheelOpen && (
+          <SpinWheelModal
+            isOpen={isSpinWheelOpen}
+            catalog={catalog}
+            activeTheme={activeTheme}
+            language={launcherSettings.language}
+            enableSounds={
+              soundEnabled && launcherSettings.uiClickSoundsEnabled && hasSoundVolume
+            }
+            onSelectGame={(game) =>
+              handleOpenGame(game, 'overview', { celebrateWin: true })
+            }
+            onClose={() => setIsSpinWheelOpen(false)}
+          />
+        )}
+
+        {isQbitSetupModalOpen && (
+          <QbitSetupWizardModal
+            isOpen={isQbitSetupModalOpen}
+            isDesktopApp={Boolean(qbitSetupBridge || downloadsBridge)}
+            language={launcherSettings.language}
+            setupState={qbitSetupState}
             torrentConfig={downloadSnapshot.torrentConfig}
             torrentConnected={downloadSnapshot.torrentConnected}
-            torrentVersion={downloadSnapshot.torrentVersion}
-            torrentWebApiVersion={downloadSnapshot.torrentWebApiVersion}
-            torrentError={downloadSnapshot.torrentError}
-            onChangeLanguage={handleChangeLanguage}
-            onToggleStartWithComputer={handleToggleStartWithComputer}
-            onChangeCloseBehavior={handleChangeCloseBehavior}
-            onExitApplication={handleExitApplication}
-            onToggleEnableCanRunIt={handleToggleEnableCanRunIt}
-            onToggleCompactNavbar={handleToggleCompactNavbar}
-            onToggleCustomCursor={handleToggleCustomCursor}
-            onToggleLightMode={handleToggleLightMode}
-            onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
-            onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
-            onUpdateCustomTheme={handleUpdateCustomTheme}
-            onResetCustomTheme={handleResetCustomTheme}
-            onToggleAmbientMusic={handleToggleAmbientMusic}
-            onToggleUiClickSounds={handleToggleUiClickSounds}
-            onChangeSoundVolume={handleChangeSoundVolume}
-            onPreviewSoundVolume={handlePreviewSoundVolume}
-            onResetDefaults={handleResetLauncherSettings}
-            onChooseDownloadFolder={handleChooseDownloadFolder}
-            onOpenDownloadFolder={() => handleOpenDownloadFolder()}
-            onOpenExternal={handleOpenExternalUrl}
-            onDetectTorrentClient={handleDetectTorrentClient}
-            onSaveTorrentConfig={handleSaveTorrentConfig}
-            onTestTorrentConnection={handleTestTorrentConnection}
-            qbitSetupState={qbitSetupState}
-            onOpenQbitSetupWizard={handleOpenQbitSetupWizard}
-            presentMonSetupState={presentMonSetupState}
-            onOpenPresentMonManager={handleOpenPresentMonManager}
-            onCheckPresentMonUpdates={handleCheckPresentMonUpdates}
-            onStartPresentMonInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
-            onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
-            onOpenNotifications={() => setIsNotificationCenterOpen(true)}
-            onReplayOnboarding={!isDesktopApp ? handleReplayOnboarding : undefined}
+            onClose={() => setIsQbitSetupModalOpen(false)}
+            onDismissFirstLaunch={handleDismissQbitSetup}
+            onRecheck={handleRecheckQbitSetup}
+            onStartInstall={handleStartQbitInstall}
+            onLaunchClient={handleLaunchQbitClient}
+            onOpenOfficialDownload={handleOpenOfficialQbitDownload}
+            onGeneratePassword={handleGenerateQbitPassword}
+            onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
+            onOpenSettings={handleOpenTorrentSettings}
           />
         )}
-      </main>
 
-      <StudioDetailModal
-        studio={selectedStudio}
-        catalog={catalog}
-        favorites={favorites}
-        language={launcherSettings.language}
-        disableEscape={Boolean(selectedGame)}
-        onToggleFavorite={handleToggleFavorite}
-        onSelectItem={(item) => handleOpenGame(item, 'overview')}
-        onClose={() => setSelectedStudio(null)}
-      />
+        {isPresentMonModalOpen && (
+          <PresentMonSetupModal
+            isOpen={isPresentMonModalOpen}
+            isDesktopApp={Boolean(presentMonSetupBridge || downloadsBridge)}
+            language={launcherSettings.language}
+            setupState={presentMonSetupState}
+            onClose={() => setIsPresentMonModalOpen(false)}
+            onDismiss={handleDismissPresentMonPrompt}
+            onCheckUpdates={handleCheckPresentMonUpdates}
+            onStartInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
+            onCancelOperation={handleCancelPresentMonOperation}
+            onOpenOfficialReleases={handleOpenOfficialPresentMonReleases}
+          />
+        )}
 
-      <GameDetailModal
-        game={selectedGame}
-        catalog={catalog}
-        initialViewMode={modalViewMode}
-        favorites={favorites}
-        systemSpecs={systemSpecs}
-        canRunItEnabled={launcherSettings.enableCanRunIt}
-        isRefreshingSpecs={isRefreshingSpecs}
-        isDesktopApp={Boolean(downloadsBridge)}
-        language={launcherSettings.language}
-        downloadTasks={downloadSnapshot.tasks}
-        onStartDownload={handleStartMirrorDownload}
-        onPauseDownload={handlePauseDownload}
-        onResumeDownload={handleResumeDownload}
-        onCancelDownload={handleCancelDownload}
-        onOpenDownloadFolder={handleOpenDownloadFolder}
-        onOpenDownloadsTab={() => setActiveSection('downloads')}
-        onRefreshSpecs={handleRefreshSystemSpecs}
-        onSaveCustomSpecs={handleSaveCustomSystemSpecs}
-        onResetCustomSpecs={handleResetSystemSpecs}
-        onToggleFavorite={handleToggleFavorite}
-        onJumpToItem={(item) => handleOpenGame(item, 'overview')}
-        onSelectStudio={(studio) => {
-          handleCloseGame();
-          setSelectedStudio(studio);
-        }}
-        celebrateWinKey={celebrateWinKey}
-        onClose={handleCloseGame}
-      />
+        {isHypervisorGuideOpen && (
+          <HypervisorGuideModal
+            isOpen={isHypervisorGuideOpen}
+            onClose={() => setIsHypervisorGuideOpen(false)}
+          />
+        )}
+      </Suspense>
 
-      {updaterBridge && (
-        <DesktopUpdaterModal
-          isOpen={isUpdaterModalOpen}
+      {isNotificationCenterOpen && (
+        <NotificationCenterDrawer
+          isOpen={isNotificationCenterOpen}
           activeTheme={activeTheme}
           language={launcherSettings.language}
-          state={desktopUpdateState}
-          fetchedReleaseNotes={fetchedUpdateReleaseNotes}
-          onClose={() => setIsUpdaterModalOpen(false)}
-          onCheckForUpdates={handleCheckForUpdates}
-          onDownloadUpdate={handleDownloadUpdate}
-          onInstallAndRestart={handleInstallAndRestart}
-          onPostponeUpdate={handlePostponeUpdate}
-          onOpenModal={() => setIsUpdaterModalOpen(true)}
-          onOpenUpdateHistory={() => setIsUpdateHistoryOpen(true)}
+          feed={notificationFeed}
+          readIds={readNotificationIds}
+          isLiveDataReady={isLiveNotificationDataReady}
+          isSyncing={isSyncingCatalog}
+          onSyncNow={gasUrl ? handleManualNotificationSync : undefined}
+          onClose={() => setIsNotificationCenterOpen(false)}
+          onMarkRead={handleMarkNotificationRead}
+          onMarkAllRead={handleMarkAllNotificationsRead}
+          onOpenGame={(item) => handleOpenGame(item, 'overview')}
+          onOpenNewsSection={() => setActiveSection('extras')}
         />
       )}
-
-      <NotificationCenterDrawer
-        isOpen={isNotificationCenterOpen}
-        activeTheme={activeTheme}
-        language={launcherSettings.language}
-        feed={notificationFeed}
-        readIds={readNotificationIds}
-        onClose={() => setIsNotificationCenterOpen(false)}
-        onMarkRead={handleMarkNotificationRead}
-        onMarkAllRead={handleMarkAllNotificationsRead}
-        onOpenGame={(item) => handleOpenGame(item, 'overview')}
-        onOpenNewsSection={() => setActiveSection('extras')}
-      />
-
-      <UpdateHistoryModal
-        isOpen={isUpdateHistoryOpen}
-        activeTheme={activeTheme}
-        language={launcherSettings.language}
-        currentVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
-        isDevMode={!isPackagedBuild || import.meta.env.DEV}
-        availableUpdateVersion={desktopUpdateState?.availableVersion || null}
-        updaterBridge={updaterBridge}
-        onClose={() => setIsUpdateHistoryOpen(false)}
-        onCheckForUpdates={
-          updaterBridge
-            ? () => {
-                setIsUpdateHistoryOpen(false);
-                setIsUpdaterModalOpen(true);
-                handleCheckForUpdates();
-              }
-            : undefined
-        }
-      />
-
-      <SpinWheelModal
-        isOpen={isSpinWheelOpen}
-        catalog={catalog}
-        activeTheme={activeTheme}
-        language={launcherSettings.language}
-        enableSounds={
-          soundEnabled && launcherSettings.uiClickSoundsEnabled && hasSoundVolume
-        }
-        onSelectGame={(game) =>
-          handleOpenGame(game, 'overview', { celebrateWin: true })
-        }
-        onClose={() => setIsSpinWheelOpen(false)}
-      />
-
-      <QbitSetupWizardModal
-        isOpen={isQbitSetupModalOpen}
-        isDesktopApp={Boolean(qbitSetupBridge || downloadsBridge)}
-        language={launcherSettings.language}
-        setupState={qbitSetupState}
-        torrentConfig={downloadSnapshot.torrentConfig}
-        torrentConnected={downloadSnapshot.torrentConnected}
-        onClose={() => setIsQbitSetupModalOpen(false)}
-        onDismissFirstLaunch={handleDismissQbitSetup}
-        onRecheck={handleRecheckQbitSetup}
-        onStartInstall={handleStartQbitInstall}
-        onLaunchClient={handleLaunchQbitClient}
-        onOpenOfficialDownload={handleOpenOfficialQbitDownload}
-        onGeneratePassword={handleGenerateQbitPassword}
-        onSaveAndVerifyWebUi={handleSaveAndVerifyQbitWebUi}
-        onOpenSettings={handleOpenTorrentSettings}
-      />
-
-      <PresentMonSetupModal
-        isOpen={isPresentMonModalOpen}
-        isDesktopApp={Boolean(presentMonSetupBridge || downloadsBridge)}
-        language={launcherSettings.language}
-        setupState={presentMonSetupState}
-        onClose={() => setIsPresentMonModalOpen(false)}
-        onDismiss={handleDismissPresentMonPrompt}
-        onCheckUpdates={handleCheckPresentMonUpdates}
-        onStartInstallOrUpdate={handleStartPresentMonInstallOrUpdate}
-        onCancelOperation={handleCancelPresentMonOperation}
-        onOpenOfficialReleases={handleOpenOfficialPresentMonReleases}
-      />
 
       {/* Persistent Offline Mode / Auto-hiding Online Mode Badge */}
       {connectivityBadge !== 'hidden' && (
