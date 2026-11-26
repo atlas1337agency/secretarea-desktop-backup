@@ -13,6 +13,7 @@ const { createGamingSessionManager } = require('./hardware/gamingSessionManager.
 const { createPresentMonManager } = require('./hardware/presentMonManager.cjs');
 const { createPcCleaner } = require('./hardware/pcCleaner.cjs');
 const { createHardwareIntelligenceManager } = require('./hardware/hardwareIntelligenceIpc.cjs');
+const { createOpenSourceToolsManager } = require('./hardware/openSourceToolsManager.cjs');
 const { registerDealsNetworkBridge } = require('./deals/dealsNetworkBridge.cjs');
 const { createDealsCredentialsManager } = require('./deals/dealsCredentialsManager.cjs');
 
@@ -32,6 +33,7 @@ let qbitSetupManager = null;
 let presentMonManager = null;
 let hardwareMonitor = null;
 let hardwareIntelligenceManager = null;
+let openSourceToolsManager = null;
 let gamingSessionManager = null;
 let pcCleaner = null;
 
@@ -472,6 +474,19 @@ function registerUpdaterIpc() {
     });
     return getDesktopSettingsPayload();
   });
+
+  ipcMain.handle('settings:set-performance', (event, payload) => {
+    if (!isTrustedSender(event)) return null;
+    const normalized = normalizePerformancePayload(payload);
+    writeDesktopLauncherSettings({ performanceSettings: normalized });
+    applyPerformanceConfigToSubsystems(normalized);
+    return { ok: true, effective: normalized };
+  });
+
+  ipcMain.handle('app:get-performance-metrics', (event) => {
+    if (!isTrustedSender(event)) return null;
+    return collectDesktopPerformanceMetrics();
+  });
 }
 
 const releaseNotesCache = new Map();
@@ -731,6 +746,11 @@ function performFullAppShutdown() {
     // ignore
   }
   try {
+    if (openSourceToolsManager) openSourceToolsManager.shutdown();
+  } catch {
+    // ignore
+  }
+  try {
     if (downloadManager) downloadManager.shutdown();
   } catch {
     // ignore
@@ -848,6 +868,168 @@ function applyCloseBehaviorSetting(rawBehavior) {
     destroySystemTray();
   }
   return getDesktopSettingsPayload();
+}
+
+const DEFAULT_DESKTOP_PERF_CONFIG = {
+  mode: 'balanced',
+  pauseBackgroundWhenMinimized: true,
+  reduceVisualEffects: false,
+  hardwarePollIntervalMs: 2500,
+  downloadUiThrottleMs: 350,
+  torrentActivePollMs: 1500,
+  torrentIdlePollMs: 12000,
+  adaptiveTorrentPolling: true,
+  deferBackgroundChecks: true,
+};
+
+let activePerfConfig = { ...DEFAULT_DESKTOP_PERF_CONFIG };
+let prevMainCpuSample = process.cpuUsage();
+let prevMainCpuAt = Date.now();
+
+function normalizePerformancePayload(raw) {
+  const src = raw && typeof raw === 'object' ? raw : {};
+  const mode = src.mode === 'eco' || src.mode === 'performance' ? src.mode : 'balanced';
+  const clamp = (val, min, max, fallback) => {
+    const num = Number(val);
+    return Number.isFinite(num) ? Math.min(max, Math.max(min, Math.round(num))) : fallback;
+  };
+  return {
+    mode,
+    pauseBackgroundWhenMinimized:
+      typeof src.pauseBackgroundWhenMinimized === 'boolean'
+        ? src.pauseBackgroundWhenMinimized
+        : DEFAULT_DESKTOP_PERF_CONFIG.pauseBackgroundWhenMinimized,
+    reduceVisualEffects:
+      typeof src.reduceVisualEffects === 'boolean'
+        ? src.reduceVisualEffects
+        : DEFAULT_DESKTOP_PERF_CONFIG.reduceVisualEffects,
+    hardwarePollIntervalMs: clamp(src.hardwarePollIntervalMs, 1000, 10000, DEFAULT_DESKTOP_PERF_CONFIG.hardwarePollIntervalMs),
+    downloadUiThrottleMs: clamp(src.downloadUiThrottleMs, 150, 2000, DEFAULT_DESKTOP_PERF_CONFIG.downloadUiThrottleMs),
+    torrentActivePollMs: clamp(src.torrentActivePollMs, 1000, 10000, DEFAULT_DESKTOP_PERF_CONFIG.torrentActivePollMs),
+    torrentIdlePollMs: clamp(src.torrentIdlePollMs, 3000, 60000, DEFAULT_DESKTOP_PERF_CONFIG.torrentIdlePollMs),
+    adaptiveTorrentPolling:
+      typeof src.adaptiveTorrentPolling === 'boolean'
+        ? src.adaptiveTorrentPolling
+        : DEFAULT_DESKTOP_PERF_CONFIG.adaptiveTorrentPolling,
+    deferBackgroundChecks:
+      typeof src.deferBackgroundChecks === 'boolean'
+        ? src.deferBackgroundChecks
+        : DEFAULT_DESKTOP_PERF_CONFIG.deferBackgroundChecks,
+  };
+}
+
+function applyPerformanceConfigToSubsystems(cfg) {
+  activePerfConfig = normalizePerformancePayload(cfg);
+  if (downloadManager && typeof downloadManager.setPerformanceConfig === 'function') {
+    downloadManager.setPerformanceConfig({
+      throttleMs: activePerfConfig.downloadUiThrottleMs,
+      torrentActivePollMs: activePerfConfig.torrentActivePollMs,
+      torrentIdlePollMs: activePerfConfig.torrentIdlePollMs,
+      adaptiveTorrentPolling: activePerfConfig.adaptiveTorrentPolling,
+      pauseOnMinimize: activePerfConfig.pauseBackgroundWhenMinimized,
+    });
+  }
+  if (hardwareMonitor && typeof hardwareMonitor.setPerformanceConfig === 'function') {
+    hardwareMonitor.setPerformanceConfig({
+      pauseOnMinimize: activePerfConfig.pauseBackgroundWhenMinimized,
+    });
+  }
+  return activePerfConfig;
+}
+
+function collectDesktopPerformanceMetrics() {
+  const now = Date.now();
+  const elapsedMs = Math.max(50, now - prevMainCpuAt);
+  const cpuDelta = process.cpuUsage(prevMainCpuSample);
+  prevMainCpuSample = process.cpuUsage();
+  prevMainCpuAt = now;
+
+  const cpuCoresCount = Math.max(1, os.cpus()?.length || 1);
+  const mainCpuPercent = Number(
+    Math.min(100, Math.max(0, ((cpuDelta.user + cpuDelta.system) / 1000 / (elapsedMs * cpuCoresCount)) * 100)).toFixed(2)
+  );
+  const memUsage = process.memoryUsage();
+  const mainProcessRssMB = Number((memUsage.rss / (1024 * 1024)).toFixed(1));
+  const mainHeapUsedMB = Number((memUsage.heapUsed / (1024 * 1024)).toFixed(1));
+
+  let rawAppMetrics = [];
+  try {
+    rawAppMetrics = typeof app.getAppMetrics === 'function' ? app.getAppMetrics() : [];
+  } catch {
+    rawAppMetrics = [];
+  }
+
+  let rendererRssMB = 0;
+  let gpuProcessRssMB = 0;
+  const processes = rawAppMetrics.map((proc) => {
+    const workingSetKB = Number(proc?.memory?.workingSetSize || 0);
+    const rssMB = Number((workingSetKB / 1024).toFixed(1));
+    const type = String(proc?.type || 'Process');
+    const lowerType = type.toLowerCase();
+    if (lowerType.includes('tab') || lowerType.includes('renderer')) {
+      rendererRssMB += rssMB;
+    } else if (lowerType.includes('gpu')) {
+      gpuProcessRssMB += rssMB;
+    }
+    return {
+      pid: Number(proc?.pid || 0),
+      type,
+      name: typeof proc?.name === 'string' && proc.name ? proc.name : type,
+      cpuPercent: Number((Number(proc?.cpu?.percentCPUUsage || 0)).toFixed(2)),
+      rssMB,
+    };
+  });
+
+  const totalAppRssMB =
+    processes.length > 0
+      ? Number(processes.reduce((acc, p) => acc + p.rssMB, 0).toFixed(1))
+      : mainProcessRssMB;
+
+  const hwStats =
+    hardwareMonitor && typeof hardwareMonitor.getRuntimeStats === 'function'
+      ? hardwareMonitor.getRuntimeStats()
+      : null;
+  const dlStats =
+    downloadManager && typeof downloadManager.getRuntimeStats === 'function'
+      ? downloadManager.getRuntimeStats()
+      : null;
+
+  const winHidden = Boolean(
+    !mainWindow ||
+      mainWindow.isDestroyed() ||
+      mainWindow.isMinimized() ||
+      !mainWindow.isVisible()
+  );
+
+  return {
+    sampledAt: now,
+    mainCpuPercent,
+    mainProcessRssMB,
+    mainHeapUsedMB,
+    rendererRssMB: Number(rendererRssMB.toFixed(1)),
+    gpuProcessRssMB: Number(gpuProcessRssMB.toFixed(1)),
+    totalAppRssMB,
+    processCount: processes.length || 1,
+    processes,
+    windowHidden: winHidden,
+    pollers: {
+      hardwareMonitorActive: Boolean(hwStats?.isMonitoring),
+      hardwarePausedByHide: Boolean(hwStats?.pausedByHide),
+      hardwareIntervalMs: hwStats?.intervalMs ?? null,
+      lastHardwareSampleMs: hwStats?.lastSampleDurationMs ?? null,
+      torrentPollerActive: Boolean(dlStats?.torrentPollerActive),
+      torrentPollIntervalMs: dlStats?.torrentPollIntervalMs ?? null,
+      activeDownloadsCount:
+        Number(dlStats?.activeHttpCount || 0) +
+        Number(dlStats?.activeMegaCount || 0) +
+        Number(dlStats?.activeElectronCount || 0),
+      gamingSessionActive: Boolean(
+        gamingSessionManager &&
+          typeof gamingSessionManager.isActiveSession === 'function' &&
+          gamingSessionManager.isActiveSession()
+      ),
+    },
+  };
 }
 
 let cachedHardwareProfile = null;
@@ -1186,23 +1368,42 @@ function createWindow(options = {}) {
 
     if (!hasCheckedOnStartup && app.isPackaged) {
       hasCheckedOnStartup = true;
+      const delayMs = activePerfConfig.deferBackgroundChecks ? 10000 : 2500;
       setTimeout(() => {
         void runUpdateCheck({ manual: false });
-      }, 2500);
+      }, delayMs);
     }
   });
 
-  mainWindow.on('hide', () => {
+  const handleWindowBackgrounded = () => {
+    if (!activePerfConfig.pauseBackgroundWhenMinimized) return;
     if (hardwareMonitor) {
       hardwareMonitor.pauseForHidden();
     }
-  });
+    if (gamingSessionManager && typeof gamingSessionManager.pauseForHidden === 'function') {
+      gamingSessionManager.pauseForHidden();
+    }
+    if (downloadManager && typeof downloadManager.onWindowHidden === 'function') {
+      downloadManager.onWindowHidden();
+    }
+  };
 
-  mainWindow.on('show', () => {
+  const handleWindowForegrounded = () => {
     if (hardwareMonitor) {
       hardwareMonitor.resumeFromHidden();
     }
-  });
+    if (gamingSessionManager && typeof gamingSessionManager.resumeFromHidden === 'function') {
+      gamingSessionManager.resumeFromHidden();
+    }
+    if (downloadManager && typeof downloadManager.onWindowShown === 'function') {
+      downloadManager.onWindowShown();
+    }
+  };
+
+  mainWindow.on('hide', handleWindowBackgrounded);
+  mainWindow.on('minimize', handleWindowBackgrounded);
+  mainWindow.on('show', handleWindowForegrounded);
+  mainWindow.on('restore', handleWindowForegrounded);
 
   mainWindow.on('close', (event) => {
     const persisted = readDesktopLauncherSettings();
@@ -1395,8 +1596,18 @@ app.whenReady().then(() => {
   });
   pcCleaner.registerIpc(ipcMain, isTrustedSender);
 
+  openSourceToolsManager = createOpenSourceToolsManager({
+    getMainWindow: () => mainWindow,
+    getUserDataPath: () => app.getPath('userData'),
+    readSettings: readDesktopLauncherSettings,
+    writeSettings: writeDesktopLauncherSettings,
+  });
+  openSourceToolsManager.registerIpc(ipcMain, isTrustedSender);
+
   hardwareMonitor = createHardwareMonitor({
     getMainWindow: () => mainWindow,
+    getLhmLibraryInfo: () =>
+      openSourceToolsManager ? openSourceToolsManager.getInstalledLibraryInfo('librehardwaremonitor') : null,
     onSnapshot: (snap) => {
       if (gamingSessionManager) {
         gamingSessionManager.ingestHardwareSnapshot(snap);
@@ -1409,6 +1620,12 @@ app.whenReady().then(() => {
     getMainWindow: () => mainWindow,
     getUserDataPath: () => app.getPath('userData'),
     getLatestSnapshot: () => (hardwareMonitor ? hardwareMonitor.getLastSnapshot() : null),
+    getFreshSnapshot: () => (hardwareMonitor ? hardwareMonitor.getSnapshot() : null),
+    getLhmLibraryInfo: () =>
+      openSourceToolsManager ? openSourceToolsManager.getInstalledLibraryInfo('librehardwaremonitor') : null,
+    onElevationDetected: (isElevated) => {
+      if (openSourceToolsManager) openSourceToolsManager.setElevationHint(isElevated);
+    },
   });
   hardwareIntelligenceManager.registerIpc(ipcMain, isTrustedSender);
 
@@ -1418,6 +1635,21 @@ app.whenReady().then(() => {
   registerDealsNetworkBridge(ipcMain, isTrustedSender, readPackageVersion, dealsCredentialsManager);
 
   const persisted = readDesktopLauncherSettings();
+  if (persisted.performanceSettings) {
+    applyPerformanceConfigToSubsystems(persisted.performanceSettings);
+  } else {
+    applyPerformanceConfigToSubsystems(DEFAULT_DESKTOP_PERF_CONFIG);
+  }
+  if (activePerfConfig.deferBackgroundChecks) {
+    setTimeout(() => {
+      if (!isQuitting && openSourceToolsManager) {
+        void openSourceToolsManager.initStartupCheck();
+      }
+    }, 6500);
+  } else {
+    void openSourceToolsManager.initStartupCheck();
+  }
+
   const launchInTray = isTrayLaunchRequested();
   if (persisted.startWithComputer || persisted.closeBehavior === 'minimize-to-tray' || launchInTray) {
     ensureSystemTray();
@@ -1453,6 +1685,9 @@ app.on('before-quit', () => {
   }
   if (presentMonManager) {
     presentMonManager.shutdown();
+  }
+  if (openSourceToolsManager) {
+    openSourceToolsManager.shutdown();
   }
   if (downloadManager) {
     downloadManager.shutdown();

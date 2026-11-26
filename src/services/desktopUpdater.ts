@@ -1,3 +1,5 @@
+import type { EffectivePerformanceConfig, InternalPerfMetricsSnapshot } from '../types';
+
 export type DesktopUpdateStatus =
   | 'idle'
   | 'checking'
@@ -103,6 +105,10 @@ interface SecretAreaSettingsBridge {
   completeOnboarding?: (
     payload?: boolean | { completed?: boolean; version?: string }
   ) => Promise<DesktopSettingsStatePayload | null>;
+  setPerformanceSettings?: (
+    payload: EffectivePerformanceConfig
+  ) => Promise<{ ok: boolean; effective: EffectivePerformanceConfig } | null>;
+  getPerformanceMetrics?: () => Promise<InternalPerfMetricsSnapshot | null>;
 }
 
 interface SecretAreaSystemBridge {

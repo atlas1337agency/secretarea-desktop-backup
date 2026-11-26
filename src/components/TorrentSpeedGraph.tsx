@@ -117,37 +117,65 @@ export function TorrentSpeedGraph({
     return seed;
   });
 
-  // Sample speeds every 1s so the time-series progresses continuously
+  // Sample speeds every 1s only while transfers are active and visible; otherwise back off to 10s when idle & expanded
   const lastSampleTimeRef = useRef<number>(Date.now());
+  const isActiveGraph = hasActiveTransfers || downloadBytesPerSec > 0 || uploadBytesPerSec > 0;
+
   useEffect(() => {
+    if (isCollapsed) return;
+    const sampleIntervalMs = isActiveGraph ? 1000 : 10000;
     const timer = window.setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       const now = Date.now();
       lastSampleTimeRef.current = now;
       const { downloadBytesPerSec: dl, uploadBytesPerSec: ul } = liveSpeedRef.current;
       setHistory((prev) => {
+        const cleanDl = Math.max(0, dl);
+        const cleanUl = Math.max(0, ul);
+        const last = prev[prev.length - 1];
+        const secondLast = prev[prev.length - 2];
+        // When idle and already bookended by 0/0, update timestamp in place on last sample instead of cloning 3600 elements
+        if (
+          cleanDl === 0 &&
+          cleanUl === 0 &&
+          last &&
+          secondLast &&
+          last.downloadBytesPerSec === 0 &&
+          last.uploadBytesPerSec === 0 &&
+          secondLast.downloadBytesPerSec === 0 &&
+          secondLast.uploadBytesPerSec === 0
+        ) {
+          const copy = prev.slice();
+          copy[copy.length - 1] = { timestamp: now, downloadBytesPerSec: 0, uploadBytesPerSec: 0 };
+          return copy;
+        }
         const next = [
           ...prev,
           {
             timestamp: now,
-            downloadBytesPerSec: Math.max(0, dl),
-            uploadBytesPerSec: Math.max(0, ul),
+            downloadBytesPerSec: cleanDl,
+            uploadBytesPerSec: cleanUl,
           },
         ];
         return next.length > MAX_HISTORY_SAMPLES
           ? next.slice(next.length - MAX_HISTORY_SAMPLES)
           : next;
       });
-    }, 1000);
+    }, sampleIntervalMs);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [isCollapsed, isActiveGraph]);
 
-  // Subtle 30fps sub-second slide interpolation while transfers are active (respecting reduced-motion)
+  // Subtle 30fps sub-second slide interpolation while transfers are active (respecting reduced-motion & visibility)
   useEffect(() => {
     if (isCollapsed) return;
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced || (!hasActiveTransfers && downloadBytesPerSec <= 0 && uploadBytesPerSec <= 0)) {
+    if (
+      prefersReduced ||
+      (typeof document !== 'undefined' && document.hidden) ||
+      !isActiveGraph
+    ) {
       setSubTickProgress(0);
       return;
     }
@@ -155,6 +183,10 @@ export function TorrentSpeedGraph({
     let rafId = 0;
     let lastPaint = 0;
     const step = (ts: number) => {
+      if (typeof document !== 'undefined' && document.hidden) {
+        rafId = 0;
+        return;
+      }
       if (ts - lastPaint >= 45) {
         lastPaint = ts;
         const elapsed = Math.min(1, Math.max(0, (Date.now() - lastSampleTimeRef.current) / 1000));
@@ -163,8 +195,10 @@ export function TorrentSpeedGraph({
       rafId = window.requestAnimationFrame(step);
     };
     rafId = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(rafId);
-  }, [isCollapsed, hasActiveTransfers, downloadBytesPerSec, uploadBytesPerSec]);
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, [isCollapsed, isActiveGraph]);
 
   const visibleSamples = useMemo(() => {
     const targetSec = PERIOD_SECONDS[period];
