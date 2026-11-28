@@ -146,8 +146,10 @@ export function GameCompareView({
       <div className={`sa-ps5-panel rounded-2xl border p-4 sm:p-5 space-y-4 ${panelClass}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Scales className="w-5 h-5 text-sky-500 shrink-0" />
+            <div className="flex items-center gap-2.5">
+              <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
+                <Scales weight="bold" className="w-4 h-4" />
+              </span>
               <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">
                 {labels.compareTitle}
               </h2>
@@ -161,7 +163,7 @@ export function GameCompareView({
             <button
               type="button"
               onClick={onClearAll}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/35 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-[12px] font-semibold cursor-pointer self-start sm:self-auto"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] border border-rose-500/35 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-[12px] font-semibold cursor-pointer self-start sm:self-auto transition-colors"
             >
               <Trash className="w-3.5 h-3.5" />
               <span>{labels.compareClearBtn}</span>
@@ -170,7 +172,7 @@ export function GameCompareView({
         </div>
 
         {/* Add Game Search */}
-        <div className="relative">
+        <div className="sa-search-bar relative">
           <div className="relative flex items-center">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute start-3 pointer-events-none" />
             <input
@@ -183,10 +185,10 @@ export function GameCompareView({
                   ? labels.compareMaxNotice
                   : labels.compareSearchPlaceholder
               }
-              className="w-full min-h-[40px] ps-9 pe-9 rounded-xl border border-slate-200 dark:border-white/[0.1] bg-slate-50 dark:bg-[#10161e] text-[13px] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7] disabled:opacity-55"
+              className="sa-search-input w-full min-h-[40px] ps-9 pe-9 border bg-slate-50 dark:bg-[#10161e] text-[13px] text-slate-900 dark:text-white disabled:opacity-55"
             />
             {isSearching && (
-              <SpinnerGap className="w-4 h-4 text-sky-500 animate-spin absolute end-3" />
+              <SpinnerGap className="w-4 h-4 text-[var(--sa-accent)] animate-spin absolute end-3" />
             )}
           </div>
 
@@ -237,7 +239,7 @@ export function GameCompareView({
                         </div>
                       </div>
                     </div>
-                    <Plus className="w-4 h-4 text-sky-500 shrink-0" />
+                    <Plus className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
                   </button>
                 );
               })}
@@ -391,7 +393,7 @@ export function GameCompareView({
                           className="py-2.5 px-3.5 font-mono-tabular font-semibold text-slate-900 dark:text-white"
                         >
                           {loading && !d ? (
-                            <SpinnerGap className="w-4 h-4 text-sky-500 animate-spin" />
+                            <SpinnerGap className="w-4 h-4 text-[var(--sa-accent)] animate-spin" />
                           ) : d ? (
                             row.render(d)
                           ) : (

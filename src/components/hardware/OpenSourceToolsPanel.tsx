@@ -77,10 +77,10 @@ function formatDateReadable(raw: string | null | undefined): string | null {
 
 function LibreHardwareMonitorLogo() {
   return (
-    <div className="w-11 h-11 rounded-xl bg-sky-500/12 dark:bg-[#38bdf8]/15 border border-sky-500/25 dark:border-[#38bdf8]/30 flex items-center justify-center shrink-0">
+    <div className="sa-icon-badge w-11 h-11 flex items-center justify-center shrink-0">
       <svg
         viewBox="0 0 32 32"
-        className="w-6 h-6 text-[#0284c7] dark:text-[#38bdf8]"
+        className="w-6 h-6"
         fill="none"
         aria-hidden="true"
       >
@@ -233,7 +233,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
       case 'newer_installed':
         return {
           text: t.ossStatusNewerInstalled,
-          cls: 'bg-sky-500/12 border-sky-500/30 text-[#0284c7] dark:text-[#38bdf8]',
+          cls: 'bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)] text-[var(--sa-accent)]',
         };
       case 'repair_required':
         return {
@@ -270,7 +270,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
         </div>
 
         <div className="rounded-lg bg-slate-50 dark:bg-[#11161d] border border-slate-200/80 dark:border-white/[0.07] px-3.5 py-2.5 text-[12px] text-slate-600 dark:text-[#9cb0c9] flex items-start gap-2.5">
-          <Info weight="duotone" className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+          <Info weight="duotone" className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
           <span className="text-start">{t.ossPolicyDesc}</span>
         </div>
 
@@ -282,8 +282,8 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
         )}
 
         {hasDesktopBridge && !managerState.platformSupported && (
-          <div className="rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-400/30 px-3.5 py-2.5 text-[12px] text-sky-800 dark:text-sky-200 flex items-start gap-2.5">
-            <Info weight="duotone" className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="rounded-lg bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] px-3.5 py-2.5 text-[12px] text-slate-800 dark:text-[#e2eaf4] flex items-start gap-2.5">
+            <Info weight="duotone" className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
             <span className="text-start">{t.ossPlatformUnsupportedNote}</span>
           </div>
         )}
@@ -331,7 +331,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'license')}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-sky-500/25 dark:border-[#38bdf8]/30 bg-sky-500/10 dark:bg-[#38bdf8]/12 text-[#0284c7] dark:text-[#38bdf8] text-[11px] font-semibold hover:bg-sky-500/20 transition-colors cursor-pointer"
+                        className="sa-badge-secondary inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold hover:opacity-90 transition-opacity cursor-pointer"
                       >
                         <ShieldCheck weight="duotone" className="w-3.5 h-3.5" />
                         <span>{tool.licenseId}</span>
@@ -353,7 +353,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'repository')}
-                        className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link inline-flex items-center gap-1.5 text-[11.5px] font-semibold cursor-pointer"
                       >
                         <GitBranch className="w-3.5 h-3.5" />
                         <span>{t.ossLinkRepo}</span>
@@ -363,7 +363,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'releases')}
-                        className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link inline-flex items-center gap-1.5 text-[11.5px] font-semibold cursor-pointer"
                       >
                         <span>{t.ossLinkReleases}</span>
                         <ArrowSquareOut className="w-3 h-3" />
@@ -372,7 +372,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'nuget')}
-                        className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link inline-flex items-center gap-1.5 text-[11.5px] font-semibold cursor-pointer"
                       >
                         <span>{t.ossLinkNuget}</span>
                         <ArrowSquareOut className="w-3 h-3" />
@@ -381,7 +381,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'source')}
-                        className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link inline-flex items-center gap-1.5 text-[11.5px] font-semibold cursor-pointer"
                       >
                         <Code className="w-3.5 h-3.5" />
                         <span>{t.ossLinkSource}</span>
@@ -391,7 +391,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                       <button
                         type="button"
                         onClick={() => handleOpenLink(tool, 'license')}
-                        className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link inline-flex items-center gap-1.5 text-[11.5px] font-semibold cursor-pointer"
                       >
                         <span>{t.ossLinkLicense}</span>
                         <ArrowSquareOut className="w-3 h-3" />
@@ -406,7 +406,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                     type="button"
                     disabled={!hasDesktopBridge || isBusyStage || busyAction !== null}
                     onClick={() => void handleCheckUpdates(tool.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-semibold border border-slate-200 dark:border-white/[0.1] bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] text-slate-700 dark:text-white disabled:opacity-50 transition-colors cursor-pointer"
+                    className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold disabled:opacity-50 cursor-pointer whitespace-nowrap"
                   >
                     <ArrowClockwise
                       className={`w-3.5 h-3.5 ${tool.stage === 'checking' ? 'motion-safe:animate-spin' : ''}`}
@@ -420,7 +420,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                     <button
                       type="button"
                       onClick={() => void handleCancel(tool.id)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer whitespace-nowrap"
                     >
                       <XCircle className="w-4 h-4" />
                       <span>{t.ossCancelBtn}</span>
@@ -431,7 +431,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                         type="button"
                         disabled={!hasDesktopBridge || !managerState.platformSupported || isBusyStage || busyAction !== null}
                         onClick={() => setPendingConfirm({ toolId: tool.id, mode: 'install' })}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#38bdf8] text-white disabled:opacity-50 transition-colors cursor-pointer"
+                        className="sa-btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] font-semibold disabled:opacity-50 cursor-pointer whitespace-nowrap"
                       >
                         <DownloadSimple className="w-4 h-4" />
                         <span>
@@ -464,9 +464,9 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
 
               {/* Explicit User Confirmation Prompt */}
               {confirmingThis && (
-                <div className="rounded-xl border border-sky-300 dark:border-[#38bdf8]/40 bg-sky-50/90 dark:bg-[#0e1e2e] p-3.5 space-y-2.5">
+                <div className="rounded-xl border border-[var(--sa-accent-ring)] bg-[var(--sa-accent-soft)] p-3.5 space-y-2.5">
                   <div className="flex items-start gap-2.5">
-                    <ShieldCheck weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                    <ShieldCheck weight="duotone" className="w-5 h-5 text-[var(--sa-accent)] shrink-0 mt-0.5" />
                     <div className="space-y-1 min-w-0">
                       <h4 className="text-[13px] font-bold text-slate-900 dark:text-white">
                         {t.ossConfirmDownloadTitle}
@@ -491,7 +491,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                           ? void handleConfirmedRollback(tool.id)
                           : void handleConfirmedInstallOrUpdate(tool.id)
                       }
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-semibold bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#38bdf8] text-white cursor-pointer"
+                      className="sa-btn-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold cursor-pointer whitespace-nowrap"
                     >
                       <CheckCircle weight="fill" className="w-3.5 h-3.5" />
                       <span>{t.ossConfirmProceedBtn}</span>
@@ -499,7 +499,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                     <button
                       type="button"
                       onClick={() => setPendingConfirm(null)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border border-slate-200 dark:border-white/[0.12] bg-white dark:bg-[#171d25] text-slate-700 dark:text-[#cbd5e1] cursor-pointer"
+                      className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold cursor-pointer whitespace-nowrap"
                     >
                       <span>{t.ossCancelBtn}</span>
                     </button>
@@ -522,7 +522,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                   <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4]">
                     {t.ossLatestVersionLabel}
                   </div>
-                  <div dir="ltr" className="mt-1 text-[13.5px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
+                  <div dir="ltr" className="mt-1 text-[13.5px] font-bold font-mono-tabular text-[var(--sa-accent)]">
                     {tool.latestRelease?.version ? `v${tool.latestRelease.version}` : t.naValue}
                   </div>
                 </div>
@@ -563,7 +563,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                   </div>
                   <div className="h-2 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
                     <div
-                      className="h-full bg-[#0284c7] dark:bg-[#38bdf8] transition-all duration-150"
+                      className="h-full bg-[var(--sa-accent)] transition-all duration-150"
                       style={{ width: `${Math.min(100, Math.max(4, tool.progress?.percent || 10))}%` }}
                     />
                   </div>
@@ -610,7 +610,7 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
                   onClick={() =>
                     setExpandedNotesIds((prev) => ({ ...prev, [tool.id]: !prev[tool.id] }))
                   }
-                  className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                  className="sa-link inline-flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>{t.ossReleaseNotesLabel}</span>
@@ -634,12 +634,12 @@ export function OpenSourceToolsPanel({ isDesktopApp, t }: OpenSourceToolsPanelPr
           className="w-full flex items-center justify-between gap-3 text-start cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <ShieldCheck weight="duotone" className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+            <ShieldCheck weight="duotone" className="w-4.5 h-4.5 text-[var(--sa-accent)] shrink-0" />
             <span className="text-[13px] font-bold text-slate-900 dark:text-white truncate">
               {t.ossThirdPartyTitle}
             </span>
           </div>
-          <span className="text-[11px] font-semibold text-[#0284c7] dark:text-[#38bdf8] shrink-0">
+          <span className="text-[11px] font-semibold text-[var(--sa-accent)] shrink-0">
             MPL-2.0
           </span>
         </button>

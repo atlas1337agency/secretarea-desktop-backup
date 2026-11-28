@@ -164,11 +164,11 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
       <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-500/12 dark:bg-[#34d399]/15 border border-emerald-500/25 dark:border-[#34d399]/30 flex items-center justify-center shrink-0">
-              <Sparkle weight="duotone" className="w-5 h-5 text-emerald-600 dark:text-[#34d399]" />
+            <div className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
+              <Sparkle weight="duotone" className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-[16px] font-bold text-slate-900 dark:text-white">{t.cleanerTitle}</h2>
+              <h2 className="font-display text-[16px] font-bold text-slate-900 dark:text-white">{t.cleanerTitle}</h2>
               <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9]">{t.cleanerSubtitle}</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
               type="button"
               disabled={!isDesktopApp || isScanning || isCleaning}
               onClick={() => void handleScan()}
-              className="inline-flex items-center gap-2 min-h-[38px] px-4 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#0284c7] text-white text-[12.5px] font-bold transition-colors disabled:opacity-45 cursor-pointer"
+              className="sa-btn-primary inline-flex items-center gap-2 min-h-[38px] px-4 py-2 text-[12.5px] font-bold disabled:opacity-45 cursor-pointer whitespace-nowrap"
             >
               <MagnifyingGlass className={`w-4 h-4 ${isScanning ? 'motion-safe:animate-pulse' : ''}`} />
               <span>{isScanning ? t.cleanerScanningBtn : t.cleanerScanBtn}</span>
@@ -189,7 +189,7 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
                 type="button"
                 disabled={selectedCategories.length === 0 || isScanning || isCleaning}
                 onClick={() => setIsConfirmingClean(true)}
-                className="inline-flex items-center gap-2 min-h-[38px] px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[12.5px] font-bold transition-colors disabled:opacity-45 cursor-pointer"
+                className="inline-flex items-center gap-2 min-h-[38px] px-4 py-2 rounded-[var(--sa-btn-radius)] bg-emerald-600 hover:bg-emerald-500 text-white text-[12.5px] font-bold transition-colors disabled:opacity-45 cursor-pointer whitespace-nowrap"
               >
                 <Trash className="w-4 h-4" />
                 <span>{isCleaning ? t.cleanerCleaningBtn : t.cleanerCleanBtn}</span>
@@ -224,7 +224,7 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
             </div>
             <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
               <div
-                className="h-full bg-[#0284c7] dark:bg-[#38bdf8] transition-[width] duration-200"
+                className="h-full bg-[var(--sa-accent)] transition-[width] duration-200"
                 style={{ width: `${Math.min(100, Math.max(0, progressEvent.percent))}%` }}
               />
             </div>
@@ -285,14 +285,14 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
             <button
               type="button"
               onClick={() => void handleConfirmClean()}
-              className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[12.5px] font-bold transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-[var(--sa-btn-radius)] bg-rose-600 hover:bg-rose-500 text-white text-[12.5px] font-bold transition-colors cursor-pointer whitespace-nowrap"
             >
               {t.cleanerConfirmAction}
             </button>
             <button
               type="button"
               onClick={() => void handleCancelClean()}
-              className="px-4 py-2 rounded-lg bg-white dark:bg-[#1a2230] border border-slate-300 dark:border-white/[0.12] text-slate-800 dark:text-white text-[12.5px] font-semibold transition-colors cursor-pointer"
+              className="sa-btn-secondary px-4 py-2 text-[12.5px] font-semibold cursor-pointer whitespace-nowrap"
             >
               {t.cleanerCancelAction}
             </button>
@@ -306,14 +306,14 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
             <div className="text-[13px] font-semibold text-slate-700 dark:text-[#d5e0ee]">
               {t.cleanerEstimatedTotal}:{' '}
-              <strong dir="ltr" className="font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
+              <strong dir="ltr" className="font-mono-tabular text-[var(--sa-accent)]">
                 {formatStorageBytes(selectedBytes, '0 B')}
               </strong>
             </div>
             <button
               type="button"
               onClick={selectSafeDefaults}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[11.5px] font-semibold text-slate-700 dark:text-[#d5e0ee] cursor-pointer"
+              className="sa-btn-secondary px-3 py-1.5 text-[11.5px] font-semibold cursor-pointer whitespace-nowrap"
             >
               {t.cleanerSelectSafeDefaults}
             </button>
@@ -329,7 +329,7 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
                   key={cat.id}
                   className={`sa-ps5-subpanel block rounded-lg border p-3.5 transition-colors ${
                     cat.supported
-                      ? 'cursor-pointer bg-slate-50/90 dark:bg-[#11161d] border-slate-200/80 dark:border-white/[0.08] hover:border-[#0284c7]/45 dark:hover:border-[#38bdf8]/45'
+                      ? 'cursor-pointer bg-slate-50/90 dark:bg-[#11161d] border-slate-200/80 dark:border-white/[0.08] hover:border-[var(--sa-accent-ring)]'
                       : 'opacity-55 cursor-not-allowed bg-slate-50/50 dark:bg-[#11161d]/60 border-slate-200/50 dark:border-white/[0.05]'
                   }`}
                 >
@@ -340,7 +340,7 @@ export function PcCleanerPanel({ isDesktopApp, language }: PcCleanerPanelProps) 
                         checked={checked}
                         disabled={!cat.supported || isCleaning}
                         onChange={() => toggleCategory(cat.id)}
-                        className="mt-1 h-4 w-4 rounded border-slate-300 text-[#0284c7] focus:ring-[#0284c7]"
+                        className="mt-1 h-4 w-4 rounded border-slate-300 accent-[var(--sa-accent)]"
                       />
                       <div className="space-y-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">

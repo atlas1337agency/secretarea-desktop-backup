@@ -101,12 +101,12 @@ export const DealCard = memo(function DealCard({
       }}
       role="button"
       tabIndex={0}
-      className={`sa-contain-card sa-ps5-subpanel group rounded-xl border overflow-hidden transition-[transform,border-color,background-color] duration-150 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 ${
+      className={`sa-contain-card sa-ps5-subpanel sa-game-card group rounded-[var(--sa-card-radius)] border overflow-hidden transition-[transform,border-color,background-color,box-shadow] duration-150 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)] ${
         isXbox
-          ? 'bg-[#0c2110]/85 border-[#52e042]/20 hover:border-[#6ee755]/70 focus-visible:ring-[#6ee755]'
+          ? 'bg-[#0c2110]/85 border-[#52e042]/20 hover:border-[#6ee755]/70'
           : isPs5
-          ? 'bg-[#081a3d]/75 border-white/[0.12] hover:border-[#7cc4ff]/70 focus-visible:ring-[#7cc4ff]'
-          : 'bg-white hover:bg-slate-50/90 dark:bg-[#171f2a] dark:hover:bg-[#1d2736] border-slate-200 dark:border-white/[0.08] hover:border-[#0284c7]/60 dark:hover:border-[#38bdf8]/60 shadow-sm dark:shadow-none focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]'
+          ? 'bg-[#081a3d]/75 border-white/[0.12] hover:border-[#7cc4ff]/70'
+          : 'bg-white hover:bg-slate-50/90 dark:bg-[#171f2a] dark:hover:bg-[#1d2736] border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-none'
       }`}
     >
       {/* Cover Image with Measured Scrim & Clean Discount Corner */}
@@ -142,12 +142,10 @@ export const DealCard = memo(function DealCard({
         {offer.savingsPercent > 0 && (
           <div
             dir="ltr"
-            className={`absolute top-2.5 end-2.5 px-2 py-0.5 rounded font-mono-tabular text-[11.5px] font-bold tracking-tight shadow-sm ${
+            className={`absolute top-2.5 end-2.5 px-2 py-0.5 rounded-[var(--sa-card-inner-radius)] font-mono-tabular text-[11.5px] font-bold tracking-tight shadow-sm ${
               offer.isFreeNow || offer.savingsPercent >= 75
                 ? 'bg-emerald-600 text-white'
-                : isXbox
-                ? 'bg-[#107C10] text-white'
-                : 'bg-[#0284c7] dark:bg-[#1a9fff] text-white'
+                : 'sa-badge-accent'
             }`}
           >
             -{offer.savingsPercent}%
@@ -255,7 +253,7 @@ export const DealCard = memo(function DealCard({
                 }}
                 title={labels.alertsFollowBtn || 'Follow Price'}
                 aria-label={labels.alertsFollowBtn || 'Follow Price'}
-                className={`h-8 w-8 inline-flex items-center justify-center rounded-lg border transition-all duration-150 cursor-pointer active:scale-[0.96] ${
+                className={`h-8 w-8 inline-flex items-center justify-center rounded-[var(--sa-btn-radius)] border transition-all duration-150 cursor-pointer active:scale-[0.96] ${
                   isFollowed
                     ? 'bg-amber-500 text-white border-amber-400/60 shadow-xs'
                     : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.12] border-slate-200/90 dark:border-white/[0.09] text-slate-700 dark:text-[#cbd6e4]'
@@ -281,9 +279,9 @@ export const DealCard = memo(function DealCard({
               }}
               title={onToggleCompare ? labels.compareAddBtn || labels.compareOffersBtn : labels.compareOffersBtn}
               aria-label={onToggleCompare ? labels.compareAddBtn || labels.compareOffersBtn : labels.compareOffersBtn}
-              className={`h-8 w-8 inline-flex items-center justify-center rounded-lg border transition-all duration-150 cursor-pointer active:scale-[0.96] ${
+              className={`h-8 w-8 inline-flex items-center justify-center rounded-[var(--sa-btn-radius)] border transition-all duration-150 cursor-pointer active:scale-[0.96] ${
                 isCompared
-                  ? 'bg-sky-500 text-white border-sky-400/60 shadow-xs'
+                  ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] border-[var(--sa-secondary)] shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.12] border-slate-200/90 dark:border-white/[0.09] text-slate-700 dark:text-[#cbd6e4]'
               }`}
             >
@@ -293,13 +291,7 @@ export const DealCard = memo(function DealCard({
             <button
               type="button"
               onClick={handleViewDeal}
-              className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white border transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.97] ${
-                isXbox
-                  ? 'bg-gradient-to-b from-[#169616] to-[#107C10] hover:from-[#1aad1a] hover:to-[#138c13] border-[#6ee755]/30 shadow-xs'
-                  : isPs5
-                  ? 'bg-gradient-to-b from-[#1486e8] to-[#0070d1] hover:from-[#2696f5] hover:to-[#0d7ee0] border-[#7cc4ff]/30 shadow-xs'
-                  : 'bg-gradient-to-b from-[#0ea5e9] to-[#0284c7] hover:from-[#38bdf8] hover:to-[#0ea5e9] border-sky-300/25 shadow-xs'
-              }`}
+              className="sa-btn-primary inline-flex items-center gap-1.5 h-8 px-3 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
             >
               <span>{labels.viewDealBtn}</span>
               <ArrowSquareOut weight="bold" className="w-3.5 h-3.5 shrink-0" />

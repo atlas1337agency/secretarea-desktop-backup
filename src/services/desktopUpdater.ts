@@ -118,6 +118,19 @@ interface SecretAreaSettingsBridge {
   getPerformanceMetrics?: () => Promise<InternalPerfMetricsSnapshot | null>;
 }
 
+export interface SystemAppearancePayload {
+  shouldUseDarkColors: boolean;
+  themeSource?: 'system' | 'dark' | 'light';
+  platform: string;
+}
+
+interface SecretAreaAppearanceBridge {
+  getSystemAppearance: () => Promise<SystemAppearancePayload | null>;
+  onSystemAppearanceChange: (
+    callback: (payload: SystemAppearancePayload) => void
+  ) => () => void;
+}
+
 interface SecretAreaSystemBridge {
   getSpecs: (forceRefresh?: boolean) => Promise<DesktopSystemSpecsPayload | null>;
 }
@@ -129,6 +142,18 @@ interface SecretAreaDesktopGlobal {
   windowControls?: SecretAreaWindowBridge;
   system?: SecretAreaSystemBridge;
   settings?: SecretAreaSettingsBridge;
+  appearance?: SecretAreaAppearanceBridge;
+}
+
+export function getDesktopAppearanceBridge(): SecretAreaAppearanceBridge | null {
+  if (typeof window === 'undefined') return null;
+  const win = window as unknown as {
+    secretAreaDesktop?: SecretAreaDesktopGlobal;
+  };
+  if (!win.secretAreaDesktop?.isDesktop || !win.secretAreaDesktop?.appearance) {
+    return null;
+  }
+  return win.secretAreaDesktop.appearance;
 }
 
 export function getDesktopUpdaterBridge(): SecretAreaUpdaterBridge | null {

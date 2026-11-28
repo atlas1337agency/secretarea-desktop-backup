@@ -4,9 +4,20 @@ import type {
   PerformanceAdvancedSettings,
   PerformanceMode,
 } from '../types';
+import {
+  getAccessibleTextOnAccent,
+  OS_THEME_PRESETS,
+  type OsThemeColorPalette,
+  type ResolvedOsTheme,
+} from './themeContrast';
+
+export type { ResolvedOsTheme, OsThemeColorPalette };
 
 export type AppLanguage = 'en' | 'fr' | 'es' | 'ar';
 export type AppThemeMode = 'default' | 'ps5' | 'xbox';
+export type OsThemePreference = 'auto' | ResolvedOsTheme;
+export type AppearanceMode = 'system' | 'dark' | 'light';
+export type AnimationMode = 'full' | 'subtle' | 'reduced';
 
 export type CustomThemeSurfaceStyle = 'midnight' | 'obsidian' | 'abyss' | 'daylight';
 export type CustomThemeButtonStyle = 'rounded' | 'pill' | 'sharp';
@@ -29,6 +40,9 @@ export interface LauncherSettings {
   enableCanRunIt: boolean;
   compactNavbar: boolean;
   lightMode: boolean;
+  osThemePreference: OsThemePreference;
+  appearanceMode: AppearanceMode;
+  animationMode: AnimationMode;
   alwaysPs5Theme: boolean;
   alwaysXboxTheme: boolean;
   ambientMusicEnabled: boolean;
@@ -57,8 +71,14 @@ export const CUSTOM_THEME_SURFACE_PALETTES: Record<
     isDark: boolean;
     canvas: string;
     surface: string;
+    surfaceGlass: string;
     subsurface: string;
+    subsurfaceGlass: string;
+    heroBg: string;
     border: string;
+    borderStrong: string;
+    textPrimary: string;
+    textMuted: string;
     swatchTop: string;
     swatchBottom: string;
   }
@@ -67,8 +87,14 @@ export const CUSTOM_THEME_SURFACE_PALETTES: Record<
     isDark: true,
     canvas: '#0e141b',
     surface: '#161e29',
+    surfaceGlass: 'rgba(22, 30, 41, 0.78)',
     subsurface: '#10161f',
+    subsurfaceGlass: 'rgba(16, 22, 31, 0.74)',
+    heroBg: '#0b1017',
     border: 'rgba(255, 255, 255, 0.09)',
+    borderStrong: 'rgba(255, 255, 255, 0.18)',
+    textPrimary: '#f1f5f9',
+    textMuted: '#94a3b8',
     swatchTop: '#1c2635',
     swatchBottom: '#0e141b',
   },
@@ -76,8 +102,14 @@ export const CUSTOM_THEME_SURFACE_PALETTES: Record<
     isDark: true,
     canvas: '#07090d',
     surface: '#11141c',
+    surfaceGlass: 'rgba(17, 20, 28, 0.78)',
     subsurface: '#0b0e14',
+    subsurfaceGlass: 'rgba(11, 14, 20, 0.74)',
+    heroBg: '#06080c',
     border: 'rgba(255, 255, 255, 0.08)',
+    borderStrong: 'rgba(255, 255, 255, 0.16)',
+    textPrimary: '#f8fafc',
+    textMuted: '#9ca3af',
     swatchTop: '#161a24',
     swatchBottom: '#07090d',
   },
@@ -85,8 +117,14 @@ export const CUSTOM_THEME_SURFACE_PALETTES: Record<
     isDark: true,
     canvas: '#071124',
     surface: '#0d1b36',
+    surfaceGlass: 'rgba(13, 27, 54, 0.76)',
     subsurface: '#09152b',
-    border: 'rgba(147, 197, 253, 0.14)',
+    subsurfaceGlass: 'rgba(9, 21, 43, 0.72)',
+    heroBg: '#050d1c',
+    border: 'rgba(147, 197, 253, 0.15)',
+    borderStrong: 'rgba(147, 197, 253, 0.28)',
+    textPrimary: '#eff6ff',
+    textMuted: '#93c5fd',
     swatchTop: '#12284e',
     swatchBottom: '#071124',
   },
@@ -94,8 +132,14 @@ export const CUSTOM_THEME_SURFACE_PALETTES: Record<
     isDark: false,
     canvas: '#f4f6f9',
     surface: '#ffffff',
+    surfaceGlass: 'rgba(255, 255, 255, 0.80)',
     subsurface: '#f8fafc',
-    border: 'rgba(15, 23, 42, 0.1)',
+    subsurfaceGlass: 'rgba(241, 245, 249, 0.78)',
+    heroBg: '#e8eef7',
+    border: 'rgba(15, 23, 42, 0.11)',
+    borderStrong: 'rgba(15, 23, 42, 0.2)',
+    textPrimary: '#0f172a',
+    textMuted: '#475569',
     swatchTop: '#ffffff',
     swatchBottom: '#e2e8f0',
   },
@@ -129,6 +173,9 @@ export const DEFAULT_LAUNCHER_SETTINGS: LauncherSettings = {
   enableCanRunIt: true,
   compactNavbar: false,
   lightMode: false,
+  osThemePreference: 'auto',
+  appearanceMode: 'system',
+  animationMode: 'full',
   alwaysPs5Theme: false,
   alwaysXboxTheme: false,
   ambientMusicEnabled: true,
@@ -139,6 +186,136 @@ export const DEFAULT_LAUNCHER_SETTINGS: LauncherSettings = {
   performanceMode: 'balanced',
   performanceAdvanced: { ...DEFAULT_PERFORMANCE_ADVANCED },
 };
+
+export function detectRuntimePlatform(): 'win32' | 'linux' | 'darwin' {
+  if (typeof window !== 'undefined') {
+    const desktopPlatform = (
+      window as unknown as { secretAreaDesktop?: { platform?: string } }
+    ).secretAreaDesktop?.platform;
+    if (desktopPlatform === 'darwin' || desktopPlatform === 'linux' || desktopPlatform === 'win32') {
+      return desktopPlatform;
+    }
+  }
+  if (typeof navigator !== 'undefined') {
+    const navPlatform = (navigator.platform || '').toLowerCase();
+    const userAgent = (navigator.userAgent || '').toLowerCase();
+    if (navPlatform.includes('mac') || userAgent.includes('macintosh') || userAgent.includes('darwin')) {
+      return 'darwin';
+    }
+    if (navPlatform.includes('linux') || navPlatform.includes('x11') || userAgent.includes('linux')) {
+      return 'linux';
+    }
+  }
+  return 'win32';
+}
+
+export function resolveDefaultOsThemeForPlatform(platform?: string | null): ResolvedOsTheme {
+  const clean = (platform || detectRuntimePlatform()).toLowerCase();
+  if (clean === 'darwin' || clean.includes('mac')) return 'macos';
+  if (clean === 'linux') return 'linux';
+  return 'windows';
+}
+
+export function normalizeOsThemePreference(value: unknown): OsThemePreference {
+  if (value === 'windows' || value === 'linux' || value === 'macos' || value === 'auto') {
+    return value;
+  }
+  return 'auto';
+}
+
+export function normalizeAppearanceMode(
+  value: unknown,
+  fallback: AppearanceMode = 'system'
+): AppearanceMode {
+  if (value === 'system' || value === 'dark' || value === 'light') {
+    return value;
+  }
+  return fallback;
+}
+
+export function normalizeAnimationMode(value: unknown): AnimationMode {
+  if (value === 'subtle' || value === 'reduced' || value === 'full') {
+    return value;
+  }
+  return 'full';
+}
+
+export function detectSystemPrefersDark(fallback = true): boolean {
+  try {
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      if (typeof mql?.matches === 'boolean') {
+        return mql.matches;
+      }
+    }
+  } catch {
+    // ignore matchMedia unavailability
+  }
+  return fallback;
+}
+
+export function resolveActiveOsTheme(
+  settings: Pick<LauncherSettings, 'osThemePreference'>,
+  platform?: string | null
+): ResolvedOsTheme {
+  const pref = normalizeOsThemePreference(settings?.osThemePreference);
+  if (pref !== 'auto') return pref;
+  return resolveDefaultOsThemeForPlatform(platform);
+}
+
+export function resolveEffectiveLightMode(
+  settings: Pick<
+    LauncherSettings,
+    'alwaysPs5Theme' | 'alwaysXboxTheme' | 'customTheme' | 'appearanceMode' | 'lightMode'
+  >,
+  systemPrefersDark?: boolean
+): boolean {
+  if (settings.alwaysXboxTheme || settings.alwaysPs5Theme) return false;
+  if (settings.customTheme?.enabled) {
+    return settings.customTheme.surfaceStyle === 'daylight';
+  }
+  if (settings.appearanceMode === 'light') return true;
+  if (settings.appearanceMode === 'dark') return false;
+  if (typeof systemPrefersDark === 'boolean') return !systemPrefersDark;
+  return Boolean(settings.lightMode);
+}
+
+export function getActiveOsPalette(
+  osTheme: ResolvedOsTheme,
+  isDark: boolean
+): OsThemeColorPalette {
+  return OS_THEME_PRESETS[osTheme][isDark ? 'dark' : 'light'];
+}
+
+export function restoreOsDefaultCustomColors(
+  osTheme: ResolvedOsTheme,
+  isDark: boolean
+): Partial<CustomThemeConfig> {
+  const palette = getActiveOsPalette(osTheme, isDark);
+  return {
+    accentColor: palette.accent,
+    secondaryColor: palette.secondary,
+    surfaceStyle: isDark ? 'midnight' : 'daylight',
+  };
+}
+
+export function restoreDefaultThemeSettings(
+  current: LauncherSettings,
+  systemPrefersDark?: boolean
+): LauncherSettings {
+  const prefersDark =
+    typeof systemPrefersDark === 'boolean' ? systemPrefersDark : detectSystemPrefersDark(true);
+  return {
+    ...current,
+    osThemePreference: 'auto',
+    appearanceMode: 'system',
+    animationMode: 'full',
+    lightMode: !prefersDark,
+    alwaysPs5Theme: false,
+    alwaysXboxTheme: false,
+    customTheme: { ...DEFAULT_CUSTOM_THEME, enabled: false },
+  };
+}
 
 export function getAppVersionString(): string {
   try {
@@ -377,12 +554,26 @@ export function getEffectivePerformanceConfig(
   };
 }
 
-export function loadLauncherSettings(): LauncherSettings {
+export function loadLauncherSettings(
+  storageOverride?: Pick<Storage, 'getItem'> | null,
+  _platformOverride?: string | null,
+  systemPrefersDarkOverride?: boolean
+): LauncherSettings {
+  const prefersDark =
+    typeof systemPrefersDarkOverride === 'boolean'
+      ? systemPrefersDarkOverride
+      : detectSystemPrefersDark(true);
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const store = storageOverride !== undefined ? storageOverride : localStorage;
+    const raw = store?.getItem(STORAGE_KEY);
     if (!raw) {
+      // Fresh startup with no saved user preferences: auto-follow OS theme & appearance
       return {
         ...DEFAULT_LAUNCHER_SETTINGS,
+        osThemePreference: 'auto',
+        appearanceMode: 'system',
+        animationMode: 'full',
+        lightMode: !prefersDark,
         customTheme: { ...DEFAULT_CUSTOM_THEME },
         performanceAdvanced: { ...DEFAULT_PERFORMANCE_ADVANCED },
       };
@@ -391,12 +582,25 @@ export function loadLauncherSettings(): LauncherSettings {
     const alwaysXboxTheme = Boolean(parsed.alwaysXboxTheme);
     const alwaysPs5Theme = alwaysXboxTheme ? false : Boolean(parsed.alwaysPs5Theme);
     const customTheme = normalizeCustomTheme(parsed.customTheme);
+    const osThemePreference = normalizeOsThemePreference(parsed.osThemePreference);
+    const inferredLegacyAppearance: AppearanceMode = parsed.lightMode ? 'light' : 'dark';
+    const appearanceMode = normalizeAppearanceMode(
+      parsed.appearanceMode,
+      inferredLegacyAppearance
+    );
+    const animationMode = normalizeAnimationMode(parsed.animationMode);
+
     const lightMode =
       alwaysXboxTheme || alwaysPs5Theme
         ? false
         : customTheme.enabled
         ? customTheme.surfaceStyle === 'daylight'
-        : Boolean(parsed.lightMode);
+        : appearanceMode === 'light'
+        ? true
+        : appearanceMode === 'dark'
+        ? false
+        : !prefersDark;
+
     const performanceMode = normalizePerformanceMode(parsed.performanceMode);
     const performanceAdvanced = normalizePerformanceAdvanced(
       parsed.performanceAdvanced,
@@ -418,6 +622,9 @@ export function loadLauncherSettings(): LauncherSettings {
           : DEFAULT_LAUNCHER_SETTINGS.enableCanRunIt,
       compactNavbar: Boolean(parsed.compactNavbar),
       lightMode,
+      osThemePreference,
+      appearanceMode,
+      animationMode,
       alwaysPs5Theme,
       alwaysXboxTheme,
       ambientMusicEnabled:
@@ -433,13 +640,14 @@ export function loadLauncherSettings(): LauncherSettings {
           ? parsed.customCursorEnabled
           : DEFAULT_LAUNCHER_SETTINGS.customCursorEnabled,
       soundVolume: normalizeVolume(parsed.soundVolume),
-      customTheme: alwaysXboxTheme || alwaysPs5Theme ? { ...customTheme, enabled: false } : customTheme,
+      customTheme,
       performanceMode,
       performanceAdvanced,
     };
   } catch {
     return {
       ...DEFAULT_LAUNCHER_SETTINGS,
+      lightMode: !prefersDark,
       customTheme: { ...DEFAULT_CUSTOM_THEME },
       performanceAdvanced: { ...DEFAULT_PERFORMANCE_ADVANCED },
     };
@@ -468,47 +676,80 @@ const CUSTOM_CSS_VAR_KEYS = [
   '--sa-accent-hover',
   '--sa-accent-soft',
   '--sa-accent-ring',
+  '--sa-accent-fg',
   '--sa-secondary',
+  '--sa-secondary-soft',
+  '--sa-secondary-fg',
   '--sa-bg-canvas',
   '--sa-bg-surface',
+  '--sa-bg-surface-solid',
+  '--sa-bg-surface-glass',
   '--sa-bg-subsurface',
+  '--sa-bg-hero',
   '--sa-border-subtle',
+  '--sa-border-strong',
+  '--sa-text-primary',
+  '--sa-text-muted',
   '--sa-btn-radius',
   '--sa-card-radius',
+  '--sa-card-inner-radius',
+  '--sa-input-radius',
   '--sa-panel-blur',
 ];
 
-export function applyDocumentThemeSettings(settings: LauncherSettings): void {
+export function applyDocumentThemeSettings(
+  settings: LauncherSettings,
+  systemPrefersDark?: boolean,
+  platformOverride?: string | null
+): void {
   if (typeof document === 'undefined') return;
   const html = document.documentElement;
   const consoleTheme = getActiveConsoleTheme(settings);
   const custom = settings.customTheme || DEFAULT_CUSTOM_THEME;
-  const useCustom = consoleTheme === 'default' && custom.enabled;
-  const surfacePalette = CUSTOM_THEME_SURFACE_PALETTES[custom.surfaceStyle] || CUSTOM_THEME_SURFACE_PALETTES.midnight;
+  const useCustom = Boolean(custom.enabled);
+  const surfacePalette =
+    CUSTOM_THEME_SURFACE_PALETTES[custom.surfaceStyle] || CUSTOM_THEME_SURFACE_PALETTES.midnight;
+  const osTheme = resolveActiveOsTheme(settings, platformOverride);
 
-  const isDark =
-    consoleTheme !== 'default'
-      ? true
-      : useCustom
-      ? surfacePalette.isDark
-      : !settings.lightMode;
+  const isDark = !resolveEffectiveLightMode(settings, systemPrefersDark);
 
   html.classList.toggle('dark', isDark);
   html.classList.toggle('theme-ps5', consoleTheme === 'ps5');
   html.classList.toggle('theme-xbox', consoleTheme === 'xbox');
   html.classList.toggle('theme-custom', useCustom);
+
+  const osThemeActive = consoleTheme === 'default';
+  html.classList.toggle('theme-os-windows', osThemeActive && osTheme === 'windows');
+  html.classList.toggle('theme-os-linux', osThemeActive && osTheme === 'linux');
+  html.classList.toggle('theme-os-macos', osThemeActive && osTheme === 'macos');
+
+  html.classList.toggle('sa-motion-subtle', settings.animationMode === 'subtle');
+  html.classList.toggle('sa-motion-reduced', settings.animationMode === 'reduced');
+
   html.style.colorScheme = isDark ? 'dark' : 'light';
 
   if (useCustom) {
     const accent = sanitizeHexColor(custom.accentColor);
     const secondary = sanitizeHexColor(custom.secondaryColor, accent);
     const { r, g, b } = hexToRgb(accent);
-    const accentHover = surfacePalette.isDark ? mixHex(accent, 255, 0.16) : mixHex(accent, 0, 0.14);
+    const secRgb = hexToRgb(secondary);
+    const effectiveDarkSurface = consoleTheme !== 'default' ? true : surfacePalette.isDark;
+    const accentHover = effectiveDarkSurface
+      ? mixHex(accent, 255, 0.16)
+      : mixHex(accent, 0, 0.14);
+    const accentFg = getAccessibleTextOnAccent(accent);
+    const secondaryFg = getAccessibleTextOnAccent(secondary);
     const btnRadius =
       custom.buttonStyle === 'pill'
         ? '9999px'
         : custom.buttonStyle === 'sharp'
         ? '4px'
+        : '10px';
+    const inputRadius =
+      custom.buttonStyle === 'pill'
+        ? '14px'
+        : custom.buttonStyle === 'sharp'
+        ? '5px'
         : '10px';
     const cardRadius =
       custom.cardRadius === 'sharp'
@@ -516,19 +757,51 @@ export function applyDocumentThemeSettings(settings: LauncherSettings): void {
         : custom.cardRadius === 'soft'
         ? '20px'
         : '12px';
+    const cardInnerRadius =
+      custom.cardRadius === 'sharp'
+        ? '4px'
+        : custom.cardRadius === 'soft'
+        ? '14px'
+        : '8px';
 
     html.style.setProperty('--sa-accent', accent);
     html.style.setProperty('--sa-accent-hover', accentHover);
-    html.style.setProperty('--sa-accent-soft', `rgba(${r}, ${g}, ${b}, ${surfacePalette.isDark ? 0.16 : 0.11})`);
-    html.style.setProperty('--sa-accent-ring', `rgba(${r}, ${g}, ${b}, 0.42)`);
+    html.style.setProperty(
+      '--sa-accent-soft',
+      `rgba(${r}, ${g}, ${b}, ${effectiveDarkSurface ? 0.18 : 0.12})`
+    );
+    html.style.setProperty('--sa-accent-ring', `rgba(${r}, ${g}, ${b}, 0.46)`);
+    html.style.setProperty('--sa-accent-fg', accentFg);
     html.style.setProperty('--sa-secondary', secondary);
+    html.style.setProperty(
+      '--sa-secondary-soft',
+      `rgba(${secRgb.r}, ${secRgb.g}, ${secRgb.b}, ${effectiveDarkSurface ? 0.18 : 0.12})`
+    );
+    html.style.setProperty('--sa-secondary-fg', secondaryFg);
     html.style.setProperty('--sa-bg-canvas', surfacePalette.canvas);
-    html.style.setProperty('--sa-bg-surface', surfacePalette.surface);
-    html.style.setProperty('--sa-bg-subsurface', surfacePalette.subsurface);
+    html.style.setProperty(
+      '--sa-bg-surface',
+      custom.glassBlur ? surfacePalette.surfaceGlass : surfacePalette.surface
+    );
+    html.style.setProperty('--sa-bg-surface-solid', surfacePalette.surface);
+    html.style.setProperty('--sa-bg-surface-glass', surfacePalette.surfaceGlass);
+    html.style.setProperty(
+      '--sa-bg-subsurface',
+      custom.glassBlur ? surfacePalette.subsurfaceGlass : surfacePalette.subsurface
+    );
+    html.style.setProperty('--sa-bg-hero', surfacePalette.heroBg);
     html.style.setProperty('--sa-border-subtle', surfacePalette.border);
+    html.style.setProperty('--sa-border-strong', surfacePalette.borderStrong);
+    html.style.setProperty('--sa-text-primary', surfacePalette.textPrimary);
+    html.style.setProperty('--sa-text-muted', surfacePalette.textMuted);
     html.style.setProperty('--sa-btn-radius', btnRadius);
     html.style.setProperty('--sa-card-radius', cardRadius);
-    html.style.setProperty('--sa-panel-blur', custom.glassBlur ? 'blur(14px)' : 'none');
+    html.style.setProperty('--sa-card-inner-radius', cardInnerRadius);
+    html.style.setProperty('--sa-input-radius', inputRadius);
+    html.style.setProperty(
+      '--sa-panel-blur',
+      custom.glassBlur ? 'blur(18px) saturate(155%)' : 'none'
+    );
   } else {
     for (const key of CUSTOM_CSS_VAR_KEYS) {
       html.style.removeProperty(key);

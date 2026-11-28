@@ -6,19 +6,63 @@
     --font-display: "Outfit", system-ui, -apple-system, sans-serif;
     --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+    /* Default Semantic Design Tokens (Light Base) */
+    --sa-accent: #0284c7;
+    --sa-accent-hover: #0369a1;
+    --sa-accent-soft: rgba(2, 132, 199, 0.12);
+    --sa-accent-ring: rgba(2, 132, 199, 0.36);
+    --sa-accent-fg: #ffffff;
+    --sa-secondary: #0ea5e9;
+    --sa-secondary-soft: rgba(14, 165, 233, 0.12);
+    --sa-secondary-fg: #0f172a;
+
+    --sa-bg-canvas: #eef3f9;
+    --sa-bg-surface: rgba(255, 255, 255, 0.9);
+    --sa-bg-surface-solid: #ffffff;
+    --sa-bg-surface-glass: rgba(255, 255, 255, 0.84);
+    --sa-bg-subsurface: #f1f5f9;
+    --sa-bg-hero: #e6edf7;
+    --sa-border-subtle: rgba(15, 23, 42, 0.1);
+    --sa-border-strong: rgba(15, 23, 42, 0.18);
+    --sa-text-primary: #0f172a;
+    --sa-text-muted: #475569;
+
+    --sa-btn-radius: 10px;
+    --sa-card-radius: 12px;
+    --sa-card-inner-radius: 8px;
+    --sa-input-radius: 10px;
+    --sa-panel-blur: blur(16px) saturate(140%);
+  }
+
+  html.dark {
+    --sa-accent: #1a9fff;
+    --sa-accent-hover: #38adff;
+    --sa-accent-soft: rgba(26, 159, 255, 0.16);
+    --sa-accent-ring: rgba(26, 159, 255, 0.44);
+    --sa-accent-fg: #ffffff;
+    --sa-secondary: #38bdf8;
+    --sa-secondary-soft: rgba(56, 189, 248, 0.14);
+    --sa-secondary-fg: #0f172a;
+
+    --sa-bg-canvas: #0c121a;
+    --sa-bg-surface: rgba(22, 30, 41, 0.86);
+    --sa-bg-surface-solid: #161e29;
+    --sa-bg-surface-glass: rgba(22, 30, 41, 0.78);
+    --sa-bg-subsurface: #111722;
+    --sa-bg-hero: #0a0f16;
+    --sa-border-subtle: rgba(255, 255, 255, 0.09);
+    --sa-border-strong: rgba(255, 255, 255, 0.17);
+    --sa-text-primary: #f1f5f9;
+    --sa-text-muted: #94a3b8;
   }
 
   html,
   body {
     font-family: var(--font-sans);
-    background-color: #f4f6f9;
-    color: #0f172a;
-  }
-
-  html.dark,
-  html.dark body {
-    background-color: #0e141b;
-    color: #dcdedf;
+    background-color: var(--sa-bg-canvas);
+    color: var(--sa-text-primary);
+    text-rendering: optimizeLegibility;
   }
 
   html[lang="ar"],
@@ -40,6 +84,245 @@
   }
 }
 
+/* ==========================================================================
+   Semantic Cross-Theme UI Primitives (.sa-*)
+   - Inherit OS, Console & Custom Theme Builder tokens seamlessly
+   ========================================================================== */
+.sa-hero {
+  border-radius: 0 0 var(--sa-card-radius, 14px) var(--sa-card-radius, 14px);
+  background-color: var(--sa-bg-hero);
+  border-color: var(--sa-border-subtle);
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.14);
+}
+
+html.dark .sa-hero {
+  box-shadow:
+    0 22px 54px rgba(0, 6, 18, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.sa-hero-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(244, 247, 252, 0.96) 0%,
+    rgba(241, 246, 253, 0.86) 46%,
+    rgba(235, 242, 251, 0.18) 100%
+  );
+}
+
+[dir="rtl"] .sa-hero-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(244, 247, 252, 0.96) 0%,
+    rgba(241, 246, 253, 0.86) 46%,
+    rgba(235, 242, 251, 0.18) 100%
+  );
+}
+
+html.dark .sa-hero-scrim-x {
+  background: linear-gradient(
+    90deg,
+    rgba(9, 13, 20, 0.95) 0%,
+    rgba(12, 17, 26, 0.82) 50%,
+    rgba(12, 17, 26, 0.24) 100%
+  );
+}
+
+[dir="rtl"].dark .sa-hero-scrim-x {
+  background: linear-gradient(
+    270deg,
+    rgba(9, 13, 20, 0.95) 0%,
+    rgba(12, 17, 26, 0.82) 50%,
+    rgba(12, 17, 26, 0.24) 100%
+  );
+}
+
+.sa-hero-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(236, 242, 250, 0.96) 0%,
+    rgba(242, 246, 252, 0.42) 55%,
+    rgba(244, 247, 252, 0.2) 100%
+  );
+}
+
+html.dark .sa-hero-scrim-y {
+  background: linear-gradient(
+    0deg,
+    rgba(9, 13, 20, 0.94) 0%,
+    rgba(11, 16, 24, 0.36) 55%,
+    rgba(9, 13, 20, 0.4) 100%
+  );
+}
+
+.sa-section-header {
+  position: relative;
+}
+
+.sa-section-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--sa-accent-ring) 0%,
+    var(--sa-secondary-soft) 45%,
+    transparent 100%
+  );
+}
+
+[dir="rtl"] .sa-section-line {
+  background: linear-gradient(
+    270deg,
+    var(--sa-accent-ring) 0%,
+    var(--sa-secondary-soft) 45%,
+    transparent 100%
+  );
+}
+
+.sa-icon-badge {
+  border-radius: var(--sa-card-inner-radius, 8px);
+  background-color: var(--sa-accent-soft);
+  border: 1px solid var(--sa-border-subtle);
+  color: var(--sa-accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.group:hover .sa-icon-badge,
+.sa-icon-badge:hover {
+  border-color: var(--sa-secondary);
+  background-color: var(--sa-secondary-soft);
+  transform: translateY(-1px) scale(1.04);
+}
+
+.sa-search-bar {
+  position: relative;
+}
+
+.sa-search-input {
+  border-radius: var(--sa-input-radius, 10px);
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  transition:
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    background-color 170ms ease;
+}
+
+.sa-search-input:hover {
+  border-color: var(--sa-border-strong);
+}
+
+.sa-search-input:focus {
+  outline: none;
+  border-color: var(--sa-accent);
+  box-shadow: 0 0 0 3px var(--sa-accent-soft);
+}
+
+.sa-btn-primary {
+  background-color: var(--sa-accent);
+  color: var(--sa-accent-fg);
+  border: 1px solid var(--sa-secondary, transparent);
+  border-radius: var(--sa-btn-radius, 10px);
+  box-shadow: 0 6px 18px var(--sa-accent-soft);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.sa-btn-primary:hover:not(:disabled) {
+  background-color: var(--sa-accent-hover);
+  box-shadow: 0 10px 24px var(--sa-accent-ring);
+  transform: translateY(-1px);
+}
+
+.sa-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.sa-btn-secondary {
+  background-color: var(--sa-bg-subsurface);
+  color: var(--sa-text-primary);
+  border: 1px solid var(--sa-border-strong);
+  border-radius: var(--sa-btn-radius, 10px);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.sa-btn-secondary:hover:not(:disabled) {
+  background-color: var(--sa-secondary-soft);
+  border-color: var(--sa-secondary);
+  transform: translateY(-1px);
+}
+
+.sa-btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.sa-link {
+  color: var(--sa-accent);
+  text-decoration: none;
+  text-underline-offset: 4px;
+  transition: color 150ms ease, text-decoration-color 150ms ease, opacity 150ms ease;
+}
+
+.sa-link:hover,
+.sa-link:focus-visible {
+  color: var(--sa-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--sa-secondary);
+}
+
+.sa-game-card {
+  border-radius: var(--sa-card-radius, 12px);
+  background-color: var(--sa-bg-surface);
+  border-color: var(--sa-border-subtle);
+  backdrop-filter: var(--sa-panel-blur);
+  -webkit-backdrop-filter: var(--sa-panel-blur);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    box-shadow 200ms ease,
+    background-color 180ms ease;
+}
+
+.sa-game-card:hover,
+.sa-game-card:focus-visible {
+  transform: translateY(-4px) scale(1.014);
+  border-color: var(--sa-secondary, var(--sa-accent));
+  box-shadow:
+    0 16px 34px rgba(10, 18, 32, 0.22),
+    0 0 0 1px var(--sa-accent-ring);
+}
+
+html.dark .sa-game-card:hover,
+html.dark .sa-game-card:focus-visible {
+  box-shadow:
+    0 18px 38px rgba(0, 4, 14, 0.56),
+    0 0 20px var(--sa-accent-soft);
+}
+
+.sa-badge-accent {
+  background-color: var(--sa-accent);
+  color: var(--sa-accent-fg);
+  border-radius: var(--sa-card-inner-radius, 6px);
+}
+
+.sa-badge-secondary {
+  background-color: var(--sa-secondary-soft);
+  color: var(--sa-secondary);
+  border: 1px solid var(--sa-secondary);
+  border-radius: var(--sa-card-inner-radius, 6px);
+}
+
 /* Subtle light & dark scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
@@ -52,7 +335,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: #94a3b8;
-  border-radius: 2px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -65,7 +348,7 @@ html.dark ::-webkit-scrollbar-track {
 
 html.dark ::-webkit-scrollbar-thumb {
   background: #2f3846;
-  border-radius: 2px;
+  border-radius: 9999px;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
@@ -140,6 +423,32 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   transform-origin: bottom;
 }
 
+html.theme-ps5 {
+  --sa-accent: #6cb6ff;
+  --sa-accent-hover: #8cc9ff;
+  --sa-accent-soft: rgba(108, 182, 255, 0.2);
+  --sa-accent-ring: rgba(255, 255, 255, 0.85);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #38bdf8;
+  --sa-secondary-soft: rgba(56, 189, 248, 0.18);
+  --sa-secondary-fg: #0f172a;
+  --sa-bg-canvas: #010a1a;
+  --sa-bg-surface: rgba(8, 30, 74, 0.82);
+  --sa-bg-surface-solid: #041638;
+  --sa-bg-surface-glass: rgba(8, 30, 74, 0.78);
+  --sa-bg-subsurface: rgba(2, 14, 42, 0.78);
+  --sa-bg-hero: #02173b;
+  --sa-border-subtle: rgba(255, 255, 255, 0.16);
+  --sa-border-strong: rgba(255, 255, 255, 0.34);
+  --sa-text-primary: #f0f6ff;
+  --sa-text-muted: #93c5fd;
+  --sa-btn-radius: 9999px;
+  --sa-card-radius: 16px;
+  --sa-card-inner-radius: 12px;
+  --sa-input-radius: 12px;
+  --sa-panel-blur: blur(16px) saturate(145%);
+}
+
 html.theme-ps5,
 html.theme-ps5 body {
   margin: 0;
@@ -149,6 +458,12 @@ html.theme-ps5 body {
   overflow: hidden;
   background-color: #010a1a;
   color: #f0f6ff;
+}
+
+.theme-ps5:not([dir="rtl"]) .font-display,
+.theme-ps5:not([dir="rtl"]) h1,
+.theme-ps5:not([dir="rtl"]) h2 {
+  letter-spacing: -0.022em;
 }
 
 .theme-ps5 .sa-app-shell {
@@ -241,15 +556,6 @@ html.theme-ps5 body {
     rgba(1, 14, 40, 0.94) 0%,
     rgba(2, 29, 74, 0.78) 46%,
     rgba(0, 72, 150, 0.16) 100%
-  );
-}
-
-[dir="rtl"] .sa-hero-scrim-x {
-  background: linear-gradient(
-    270deg,
-    #0c1016 0%,
-    rgba(12, 16, 22, 0.85) 50%,
-    rgba(12, 16, 22, 0.25) 100%
   );
 }
 
@@ -632,6 +938,32 @@ html.theme-ps5 ::-webkit-scrollbar-thumb:hover {
   }
 }
 
+html.theme-xbox {
+  --sa-accent: #169c16;
+  --sa-accent-hover: #1cb81c;
+  --sa-accent-soft: rgba(82, 224, 66, 0.18);
+  --sa-accent-ring: rgba(124, 242, 92, 0.56);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #7cf25c;
+  --sa-secondary-soft: rgba(124, 242, 92, 0.16);
+  --sa-secondary-fg: #030a04;
+  --sa-bg-canvas: #030a04;
+  --sa-bg-surface: rgba(10, 30, 14, 0.86);
+  --sa-bg-surface-solid: #07190a;
+  --sa-bg-surface-glass: rgba(10, 30, 14, 0.82);
+  --sa-bg-subsurface: rgba(6, 20, 9, 0.82);
+  --sa-bg-hero: #07190a;
+  --sa-border-subtle: rgba(110, 231, 85, 0.22);
+  --sa-border-strong: rgba(124, 242, 92, 0.48);
+  --sa-text-primary: #edf9ee;
+  --sa-text-muted: #9ad89f;
+  --sa-btn-radius: 6px;
+  --sa-card-radius: 8px;
+  --sa-card-inner-radius: 6px;
+  --sa-input-radius: 6px;
+  --sa-panel-blur: blur(14px) saturate(135%);
+}
+
 html.theme-xbox,
 html.theme-xbox body {
   margin: 0;
@@ -641,6 +973,12 @@ html.theme-xbox body {
   overflow: hidden;
   background-color: #030a04;
   color: #edf9ee;
+}
+
+.theme-xbox:not([dir="rtl"]) .font-display,
+.theme-xbox:not([dir="rtl"]) h1,
+.theme-xbox:not([dir="rtl"]) h2 {
+  letter-spacing: -0.015em;
 }
 
 .theme-xbox .sa-app-shell {
@@ -1084,67 +1422,1452 @@ html.theme-xbox ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================================================
-   Custom Default Theme Builder (.theme-custom)
+   Windows Desktop Design System (.theme-os-windows) — Fluent 2 Mica / Acrylic
+   - Dark: Mica slate backdrop with azure bloom & frosted acrylic navigation
+   - Light: Porcelain Mica backdrop (#eef3f9 -> #f6f8fc) & layered white cards
    ========================================================================== */
-html.theme-custom,
-html.theme-custom body {
-  background-color: var(--sa-bg-canvas, #0e141b);
+html.theme-os-windows {
+  --sa-accent: #0284c7;
+  --sa-accent-hover: #0369a1;
+  --sa-accent-soft: rgba(2, 132, 199, 0.11);
+  --sa-accent-ring: rgba(2, 132, 199, 0.36);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #0ea5e9;
+  --sa-secondary-soft: rgba(14, 165, 233, 0.12);
+  --sa-secondary-fg: #0f172a;
+  --sa-bg-canvas: #eef3f9;
+  --sa-bg-surface: rgba(255, 255, 255, 0.88);
+  --sa-bg-surface-solid: #ffffff;
+  --sa-bg-surface-glass: rgba(255, 255, 255, 0.82);
+  --sa-bg-subsurface: #f4f7fb;
+  --sa-bg-hero: #e4edf8;
+  --sa-border-subtle: rgba(15, 23, 42, 0.09);
+  --sa-border-strong: rgba(15, 23, 42, 0.18);
+  --sa-text-primary: #0f172a;
+  --sa-text-muted: #475569;
+  --sa-btn-radius: 8px;
+  --sa-card-radius: 10px;
+  --sa-card-inner-radius: 7px;
+  --sa-input-radius: 8px;
+  --sa-panel-blur: blur(18px) saturate(145%);
 }
 
-.theme-custom .sa-app-shell {
+html.theme-os-windows.dark {
+  --sa-accent: #1a9fff;
+  --sa-accent-hover: #38adff;
+  --sa-accent-soft: rgba(26, 159, 255, 0.16);
+  --sa-accent-ring: rgba(56, 189, 248, 0.44);
+  --sa-accent-fg: #0f172a;
+  --sa-secondary: #38bdf8;
+  --sa-secondary-soft: rgba(56, 189, 248, 0.15);
+  --sa-secondary-fg: #0f172a;
+  --sa-bg-canvas: #0c121a;
+  --sa-bg-surface: rgba(23, 30, 41, 0.86);
+  --sa-bg-surface-solid: #171e29;
+  --sa-bg-surface-glass: rgba(23, 30, 41, 0.78);
+  --sa-bg-subsurface: rgba(16, 22, 31, 0.86);
+  --sa-bg-hero: #0a1018;
+  --sa-border-subtle: rgba(255, 255, 255, 0.09);
+  --sa-border-strong: rgba(255, 255, 255, 0.18);
+  --sa-text-primary: #f1f5f9;
+  --sa-text-muted: #94a3b8;
+}
+
+html.theme-os-windows:not(.dark),
+html.theme-os-windows:not(.dark) body {
+  background-color: #eef3f9;
+}
+
+html.theme-os-windows.dark,
+html.theme-os-windows.dark body {
+  background-color: #0c121a;
+}
+
+.theme-os-windows:not([dir="rtl"]) body {
+  letter-spacing: -0.005em;
+}
+
+.theme-os-windows:not([dir="rtl"]) .font-display,
+.theme-os-windows:not([dir="rtl"]) h1,
+.theme-os-windows:not([dir="rtl"]) h2 {
+  letter-spacing: -0.018em;
+}
+
+/* Windows 11 Mica Atmospheric Canvas */
+.theme-os-windows:not(.dark) .sa-app-shell {
+  background:
+    radial-gradient(64% 50% at 15% 6%, rgba(14, 165, 233, 0.12) 0%, transparent 65%),
+    radial-gradient(56% 48% at 88% 14%, rgba(2, 132, 199, 0.09) 0%, transparent 66%),
+    linear-gradient(180deg, #f6f9fd 0%, #eef3f9 55%, #e6edf7 100%);
+}
+
+.theme-os-windows.dark .sa-app-shell {
+  background:
+    radial-gradient(66% 52% at 16% 6%, rgba(26, 159, 255, 0.15) 0%, transparent 64%),
+    radial-gradient(58% 48% at 86% 10%, rgba(56, 189, 248, 0.1) 0%, transparent 66%),
+    linear-gradient(180deg, #0f1621 0%, #0b1018 55%, #080c12 100%);
+}
+
+.theme-os-windows main > div,
+.theme-os-windows main > section,
+.theme-os-windows .sa-ps5-modal-scroll {
+  background-image: none;
+  background-color: transparent;
+}
+
+.theme-os-windows:not(.dark) main > aside {
+  background-image: none;
+  background-color: rgba(248, 250, 254, 0.84);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-color: rgba(15, 23, 42, 0.09);
+}
+
+.theme-os-windows.dark main > aside {
+  background-image: none;
+  background-color: rgba(16, 22, 31, 0.82);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+/* Fluent 2 Acrylic Topbar & Header */
+.theme-os-windows:not(.dark) .sa-topbar {
+  background-color: rgba(241, 245, 251, 0.85);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-color: rgba(15, 23, 42, 0.09);
+}
+
+.theme-os-windows.dark .sa-topbar {
+  background-color: rgba(11, 16, 23, 0.82);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-os-windows:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  border-color: rgba(15, 23, 42, 0.09);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.theme-os-windows.dark header {
+  background-color: rgba(19, 26, 36, 0.8);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 4, 14, 0.36);
+}
+
+/* Fluent Cards, Panels & Subpanels (Light & Dark) */
+.theme-os-windows:not(.dark) .sa-ps5-panel,
+.theme-os-windows:not(.dark) .sa-contain-card {
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  border-color: rgba(15, 23, 42, 0.09);
+  border-radius: 10px;
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.theme-os-windows.dark .sa-ps5-panel,
+.theme-os-windows.dark .sa-contain-card,
+.theme-os-windows.dark [class*="bg-[#141921]"],
+.theme-os-windows.dark [class*="bg-[#141a23]"],
+.theme-os-windows.dark [class*="bg-[#141b24]"],
+.theme-os-windows.dark [class*="bg-[#141b25]"],
+.theme-os-windows.dark [class*="bg-[#141c27]"],
+.theme-os-windows.dark [class*="bg-[#141c28]"],
+.theme-os-windows.dark [class*="bg-[#151b24]"],
+.theme-os-windows.dark [class*="bg-[#151c25]"],
+.theme-os-windows.dark [class*="bg-[#151c26]"],
+.theme-os-windows.dark [class*="bg-[#161c26]"],
+.theme-os-windows.dark [class*="bg-[#161d28]"],
+.theme-os-windows.dark [class*="bg-[#161e29]"],
+.theme-os-windows.dark [class*="bg-[#171a21]"],
+.theme-os-windows.dark [class*="bg-[#171d25]"],
+.theme-os-windows.dark [class*="bg-[#171d26]"],
+.theme-os-windows.dark [class*="bg-[#171f2a]"],
+.theme-os-windows.dark [class*="bg-[#18202b]"],
+.theme-os-windows.dark [class*="bg-[#1b222d]"] {
+  background-image: none;
+  background-color: rgba(23, 30, 41, 0.86);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-color: rgba(255, 255, 255, 0.09);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 24px rgba(0, 4, 14, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.theme-os-windows:not(.dark) .sa-ps5-subpanel {
+  background-image: none;
+  background-color: rgba(244, 247, 251, 0.92);
+  border-color: rgba(15, 23, 42, 0.09);
+  border-radius: 8px;
+}
+
+.theme-os-windows.dark .sa-ps5-subpanel {
+  background-image: none;
+  background-color: rgba(16, 22, 31, 0.84);
+  border-color: rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+}
+
+.theme-os-windows.dark .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-windows.dark [aria-pressed="true"] {
+  background-color: rgba(26, 159, 255, 0.16);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+}
+
+.theme-os-windows:not(.dark) .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-windows:not(.dark) [aria-pressed="true"] {
+  background-color: rgba(2, 132, 199, 0.1);
+  border-color: #0284c7;
+  box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.32);
+}
+
+/* Fluent Primary & Secondary Buttons */
+.theme-os-windows button[class*="bg-[#0284c7]"],
+.theme-os-windows button[class*="bg-[#1a9fff]"],
+.theme-os-windows button[class*="bg-sky-600"],
+.theme-os-windows a[class*="bg-[#0284c7]"],
+.theme-os-windows a[class*="bg-[#1a9fff]"] {
+  border-radius: 8px;
+  box-shadow:
+    0 4px 14px rgba(2, 132, 199, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.theme-os-windows button[class*="bg-[#0284c7]"]:hover,
+.theme-os-windows button[class*="bg-[#1a9fff]"]:hover,
+.theme-os-windows button[class*="bg-sky-600"]:hover,
+.theme-os-windows a[class*="bg-[#0284c7]"]:hover,
+.theme-os-windows a[class*="bg-[#1a9fff]"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(26, 159, 255, 0.36);
+}
+
+.theme-os-windows button:active {
+  transform: scale(0.985);
+}
+
+.theme-os-windows:not(.dark) input:not([type="range"]),
+.theme-os-windows:not(.dark) select,
+.theme-os-windows:not(.dark) textarea {
+  background-color: #ffffff;
+  border-color: rgba(15, 23, 42, 0.14);
+  border-radius: 8px;
+  color: #0f172a;
+}
+
+.theme-os-windows:not(.dark) input:not([type="range"]):focus,
+.theme-os-windows:not(.dark) select:focus,
+.theme-os-windows:not(.dark) textarea:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16);
+}
+
+.theme-os-windows.dark input:not([type="range"]),
+.theme-os-windows.dark select,
+.theme-os-windows.dark textarea {
+  background-color: rgba(14, 19, 27, 0.88);
+  border-color: rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  color: #f1f5f9;
+}
+
+.theme-os-windows.dark input:not([type="range"]):focus,
+.theme-os-windows.dark select:focus,
+.theme-os-windows.dark textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+}
+
+.theme-os-windows .sa-contain-card,
+.theme-os-windows [role="button"] {
+  transition:
+    transform 170ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 160ms ease,
+    box-shadow 170ms ease,
+    background-color 160ms ease;
+}
+
+.theme-os-windows.dark .sa-contain-card:hover,
+.theme-os-windows.dark [role="button"]:hover {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 12px 28px rgba(0, 4, 14, 0.48);
+}
+
+.theme-os-windows:not(.dark) .sa-contain-card:hover,
+.theme-os-windows:not(.dark) [role="button"]:hover {
+  border-color: rgba(2, 132, 199, 0.42);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
+}
+
+html.theme-os-windows:not(.dark) ::-webkit-scrollbar-track {
+  background: #e7eef7;
+}
+
+html.theme-os-windows:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.32);
+  border-radius: 9999px;
+}
+
+html.theme-os-windows:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(2, 132, 199, 0.58);
+}
+
+html.theme-os-windows.dark ::-webkit-scrollbar-track {
+  background: #0c121a;
+}
+
+html.theme-os-windows.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 9999px;
+}
+
+html.theme-os-windows.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.55);
+}
+
+/* ==========================================================================
+   Linux Desktop Design System (.theme-os-linux) — Nordic Darker / Polar Frost
+   - Matte Nordic slate surfaces (#242933 canvas, #2e3440 panels, #3b4252 tiles)
+   - Polar Frost Light palette (#e5e9f0 canvas, #ffffff cards, #eceff4 tiles)
+   - Crisp 1px frost borders, #88c0d0 / #5e81ac steel-glacier accents, tactile snap
+   ========================================================================== */
+html.theme-os-linux {
+  --sa-accent: #4c6f9c;
+  --sa-accent-hover: #3d5c85;
+  --sa-accent-soft: rgba(94, 129, 172, 0.14);
+  --sa-accent-ring: rgba(76, 111, 156, 0.4);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #5e81ac;
+  --sa-secondary-soft: rgba(94, 129, 172, 0.14);
+  --sa-secondary-fg: #ffffff;
+  --sa-bg-canvas: #e5e9f0;
+  --sa-bg-surface: #ffffff;
+  --sa-bg-surface-solid: #ffffff;
+  --sa-bg-surface-glass: rgba(255, 255, 255, 0.92);
+  --sa-bg-subsurface: #eceff4;
+  --sa-bg-hero: #dfe5ef;
+  --sa-border-subtle: rgba(46, 52, 64, 0.13);
+  --sa-border-strong: rgba(46, 52, 64, 0.24);
+  --sa-text-primary: #2e3440;
+  --sa-text-muted: #4c566a;
+  --sa-btn-radius: 7px;
+  --sa-card-radius: 10px;
+  --sa-card-inner-radius: 8px;
+  --sa-input-radius: 7px;
+  --sa-panel-blur: none;
+}
+
+html.theme-os-linux.dark {
+  --sa-accent: #88c0d0;
+  --sa-accent-hover: #8fbcbb;
+  --sa-accent-soft: rgba(136, 192, 208, 0.16);
+  --sa-accent-ring: rgba(136, 192, 208, 0.42);
+  --sa-accent-fg: #0f172a;
+  --sa-secondary: #5e81ac;
+  --sa-secondary-soft: rgba(94, 129, 172, 0.22);
+  --sa-secondary-fg: #ffffff;
+  --sa-bg-canvas: #242933;
+  --sa-bg-surface: #2e3440;
+  --sa-bg-surface-solid: #2e3440;
+  --sa-bg-surface-glass: rgba(46, 52, 64, 0.88);
+  --sa-bg-subsurface: #3b4252;
+  --sa-bg-hero: #20252e;
+  --sa-border-subtle: rgba(216, 222, 233, 0.11);
+  --sa-border-strong: rgba(136, 192, 208, 0.34);
+  --sa-text-primary: #eceff4;
+  --sa-text-muted: #d8dee9;
+}
+
+html.theme-os-linux:not(.dark),
+html.theme-os-linux:not(.dark) body {
+  background-color: #e5e9f0;
+  color: #2e3440;
+}
+
+html.theme-os-linux.dark,
+html.theme-os-linux.dark body {
+  background-color: #242933;
+  color: #eceff4;
+}
+
+.theme-os-linux:not([dir="rtl"]) body {
+  letter-spacing: -0.004em;
+}
+
+.theme-os-linux:not([dir="rtl"]) .font-display,
+.theme-os-linux:not([dir="rtl"]) h1,
+.theme-os-linux:not([dir="rtl"]) h2 {
+  letter-spacing: -0.015em;
+}
+
+.theme-os-linux:not(.dark) .sa-app-shell {
+  background:
+    radial-gradient(90% 55% at 50% -10%, rgba(94, 129, 172, 0.14) 0%, transparent 70%),
+    linear-gradient(180deg, #eceff4 0%, #dfe5ef 100%);
+}
+
+.theme-os-linux.dark .sa-app-shell {
+  background:
+    radial-gradient(85% 50% at 50% -10%, rgba(129, 161, 193, 0.14) 0%, transparent 72%),
+    linear-gradient(180deg, #272c37 0%, #20252e 55%, #1b1f27 100%);
+}
+
+/* Expose Nordic Darker / Polar Frost shell backdrop across every primary scrollable view & modal */
+.theme-os-linux main > div,
+.theme-os-linux main > section,
+.theme-os-linux .sa-ps5-modal-scroll {
+  background-image: none;
+  background-color: transparent;
+}
+
+.theme-os-linux:not(.dark) main > aside {
+  background-image: none;
+  background-color: #eaedf3;
+  border-color: rgba(46, 52, 64, 0.13);
+}
+
+.theme-os-linux.dark main > aside {
+  background-image: none;
+  background-color: #272d38;
+  border-color: rgba(216, 222, 233, 0.1);
+}
+
+/* Matte GNOME / Nordic Topbar & Headerbar */
+.theme-os-linux:not(.dark) .sa-topbar {
+  background-color: #dfe5ef;
+  border-color: rgba(46, 52, 64, 0.14);
+}
+
+.theme-os-linux.dark .sa-topbar {
+  background-color: #191d24;
+  border-color: rgba(216, 222, 233, 0.09);
+}
+
+.theme-os-linux:not(.dark) header {
+  background-color: #eef1f6;
+  border-color: rgba(46, 52, 64, 0.13);
+  box-shadow: 0 2px 10px rgba(46, 52, 64, 0.05);
+}
+
+.theme-os-linux.dark header {
+  background-color: #272d38;
+  border-color: rgba(216, 222, 233, 0.1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* Nordic Matte Cards, Panels, Modals & Containers Across All Pages */
+.theme-os-linux:not(.dark) .sa-ps5-panel,
+.theme-os-linux:not(.dark) .sa-contain-card {
+  background-image: none;
+  background-color: #ffffff;
+  border-color: rgba(46, 52, 64, 0.14);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(46, 52, 64, 0.06);
+}
+
+.theme-os-linux.dark .sa-ps5-panel,
+.theme-os-linux.dark .sa-contain-card,
+.theme-os-linux.dark [class*="bg-[#141921]"],
+.theme-os-linux.dark [class*="bg-[#141a23]"],
+.theme-os-linux.dark [class*="bg-[#141b24]"],
+.theme-os-linux.dark [class*="bg-[#141b25]"],
+.theme-os-linux.dark [class*="bg-[#141c27]"],
+.theme-os-linux.dark [class*="bg-[#141c28]"],
+.theme-os-linux.dark [class*="bg-[#141d29]"],
+.theme-os-linux.dark [class*="bg-[#151b24]"],
+.theme-os-linux.dark [class*="bg-[#151c25]"],
+.theme-os-linux.dark [class*="bg-[#151c26]"],
+.theme-os-linux.dark [class*="bg-[#161c26]"],
+.theme-os-linux.dark [class*="bg-[#161d28]"],
+.theme-os-linux.dark [class*="bg-[#161e29]"],
+.theme-os-linux.dark [class*="bg-[#171a21]"],
+.theme-os-linux.dark [class*="bg-[#171d25]"],
+.theme-os-linux.dark [class*="bg-[#171d26]"],
+.theme-os-linux.dark [class*="bg-[#171d27]"],
+.theme-os-linux.dark [class*="bg-[#171e28]"],
+.theme-os-linux.dark [class*="bg-[#171f2a]"],
+.theme-os-linux.dark [class*="bg-[#18202b]"],
+.theme-os-linux.dark [class*="bg-[#182230]"],
+.theme-os-linux.dark [class*="bg-[#192331]"],
+.theme-os-linux.dark [class*="bg-[#1b222c]"],
+.theme-os-linux.dark [class*="bg-[#1b222d]"],
+.theme-os-linux.dark [class*="bg-[#1b232e]"],
+.theme-os-linux.dark [class*="bg-[#1b232f]"],
+.theme-os-linux.dark [class*="bg-[#1b2838]"],
+.theme-os-linux.dark [class*="bg-[#1f2937]"] {
+  background-image: none;
+  background-color: #2e3440;
+  border-color: rgba(216, 222, 233, 0.11);
+  border-radius: 10px;
+  box-shadow:
+    0 6px 18px rgba(14, 17, 24, 0.34),
+    inset 0 1px 0 rgba(236, 239, 244, 0.04);
+}
+
+.theme-os-linux:not(.dark) .sa-ps5-subpanel {
+  background-image: none;
+  background-color: #eceff4;
+  border-color: rgba(46, 52, 64, 0.12);
+  border-radius: 8px;
+}
+
+.theme-os-linux.dark .sa-ps5-subpanel,
+.theme-os-linux.dark [class*="bg-[#0b0e14]"],
+.theme-os-linux.dark [class*="bg-[#0b1016]"],
+.theme-os-linux.dark [class*="bg-[#0e141b]"],
+.theme-os-linux.dark [class*="bg-[#0f141b]"],
+.theme-os-linux.dark [class*="bg-[#0f141c]"],
+.theme-os-linux.dark [class*="bg-[#10151c]"],
+.theme-os-linux.dark [class*="bg-[#10161e]"],
+.theme-os-linux.dark [class*="bg-[#11161d]"],
+.theme-os-linux.dark [class*="bg-[#11161f]"],
+.theme-os-linux.dark [class*="bg-[#111722]"],
+.theme-os-linux.dark [class*="bg-[#111824]"],
+.theme-os-linux.dark [class*="bg-[#12171f]"],
+.theme-os-linux.dark [class*="bg-[#121923]"],
+.theme-os-linux.dark [class*="bg-[#131820]"],
+.theme-os-linux.dark [class*="bg-[#131922]"],
+.theme-os-linux.dark [class*="bg-[#131a23]"],
+.theme-os-linux.dark [class*="bg-[#131b24]"] {
+  background-image: none;
+  background-color: #3b4252;
+  border-color: rgba(216, 222, 233, 0.1);
+  border-radius: 8px;
+}
+
+.theme-os-linux.dark .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-linux.dark [aria-pressed="true"] {
+  background-color: #434c5e;
+  border-color: #88c0d0;
+  box-shadow: 0 0 0 1px rgba(136, 192, 208, 0.45);
+}
+
+.theme-os-linux:not(.dark) .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-linux:not(.dark) [aria-pressed="true"] {
+  background-color: #dce4f2;
+  border-color: #4c6f9c;
+  box-shadow: 0 0 0 1px rgba(76, 111, 156, 0.38);
+}
+
+.theme-os-linux.dark .sa-ps5-subpanel button[aria-pressed="true"] {
+  background-color: rgba(94, 129, 172, 0.34);
+  border-color: #88c0d0;
+  color: #eceff4;
+}
+
+/* Nordic Global Text, Border & Badge Accents Across Every View */
+.theme-os-linux.dark [class*="text-[#0284c7]"],
+.theme-os-linux.dark [class*="text-[#38bdf8]"],
+.theme-os-linux.dark [class*="text-[#66c0f4]"],
+.theme-os-linux.dark [class*="text-[#1a9fff]"],
+.theme-os-linux.dark [class*="text-sky-300"],
+.theme-os-linux.dark [class*="text-sky-400"],
+.theme-os-linux.dark [class*="text-sky-500"] {
+  color: #88c0d0;
+}
+
+.theme-os-linux:not(.dark) [class*="text-[#0284c7]"],
+.theme-os-linux:not(.dark) [class*="text-[#38bdf8]"],
+.theme-os-linux:not(.dark) [class*="text-[#66c0f4]"],
+.theme-os-linux:not(.dark) [class*="text-[#1a9fff]"],
+.theme-os-linux:not(.dark) [class*="text-sky-600"],
+.theme-os-linux:not(.dark) [class*="text-sky-700"] {
+  color: #4c6f9c;
+}
+
+.theme-os-linux.dark [class*="border-[#0284c7]"],
+.theme-os-linux.dark [class*="border-[#38bdf8]"],
+.theme-os-linux.dark [class*="border-[#1a9fff]"],
+.theme-os-linux.dark [class*="border-sky-400"],
+.theme-os-linux.dark [class*="border-sky-500"] {
+  border-color: rgba(136, 192, 208, 0.55);
+}
+
+.theme-os-linux:not(.dark) [class*="border-[#0284c7]"],
+.theme-os-linux:not(.dark) [class*="border-[#38bdf8]"],
+.theme-os-linux:not(.dark) [class*="border-[#1a9fff]"],
+.theme-os-linux:not(.dark) [class*="border-sky-400"],
+.theme-os-linux:not(.dark) [class*="border-sky-500"] {
+  border-color: rgba(76, 111, 156, 0.52);
+}
+
+.theme-os-linux.dark [class*="bg-sky-500/"],
+.theme-os-linux.dark [class*="bg-[#1a9fff]/"] {
+  background-color: rgba(136, 192, 208, 0.14);
+}
+
+/* Tactile Nordic Primary & Secondary Buttons + Inputs (Light & Dark) */
+.theme-os-linux button[class*="bg-[#0284c7]"],
+.theme-os-linux button[class*="bg-[#1a9fff]"],
+.theme-os-linux button[class*="bg-sky-600"],
+.theme-os-linux a[class*="bg-[#0284c7]"],
+.theme-os-linux a[class*="bg-[#1a9fff]"],
+.theme-os-linux [class*="from-[#1a9fff]"] {
+  background-image: none;
+  background-color: #5e81ac;
+  color: #ffffff;
+  border: 1px solid rgba(216, 222, 233, 0.2);
+  border-radius: 7px;
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 140ms ease, border-color 140ms ease;
+}
+
+.theme-os-linux button[class*="bg-[#0284c7]"]:hover,
+.theme-os-linux button[class*="bg-[#1a9fff]"]:hover,
+.theme-os-linux button[class*="bg-sky-600"]:hover,
+.theme-os-linux a[class*="bg-[#0284c7]"]:hover,
+.theme-os-linux a[class*="bg-[#1a9fff]"]:hover {
+  background-color: #6f94bf;
+  border-color: #88c0d0;
+  transform: translateY(-1px);
+}
+
+.theme-os-linux button:active {
+  transform: scale(0.985);
+}
+
+.theme-os-linux.dark button[class*="bg-[#1a222d]"],
+.theme-os-linux.dark button[class*="bg-[#1a222e]"],
+.theme-os-linux.dark button[class*="bg-[#1c2430]"],
+.theme-os-linux.dark button[class*="bg-[#1e2633]"],
+.theme-os-linux.dark button[class*="bg-[#1e2733]"],
+.theme-os-linux.dark button[class*="bg-[#1f2835]"],
+.theme-os-linux.dark button[class*="bg-[#202936]"],
+.theme-os-linux.dark button[class*="bg-[#212a37]"],
+.theme-os-linux.dark button[class*="bg-[#232b36]"],
+.theme-os-linux.dark button[class*="bg-[#232d3d]"] {
+  background-color: #3b4252;
+  border-color: rgba(216, 222, 233, 0.12);
+  color: #eceff4;
+  border-radius: 7px;
+}
+
+.theme-os-linux.dark button[class*="bg-[#1a222d]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#1a222e]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#1c2430]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#1e2633]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#1e2733]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#1f2835]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#202936]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#212a37]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#232b36]"]:hover,
+.theme-os-linux.dark button[class*="bg-[#232d3d]"]:hover {
+  background-color: #4c566a;
+  border-color: rgba(136, 192, 208, 0.55);
+}
+
+.theme-os-linux:not(.dark) input:not([type="range"]),
+.theme-os-linux:not(.dark) select,
+.theme-os-linux:not(.dark) textarea {
+  background-color: #ffffff;
+  border-color: rgba(46, 52, 64, 0.18);
+  border-radius: 7px;
+  color: #2e3440;
+}
+
+.theme-os-linux:not(.dark) input:not([type="range"]):focus,
+.theme-os-linux:not(.dark) select:focus,
+.theme-os-linux:not(.dark) textarea:focus {
+  border-color: #4c6f9c;
+  box-shadow: 0 0 0 3px rgba(76, 111, 156, 0.18);
+}
+
+.theme-os-linux.dark input:not([type="range"]),
+.theme-os-linux.dark select,
+.theme-os-linux.dark textarea {
+  background-color: #242933;
+  border-color: rgba(216, 222, 233, 0.14);
+  border-radius: 7px;
+  color: #eceff4;
+}
+
+.theme-os-linux.dark input:not([type="range"]):focus,
+.theme-os-linux.dark select:focus,
+.theme-os-linux.dark textarea:focus {
+  border-color: #88c0d0;
+  box-shadow: 0 0 0 3px rgba(136, 192, 208, 0.22);
+}
+
+/* Crisp Nordic Card Hover Motion */
+.theme-os-linux .sa-contain-card,
+.theme-os-linux [role="button"] {
+  transition:
+    transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.theme-os-linux.dark .sa-contain-card:hover,
+.theme-os-linux.dark [role="button"]:hover {
+  border-color: rgba(136, 192, 208, 0.65);
+  box-shadow: 0 10px 24px rgba(10, 12, 18, 0.45);
+}
+
+.theme-os-linux:not(.dark) .sa-contain-card:hover,
+.theme-os-linux:not(.dark) [role="button"]:hover {
+  border-color: rgba(76, 111, 156, 0.48);
+  box-shadow: 0 8px 20px rgba(46, 52, 64, 0.11);
+}
+
+html.theme-os-linux:not(.dark) ::-webkit-scrollbar-track {
+  background: #e5e9f0;
+}
+
+html.theme-os-linux:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(76, 86, 106, 0.34);
+  border-radius: 6px;
+}
+
+html.theme-os-linux:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 111, 156, 0.62);
+}
+
+html.theme-os-linux.dark ::-webkit-scrollbar-track {
+  background: #1b1f27;
+}
+
+html.theme-os-linux.dark ::-webkit-scrollbar-thumb {
+  background: rgba(129, 161, 193, 0.35);
+  border-radius: 6px;
+}
+
+html.theme-os-linux.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(136, 192, 208, 0.6);
+}
+
+/* ==========================================================================
+   macOS Desktop Design System (.theme-os-macos) — Sequoia Cobalt Frosted Glass
+   - Deep indigo-cobalt ambient mesh backdrop + smoked translucent frosted glass
+   - Bright Sequoia frost daylight theme with translucent aqua glass & soft shadows
+   - Luminous 1px glass rims, electric cobalt-sky accents, dock-inspired spring motion
+   ========================================================================== */
+html.theme-os-macos {
+  --sa-accent: #0066cc;
+  --sa-accent-hover: #0055b3;
+  --sa-accent-soft: rgba(0, 102, 204, 0.12);
+  --sa-accent-ring: rgba(0, 102, 204, 0.38);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #38bdf8;
+  --sa-secondary-soft: rgba(56, 189, 248, 0.14);
+  --sa-secondary-fg: #0f172a;
+  --sa-bg-canvas: #eef2f9;
+  --sa-bg-surface: rgba(255, 255, 255, 0.78);
+  --sa-bg-surface-solid: #ffffff;
+  --sa-bg-surface-glass: rgba(255, 255, 255, 0.76);
+  --sa-bg-subsurface: rgba(241, 245, 255, 0.78);
+  --sa-bg-hero: #e4eaf8;
+  --sa-border-subtle: rgba(15, 23, 42, 0.1);
+  --sa-border-strong: rgba(15, 23, 42, 0.18);
+  --sa-text-primary: #0f172a;
+  --sa-text-muted: #475569;
+  --sa-btn-radius: 11px;
+  --sa-card-radius: 16px;
+  --sa-card-inner-radius: 12px;
+  --sa-input-radius: 11px;
+  --sa-panel-blur: blur(22px) saturate(165%);
+}
+
+html.theme-os-macos.dark {
+  --sa-accent: #2563eb;
+  --sa-accent-hover: #3b82f6;
+  --sa-accent-soft: rgba(56, 189, 248, 0.16);
+  --sa-accent-ring: rgba(56, 189, 248, 0.44);
+  --sa-accent-fg: #ffffff;
+  --sa-secondary: #38bdf8;
+  --sa-secondary-soft: rgba(56, 189, 248, 0.18);
+  --sa-secondary-fg: #0f172a;
+  --sa-bg-canvas: #11132e;
+  --sa-bg-surface: rgba(21, 26, 62, 0.72);
+  --sa-bg-surface-solid: #151a3e;
+  --sa-bg-surface-glass: rgba(21, 26, 62, 0.7);
+  --sa-bg-subsurface: rgba(28, 34, 80, 0.66);
+  --sa-bg-hero: #0e112c;
+  --sa-border-subtle: rgba(255, 255, 255, 0.15);
+  --sa-border-strong: rgba(96, 165, 250, 0.42);
+  --sa-text-primary: #f8fafc;
+  --sa-text-muted: #cbd5e1;
+}
+
+html.theme-os-macos:not(.dark),
+html.theme-os-macos:not(.dark) body {
+  background-color: #eef2f9;
+}
+
+html.theme-os-macos.dark,
+html.theme-os-macos.dark body {
+  background-color: #11132e;
+}
+
+.theme-os-macos:not([dir="rtl"]) body {
+  letter-spacing: -0.011em;
+}
+
+.theme-os-macos:not([dir="rtl"]) .font-display,
+.theme-os-macos:not([dir="rtl"]) h1,
+.theme-os-macos:not([dir="rtl"]) h2 {
+  letter-spacing: -0.026em;
+}
+
+.theme-os-macos:not(.dark) .sa-app-shell {
+  background:
+    radial-gradient(62% 52% at 12% 8%, rgba(56, 189, 248, 0.16) 0%, transparent 65%),
+    radial-gradient(56% 52% at 88% 12%, rgba(139, 92, 246, 0.14) 0%, transparent 68%),
+    radial-gradient(60% 48% at 65% 92%, rgba(236, 72, 153, 0.1) 0%, transparent 68%),
+    linear-gradient(160deg, #f5f7ff 0%, #eaeffc 55%, #e5eaf9 100%);
+}
+
+.theme-os-macos.dark .sa-app-shell {
+  background:
+    radial-gradient(62% 52% at 14% 10%, rgba(56, 189, 248, 0.24) 0%, transparent 64%),
+    radial-gradient(58% 50% at 86% 8%, rgba(168, 85, 247, 0.26) 0%, transparent 66%),
+    radial-gradient(54% 48% at 72% 94%, rgba(236, 72, 153, 0.18) 0%, transparent 65%),
+    radial-gradient(65% 60% at 24% 88%, rgba(37, 99, 235, 0.22) 0%, transparent 68%),
+    linear-gradient(160deg, #121538 0%, #0e112e 52%, #0a0c22 100%);
+}
+
+/* Expose vibrant Indigo-Cobalt Glass backdrop across every primary scrollable view */
+.theme-os-macos main > div,
+.theme-os-macos main > section,
+.theme-os-macos .sa-ps5-modal-scroll {
+  background-image: none;
+  background-color: transparent;
+}
+
+.theme-os-macos:not(.dark) main > aside {
+  background-image: none;
+  background-color: rgba(248, 250, 255, 0.78);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-color: rgba(15, 23, 42, 0.09);
+}
+
+.theme-os-macos.dark main > aside {
+  background-image: none;
+  background-color: rgba(16, 20, 52, 0.72);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Translucent Smoked Glass Topbar & Dock Header */
+.theme-os-macos:not(.dark) .sa-topbar {
+  background-color: rgba(248, 250, 255, 0.76);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.theme-os-macos.dark .sa-topbar {
+  background-color: rgba(13, 16, 44, 0.74);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-os-macos:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  border-color: rgba(15, 23, 42, 0.09);
+}
+
+.theme-os-macos.dark header {
+  background-color: rgba(16, 20, 52, 0.7);
+  backdrop-filter: blur(24px) saturate(175%);
+  -webkit-backdrop-filter: blur(24px) saturate(175%);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(4, 6, 24, 0.42);
+}
+
+/* Smoked Translucent Glass Cards & Panels Across Every Page */
+.theme-os-macos:not(.dark) .sa-ps5-panel,
+.theme-os-macos:not(.dark) .sa-contain-card {
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px) saturate(155%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  border-color: rgba(15, 23, 42, 0.09);
+  border-radius: 16px;
+  box-shadow:
+    0 10px 28px rgba(30, 41, 90, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.theme-os-macos.dark .sa-ps5-panel,
+.theme-os-macos.dark .sa-contain-card,
+.theme-os-macos.dark [class*="bg-[#141921]"],
+.theme-os-macos.dark [class*="bg-[#141a23]"],
+.theme-os-macos.dark [class*="bg-[#141b24]"],
+.theme-os-macos.dark [class*="bg-[#141b25]"],
+.theme-os-macos.dark [class*="bg-[#141c27]"],
+.theme-os-macos.dark [class*="bg-[#141c28]"],
+.theme-os-macos.dark [class*="bg-[#141d29]"],
+.theme-os-macos.dark [class*="bg-[#151b24]"],
+.theme-os-macos.dark [class*="bg-[#151c25]"],
+.theme-os-macos.dark [class*="bg-[#151c26]"],
+.theme-os-macos.dark [class*="bg-[#161c26]"],
+.theme-os-macos.dark [class*="bg-[#161d28]"],
+.theme-os-macos.dark [class*="bg-[#161e29]"],
+.theme-os-macos.dark [class*="bg-[#171a21]"],
+.theme-os-macos.dark [class*="bg-[#171d25]"],
+.theme-os-macos.dark [class*="bg-[#171d26]"],
+.theme-os-macos.dark [class*="bg-[#171d27]"],
+.theme-os-macos.dark [class*="bg-[#171e28]"],
+.theme-os-macos.dark [class*="bg-[#171f2a]"],
+.theme-os-macos.dark [class*="bg-[#18202b]"],
+.theme-os-macos.dark [class*="bg-[#182230]"],
+.theme-os-macos.dark [class*="bg-[#192331]"],
+.theme-os-macos.dark [class*="bg-[#1b222c]"],
+.theme-os-macos.dark [class*="bg-[#1b222d]"],
+.theme-os-macos.dark [class*="bg-[#1b232e]"],
+.theme-os-macos.dark [class*="bg-[#1b232f]"],
+.theme-os-macos.dark [class*="bg-[#1b2838]"],
+.theme-os-macos.dark [class*="bg-[#1f2937]"] {
+  background-image: none;
+  background-color: rgba(21, 26, 62, 0.7);
+  backdrop-filter: blur(22px) saturate(165%);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  border-color: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow:
+    0 16px 38px rgba(4, 6, 24, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.theme-os-macos:not(.dark) .sa-ps5-subpanel {
+  background-image: none;
+  background-color: rgba(241, 245, 255, 0.76);
+  border-color: rgba(15, 23, 42, 0.08);
+  border-radius: 13px;
+}
+
+.theme-os-macos.dark .sa-ps5-subpanel,
+.theme-os-macos.dark [class*="bg-[#0b0e14]"],
+.theme-os-macos.dark [class*="bg-[#0b1016]"],
+.theme-os-macos.dark [class*="bg-[#0e141b]"],
+.theme-os-macos.dark [class*="bg-[#0f141b]"],
+.theme-os-macos.dark [class*="bg-[#0f141c]"],
+.theme-os-macos.dark [class*="bg-[#10151c]"],
+.theme-os-macos.dark [class*="bg-[#10161e]"],
+.theme-os-macos.dark [class*="bg-[#11161d]"],
+.theme-os-macos.dark [class*="bg-[#11161f]"],
+.theme-os-macos.dark [class*="bg-[#111722]"],
+.theme-os-macos.dark [class*="bg-[#111824]"],
+.theme-os-macos.dark [class*="bg-[#12171f]"],
+.theme-os-macos.dark [class*="bg-[#121923]"],
+.theme-os-macos.dark [class*="bg-[#131820]"],
+.theme-os-macos.dark [class*="bg-[#131922]"],
+.theme-os-macos.dark [class*="bg-[#131a23]"],
+.theme-os-macos.dark [class*="bg-[#131b24]"] {
+  background-image: none;
+  background-color: rgba(28, 34, 80, 0.64);
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.theme-os-macos.dark .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-macos.dark [aria-pressed="true"] {
+  background-color: rgba(37, 99, 235, 0.34);
+  border-color: rgba(96, 165, 250, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.55),
+    0 10px 24px rgba(37, 99, 235, 0.28);
+}
+
+.theme-os-macos:not(.dark) .sa-ps5-subpanel[aria-pressed="true"],
+.theme-os-macos:not(.dark) [aria-pressed="true"] {
+  background-color: rgba(0, 102, 204, 0.12);
+  border-color: #0066cc;
+  box-shadow: 0 0 0 1px rgba(0, 102, 204, 0.35);
+}
+
+.theme-os-macos.dark .sa-ps5-subpanel button[aria-pressed="true"] {
+  background-color: rgba(37, 99, 235, 0.34);
+  border-color: #60a5fa;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.28);
+}
+
+/* macOS Global Text, Border & Badge Accents */
+.theme-os-macos.dark [class*="text-[#0284c7]"],
+.theme-os-macos.dark [class*="text-[#38bdf8]"],
+.theme-os-macos.dark [class*="text-[#66c0f4]"],
+.theme-os-macos.dark [class*="text-[#1a9fff]"] {
+  color: #60a5fa;
+}
+
+.theme-os-macos:not(.dark) [class*="text-[#0284c7]"],
+.theme-os-macos:not(.dark) [class*="text-[#1a9fff]"] {
+  color: #0066cc;
+}
+
+.theme-os-macos.dark [class*="border-[#0284c7]"],
+.theme-os-macos.dark [class*="border-[#38bdf8]"],
+.theme-os-macos.dark [class*="border-[#1a9fff]"] {
+  border-color: rgba(96, 165, 250, 0.58);
+}
+
+/* Sapphire Glass Primary CTAs & Translucent Secondary Pills */
+.theme-os-macos button[class*="bg-[#0284c7]"],
+.theme-os-macos button[class*="bg-[#1a9fff]"],
+.theme-os-macos button[class*="bg-sky-600"],
+.theme-os-macos a[class*="bg-[#0284c7]"],
+.theme-os-macos a[class*="bg-[#1a9fff]"] {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border: 1px solid rgba(147, 197, 253, 0.55);
+  border-radius: 11px;
+  box-shadow:
+    0 6px 20px rgba(37, 99, 235, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition:
+    transform 210ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 210ms ease,
+    filter 180ms ease;
+}
+
+.theme-os-macos button[class*="bg-[#0284c7]"]:hover,
+.theme-os-macos button[class*="bg-[#1a9fff]"]:hover,
+.theme-os-macos button[class*="bg-sky-600"]:hover,
+.theme-os-macos a[class*="bg-[#0284c7]"]:hover,
+.theme-os-macos a[class*="bg-[#1a9fff]"]:hover {
+  background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+  box-shadow:
+    0 10px 26px rgba(56, 189, 248, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  transform: translateY(-1.5px) scale(1.015);
+}
+
+.theme-os-macos button:active {
+  transform: scale(0.975);
+}
+
+.theme-os-macos.dark button[class*="bg-[#1a222d]"],
+.theme-os-macos.dark button[class*="bg-[#1a222e]"],
+.theme-os-macos.dark button[class*="bg-[#1c2430]"],
+.theme-os-macos.dark button[class*="bg-[#1e2633]"],
+.theme-os-macos.dark button[class*="bg-[#1e2733]"],
+.theme-os-macos.dark button[class*="bg-[#1f2835]"],
+.theme-os-macos.dark button[class*="bg-[#202936]"],
+.theme-os-macos.dark button[class*="bg-[#212a37]"],
+.theme-os-macos.dark button[class*="bg-[#232b36]"],
+.theme-os-macos.dark button[class*="bg-[#232d3d]"] {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f8fafc;
+  border-radius: 11px;
+}
+
+.theme-os-macos.dark button[class*="bg-[#1a222d]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#1a222e]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#1c2430]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#1e2633]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#1e2733]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#1f2835]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#202936]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#212a37]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#232b36]"]:hover,
+.theme-os-macos.dark button[class*="bg-[#232d3d]"]:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(96, 165, 250, 0.6);
+}
+
+.theme-os-macos:not(.dark) input:not([type="range"]),
+.theme-os-macos:not(.dark) select,
+.theme-os-macos:not(.dark) textarea {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(15, 23, 42, 0.14);
+  border-radius: 11px;
+  color: #0f172a;
+}
+
+.theme-os-macos:not(.dark) input:not([type="range"]):focus,
+.theme-os-macos:not(.dark) select:focus,
+.theme-os-macos:not(.dark) textarea:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.18);
+}
+
+.theme-os-macos.dark input:not([type="range"]),
+.theme-os-macos.dark select,
+.theme-os-macos.dark textarea {
+  background-color: rgba(14, 18, 48, 0.72);
+  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: 11px;
+  color: #f8fafc;
+}
+
+.theme-os-macos.dark input:not([type="range"]):focus,
+.theme-os-macos.dark select:focus,
+.theme-os-macos.dark textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.24);
+}
+
+/* Buoyant Spring Card Hover Physics */
+.theme-os-macos .sa-contain-card,
+.theme-os-macos [role="button"] {
+  transition:
+    transform 230ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.theme-os-macos.dark .sa-contain-card:hover,
+.theme-os-macos.dark [role="button"]:hover {
+  transform: translateY(-4px) scale(1.016);
+  border-color: rgba(96, 165, 250, 0.72);
+  box-shadow:
+    0 18px 36px rgba(4, 6, 24, 0.56),
+    0 0 22px rgba(56, 189, 248, 0.24);
+}
+
+.theme-os-macos:not(.dark) .sa-contain-card:hover,
+.theme-os-macos:not(.dark) [role="button"]:hover {
+  transform: translateY(-3px) scale(1.012);
+  border-color: rgba(0, 102, 204, 0.45);
+  box-shadow: 0 14px 30px rgba(30, 41, 90, 0.12);
+}
+
+html.theme-os-macos:not(.dark) ::-webkit-scrollbar-track {
+  background: #e5eaf8;
+}
+
+html.theme-os-macos:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(0, 102, 204, 0.28);
+  border-radius: 9999px;
+}
+
+html.theme-os-macos:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 102, 204, 0.56);
+}
+
+html.theme-os-macos.dark ::-webkit-scrollbar-track {
+  background: #0c0e26;
+}
+
+html.theme-os-macos.dark ::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.35);
+  border-radius: 9999px;
+}
+
+html.theme-os-macos.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.62);
+}
+
+/* ==========================================================================
+   Composable Custom Theme Studio (.theme-custom)
+   - Layers seamlessly on top of ANY base theme (Windows, Linux, macOS, PS5, Xbox)
+   - Propagates Surface Style (Midnight/Obsidian/Abyss/Daylight), Primary & Secondary
+     Colors, Button Style, Card Radius & Frosted Glass Blur everywhere in Light & Dark
+   ========================================================================== */
+html.theme-custom:not(.theme-ps5):not(.theme-xbox),
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) body {
+  background-color: var(--sa-bg-canvas, #0e141b);
+  color: var(--sa-text-primary);
+}
+
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-app-shell {
   background-color: var(--sa-bg-canvas, #0e141b);
   background-image:
-    radial-gradient(85% 55% at 50% -8%, var(--sa-accent-soft, rgba(26, 159, 255, 0.14)) 0%, transparent 72%);
+    radial-gradient(85% 55% at 50% -8%, var(--sa-accent-soft, rgba(26, 159, 255, 0.16)) 0%, transparent 72%),
+    radial-gradient(65% 45% at 88% 96%, var(--sa-secondary-soft, rgba(56, 189, 248, 0.12)) 0%, transparent 72%);
 }
 
-.theme-custom .sa-ps5-panel,
-.theme-custom [class*="bg-[#171d25]"],
-.theme-custom [class*="bg-[#151c25]"] {
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) main > div,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) main > section,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-ps5-modal-scroll {
+  background-image: none;
+  background-color: transparent;
+}
+
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-topbar,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) header,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) main > aside {
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  backdrop-filter: var(--sa-panel-blur, blur(18px));
+  -webkit-backdrop-filter: var(--sa-panel-blur, blur(18px));
+}
+
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-ps5-modal {
+  background-color: var(--sa-bg-canvas);
+}
+
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-ps5-modal-header {
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  backdrop-filter: var(--sa-panel-blur, blur(18px));
+  -webkit-backdrop-filter: var(--sa-panel-blur, blur(18px));
+}
+
+/* Custom surfaces in Dark Mode (covers all panel hex tokens across views) */
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-ps5-panel,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-contain-card,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#141921]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#141a23]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#141b24]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#141b25]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#141c27]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#151c25]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#151c26]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#161c26]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#161e29]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#171d25]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#171d26]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#171f2a]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#18202b]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#1b222d]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#1b2838]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#1f2937]"] {
+  background-image: none;
   background-color: var(--sa-bg-surface);
   border-color: var(--sa-border-subtle);
   border-radius: var(--sa-card-radius, 12px);
-  backdrop-filter: var(--sa-panel-blur, blur(14px));
+  backdrop-filter: var(--sa-panel-blur, blur(18px));
+  -webkit-backdrop-filter: var(--sa-panel-blur, blur(18px));
 }
 
-.theme-custom .sa-ps5-subpanel,
-.theme-custom [class*="bg-[#12171f]"],
-.theme-custom [class*="bg-[#10161e]"] {
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-ps5-subpanel,
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#0a0f16]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#0b0e14]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#0e141b]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#0f141b]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#0f141c]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#10151c]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#10161e]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#11161d]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#11161f]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#111824]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#12171f]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#121923]"],
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) [class*="bg-[#131922]"] {
+  background-image: none;
   background-color: var(--sa-bg-subsurface);
   border-color: var(--sa-border-subtle);
-  border-radius: calc(var(--sa-card-radius, 12px) * 0.78);
+  border-radius: var(--sa-card-inner-radius, 8px);
 }
 
-.theme-custom button[class*="bg-[#1a9fff]"],
-.theme-custom button[class*="bg-[#0284c7]"],
-.theme-custom a[class*="bg-[#1a9fff]"],
-.theme-custom a[class*="bg-[#0284c7]"] {
+/* Daylight (Light) Mode Panels & Subpanels in Custom Theme */
+html.theme-custom:not(.dark):not(.theme-ps5):not(.theme-xbox) .sa-ps5-panel,
+html.theme-custom:not(.dark):not(.theme-ps5):not(.theme-xbox) .sa-contain-card,
+html.theme-custom:not(.dark):not(.theme-ps5):not(.theme-xbox) main [class~="bg-white"] {
+  background-image: none;
+  background-color: var(--sa-bg-surface);
+  border-color: var(--sa-border-subtle);
+  border-radius: var(--sa-card-radius, 12px);
+  backdrop-filter: var(--sa-panel-blur, blur(18px));
+  -webkit-backdrop-filter: var(--sa-panel-blur, blur(18px));
+}
+
+html.theme-custom:not(.dark):not(.theme-ps5):not(.theme-xbox) .sa-ps5-subpanel,
+html.theme-custom:not(.dark):not(.theme-ps5):not(.theme-xbox) main [class~="bg-slate-50"] {
+  background-image: none;
+  background-color: var(--sa-bg-subsurface);
+  border-color: var(--sa-border-subtle);
+  border-radius: var(--sa-card-inner-radius, 8px);
+}
+
+/* Custom Theme Geometry, Blur, Buttons, Cards, Links, Search & Accents Across ALL 5 Themes */
+html.theme-custom .sa-ps5-panel,
+html.theme-custom .sa-contain-card,
+html.theme-custom .sa-game-card,
+html.theme-custom [role="button"] {
+  border-radius: var(--sa-card-radius, 12px);
+  backdrop-filter: var(--sa-panel-blur, blur(18px));
+  -webkit-backdrop-filter: var(--sa-panel-blur, blur(18px));
+}
+
+html.theme-custom .sa-ps5-hero,
+html.theme-custom .sa-hero {
+  border-radius: 0 0 var(--sa-card-radius, 12px) var(--sa-card-radius, 12px);
+}
+
+html.theme-custom .sa-ps5-subpanel {
+  border-radius: var(--sa-card-inner-radius, 8px);
+}
+
+html.theme-custom .sa-search-input,
+html.theme-custom input:not([type="range"]),
+html.theme-custom select {
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+html.theme-custom textarea {
+  border-radius: var(--sa-input-radius, 10px);
+}
+
+html.theme-custom button:not([role="switch"]),
+html.theme-custom .sa-btn-primary,
+html.theme-custom .sa-btn-secondary {
+  border-radius: var(--sa-btn-radius, 10px);
+}
+
+html.theme-custom button[class*="bg-[#1a9fff]"],
+html.theme-custom button[class*="bg-[#0284c7]"],
+html.theme-custom button[class*="bg-sky-600"],
+html.theme-custom button[class*="bg-[#107C10]"],
+html.theme-custom a[class*="bg-[#1a9fff]"],
+html.theme-custom a[class*="bg-[#0284c7]"],
+html.theme-custom a[class*="bg-[#107C10]"],
+html.theme-custom [class*="from-[#1a9fff]"],
+html.theme-custom .sa-btn-primary {
+  background-image: none;
   background-color: var(--sa-accent, #1a9fff);
+  border-color: var(--sa-secondary, #38bdf8);
+  color: var(--sa-accent-fg, #ffffff);
   border-radius: var(--sa-btn-radius, 10px);
 }
 
-.theme-custom button[class*="bg-[#1a9fff]"]:hover,
-.theme-custom button[class*="bg-[#0284c7]"]:hover,
-.theme-custom a[class*="bg-[#1a9fff]"]:hover,
-.theme-custom a[class*="bg-[#0284c7]"]:hover {
+html.theme-custom button[class*="bg-[#1a9fff]"]:hover,
+html.theme-custom button[class*="bg-[#0284c7]"]:hover,
+html.theme-custom button[class*="bg-sky-600"]:hover,
+html.theme-custom button[class*="bg-[#107C10]"]:hover,
+html.theme-custom a[class*="bg-[#1a9fff]"]:hover,
+html.theme-custom a[class*="bg-[#0284c7]"]:hover,
+html.theme-custom a[class*="bg-[#107C10]"]:hover,
+html.theme-custom .sa-btn-primary:hover {
   background-color: var(--sa-accent-hover, #38adff);
+  box-shadow: 0 8px 22px var(--sa-accent-ring, rgba(26, 159, 255, 0.4));
 }
 
-.theme-custom .sa-ps5-subpanel[aria-pressed="true"],
-.theme-custom .sa-custom-accent-ring {
+html.theme-custom .sa-btn-secondary:hover {
+  border-color: var(--sa-secondary, var(--sa-accent));
+  background-color: var(--sa-secondary-soft);
+}
+
+html.theme-custom [aria-pressed="true"],
+html.theme-custom .sa-ps5-subpanel[aria-pressed="true"],
+html.theme-custom .sa-custom-accent-ring {
   border-color: var(--sa-accent, #1a9fff);
-  box-shadow: 0 0 0 1px var(--sa-accent-ring, rgba(26, 159, 255, 0.42)), 0 10px 26px var(--sa-accent-soft, rgba(26, 159, 255, 0.14));
+  background-color: var(--sa-accent-soft, rgba(26, 159, 255, 0.16));
+  box-shadow:
+    0 0 0 1px var(--sa-accent-ring, rgba(26, 159, 255, 0.42)),
+    0 10px 24px var(--sa-accent-soft, rgba(26, 159, 255, 0.14));
 }
 
-.theme-custom button:not([role="switch"]) {
-  border-radius: var(--sa-btn-radius, 10px);
-}
-
-.theme-custom .sa-custom-accent-text {
+html.theme-custom [class*="text-[#0284c7]"],
+html.theme-custom [class*="text-[#38bdf8]"],
+html.theme-custom [class*="text-[#66c0f4]"],
+html.theme-custom [class*="text-[#1a9fff]"],
+html.theme-custom [class*="text-[#7cc4ff]"],
+html.theme-custom [class*="text-[#88c0d0]"],
+html.theme-custom [class*="text-[#6ee755]"],
+html.theme-custom [class*="text-sky-400"],
+html.theme-custom [class*="text-sky-500"],
+html.theme-custom .sa-custom-accent-text,
+html.theme-custom .sa-link {
   color: var(--sa-accent, #1a9fff);
 }
 
-.theme-custom .sa-custom-accent-bg {
+html.theme-custom .sa-link:hover,
+html.theme-custom .sa-link:focus-visible {
+  color: var(--sa-secondary, var(--sa-accent));
+  text-decoration-color: var(--sa-secondary, var(--sa-accent));
+}
+
+html.theme-custom [class*="border-[#0284c7]"],
+html.theme-custom [class*="border-[#38bdf8]"],
+html.theme-custom [class*="border-[#1a9fff]"],
+html.theme-custom [class*="border-[#88c0d0]"],
+html.theme-custom [class*="border-[#52e042]"],
+html.theme-custom [class*="border-[#6ee755]"] {
+  border-color: var(--sa-accent, #1a9fff);
+}
+
+html.theme-custom input:not([type="range"]):focus,
+html.theme-custom select:focus,
+html.theme-custom textarea:focus,
+html.theme-custom .sa-search-input:focus {
+  border-color: var(--sa-accent, #1a9fff);
+  box-shadow: 0 0 0 3px var(--sa-accent-soft, rgba(26, 159, 255, 0.24));
+}
+
+html.theme-custom .sa-contain-card:hover,
+html.theme-custom .sa-game-card:hover,
+html.theme-custom [role="button"]:hover {
+  border-color: var(--sa-secondary, var(--sa-accent));
+  box-shadow:
+    0 14px 30px var(--sa-accent-soft, rgba(26, 159, 255, 0.18)),
+    0 0 0 1px var(--sa-secondary-soft);
+}
+
+html.theme-custom:not(.theme-ps5):not(.theme-xbox) .sa-hero {
+  background-color: var(--sa-bg-hero);
+  border-color: var(--sa-border-subtle);
+}
+
+html.theme-custom .sa-icon-badge {
+  background-color: var(--sa-accent-soft);
+  border-color: var(--sa-border-strong);
+  color: var(--sa-accent);
+  border-radius: var(--sa-card-inner-radius, 8px);
+}
+
+html.theme-custom .sa-badge-accent {
+  background-color: var(--sa-accent);
+  color: var(--sa-accent-fg);
+}
+
+html.theme-custom .sa-custom-accent-bg {
   background-color: var(--sa-accent, #1a9fff);
+  color: var(--sa-accent-fg, #ffffff);
+}
+
+html.theme-custom .sa-badge-secondary {
+  background-color: var(--sa-secondary-soft);
+  color: var(--sa-secondary);
+  border-color: var(--sa-secondary);
+}
+
+html.theme-custom ::-webkit-scrollbar-thumb {
+  background: var(--sa-accent-ring, rgba(26, 159, 255, 0.42));
+}
+
+html.theme-custom ::-webkit-scrollbar-thumb:hover {
+  background: var(--sa-accent, #1a9fff);
+}
+
+/* ==========================================================================
+   Animation Mode Tiers (.sa-motion-subtle & .sa-motion-reduced)
+   ========================================================================== */
+html.sa-motion-subtle *,
+html.sa-motion-subtle *::before,
+html.sa-motion-subtle *::after {
+  transition-duration: 120ms;
+}
+
+html.sa-motion-subtle .theme-ps5 .sa-app-shell::before,
+html.sa-motion-subtle .theme-ps5 .sa-app-shell::after,
+html.sa-motion-subtle .theme-xbox .sa-app-shell::before,
+html.sa-motion-subtle .theme-xbox .sa-app-shell::after {
+  animation-duration: 32s;
+  opacity: 0.35;
+}
+
+html.sa-motion-reduced *,
+html.sa-motion-reduced *::before,
+html.sa-motion-reduced *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }
 
 /* ==========================================================================
@@ -1597,6 +3320,25 @@ html.sa-reduce-effects .sa-cursor-hourglass-flip {
 
 html.sa-reduce-effects .theme-ps5 main > aside,
 html.sa-reduce-effects .theme-xbox main > aside,
+html.sa-reduce-effects .theme-os-windows main > aside,
+html.sa-reduce-effects .theme-os-windows .sa-topbar,
+html.sa-reduce-effects .theme-os-windows header,
+html.sa-reduce-effects .theme-os-windows .sa-ps5-panel,
+html.sa-reduce-effects .theme-os-windows .sa-contain-card,
+html.sa-reduce-effects .theme-os-macos main > aside,
+html.sa-reduce-effects .theme-os-macos .sa-topbar,
+html.sa-reduce-effects .theme-os-macos header,
+html.sa-reduce-effects .theme-os-macos .sa-ps5-panel,
+html.sa-reduce-effects .theme-os-macos .sa-contain-card,
+html.sa-reduce-effects .theme-custom main > aside,
+html.sa-reduce-effects .theme-custom .sa-topbar,
+html.sa-reduce-effects .theme-custom header,
+html.sa-reduce-effects .theme-custom .sa-ps5-panel,
+html.sa-reduce-effects .theme-custom .sa-contain-card,
+html.sa-reduce-effects .theme-custom .sa-game-card,
+html.sa-reduce-effects .theme-os-macos.dark [class*="bg-[#171d25]"],
+html.sa-reduce-effects .theme-os-macos.dark [class*="bg-[#151c25]"],
+html.sa-reduce-effects .theme-os-macos.dark [class*="bg-[#141b25]"],
 html.sa-reduce-effects [class*="backdrop-blur"] {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;

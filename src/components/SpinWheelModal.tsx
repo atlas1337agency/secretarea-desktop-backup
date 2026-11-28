@@ -335,17 +335,8 @@ export function SpinWheelModal({
 
   if (!isOpen) return null;
 
-  const accentBtnClass = isXboxTheme
-    ? 'bg-[#107C10] hover:bg-[#149414] text-white border border-[#6ee755]/60'
-    : isPs5Theme
-    ? 'bg-white text-[#041432] hover:bg-[#e5f1ff]'
-    : 'bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8] text-white';
-
-  const secondaryBtnClass = isPs5Theme
-    ? 'bg-white/[0.12] hover:bg-white/[0.2] border border-white/[0.22] text-white'
-    : isXboxTheme
-    ? 'bg-[#113017] hover:bg-[#184420] border border-[#52e042]/40 text-[#ecfdf0]'
-    : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200 dark:border-white/[0.12] text-slate-900 dark:text-white';
+  const accentBtnClass = 'sa-btn-primary';
+  const secondaryBtnClass = 'sa-btn-secondary';
 
   return (
     <div
@@ -360,7 +351,7 @@ export function SpinWheelModal({
       }}
     >
       <div
-        className={`relative w-full max-w-md sm:max-w-lg rounded-2xl border shadow-2xl p-5 sm:p-6 transition-colors ${
+        className={`sa-ps5-panel relative w-full max-w-md sm:max-w-lg rounded-[var(--sa-card-radius)] border shadow-2xl p-5 sm:p-6 transition-colors ${
           isPs5Theme
             ? 'bg-[#03153a] border-white/[0.18] text-white'
             : isXboxTheme
@@ -559,7 +550,7 @@ export function SpinWheelModal({
                 <button
                   type="button"
                   onClick={startSpin}
-                  className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-all ${secondaryBtnClass}`}
+                  className={`py-2.5 px-4 text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-all ${secondaryBtnClass}`}
                 >
                   <ArrowsClockwise weight="bold" className="w-4 h-4 shrink-0" />
                   <span>{sw.spinBtn}</span>
@@ -571,7 +562,7 @@ export function SpinWheelModal({
                     onClose();
                     onSelectGame(winner);
                   }}
-                  className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-all shadow-md ${accentBtnClass}`}
+                  className={`py-2.5 px-4 text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-all shadow-md ${accentBtnClass}`}
                 >
                   <span>{sw.viewGameBtn}</span>
                   <ArrowUpRight weight="bold" className="w-4 h-4 shrink-0" />

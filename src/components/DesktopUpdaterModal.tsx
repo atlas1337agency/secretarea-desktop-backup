@@ -117,7 +117,7 @@ export function DesktopUpdaterModal({
                 isPs5Theme || isXboxTheme ? 'text-white' : 'text-slate-900 dark:text-white'
               }`}
             >
-              <Sparkle weight="fill" className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+              <Sparkle weight="fill" className="w-3.5 h-3.5 text-[var(--sa-accent)] shrink-0" />
               <span className="truncate">{t.whatsNewTitle}</span>
             </div>
             {changelog.releaseTitle && (
@@ -132,7 +132,7 @@ export function DesktopUpdaterModal({
           </div>
           <span
             dir="ltr"
-            className="text-[11px] font-mono-tabular font-semibold text-[#0284c7] dark:text-[#38bdf8] shrink-0"
+            className="text-[11px] font-mono-tabular font-semibold text-[var(--sa-accent)] shrink-0"
           >
             v{changelog.version} · {changelog.items.length} {t.whatsNewCountSuffix}
           </span>
@@ -157,7 +157,7 @@ export function DesktopUpdaterModal({
                 ? 'text-amber-700 dark:text-amber-300'
                 : item.category === 'improvement'
                 ? 'text-emerald-700 dark:text-[#4ade80]'
-                : 'text-[#0284c7] dark:text-[#38bdf8]';
+                : 'text-[var(--sa-accent)]';
 
             return (
               <li
@@ -206,21 +206,21 @@ export function DesktopUpdaterModal({
         <div
           role="dialog"
           aria-label="Desktop update notification"
-          className={`fixed bottom-4 end-4 z-[96] w-[360px] max-w-[calc(100vw-2rem)] rounded-lg border shadow-[0_18px_48px_rgba(0,0,0,0.22)] dark:shadow-[0_18px_48px_rgba(0,0,0,0.65)] backdrop-blur-xl p-4 transition-all ${
+          className={`fixed bottom-4 end-4 z-[96] w-[360px] max-w-[calc(100vw-2rem)] rounded-[var(--sa-card-radius)] border shadow-[0_18px_48px_rgba(0,0,0,0.22)] dark:shadow-[0_18px_48px_rgba(0,0,0,0.65)] backdrop-blur-[var(--sa-panel-blur)] p-4 transition-all ${
             isPs5Theme
               ? 'bg-[#04183d]/92 border-white/[0.18] text-white'
               : isXboxTheme
               ? 'bg-[#091f0d]/94 border-[#52e042]/35 text-[#ecfdf0]'
-              : 'bg-white/95 border-slate-200 text-slate-800 dark:bg-[#171d26]/96 dark:border-white/[0.12] dark:text-[#e5e9f0]'
+              : 'bg-[var(--sa-bg-surface-glass)] border-[var(--sa-border-strong)] text-[var(--sa-text-primary)]'
           }`}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                className={`w-8 h-8 rounded-[var(--sa-btn-radius)] flex items-center justify-center shrink-0 ${
                   isDownloaded
                     ? 'bg-emerald-500/15 text-emerald-600 dark:bg-[#10b981]/20 dark:text-[#34d399]'
-                    : 'bg-[#1a9fff]/15 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:text-[#66c0f4]'
+                    : 'bg-[var(--sa-accent-soft)] text-[var(--sa-accent)]'
                 }`}
               >
                 {isDownloading ? (
@@ -286,7 +286,7 @@ export function DesktopUpdaterModal({
                   : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-black/25 dark:border-white/[0.08] dark:text-[#b8c7dc]'
               }`}
             >
-              <div className="font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+              <div className="font-semibold text-[var(--sa-accent)]">
                 {t.whatsNewTitle} ({changelog.items.length})
               </div>
               <div className="truncate">
@@ -305,7 +305,7 @@ export function DesktopUpdaterModal({
                 }`}
               >
                 <div
-                  className="h-full bg-gradient-to-r from-[#1a9fff] to-[#34d399] transition-all duration-150"
+                  className="h-full bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)] transition-all duration-150"
                   style={{ width: `${Math.max(4, progressPercent)}%` }}
                 />
               </div>
@@ -332,7 +332,7 @@ export function DesktopUpdaterModal({
               <button
                 type="button"
                 onClick={onOpenModal}
-                className={`px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                className={`px-2.5 py-1.5 rounded-[var(--sa-btn-radius)] text-[11.5px] font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   isPs5Theme || isXboxTheme
                     ? 'text-[#9fb0c7] hover:text-white hover:bg-white/[0.06]'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#9fb0c7] dark:hover:text-white dark:hover:bg-white/[0.06]'
@@ -343,7 +343,7 @@ export function DesktopUpdaterModal({
               <button
                 type="button"
                 onClick={onPostponeUpdate}
-                className={`px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                className={`px-2.5 py-1.5 rounded-[var(--sa-btn-radius)] text-[11.5px] font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   isPs5Theme || isXboxTheme
                     ? 'text-[#b8c7dc] bg-white/[0.06] hover:bg-white/[0.12]'
                     : 'text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-[#b8c7dc] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]'
@@ -355,7 +355,7 @@ export function DesktopUpdaterModal({
                 <button
                   type="button"
                   onClick={onDownloadUpdate}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[11.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  className="sa-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-[11.5px] font-semibold cursor-pointer whitespace-nowrap"
                 >
                   <DownloadSimple className="w-3.5 h-3.5" />
                   <span>{t.downloadUpdateBtn}</span>
@@ -385,12 +385,12 @@ export function DesktopUpdaterModal({
           aria-label="About SecretArea and Software Updates"
         >
           <div
-            className={`w-full max-w-lg max-h-[90dvh] flex flex-col rounded-xl border shadow-2xl overflow-hidden ${
+            className={`sa-ps5-panel w-full max-w-lg max-h-[90dvh] flex flex-col rounded-[var(--sa-card-radius)] border shadow-2xl overflow-hidden ${
               isPs5Theme
                 ? 'bg-[#031333]/95 border-white/[0.18] text-white'
                 : isXboxTheme
                 ? 'bg-[#081b0c]/96 border-[#52e042]/35 text-[#ecfdf0]'
-                : 'bg-white border-slate-200 text-slate-800 dark:bg-[#151b24] dark:border-white/[0.1] dark:text-[#e5e9f0]'
+                : 'bg-[var(--sa-bg-surface-solid)] border-[var(--sa-border-strong)] text-[var(--sa-text-primary)]'
             }`}
           >
             {/* Header */}
@@ -402,7 +402,7 @@ export function DesktopUpdaterModal({
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-md bg-[#1a9fff]/15 border border-[#1a9fff]/30 flex items-center justify-center text-[#0284c7] dark:text-[#66c0f4]">
+                <div className="sa-icon-badge w-8 h-8">
                   <Info className="w-4 h-4" />
                 </div>
                 <div>
@@ -522,29 +522,17 @@ export function DesktopUpdaterModal({
               )}
 
               {isChecking && (
-                <div
-                  className={`rounded-lg border px-4 py-3 flex items-center gap-2.5 text-[13px] ${
-                    isPs5Theme || isXboxTheme
-                      ? 'bg-[#1a9fff]/10 border-[#1a9fff]/25 text-[#bae6fd]'
-                      : 'bg-sky-50 border-sky-200 text-sky-900 dark:bg-[#1a9fff]/10 dark:border-[#1a9fff]/25 dark:text-[#bae6fd]'
-                  }`}
-                >
-                  <SpinnerGap className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] animate-spin shrink-0" />
+                <div className="rounded-[var(--sa-card-inner-radius)] border px-4 py-3 flex items-center gap-2.5 text-[13px] bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)] text-[var(--sa-text-primary)]">
+                  <SpinnerGap className="w-4 h-4 text-[var(--sa-accent)] animate-spin shrink-0" />
                   <span>{t.checkingMsg}</span>
                 </div>
               )}
 
               {isAvailable && (
-                <div
-                  className={`rounded-lg border p-4 space-y-3 ${
-                    isPs5Theme || isXboxTheme
-                      ? 'bg-[#1a9fff]/12 border-[#1a9fff]/35'
-                      : 'bg-sky-50 border-sky-200 dark:bg-[#1a9fff]/12 dark:border-[#1a9fff]/35'
-                  }`}
-                >
+                <div className="rounded-[var(--sa-card-inner-radius)] border p-4 space-y-3 bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)]">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Sparkle className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                      <Sparkle className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
                       <span
                         className={`text-[13.5px] font-bold ${
                           isPs5Theme || isXboxTheme
@@ -562,15 +550,17 @@ export function DesktopUpdaterModal({
 
                   {renderWhatsNewBox()}
 
-                  {state.autoUpdateSupported === false && state.linuxPackageType === 'deb' && (
+                  {state.autoUpdateSupported === false && (
                     <p
                       className={`text-[11.5px] leading-relaxed rounded-md px-3 py-2 border ${
                         isPs5Theme || isXboxTheme
                           ? 'bg-black/25 border-white/[0.08] text-[#b8c7dc]'
-                          : 'bg-white/75 border-sky-200 text-slate-600 dark:bg-black/25 dark:border-white/[0.08] dark:text-[#b8c7dc]'
+                          : 'bg-white/75 border-slate-200 text-slate-600 dark:bg-black/25 dark:border-white/[0.08] dark:text-[#b8c7dc]'
                       }`}
                     >
-                      Automatic in-place updates are only supported on Windows and Linux AppImage builds. Clicking download will open the GitHub Release page to download the latest .deb package manually.
+                      {state.linuxPackageType === 'deb'
+                        ? 'Automatic in-place updates are only supported on Windows, signed macOS, and Linux AppImage builds. Clicking download will open the GitHub Release page to download the latest .deb package manually.'
+                        : t.macManualUpdateNote}
                     </p>
                   )}
 
@@ -581,7 +571,7 @@ export function DesktopUpdaterModal({
                         onPostponeUpdate();
                         onClose();
                       }}
-                      className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-medium transition-colors cursor-pointer ${
                         isPs5Theme || isXboxTheme
                           ? 'text-[#b8c7dc] bg-white/[0.06] hover:bg-white/[0.12]'
                           : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 dark:border-transparent dark:text-[#b8c7dc] dark:bg-white/[0.06] dark:hover:bg-white/[0.12]'
@@ -592,7 +582,7 @@ export function DesktopUpdaterModal({
                     <button
                       type="button"
                       onClick={onDownloadUpdate}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors cursor-pointer"
+                      className="sa-btn-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-[12px] font-semibold cursor-pointer"
                     >
                       <DownloadSimple className="w-3.5 h-3.5" />
                       <span>{t.downloadUpdateBtn}</span>
@@ -602,13 +592,7 @@ export function DesktopUpdaterModal({
               )}
 
               {isDownloading && (
-                <div
-                  className={`rounded-lg border p-4 space-y-2.5 ${
-                    isPs5Theme || isXboxTheme
-                      ? 'bg-[#1a9fff]/12 border-[#1a9fff]/35'
-                      : 'bg-sky-50 border-sky-200 dark:bg-[#1a9fff]/12 dark:border-[#1a9fff]/35'
-                  }`}
-                >
+                <div className="rounded-[var(--sa-card-inner-radius)] border p-4 space-y-2.5 bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)]">
                   <div
                     className={`flex items-center justify-between gap-2 text-[13px] font-semibold ${
                       isPs5Theme || isXboxTheme
@@ -617,7 +601,7 @@ export function DesktopUpdaterModal({
                     }`}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <SpinnerGap className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] animate-spin" />
+                      <SpinnerGap className="w-4 h-4 text-[var(--sa-accent)] animate-spin" />
                       <span>
                         {t.downloadingPrefix}{' '}
                         <span dir="ltr" className="font-mono-tabular">
@@ -636,7 +620,7 @@ export function DesktopUpdaterModal({
                     }`}
                   >
                     <div
-                      className="h-full bg-gradient-to-r from-[#1a9fff] to-[#34d399] transition-all duration-150"
+                      className="h-full bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)] transition-all duration-150"
                       style={{ width: `${Math.max(4, progressPercent)}%` }}
                     />
                   </div>

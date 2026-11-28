@@ -192,8 +192,8 @@ export async function collectBrowserDeepInventory(): Promise<DeepHardwareInvento
     platform: nav?.platform || 'web',
     isElevated: null,
     detectionLimitations: [
-      'Running inside Web Browser mode: sandbox prevents direct access to CPU/GPU temperature sensors, fan RPMs, SMART disk wear, motherboard SMBIOS, physical USB port headers, signed drivers, and Windows Event Viewer.',
-      'Use SecretArea Desktop (Electron on Windows/Linux) for real OS, WMI/SMBIOS, SMART, and sensor telemetry.',
+      'Running inside Web Browser mode: sandbox prevents direct access to CPU/GPU temperature sensors, fan RPMs, SMART disk wear, motherboard SMBIOS, physical USB port headers, signed drivers, and OS event diagnostics.',
+      'Use SecretArea Desktop (Electron on Windows, macOS, or Linux) for real OS, hardware, SMART, and sensor telemetry.',
     ],
     system: {
       formFactor: batteryObj ? 'laptop' : 'unknown',
@@ -360,7 +360,7 @@ export async function collectBrowserDeepInventory(): Promise<DeepHardwareInvento
     diagnosticEvents: {
       pnpErrors: [],
       eventLogWarnings: [],
-      eventLogErrorNote: 'Windows Event Viewer and Device Manager codes are only accessible in SecretArea Desktop.',
+      eventLogErrorNote: 'OS event and device diagnostics are only accessible in SecretArea Desktop.',
     },
   };
 }
@@ -412,7 +412,15 @@ export const EMPTY_HARDWARE_SNAPSHOT: HardwareMonitorSnapshot = {
     totalUploadBytesPerSec: null,
   },
   capabilities: null,
+  metricAvailability: null,
 };
+
+export function getMetricAvailability(
+  snapshot: HardwareMonitorSnapshot | null | undefined,
+  key: string
+) {
+  return snapshot?.metricAvailability?.[key] || null;
+}
 
 export const EMPTY_GAMING_SESSION_STATE: GamingSessionState = {
   isActive: false,

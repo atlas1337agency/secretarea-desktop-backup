@@ -169,6 +169,23 @@ export interface LauncherTranslations {
     exitAppConfirmBtn: string;
     exitAppCancelBtn: string;
     exitAppWebHint: string;
+    osThemeProfileTitle: string;
+    osThemeProfileDesc: string;
+    osThemeAutoLabel: string;
+    osThemeWindowsLabel: string;
+    osThemeLinuxLabel: string;
+    osThemeMacosLabel: string;
+    appearanceModeTitle: string;
+    appearanceSystemLabel: string;
+    appearanceDarkLabel: string;
+    appearanceLightLabel: string;
+    animationModeTitle: string;
+    animationModeDesc: string;
+    animationFullLabel: string;
+    animationSubtleLabel: string;
+    animationReducedLabel: string;
+    restoreThemeDefaultsBtn: string;
+    themeRestoredToast: string;
   };
   performance: {
     sectionTitle: string;
@@ -243,6 +260,15 @@ export interface LauncherTranslations {
     resetBtn: string;
     consoleOverrideNote: string;
     summaryCustomPrefix: string;
+    secondaryColorLabel: string;
+    previewingDraftNote: string;
+    applyThemeBtn: string;
+    discardPreviewBtn: string;
+    restoreOsColorsBtn: string;
+    contrastLabel: string;
+    contrastPassBadge: string;
+    contrastWarnBadge: string;
+    contrastHint: string;
   };
   downloads: {
     pageTitle: string;
@@ -766,6 +792,7 @@ export interface LauncherTranslations {
     lastCheckedLabel: string;
     errorFallback: string;
     preparingDownload: string;
+    macManualUpdateNote: string;
   };
   hardware: {
     pageTitle: string;
@@ -863,6 +890,14 @@ export interface LauncherTranslations {
     gamingPresentMonMissingTitle: string;
     gamingPresentMonMissingDesc: string;
     gamingPresentMonReady: string;
+    gamingPresentMonUnsupportedTitle: string;
+    gamingPresentMonUnsupportedDesc: string;
+    windowsOnlyTag: string;
+    metricCoverageTitle: string;
+    availabilityPermissionRequired: string;
+    availabilityUnsupported: string;
+    availabilityTempUnavailable: string;
+    availabilityDetectionFailed: string;
     gamingFpsCurrent: string;
     gamingFpsAvg: string;
     gamingFps1Low: string;
@@ -1629,8 +1664,8 @@ const EN: LauncherTranslations = {
     startingSectionTitle: 'Starting and closing',
     startWithComputerTitle: 'Start with your computer',
     startWithComputerDesc: 'Opens SecretArea in the tray when you sign in to this computer.',
-    desktopSupportedBadge: 'Windows Tray Sync',
-    webNotice: 'Tray auto-start activates automatically in the SecretArea.exe desktop app.',
+    desktopSupportedBadge: 'Desktop Tray Sync',
+    webNotice: 'Tray auto-start activates automatically in the SecretArea Desktop app.',
     trayActiveHint: 'Closing the window minimizes SecretArea to the system tray while auto-start is active.',
     canRunItTitle: 'Can Run It hardware check',
     canRunItDesc: 'Compare games and tools against your PC hardware requirements across Home, Library, and Game pages.',
@@ -1713,6 +1748,23 @@ const EN: LauncherTranslations = {
     exitAppConfirmBtn: 'Confirm Full Exit',
     exitAppCancelBtn: 'Cancel',
     exitAppWebHint: 'Full application shutdown is only available in the SecretArea.exe Desktop App.',
+    osThemeProfileTitle: 'Operating System Design',
+    osThemeProfileDesc: 'Automatically adapt to your operating system look or manually preview Windows, Linux, or macOS default styling.',
+    osThemeAutoLabel: 'Auto (Detected)',
+    osThemeWindowsLabel: 'Windows',
+    osThemeLinuxLabel: 'Linux',
+    osThemeMacosLabel: 'macOS',
+    appearanceModeTitle: 'Appearance Mode',
+    appearanceSystemLabel: 'Follow System',
+    appearanceDarkLabel: 'Dark',
+    appearanceLightLabel: 'Light',
+    animationModeTitle: 'Motion & Animations',
+    animationModeDesc: 'Control transition energy and micro-motion intensity across the interface.',
+    animationFullLabel: 'Full',
+    animationSubtleLabel: 'Subtle',
+    animationReducedLabel: 'Reduced',
+    restoreThemeDefaultsBtn: 'Restore Default Theme Settings',
+    themeRestoredToast: 'Default OS theme settings restored',
   },
   performance: {
     sectionTitle: 'Performance & Resource Mode',
@@ -1787,6 +1839,15 @@ const EN: LauncherTranslations = {
     resetBtn: 'Reset Custom Theme',
     consoleOverrideNote: 'Note: Turning Custom Theme on automatically switches out of PS5/Xbox console theme.',
     summaryCustomPrefix: 'Custom',
+    secondaryColorLabel: 'Secondary Color',
+    previewingDraftNote: 'Previewing unsaved changes',
+    applyThemeBtn: 'Apply Theme',
+    discardPreviewBtn: 'Discard Preview',
+    restoreOsColorsBtn: 'Restore Active OS Colors',
+    contrastLabel: 'WCAG Contrast',
+    contrastPassBadge: 'AA Accessible',
+    contrastWarnBadge: 'Low Contrast',
+    contrastHint: 'Button text contrast adjusts automatically for legibility.',
   },
   downloads: {
     pageTitle: 'Download Manager',
@@ -2310,6 +2371,7 @@ const EN: LauncherTranslations = {
     lastCheckedLabel: 'Last checked',
     errorFallback: 'Unable to check for updates right now.',
     preparingDownload: 'Preparing download...',
+    macManualUpdateNote: 'In-place macOS auto-updates require a Developer ID signed build. Download the latest .dmg from GitHub Releases and replace SecretArea.app in Applications.',
   },
   hardware: {
     pageTitle: 'Hardware Monitor',
@@ -2406,6 +2468,14 @@ const EN: LauncherTranslations = {
     gamingSessionDuration: 'Duration',
     gamingPresentMonMissingTitle: 'PresentMon ETW Not Installed — FPS Metrics Show N/A',
     gamingPresentMonMissingDesc: 'SecretArea never fakes or injects overlays into games. Place Intel PresentMon CLI (PresentMon.exe) in resources/bin/PresentMon.exe or install it under %LOCALAPPDATA%\\Intel\\PresentMon to enable real DX11/DX12/Vulkan/OpenGL FPS, 1% Low, and Frame Time capture.',
+    gamingPresentMonUnsupportedTitle: 'Windows ETW / PresentMon Not Supported on This OS',
+    gamingPresentMonUnsupportedDesc: 'Intel PresentMon relies on Windows ETW graphics tracing. Live CPU, GPU, memory, and latency probe telemetry remain active without elevated privileges.',
+    windowsOnlyTag: 'Windows-only',
+    metricCoverageTitle: 'Platform Telemetry Coverage',
+    availabilityPermissionRequired: 'Permission required',
+    availabilityUnsupported: 'Unsupported on OS',
+    availabilityTempUnavailable: 'Temporarily unavailable',
+    availabilityDetectionFailed: 'Detection failed',
     gamingPresentMonReady: 'PresentMon ETW Ready',
     gamingFpsCurrent: 'Current FPS',
     gamingFpsAvg: 'Average FPS',
@@ -2723,7 +2793,7 @@ const EN: LauncherTranslations = {
     ossThirdPartyTitle: 'Third-Party Open-Source License Compliance (MPL-2.0)',
     ossThirdPartyDesc: 'LibreHardwareMonitorLib is licensed under the Mozilla Public License 2.0 (MPL-2.0) by the LibreHardwareMonitor Contributors. Official license notices are preserved alongside the local library installation and in THIRD_PARTY_LICENSES.md.',
     ossWebPreviewNote: 'Desktop Downloads Disabled in Web Preview: Open SecretArea Desktop on Windows 10/11 to download, verify SHA-256 checksums, and run LibreHardwareMonitorLib telemetry.',
-    ossPlatformUnsupportedNote: 'Direct LibreHardwareMonitorLib (.NET DLL) integration targets Windows 10/11 hosts. On Linux, SecretArea uses native sysfs hwmon/DRM kernel telemetry automatically.',
+    ossPlatformUnsupportedNote: 'Direct LibreHardwareMonitorLib (.NET DLL) integration targets Windows 10/11 hosts. On macOS, SecretArea reads sysctl, ioreg, and system_profiler natively; on Linux, it uses sysfs hwmon/DRM automatically.',
   },
   updateHistory: {
     title: 'Update History',
@@ -3191,7 +3261,7 @@ const FR: LauncherTranslations = {
     startingSectionTitle: 'Démarrage et fermeture',
     startWithComputerTitle: 'Démarrer avec votre ordinateur',
     startWithComputerDesc: 'Ouvre SecretArea dans la zone de notification lors de votre connexion à cet ordinateur.',
-    desktopSupportedBadge: 'Zone de notification Windows',
+    desktopSupportedBadge: 'Synchronisation barre système',
     webNotice: 'Le démarrage automatique dans la barre d’état s’active automatiquement dans SecretArea.exe.',
     trayActiveHint: 'Fermer la fenêtre réduit SecretArea dans la zone de notification tant que cette option est active.',
     canRunItTitle: 'Vérification matérielle « Can Run It »',
@@ -3275,6 +3345,23 @@ const FR: LauncherTranslations = {
     exitAppConfirmBtn: 'Confirmer la fermeture',
     exitAppCancelBtn: 'Annuler',
     exitAppWebHint: 'La fermeture complète s’applique uniquement dans SecretArea.exe.',
+    osThemeProfileTitle: 'Style du système d’exploitation',
+    osThemeProfileDesc: 'S’adapte automatiquement à votre OS ou permet de prévisualiser manuellement Windows, Linux ou macOS.',
+    osThemeAutoLabel: 'Auto (Détecté)',
+    osThemeWindowsLabel: 'Windows',
+    osThemeLinuxLabel: 'Linux',
+    osThemeMacosLabel: 'macOS',
+    appearanceModeTitle: 'Mode d’apparence',
+    appearanceSystemLabel: 'Suivre le système',
+    appearanceDarkLabel: 'Sombre',
+    appearanceLightLabel: 'Clair',
+    animationModeTitle: 'Mouvements et animations',
+    animationModeDesc: 'Contrôlez la richesse des transitions et micro-animations dans toute l’interface.',
+    animationFullLabel: 'Complet',
+    animationSubtleLabel: 'Discret',
+    animationReducedLabel: 'Réduit',
+    restoreThemeDefaultsBtn: 'Rétablir le thème par défaut',
+    themeRestoredToast: 'Paramètres de thème OS par défaut rétablis',
   },
   performance: {
     sectionTitle: 'Performances et consommation système',
@@ -3349,6 +3436,15 @@ const FR: LauncherTranslations = {
     resetBtn: 'Réinitialiser le thème',
     consoleOverrideNote: 'Note : activer le thème personnalisé désactive les thèmes console PS5 / Xbox.',
     summaryCustomPrefix: 'Personnalisé',
+    secondaryColorLabel: 'Couleur secondaire',
+    previewingDraftNote: 'Aperçu des modifications non enregistrées',
+    applyThemeBtn: 'Appliquer le thème',
+    discardPreviewBtn: 'Annuler l’aperçu',
+    restoreOsColorsBtn: 'Couleurs OS par défaut',
+    contrastLabel: 'Contraste WCAG',
+    contrastPassBadge: 'Conforme AA',
+    contrastWarnBadge: 'Contraste faible',
+    contrastHint: 'Le contraste du texte des boutons s’ajuste automatiquement.',
   },
   downloads: {
     pageTitle: 'Gestionnaire de téléchargements',
@@ -3872,6 +3968,7 @@ const FR: LauncherTranslations = {
     lastCheckedLabel: 'Dernière vérification',
     errorFallback: 'Impossible de vérifier les mises à jour pour le moment.',
     preparingDownload: 'Préparation du téléchargement...',
+    macManualUpdateNote: 'Les mises à jour automatiques sur macOS nécessitent une signature Apple Developer ID. Téléchargez le dernier fichier .dmg sur GitHub Releases et remplacez SecretArea.app dans Applications.',
   },
   hardware: {
     pageTitle: 'Moniteur matériel',
@@ -3969,6 +4066,14 @@ const FR: LauncherTranslations = {
     gamingPresentMonMissingTitle: 'PresentMon ETW absent — FPS affichés en N/D',
     gamingPresentMonMissingDesc: 'SecretArea ne simule jamais les FPS et n’injecte aucun overlay. Placez PresentMon.exe dans resources/bin/PresentMon.exe ou %LOCALAPPDATA%\\Intel\\PresentMon pour capturer les vrais FPS, 1% Low et Frame Time.',
     gamingPresentMonReady: 'PresentMon ETW prêt',
+    gamingPresentMonUnsupportedTitle: 'La capture FPS ETW Windows n’est pas prise en charge sur cet OS',
+    gamingPresentMonUnsupportedDesc: 'Le traçage PresentMon nécessite Windows ETW. La surveillance CPU, GPU, RAM, disque, réseau et latence ping fonctionne normalement.',
+    windowsOnlyTag: 'Windows uniquement',
+    metricCoverageTitle: 'Disponibilité des capteurs OS',
+    availabilityPermissionRequired: 'Permission requise',
+    availabilityUnsupported: 'Non pris en charge',
+    availabilityTempUnavailable: 'Temporairement indisponible',
+    availabilityDetectionFailed: 'Détection indisponible',
     gamingFpsCurrent: 'FPS actuels',
     gamingFpsAvg: 'FPS moyens',
     gamingFps1Low: 'FPS 1% Low',
@@ -4285,7 +4390,7 @@ const FR: LauncherTranslations = {
     ossThirdPartyTitle: 'Conformité Licence Open-Source Tierce (MPL-2.0)',
     ossThirdPartyDesc: 'LibreHardwareMonitorLib est distribué sous licence Mozilla Public License 2.0 (MPL-2.0) par les contributeurs LibreHardwareMonitor. Les notices officielles sont conservées localement et dans THIRD_PARTY_LICENSES.md.',
     ossWebPreviewNote: 'Téléchargements désactivés en Aperçu Web : utilisez SecretArea Desktop sur Windows 10/11 pour télécharger, vérifier le SHA-256 et activer LibreHardwareMonitorLib.',
-    ossPlatformUnsupportedNote: 'L’intégration directe de LibreHardwareMonitorLib (.NET DLL) cible Windows 10/11. Sous Linux, SecretArea utilise automatiquement sysfs hwmon/DRM.',
+    ossPlatformUnsupportedNote: 'L’intégration directe de LibreHardwareMonitorLib (.NET DLL) cible Windows 10/11. Sous macOS, SecretArea utilise sysctl, ioreg et system_profiler ; sous Linux, sysfs hwmon/DRM automatiquement.',
   },
   updateHistory: {
     title: 'Historique des mises à jour',
@@ -4753,7 +4858,7 @@ const ES: LauncherTranslations = {
     startingSectionTitle: 'Inicio y cierre',
     startWithComputerTitle: 'Iniciar con tu computadora',
     startWithComputerDesc: 'Abre SecretArea en la bandeja del sistema al iniciar sesión en este equipo.',
-    desktopSupportedBadge: 'Bandeja de Windows',
+    desktopSupportedBadge: 'Sincronización en bandeja',
     webNotice: 'El inicio automático en bandeja se activa en la aplicación de escritorio SecretArea.exe.',
     trayActiveHint: 'Al cerrar la ventana, SecretArea permanecerá en la bandeja del sistema mientras esta opción esté activa.',
     canRunItTitle: 'Comprobación de hardware «Can Run It»',
@@ -4837,6 +4942,23 @@ const ES: LauncherTranslations = {
     exitAppConfirmBtn: 'Confirmar cierre total',
     exitAppCancelBtn: 'Cancelar',
     exitAppWebHint: 'El cierre completo solo está disponible en SecretArea.exe.',
+    osThemeProfileTitle: 'Diseño del sistema operativo',
+    osThemeProfileDesc: 'Se adapta automáticamente a tu sistema o permite elegir manualmente Windows, Linux o macOS.',
+    osThemeAutoLabel: 'Auto (Detectado)',
+    osThemeWindowsLabel: 'Windows',
+    osThemeLinuxLabel: 'Linux',
+    osThemeMacosLabel: 'macOS',
+    appearanceModeTitle: 'Modo de apariencia',
+    appearanceSystemLabel: 'Seguir sistema',
+    appearanceDarkLabel: 'Oscuro',
+    appearanceLightLabel: 'Claro',
+    animationModeTitle: 'Movimiento y animaciones',
+    animationModeDesc: 'Controla la intensidad de transiciones y microanimaciones en la interfaz.',
+    animationFullLabel: 'Completo',
+    animationSubtleLabel: 'Sutil',
+    animationReducedLabel: 'Reducido',
+    restoreThemeDefaultsBtn: 'Restaurar tema predeterminado',
+    themeRestoredToast: 'Configuración de tema del SO restaurada',
   },
   performance: {
     sectionTitle: 'Rendimiento y consumo de recursos',
@@ -4911,6 +5033,15 @@ const ES: LauncherTranslations = {
     resetBtn: 'Restablecer tema',
     consoleOverrideNote: 'Nota: activar el tema personalizado desactiva el tema de consola PS5 / Xbox.',
     summaryCustomPrefix: 'Personalizado',
+    secondaryColorLabel: 'Color secundario',
+    previewingDraftNote: 'Vista previa sin guardar',
+    applyThemeBtn: 'Aplicar tema',
+    discardPreviewBtn: 'Descartar vista previa',
+    restoreOsColorsBtn: 'Restaurar colores del SO',
+    contrastLabel: 'Contraste WCAG',
+    contrastPassBadge: 'Accesible AA',
+    contrastWarnBadge: 'Contraste bajo',
+    contrastHint: 'El contraste del texto en botones se ajusta automáticamente.',
   },
   downloads: {
     pageTitle: 'Gestor de descargas',
@@ -5434,6 +5565,7 @@ const ES: LauncherTranslations = {
     lastCheckedLabel: 'Última comprobación',
     errorFallback: 'No se pudo comprobar si hay actualizaciones ahora.',
     preparingDownload: 'Preparando descarga...',
+    macManualUpdateNote: 'Las actualizaciones automáticas en macOS requieren firma Apple Developer ID. Descarga el último .dmg desde GitHub Releases y reemplaza SecretArea.app en Aplicaciones.',
   },
   hardware: {
     pageTitle: 'Monitor de hardware',
@@ -5531,6 +5663,14 @@ const ES: LauncherTranslations = {
     gamingPresentMonMissingTitle: 'PresentMon ETW no instalado — FPS en N/D',
     gamingPresentMonMissingDesc: 'SecretArea nunca simula FPS ni inyecta overlays. Coloca PresentMon.exe en resources/bin/PresentMon.exe o %LOCALAPPDATA%\\Intel\\PresentMon para leer FPS reales, 1% Low y Frame Time.',
     gamingPresentMonReady: 'PresentMon ETW listo',
+    gamingPresentMonUnsupportedTitle: 'La captura FPS de Windows ETW no está disponible en este SO',
+    gamingPresentMonUnsupportedDesc: 'PresentMon requiere Windows ETW. El monitoreo de CPU, GPU, RAM, almacenamiento, red y ping sigue funcionando normalmente.',
+    windowsOnlyTag: 'Solo Windows',
+    metricCoverageTitle: 'Disponibilidad de sensores del SO',
+    availabilityPermissionRequired: 'Requiere permisos',
+    availabilityUnsupported: 'No compatible en este SO',
+    availabilityTempUnavailable: 'Temporalmente no disponible',
+    availabilityDetectionFailed: 'Detección no disponible',
     gamingFpsCurrent: 'FPS actuales',
     gamingFpsAvg: 'FPS promedio',
     gamingFps1Low: 'FPS 1% Low',
@@ -5847,7 +5987,7 @@ const ES: LauncherTranslations = {
     ossThirdPartyTitle: 'Cumplimiento de licencia Open-Source de terceros (MPL-2.0)',
     ossThirdPartyDesc: 'LibreHardwareMonitorLib se distribuye bajo la licencia Mozilla Public License 2.0 (MPL-2.0). Los avisos oficiales se conservan junto a la librería local y en THIRD_PARTY_LICENSES.md.',
     ossWebPreviewNote: 'Descargas deshabilitadas en Vista Web: abre SecretArea Desktop en Windows 10/11 para descargar, verificar SHA-256 y usar LibreHardwareMonitorLib.',
-    ossPlatformUnsupportedNote: 'La integración directa de LibreHardwareMonitorLib (.NET DLL) está destinada a Windows 10/11. En Linux, SecretArea utiliza sysfs hwmon/DRM de forma nativa.',
+    ossPlatformUnsupportedNote: 'La integración directa de LibreHardwareMonitorLib (.NET DLL) está destinada a Windows 10/11. En macOS, SecretArea utiliza sysctl, ioreg y system_profiler; en Linux, sysfs hwmon/DRM de forma nativa.',
   },
   updateHistory: {
     title: 'Historial de actualizaciones',
@@ -6315,7 +6455,7 @@ const AR: LauncherTranslations = {
     startingSectionTitle: 'البدء والإغلاق',
     startWithComputerTitle: 'التشغيل مع جهاز الكمبيوتر',
     startWithComputerDesc: 'يفتح SecretArea في شريط المهام (Tray) عند تسجيل الدخول إلى هذا الكمبيوتر.',
-    desktopSupportedBadge: 'تشغيل تلقائي في Tray',
+    desktopSupportedBadge: 'مزامنة شريط النظام',
     webNotice: 'يتفعّل التشغيل التلقائي في شريط النظام تلقائياً داخل تطبيق سطح المكتب SecretArea.exe.',
     trayActiveHint: 'عند تفعيل هذا الخيار، يؤدي إغلاق النافذة إلى تصغير SecretArea إلى شريط النظام.',
     canRunItTitle: 'فحص التوافق مع الجهاز (Can Run It)',
@@ -6399,6 +6539,23 @@ const AR: LauncherTranslations = {
     exitAppConfirmBtn: 'تأكيد الإغلاق الكامل',
     exitAppCancelBtn: 'إلغاء',
     exitAppWebHint: 'الإغلاق الكامل متاح فقط داخل تطبيق سطح المكتب SecretArea.exe.',
+    osThemeProfileTitle: 'تصميم نظام التشغيل',
+    osThemeProfileDesc: 'يتكيّف تلقائياً مع نظام التشغيل الحالي أو يتيح معاينة نمط Windows أو Linux أو macOS يدوياً.',
+    osThemeAutoLabel: 'تلقائي (مُكتشف)',
+    osThemeWindowsLabel: 'Windows',
+    osThemeLinuxLabel: 'Linux',
+    osThemeMacosLabel: 'macOS',
+    appearanceModeTitle: 'وضع المظهر',
+    appearanceSystemLabel: 'متابعة النظام',
+    appearanceDarkLabel: 'داكن',
+    appearanceLightLabel: 'فاتح',
+    animationModeTitle: 'الحركة والتأثيرات',
+    animationModeDesc: 'تحكّم في مستوى الحركة والانتقالات البصرية عبر الواجهة.',
+    animationFullLabel: 'كامل',
+    animationSubtleLabel: 'هادئ',
+    animationReducedLabel: 'مُخفّض',
+    restoreThemeDefaultsBtn: 'استعادة إعدادات المظهر الافتراضية',
+    themeRestoredToast: 'تمت استعادة إعدادات مظهر النظام الافتراضية',
   },
   performance: {
     sectionTitle: 'وضع الأداء واستهلاك الموارد',
@@ -6473,6 +6630,15 @@ const AR: LauncherTranslations = {
     resetBtn: 'إعادة ضبط المظهر المخصص',
     consoleOverrideNote: 'ملاحظة: تفعيل المظهر المخصص يلغي مؤقتاً مظهر كونسول PS5 / Xbox.',
     summaryCustomPrefix: 'مخصص',
+    secondaryColorLabel: 'اللون الثانوي',
+    previewingDraftNote: 'معاينة تغييرات غير محفوظة',
+    applyThemeBtn: 'تطبيق المظهر',
+    discardPreviewBtn: 'تجاهل المعاينة',
+    restoreOsColorsBtn: 'ألوان النظام الافتراضية',
+    contrastLabel: 'تباين WCAG',
+    contrastPassBadge: 'متوافق AA',
+    contrastWarnBadge: 'تباين منخفض',
+    contrastHint: 'يتم ضبط لون نص الأزرار تلقائياً لضمان وضوح القراءة.',
   },
   downloads: {
     pageTitle: 'مدير التنزيلات',
@@ -6996,6 +7162,7 @@ const AR: LauncherTranslations = {
     lastCheckedLabel: 'آخر فحص',
     errorFallback: 'تعذر التحقق من التحديثات حالياً.',
     preparingDownload: 'جارٍ تجهيز التنزيل...',
+    macManualUpdateNote: 'التحديث التلقائي المباشر على macOS يتطلب توقيع Apple Developer ID. اضغط تنزيل لفتح صفحة GitHub Releases وتحميل أحدث ملف .dmg يدوياً.',
   },
   hardware: {
     pageTitle: 'مراقب العتاد',
@@ -7093,6 +7260,14 @@ const AR: LauncherTranslations = {
     gamingPresentMonMissingTitle: 'أداة PresentMon ETW غير مثبتة — قراءات FPS غير متاحة',
     gamingPresentMonMissingDesc: 'لا يقوم SecretArea بتزييف الإطارات أو حقن الألعاب أبداً. ضع PresentMon.exe في resources/bin/PresentMon.exe أو %LOCALAPPDATA%\\Intel\\PresentMon لالتقاط FPS الحقيقي و 1% Low و Frame Time.',
     gamingPresentMonReady: 'PresentMon ETW جاهز',
+    gamingPresentMonUnsupportedTitle: 'التقاط إطارات PresentMon ETW مخصص لويندوز فقط',
+    gamingPresentMonUnsupportedDesc: 'يتطلب تتبع PresentMon نظام Windows ETW. تستمر قراءات المعالج والرسوميات والذاكرة والتخزين والشبكة وزمن الاستجابة بشكل طبيعي على هذا النظام.',
+    windowsOnlyTag: 'لويندوز فقط',
+    metricCoverageTitle: 'حالة توفر حساسات النظام',
+    availabilityPermissionRequired: 'يتطلب صلاحيات',
+    availabilityUnsupported: 'غير مدعوم على النظام',
+    availabilityTempUnavailable: 'غير متوفر مؤقتاً',
+    availabilityDetectionFailed: 'تعذر الكشف',
     gamingFpsCurrent: 'FPS الحالي',
     gamingFpsAvg: 'متوسط FPS',
     gamingFps1Low: '1% Low FPS',
@@ -7409,7 +7584,7 @@ const AR: LauncherTranslations = {
     ossThirdPartyTitle: 'إشعار تراخيص البرمجيات مفتوحة المصدر (MPL-2.0)',
     ossThirdPartyDesc: 'مكتبة LibreHardwareMonitorLib مرخصة بموجب رخصة Mozilla Public License 2.0 (MPL-2.0) من مساهمي LibreHardwareMonitor. يتم حفظ إشعارات الرخصة الرسمية محلياً وفي ملف THIRD_PARTY_LICENSES.md.',
     ossWebPreviewNote: 'التنزيل معطّل في معاينة الويب: افتح تطبيق SecretArea Desktop على Windows 10/11 لتنزيل المكتبة والتحقق من بصمتها وتشغيلها.',
-    ossPlatformUnsupportedNote: 'التكامل المباشر مع LibreHardwareMonitorLib (.NET DLL) مخصص لنظام Windows 10/11. على نظام Linux يستخدم التطبيق واجهة sysfs hwmon/DRM تلقائياً.',
+    ossPlatformUnsupportedNote: 'التكامل المباشر مع LibreHardwareMonitorLib (.NET DLL) مخصص لنظام Windows 10/11. على نظام macOS يقرأ التطبيق sysctl وioreg وsystem_profiler، وعلى Linux يستخدم واجهة sysfs hwmon/DRM تلقائياً.',
   },
   updateHistory: {
     title: 'سجل التحديثات',

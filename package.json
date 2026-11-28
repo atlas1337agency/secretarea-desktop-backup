@@ -15,7 +15,10 @@
     "lint": "tsc --noEmit",
     "desktop:build": "vite build && electron-builder --win nsis",
     "desktop:build:win": "vite build && electron-builder --win nsis --x64 --publish never",
-    "desktop:build:linux": "vite build && electron-builder --linux AppImage deb --x64 --publish never"
+    "desktop:build:linux": "vite build && electron-builder --linux AppImage deb --x64 --publish never",
+    "desktop:build:mac": "vite build && electron-builder --mac dmg zip --x64 --arm64 --publish never",
+    "desktop:build:mac:x64": "vite build && electron-builder --mac dmg zip --x64 --publish never",
+    "desktop:build:mac:arm64": "vite build && electron-builder --mac dmg zip --arm64 --publish never"
   },
   "build": {
     "appId": "site.secretarea.desktop",
@@ -98,6 +101,54 @@
       "packageCategory": "games",
       "priority": "optional",
       "compression": "gz"
+    },
+    "mac": {
+      "appId": "site.secretarea.desktop",
+      "category": "public.app-category.games",
+      "icon": "packaging/mac/icon.icns",
+      "minimumSystemVersion": "11.0",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "packaging/mac/entitlements.mac.plist",
+      "entitlementsInherit": "packaging/mac/entitlements.mac.inherit.plist",
+      "darkModeSupport": true,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "SecretArea-${version}-mac-${arch}.${ext}",
+      "extendInfo": {
+        "LSMinimumSystemVersion": "11.0",
+        "NSHumanReadableCopyright": "Copyright © 2026 SecretArea",
+        "NSRequiresAquaSystemAppearance": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "SecretArea Deep Link",
+            "CFBundleURLSchemes": [
+              "secretarea"
+            ]
+          }
+        ]
+      }
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "icon": "packaging/mac/icon.icns",
+      "artifactName": "SecretArea-${version}-mac-${arch}.dmg",
+      "format": "UDZO",
+      "internetEnabled": false
     }
   },
   "dependencies": {

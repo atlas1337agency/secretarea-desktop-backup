@@ -886,7 +886,7 @@ export function ToolsHubSection({
                 <button
                   type="button"
                   onClick={onOpenQbitSetupWizard}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
                 >
                   <DownloadSimple className="w-3.5 h-3.5" />
                   <span>{t.torrentManageSetupBtn}</span>
@@ -938,7 +938,7 @@ export function ToolsHubSection({
                         detectionResult.downloadUrl || 'https://www.qbittorrent.org/download'
                       )
                     }
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#212a37] border border-slate-300 dark:border-white/[0.1] text-[11.5px] font-semibold cursor-pointer"
+                    className="sa-btn-secondary px-3 py-1.5 text-[11.5px]"
                   >
                     <ArrowSquareOut className="w-3.5 h-3.5" />
                     <span>{t.torrentDownloadBtn}</span>
@@ -990,7 +990,7 @@ export function ToolsHubSection({
                   if (hostError && isLoopbackHost(nextHost)) setHostError(null);
                 }}
                 placeholder="127.0.0.1"
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] font-mono-tabular text-slate-900 dark:text-white"
               />
             </div>
 
@@ -1014,7 +1014,7 @@ export function ToolsHubSection({
                     port: Number(e.target.value) || 8080,
                   }))
                 }
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] font-mono-tabular text-slate-900 dark:text-white"
               />
             </div>
 
@@ -1034,7 +1034,7 @@ export function ToolsHubSection({
                   setDraftTorrent((prev) => ({ ...prev, username: e.target.value }))
                 }
                 placeholder="admin"
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] text-slate-900 dark:text-white"
               />
             </div>
 
@@ -1056,7 +1056,7 @@ export function ToolsHubSection({
                 placeholder={
                   torrentConfig.hasSavedPassword ? t.torrentPasswordSavedPlaceholder : '••••••••'
                 }
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] text-slate-900 dark:text-white"
               />
             </div>
 
@@ -1080,7 +1080,7 @@ export function ToolsHubSection({
                     ? t.torrentApiKeySavedPlaceholder
                     : t.torrentApiKeyPlaceholder
                 }
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#0e131b] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] font-mono-tabular text-slate-900 dark:text-white"
               />
             </div>
           </div>
@@ -1100,7 +1100,7 @@ export function ToolsHubSection({
             <button
               type="button"
               onClick={() => setShowTorrentGuide((prev) => !prev)}
-              className="text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline cursor-pointer"
+              className="sa-link text-[12px] font-semibold cursor-pointer"
             >
               {t.torrentGuideTitle}
             </button>
@@ -1110,9 +1110,9 @@ export function ToolsHubSection({
                 type="button"
                 disabled={isDetectingTorrent}
                 onClick={handleAutoDetectTorrent}
-                className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white disabled:opacity-60 transition-colors whitespace-nowrap cursor-pointer"
+                className="sa-btn-secondary min-h-[38px] px-3 py-1.5 text-[12px] disabled:opacity-60"
               >
-                <MagnifyingGlass className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                <MagnifyingGlass className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                 <span>{isDetectingTorrent ? t.torrentDetectingBtn : t.torrentAutoDetectBtn}</span>
               </button>
 
@@ -1120,7 +1120,7 @@ export function ToolsHubSection({
                 type="button"
                 disabled={isTestingTorrent}
                 onClick={handleTestTorrent}
-                className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold disabled:opacity-60 transition-colors whitespace-nowrap cursor-pointer"
+                className="sa-btn-primary min-h-[38px] px-3 py-1.5 text-[12px] disabled:opacity-60"
               >
                 <PlugsConnected className="w-3.5 h-3.5" />
                 <span>{isTestingTorrent ? t.torrentTestingBtn : t.torrentTestBtn}</span>
@@ -1130,7 +1130,7 @@ export function ToolsHubSection({
                 type="button"
                 disabled={isSavingTorrent}
                 onClick={handleSaveTorrent}
-                className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-[var(--sa-btn-radius)] bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
               >
                 <FloppyDisk className="w-3.5 h-3.5" />
                 <span>{isSavingTorrent ? t.torrentSavingBtn : t.torrentSaveBtn}</span>
@@ -1200,7 +1200,7 @@ export function ToolsHubSection({
                     'https://github.com/GameTechDev/PresentMon/releases/latest'
                 )
               }
-              className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline cursor-pointer"
+              className="sa-link inline-flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer"
             >
               <ArrowSquareOut className="w-3.5 h-3.5" />
               <span>{tp.officialReleasesBtn}</span>
@@ -1211,7 +1211,7 @@ export function ToolsHubSection({
                 <button
                   type="button"
                   onClick={onOpenPresentMonManager}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white cursor-pointer"
+                  className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   <span>{tp.managePresentMonBtn}</span>
@@ -1223,7 +1223,7 @@ export function ToolsHubSection({
                   type="button"
                   disabled={presentMonSetupState?.stage === 'checking'}
                   onClick={() => void onCheckPresentMonUpdates()}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white disabled:opacity-55 cursor-pointer"
+                  className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-55"
                 >
                   <ArrowCounterClockwise
                     className={`w-3.5 h-3.5 ${
@@ -1247,7 +1247,7 @@ export function ToolsHubSection({
                       onOpenPresentMonManager?.();
                       void onStartPresentMonInstallOrUpdate(true, 'update');
                     }}
-                    className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold cursor-pointer"
+                    className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
                   >
                     <DownloadSimple className="w-3.5 h-3.5" />
                     <span>{tp.updateNowBtn}</span>
@@ -1406,7 +1406,7 @@ export function ToolsHubSection({
                     ? void ossBridge.openExternalLink({ toolId: targetTool.id, kind: 'repository' })
                     : onOpenExternal?.('https://github.com/LibreHardwareMonitor/LibreHardwareMonitor')
                 }
-                className="inline-flex items-center gap-1 font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                className="sa-link inline-flex items-center gap-1 font-semibold cursor-pointer"
               >
                 <GitBranch className="w-3.5 h-3.5" />
                 <span>{thw.ossLinkRepo}</span>
@@ -1418,7 +1418,7 @@ export function ToolsHubSection({
                     ? void ossBridge.openExternalLink({ toolId: targetTool.id, kind: 'source' })
                     : onOpenExternal?.('https://github.com/LibreHardwareMonitor/LibreHardwareMonitor')
                 }
-                className="inline-flex items-center gap-1 font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                className="sa-link inline-flex items-center gap-1 font-semibold cursor-pointer"
               >
                 <Code className="w-3.5 h-3.5" />
                 <span>{thw.ossLinkSource}</span>
@@ -1427,7 +1427,7 @@ export function ToolsHubSection({
                 <button
                   type="button"
                   onClick={() => onNavigateSection('hardware')}
-                  className="inline-flex items-center gap-1 font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                  className="sa-link inline-flex items-center gap-1 font-semibold cursor-pointer"
                 >
                   <span>{th.openHardwareMonitorBtn}</span>
                 </button>
@@ -1451,7 +1451,7 @@ export function ToolsHubSection({
                     setOssBusyAction(null);
                   }
                 }}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-50"
               >
                 <ArrowClockwise className="w-3.5 h-3.5" />
                 <span>{thw.ossCheckUpdatesBtn}</span>
@@ -1461,7 +1461,7 @@ export function ToolsHubSection({
                 <button
                   type="button"
                   onClick={() => void ossBridge?.cancel({ toolId: targetTool.id })}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-rose-600 text-white text-[12px] font-semibold cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-rose-600 text-white text-[12px] font-semibold cursor-pointer"
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>{thw.ossCancelBtn}</span>
@@ -1472,7 +1472,7 @@ export function ToolsHubSection({
                     type="button"
                     disabled={!hasOssDesktop || ossBusyAction !== null}
                     onClick={() => setOssPendingConfirm({ toolId: targetTool.id, mode: 'install' })}
-                    className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                    className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-50"
                   >
                     <DownloadSimple className="w-3.5 h-3.5" />
                     <span>
@@ -1589,7 +1589,7 @@ export function ToolsHubSection({
               <button
                 type="button"
                 onClick={() => onNavigateSection('hardware')}
-                className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline cursor-pointer"
+                className="sa-link inline-flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer"
               >
                 <Broom className="w-3.5 h-3.5" />
                 <span>{th.openPcCleanerBtn}</span>
@@ -1601,7 +1601,7 @@ export function ToolsHubSection({
                 type="button"
                 disabled={!hasCleanerDesktop || cleanerBusy !== null}
                 onClick={() => void handleQuickCleanerScan()}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-50"
               >
                 <MagnifyingGlass className="w-3.5 h-3.5" />
                 <span>{cleanerBusy === 'scan' ? thw.cleanerScanningBtn : th.cleanerQuickScanBtn}</span>
@@ -1612,7 +1612,7 @@ export function ToolsHubSection({
                   type="button"
                   disabled={!hasCleanerDesktop || cleanerBusy !== null}
                   onClick={() => setCleanerConfirm(true)}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
                 >
                   <Trash className="w-3.5 h-3.5" />
                   <span>
@@ -1651,7 +1651,7 @@ export function ToolsHubSection({
 
           {dealsFeedback && (
             <div className="px-3 py-2 rounded-lg border border-slate-200 dark:border-white/[0.12] bg-slate-50 dark:bg-white/[0.05] text-[12px] flex items-center gap-2">
-              <WarningCircle className="w-4 h-4 text-[#0284c7] shrink-0" />
+              <WarningCircle className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
               <span>{dealsFeedback}</span>
             </div>
           )}
@@ -1701,13 +1701,13 @@ export function ToolsHubSection({
                       }
                       disabled={!isElectronDeals || dealsBusyId === spec.id}
                       placeholder={spec.placeholder}
-                      className="flex-1 min-h-[36px] px-3 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-[#161e29] text-[12px] font-mono-tabular focus:outline-none focus:border-[#0284c7]"
+                      className="sa-search-input flex-1 min-h-[36px] px-3 text-[12px] font-mono-tabular"
                     />
                     <button
                       type="button"
                       disabled={!isElectronDeals || !dealsKeyInputs[spec.id].trim() || dealsBusyId === spec.id}
                       onClick={() => void handleSaveDealsKey(spec.id)}
-                      className="px-3 py-1.5 min-h-[36px] rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold disabled:opacity-45 whitespace-nowrap cursor-pointer"
+                      className="sa-btn-primary px-3 py-1.5 min-h-[36px] text-[12px] disabled:opacity-45"
                     >
                       {tr.deals.apiKeysSaveBtn}
                     </button>
@@ -1716,7 +1716,7 @@ export function ToolsHubSection({
                         type="button"
                         disabled={!isElectronDeals || dealsBusyId === spec.id}
                         onClick={() => void handleClearDealsKey(spec.id)}
-                        className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-lg border border-rose-500/35 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-[var(--sa-btn-radius)] border border-rose-500/35 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-[12px] font-semibold whitespace-nowrap cursor-pointer"
                       >
                         <Trash className="w-3.5 h-3.5" />
                         <span>{tr.deals.apiKeysClearBtn}</span>
@@ -1735,7 +1735,7 @@ export function ToolsHubSection({
                 clearDealsMemoryCache();
                 onNotify?.(th.dealsCacheCleared, 'info');
               }}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold cursor-pointer"
+              className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
             >
               <Trash className="w-3.5 h-3.5" />
               <span>{th.clearDealsCacheBtn}</span>
@@ -1745,7 +1745,7 @@ export function ToolsHubSection({
               <button
                 type="button"
                 onClick={() => onNavigateSection('deals')}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold cursor-pointer"
+                className="sa-btn-primary min-h-[36px] px-3.5 py-1.5 text-[12px]"
               >
                 <span>{th.openDealsBtn}</span>
               </button>
@@ -1823,7 +1823,7 @@ export function ToolsHubSection({
                     type="text"
                     value={draftCpu}
                     onChange={(e) => setDraftCpu(e.target.value)}
-                    className="w-full min-h-[36px] px-2.5 rounded-lg bg-white dark:bg-[#161e29] border border-slate-200 dark:border-white/[0.1] text-[12px]"
+                    className="sa-search-input w-full min-h-[36px] px-2.5 text-[12px]"
                   />
                 </div>
                 <div className="sm:col-span-2 space-y-1">
@@ -1834,7 +1834,7 @@ export function ToolsHubSection({
                     type="text"
                     value={draftGpu}
                     onChange={(e) => setDraftGpu(e.target.value)}
-                    className="w-full min-h-[36px] px-2.5 rounded-lg bg-white dark:bg-[#161e29] border border-slate-200 dark:border-white/[0.1] text-[12px]"
+                    className="sa-search-input w-full min-h-[36px] px-2.5 text-[12px]"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1848,7 +1848,7 @@ export function ToolsHubSection({
                     dir="ltr"
                     value={draftVram}
                     onChange={(e) => setDraftVram(e.target.value)}
-                    className="w-full min-h-[36px] px-2.5 rounded-lg bg-white dark:bg-[#161e29] border border-slate-200 dark:border-white/[0.1] text-[12px] font-mono-tabular"
+                    className="sa-search-input w-full min-h-[36px] px-2.5 text-[12px] font-mono-tabular"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1861,7 +1861,7 @@ export function ToolsHubSection({
                     dir="ltr"
                     value={draftRam}
                     onChange={(e) => setDraftRam(e.target.value)}
-                    className="w-full min-h-[36px] px-2.5 rounded-lg bg-white dark:bg-[#161e29] border border-slate-200 dark:border-white/[0.1] text-[12px] font-mono-tabular"
+                    className="sa-search-input w-full min-h-[36px] px-2.5 text-[12px] font-mono-tabular"
                   />
                 </div>
                 <div className="space-y-1">
@@ -1874,14 +1874,14 @@ export function ToolsHubSection({
                     dir="ltr"
                     value={draftDiskFree}
                     onChange={(e) => setDraftDiskFree(e.target.value)}
-                    className="w-full min-h-[36px] px-2.5 rounded-lg bg-white dark:bg-[#161e29] border border-slate-200 dark:border-white/[0.1] text-[12px] font-mono-tabular"
+                    className="sa-search-input w-full min-h-[36px] px-2.5 text-[12px] font-mono-tabular"
                   />
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 min-h-[34px] px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-semibold cursor-pointer"
+                  className="inline-flex items-center gap-1.5 min-h-[34px] px-3 py-1 rounded-[var(--sa-btn-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-semibold cursor-pointer"
                 >
                   <FloppyDisk className="w-3.5 h-3.5" />
                   <span>{th.specsSaveBtn}</span>
@@ -1889,7 +1889,7 @@ export function ToolsHubSection({
                 <button
                   type="button"
                   onClick={() => setEditingSpecs(false)}
-                  className="min-h-[34px] px-3 py-1 rounded-lg border border-slate-300 dark:border-white/[0.12] bg-white dark:bg-[#171d25] text-[12px] font-semibold cursor-pointer"
+                  className="sa-btn-secondary min-h-[34px] px-3 py-1 text-[12px]"
                 >
                   {t.exitAppCancelBtn}
                 </button>
@@ -1903,7 +1903,7 @@ export function ToolsHubSection({
                 type="button"
                 disabled={isRefreshingSpecs}
                 onClick={() => void onRefreshSpecs()}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-50"
               >
                 <ArrowsClockwise
                   className={`w-3.5 h-3.5 ${isRefreshingSpecs ? 'motion-safe:animate-spin' : ''}`}
@@ -1915,7 +1915,7 @@ export function ToolsHubSection({
               <button
                 type="button"
                 onClick={() => setEditingSpecs((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold cursor-pointer"
+                className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>{th.specsCustomizeBtn}</span>
@@ -1925,7 +1925,7 @@ export function ToolsHubSection({
               <button
                 type="button"
                 onClick={() => void onResetCustomSpecs()}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
               >
                 <ArrowCounterClockwise className="w-3.5 h-3.5" />
                 <span>{th.specsResetAutoBtn}</span>
@@ -1948,7 +1948,7 @@ export function ToolsHubSection({
             </div>
             <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.06]">
               <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4]">{th.dbEntriesLabel}</div>
-              <div dir="ltr" className="mt-0.5 text-[13px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
+              <div dir="ltr" className="mt-0.5 text-[13px] font-bold font-mono-tabular text-[var(--sa-accent)]">
                 {dbState?.entryCount || BUNDLED_HARDWARE_DATABASE.length}
               </div>
             </div>
@@ -1966,7 +1966,7 @@ export function ToolsHubSection({
                 type="button"
                 disabled={isUpdatingDb}
                 onClick={() => void handleCheckDbUpdate()}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold disabled:opacity-50 cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-50"
               >
                 <ArrowsClockwise className={`w-3.5 h-3.5 ${isUpdatingDb ? 'motion-safe:animate-spin' : ''}`} />
                 <span>{th.dbCheckUpdateBtn}</span>
@@ -1976,7 +1976,7 @@ export function ToolsHubSection({
               <button
                 type="button"
                 onClick={() => onNavigateSection('hardware')}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold cursor-pointer"
+                className="sa-btn-primary min-h-[36px] px-3.5 py-1.5 text-[12px]"
               >
                 <span>{th.openBenchmarksBtn}</span>
               </button>
@@ -1995,7 +1995,7 @@ export function ToolsHubSection({
         <button
           type="button"
           onClick={onOpenHypervisorGuide}
-          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+          className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
         >
           <Wrench className="w-3.5 h-3.5" />
           <span>{th.openHypervisorBtn}</span>
@@ -2008,7 +2008,7 @@ export function ToolsHubSection({
         <button
           type="button"
           onClick={onOpenSpinWheel}
-          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+          className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
         >
           <Gauge className="w-3.5 h-3.5" />
           <span>{th.openSpinWheelBtn}</span>
@@ -2023,7 +2023,7 @@ export function ToolsHubSection({
             <button
               type="button"
               onClick={() => (onOpenUpdater ? onOpenUpdater() : onCheckForUpdates?.())}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+              className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
             >
               <ArrowClockwise className="w-3.5 h-3.5" />
               <span>{th.openUpdaterBtn}</span>
@@ -2033,7 +2033,7 @@ export function ToolsHubSection({
             <button
               type="button"
               onClick={onOpenUpdateHistory}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+              className="sa-btn-secondary min-h-[36px] px-2.5 py-1.5 text-[12px]"
             >
               <ClockCounterClockwise className="w-3.5 h-3.5" />
               <span>{tr.updateHistory.openHistoryBtn}</span>
@@ -2045,7 +2045,7 @@ export function ToolsHubSection({
               onClick={onOpenNotifications}
               aria-label={tr.notificationCenter.title}
               title={tr.notificationCenter.title}
-              className="inline-flex items-center justify-center min-h-[36px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] cursor-pointer"
+              className="sa-btn-secondary min-h-[36px] px-2.5 py-1.5"
             >
               <Bell className="w-3.5 h-3.5" />
             </button>
@@ -2054,7 +2054,7 @@ export function ToolsHubSection({
             <button
               type="button"
               onClick={onReplayOnboarding}
-              className="inline-flex items-center gap-1 min-h-[36px] px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold whitespace-nowrap cursor-pointer"
+              className="sa-btn-secondary min-h-[36px] px-2.5 py-1.5 text-[12px]"
             >
               <span>{t.replaySetupBtn}</span>
             </button>
@@ -2081,7 +2081,7 @@ export function ToolsHubSection({
     >
       <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.06]">
         <div className="flex items-start gap-3 min-w-0 flex-1">
-          <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+          <span className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
             <Wrench className="w-4.5 h-4.5" />
           </span>
           <div className="space-y-0.5 min-w-0">
@@ -2096,7 +2096,7 @@ export function ToolsHubSection({
       </div>
 
       {/* Category Filter Segmented Control */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-slate-100 dark:bg-[#10151c] border border-slate-200/70 dark:border-white/[0.06]">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-[var(--sa-btn-radius)] bg-slate-100 dark:bg-[#10151c] border border-slate-200/70 dark:border-white/[0.06]">
         {filterTabs.map((tab) => {
           const active = filter === tab.id;
           return (
@@ -2105,10 +2105,10 @@ export function ToolsHubSection({
               type="button"
               aria-pressed={active}
               onClick={() => setFilter(tab.id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 text-[12px] ${
                 active
-                  ? 'bg-white dark:bg-[#1d2735] text-slate-900 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-[#8b9bb4] hover:text-slate-900 dark:hover:text-white'
+                  ? 'sa-btn-primary shadow-xs'
+                  : 'inline-flex items-center gap-1.5 rounded-[var(--sa-btn-radius)] text-slate-600 dark:text-[#8b9bb4] hover:text-slate-900 dark:hover:text-white font-semibold cursor-pointer transition-colors'
               }`}
             >
               <span>{tab.label}</span>
@@ -2127,16 +2127,16 @@ export function ToolsHubSection({
             <div
               key={tool.id}
               id={`tool-card-${tool.id}`}
-              className={`sa-ps5-subpanel rounded-xl border p-4 transition-colors flex flex-col justify-between ${
+              className={`sa-ps5-subpanel rounded-[var(--sa-card-radius)] border p-4 transition-all flex flex-col justify-between ${
                 isExpanded
-                  ? 'md:col-span-2 bg-white dark:bg-[#131922] border-[#0284c7]/50 dark:border-[#38bdf8]/45'
-                  : 'bg-slate-50 dark:bg-[#12171f] border-slate-200 dark:border-white/[0.07]'
+                  ? 'md:col-span-2 bg-white dark:bg-[#131922] border-[var(--sa-accent-ring)]'
+                  : 'sa-game-card bg-slate-50 dark:bg-[#12171f] border-slate-200 dark:border-white/[0.07]'
               }`}
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className="w-9 h-9 rounded-lg bg-slate-200/80 dark:bg-[#1a2433] border border-slate-300/70 dark:border-white/[0.08] text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                    <span className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
                       <Icon className="w-4.5 h-4.5" />
                     </span>
                     <div className="min-w-0 space-y-1">
@@ -2174,10 +2174,8 @@ export function ToolsHubSection({
                     type="button"
                     aria-expanded={isExpanded}
                     onClick={() => setExpanded(isExpanded ? null : tool.id)}
-                    className={`inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-                      isExpanded
-                        ? 'bg-slate-200 dark:bg-[#232d3d] text-slate-900 dark:text-white'
-                        : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white'
+                    className={`min-h-[36px] px-3 py-1.5 text-[12px] ${
+                      isExpanded ? 'sa-btn-secondary' : 'sa-btn-primary'
                     }`}
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />

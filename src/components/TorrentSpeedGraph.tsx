@@ -287,7 +287,7 @@ export const TorrentSpeedGraph = memo(function TorrentSpeedGraph({
   return (
     <section
       aria-label={t.speedGraphTitle}
-      className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-xs dark:shadow-md space-y-3"
+      className="sa-ps5-panel rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-xs dark:shadow-md space-y-3"
     >
       {/* Top Toolbar: Period Selector + Live Readouts + Collapse Toggle */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
@@ -304,7 +304,7 @@ export const TorrentSpeedGraph = memo(function TorrentSpeedGraph({
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value as SpeedPeriodKey)}
-              className="min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px] font-semibold text-slate-800 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none cursor-pointer"
+              className="sa-search-input min-h-[34px] px-2.5 py-1 text-[12px] font-semibold cursor-pointer"
             >
               <option value="1m">{t.period1m}</option>
               <option value="5m">{t.period5m}</option>
@@ -330,7 +330,7 @@ export const TorrentSpeedGraph = memo(function TorrentSpeedGraph({
           <button
             type="button"
             onClick={() => setIsCollapsed((prev) => !prev)}
-            className="inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[11.5px] font-semibold text-slate-700 dark:text-[#d5e0ee] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="sa-btn-secondary inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 text-[11.5px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
           >
             {isCollapsed ? (
               <>
@@ -351,7 +351,7 @@ export const TorrentSpeedGraph = memo(function TorrentSpeedGraph({
       {!isCollapsed && (
         <div
           dir="ltr"
-          className="relative rounded-lg bg-slate-50 dark:bg-[#11151b] border border-slate-200 dark:border-white/[0.08] p-2.5 sm:p-3 overflow-hidden"
+          className="relative rounded-[var(--sa-card-inner-radius)] bg-slate-50 dark:bg-[#11151b] border border-slate-200 dark:border-white/[0.08] p-2.5 sm:p-3 overflow-hidden"
         >
           <div className="flex items-stretch gap-2.5 sm:gap-3 h-[156px] sm:h-[188px]">
             {/* Y-Axis Speed Scale Labels */}

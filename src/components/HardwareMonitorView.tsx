@@ -124,9 +124,9 @@ function getUsageTone(percent: number | null) {
     };
   }
   return {
-    stroke: 'stroke-[#0284c7] dark:stroke-[#38bdf8]',
-    bar: 'bg-gradient-to-r from-[#0284c7] to-[#38bdf8]',
-    text: 'text-[#0284c7] dark:text-[#38bdf8]',
+    stroke: 'stroke-[var(--sa-accent)]',
+    bar: 'bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)]',
+    text: 'text-[var(--sa-accent)]',
   };
 }
 
@@ -798,15 +798,15 @@ export function HardwareMonitorView({
       : naLabel;
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50 dark:bg-[#0e141b] text-slate-900 dark:text-white">
+    <div className="flex-1 min-h-0 overflow-y-auto bg-[var(--sa-bg-canvas)] text-[var(--sa-text-primary)]">
       <div className="w-full max-w-[1600px] mx-auto px-3 sm:px-5 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
         {/* Header Bar */}
-        <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md">
+        <section className="sa-ps5-panel rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-sky-500/12 dark:bg-[#38bdf8]/15 border border-sky-500/25 dark:border-[#38bdf8]/30 flex items-center justify-center shrink-0">
-                  <Pulse weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8]" />
+                <div className="sa-icon-badge w-9 h-9 shrink-0">
+                  <Pulse weight="duotone" className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
                   <h1 className="font-display text-[19px] sm:text-[22px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
@@ -860,7 +860,7 @@ export function HardwareMonitorView({
                   disabled={!hasDesktopTelemetry}
                   onChange={(e) => handleChangeInterval(Number(e.target.value))}
                   aria-label={t.intervalLabel}
-                  className="min-h-[36px] px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px] font-mono-tabular font-semibold text-slate-800 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none disabled:opacity-50 cursor-pointer"
+                  className="sa-search-input min-h-[36px] px-2.5 py-1 text-[12px] font-mono-tabular font-semibold disabled:opacity-50 cursor-pointer"
                 >
                   {intervalOptions.map((opt) => (
                     <option key={opt.ms} value={opt.ms}>
@@ -875,7 +875,7 @@ export function HardwareMonitorView({
                 type="button"
                 disabled={!hasDesktopTelemetry || isRefreshingOnce}
                 onClick={() => void handleManualRefresh()}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 cursor-pointer"
+                className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-[12px] font-semibold disabled:opacity-45 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <ArrowClockwise
                   className={`w-4 h-4 ${isRefreshingOnce ? 'motion-safe:animate-spin' : ''}`}
@@ -888,10 +888,10 @@ export function HardwareMonitorView({
                 type="button"
                 disabled={!hasDesktopTelemetry}
                 onClick={handleToggleMonitoring}
-                className={`inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 rounded-lg text-[12.5px] font-semibold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 cursor-pointer ${
                   isMonitoring
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                    : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#0284c7] text-white'
+                    ? 'rounded-[var(--sa-btn-radius)] bg-rose-600 hover:bg-rose-700 text-white'
+                    : 'sa-btn-primary'
                 }`}
               >
                 {isMonitoring ? (
@@ -983,9 +983,9 @@ export function HardwareMonitorView({
                 key={id}
                 type="button"
                 onClick={() => setActiveTab(id)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-[12.5px] font-semibold border transition-colors whitespace-nowrap cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--sa-btn-radius)] text-[12.5px] font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   active
-                    ? 'bg-[#0284c7] dark:bg-[#0ea5e9] border-[#0284c7] dark:border-[#38bdf8] text-white shadow-xs'
+                    ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)] shadow-xs'
                     : 'bg-white dark:bg-[#171d25] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-[#cbd5e1] hover:bg-slate-100 dark:hover:bg-[#1e2633]'
                 }`}
               >
@@ -998,8 +998,8 @@ export function HardwareMonitorView({
 
         {(activeTab === 'health' || activeTab === 'inventory' || activeTab === 'advisors') &&
           !activeInventory && (
-            <div className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-8 flex items-center justify-center gap-3 text-[13px] font-medium text-slate-600 dark:text-[#9cb0c9]">
-              <ArrowClockwise className="w-4.5 h-4.5 motion-safe:animate-spin text-[#0284c7] dark:text-[#38bdf8]" />
+            <div className="sa-ps5-panel rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-8 flex items-center justify-center gap-3 text-[13px] font-medium text-slate-600 dark:text-[#9cb0c9]">
+              <ArrowClockwise className="w-4.5 h-4.5 motion-safe:animate-spin text-[var(--sa-accent)]" />
               <span>{t.intelRefreshDeepScan}...</span>
             </div>
           )}
@@ -1082,14 +1082,57 @@ export function HardwareMonitorView({
 
         {activeTab === 'overview' && (
           <>
+            {snapshot.metricAvailability &&
+              Object.values(snapshot.metricAvailability).some(
+                (entry) => entry && entry.state !== 'available'
+              ) && (
+                <div className="sa-ps5-subpanel rounded-xl bg-slate-50/90 dark:bg-[#141a23] border border-slate-200 dark:border-white/[0.08] px-3.5 py-2.5 flex flex-col gap-1.5 text-[11.5px]">
+                  <div className="font-semibold text-slate-800 dark:text-white">
+                    {t.metricCoverageTitle} ({snapshot.platform})
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(snapshot.metricAvailability)
+                      .filter(([, item]) => item && item.state !== 'available')
+                      .slice(0, 6)
+                      .map(([metricKey, item]) => (
+                        <span
+                          key={metricKey}
+                          title={item.reason}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-medium ${
+                            item.state === 'permission_required'
+                              ? 'bg-amber-500/10 border-amber-500/25 text-amber-800 dark:text-amber-300'
+                              : item.state === 'unsupported'
+                              ? 'bg-slate-200/70 dark:bg-white/[0.05] border-slate-300/70 dark:border-white/[0.1] text-slate-700 dark:text-[#9cb0c9]'
+                              : 'bg-sky-500/10 border-sky-500/25 text-sky-800 dark:text-sky-300'
+                          }`}
+                        >
+                          <span className="font-mono-tabular font-semibold">{metricKey}:</span>
+                          <span>
+                            {item.state === 'permission_required'
+                              ? t.availabilityPermissionRequired
+                              : item.state === 'unsupported'
+                              ? t.availabilityUnsupported
+                              : item.state === 'temporarily_unavailable'
+                              ? t.availabilityTempUnavailable
+                              : t.availabilityDetectionFailed}
+                          </span>
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+
             {/* SECTION A: System Overview */}
             <section aria-labelledby="hw-overview-heading" className="space-y-3">
-          <h2
-            id="hw-overview-heading"
-            className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4] px-0.5"
-          >
-            {t.sectionOverview}
-          </h2>
+          <div className="sa-section-header px-0.5">
+            <h2
+              id="hw-overview-heading"
+              className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4]"
+            >
+              {t.sectionOverview}
+            </h2>
+            <span className="sa-section-line" />
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
             {/* CPU Overview Card */}
@@ -1272,12 +1315,15 @@ export function HardwareMonitorView({
 
         {/* SECTION B: Live Performance Graphs */}
         <section aria-labelledby="hw-performance-heading" className="space-y-3">
-          <h2
-            id="hw-performance-heading"
-            className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4] px-0.5"
-          >
-            {t.sectionPerformance}
-          </h2>
+          <div className="sa-section-header px-0.5">
+            <h2
+              id="hw-performance-heading"
+              className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4]"
+            >
+              {t.sectionPerformance}
+            </h2>
+            <span className="sa-section-line" />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
             <LiveTelemetryChart
@@ -1376,26 +1422,29 @@ export function HardwareMonitorView({
 
         {/* SECTION C: Hardware Details */}
         <section aria-labelledby="hw-details-heading" className="space-y-3">
-          <h2
-            id="hw-details-heading"
-            className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4] px-0.5"
-          >
-            {t.sectionDetails}
-          </h2>
+          <div className="sa-section-header px-0.5">
+            <h2
+              id="hw-details-heading"
+              className="text-[13px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4]"
+            >
+              {t.sectionDetails}
+            </h2>
+            <span className="sa-section-line" />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* CPU Details Panel */}
-            <article className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-3.5">
+            <article className="sa-ps5-panel rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-3.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Cpu weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                  <Cpu weight="duotone" className="w-5 h-5 text-[var(--sa-accent)] shrink-0" />
                   <h3 className="text-[15px] font-bold text-slate-900 dark:text-white truncate">
                     {t.cpuTitle}
                   </h3>
                 </div>
                 <span
                   dir="ltr"
-                  className="text-[13.5px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]"
+                  className="text-[13.5px] font-bold font-mono-tabular text-[var(--sa-accent)]"
                 >
                   {formatPercent(snapshot.cpu.usagePercent, naLabel)}
                 </span>
@@ -1468,7 +1517,7 @@ export function HardwareMonitorView({
                         </div>
                         <div className="mt-1 h-1 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
                           <div
-                            className="h-full bg-[#0284c7] dark:bg-[#38bdf8] transition-[width] duration-300"
+                            className="h-full bg-[var(--sa-accent)] transition-[width] duration-300"
                             style={{ width: `${Math.max(0, Math.min(100, load))}%` }}
                           />
                         </div>
@@ -1836,7 +1885,7 @@ export function HardwareMonitorView({
                 <div className="flex items-center gap-2.5 min-w-0">
                   <WifiHigh
                     weight="duotone"
-                    className="w-5 h-5 text-sky-600 dark:text-[#38bdf8] shrink-0"
+                    className="w-5 h-5 text-[var(--sa-accent)] shrink-0"
                   />
                   <h3 className="text-[15px] font-bold text-slate-900 dark:text-white truncate">
                     {t.networkTitle}

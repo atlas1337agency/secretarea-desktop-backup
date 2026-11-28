@@ -56,12 +56,12 @@ export function SyncModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded bg-white border border-slate-200 dark:bg-[#1b2838] dark:border-white/[0.1] shadow-2xl overflow-hidden"
+        className="sa-ps5-panel w-full max-w-xl rounded-[var(--sa-card-radius)] bg-white border border-slate-200 dark:bg-[#1b2838] dark:border-white/[0.1] shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200 dark:bg-[#171a21] dark:border-white/[0.07]">
           <div className="flex items-center gap-2.5">
-            <Database className="w-4 h-4 text-[#0284c7] dark:text-[#1a9fff]" />
+            <Database className="w-4 h-4 text-[var(--sa-accent)]" />
             <h2 className="font-display text-[16px] font-semibold text-slate-900 dark:text-white">
               Catalog &amp; Remote Sync
             </h2>
@@ -90,7 +90,7 @@ export function SyncModal({
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2.5 rounded bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 dark:bg-[#0e141b] dark:border-white/[0.12] dark:text-white dark:placeholder-[#566376] text-[13px] focus:outline-none focus:border-[#1a9fff]"
+              className="sa-search-input w-full px-3 py-2.5 text-[13px]"
               required
             />
             <p className="mt-1.5 text-[12px] text-slate-600 dark:text-[#8b9bb4] leading-relaxed">
@@ -114,7 +114,7 @@ export function SyncModal({
             </div>
             <div>
               <div className="text-slate-500 dark:text-[#8b9bb4]">Source</div>
-              <div className="text-[13px] font-medium text-[#0284c7] dark:text-[#66c0f4] mt-0.5 truncate">
+              <div className="text-[13px] font-medium text-[var(--sa-accent)] mt-0.5 truncate">
                 {currentUrl ? 'Live Catalog' : 'Offline Snapshot'}
               </div>
             </div>
@@ -138,7 +138,7 @@ export function SyncModal({
             <button
               type="button"
               onClick={onResetBuiltin}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-[#232b36] dark:hover:bg-[#2c3644] dark:text-[#c6d4df] text-[12px] font-medium cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium cursor-pointer"
             >
               <ArrowCounterClockwise className="w-3.5 h-3.5" />
               Use Offline Snapshot
@@ -148,14 +148,14 @@ export function SyncModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 rounded text-[12px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-[#8b9bb4] dark:hover:text-white dark:hover:bg-white/[0.06] cursor-pointer"
+                className="sa-btn-secondary px-3.5 py-2 text-[12px] font-medium cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSyncing || !urlInput.trim()}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] disabled:opacity-50 text-white text-[12px] font-semibold cursor-pointer"
+                className="sa-btn-primary inline-flex items-center gap-2 px-4 py-2 disabled:opacity-50 text-[12px] font-semibold cursor-pointer"
               >
                 <ArrowsClockwise className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
                 {isSyncing ? 'Syncing...' : 'Save & Sync'}

@@ -375,6 +375,17 @@ function createQbitSetupManager({
       }
       return candidates[0];
     }
+    if (process.platform === 'darwin') {
+      const macCandidates = [
+        path.join(os.homedir(), 'Library', 'Preferences', 'qBittorrent', 'qBittorrent.ini'),
+        path.join(os.homedir(), 'Library', 'Preferences', 'qBittorrent', 'qBittorrent.conf'),
+        path.join(os.homedir(), '.config', 'qBittorrent', 'qBittorrent.conf'),
+      ];
+      for (const cand of macCandidates) {
+        if (fs.existsSync(cand)) return cand;
+      }
+      return macCandidates[0];
+    }
     const homeConf = path.join(os.homedir(), '.config', 'qBittorrent', 'qBittorrent.conf');
     return homeConf;
   }
@@ -423,7 +434,8 @@ function createQbitSetupManager({
       }
       return false;
     }
-    const res = await execFilePromise('pgrep', ['-x', 'qbittorrent'], { timeoutMs: 2500 });
+    const pgrepFlags = process.platform === 'darwin' ? ['-ix', 'qbittorrent'] : ['-x', 'qbittorrent'];
+    const res = await execFilePromise('pgrep', pgrepFlags, { timeoutMs: 2500 });
     return res.ok && Boolean(res.stdout);
   }
 
@@ -547,11 +559,19 @@ function createQbitSetupManager({
   }
 
   async function inspectUnixQbitInstall() {
-    const candidates = [
-      '/usr/bin/qbittorrent',
-      '/usr/local/bin/qbittorrent',
-      '/Applications/qbittorrent.app',
-    ];
+    const candidates =
+      process.platform === 'darwin'
+        ? [
+            '/Applications/qBittorrent.app',
+            path.join(os.homedir(), 'Applications', 'qBittorrent.app'),
+            '/Applications/qbittorrent.app',
+            '/opt/homebrew/bin/qbittorrent',
+            '/usr/local/bin/qbittorrent',
+          ]
+        : [
+            '/usr/bin/qbittorrent',
+            '/usr/local/bin/qbittorrent',
+          ];
     let executablePath = null;
     for (const cand of candidates) {
       if (fs.existsSync(cand)) {
@@ -560,7 +580,26 @@ function createQbitSetupManager({
       }
     }
     let installedVersion = null;
-    if (executablePath && process.platform === 'linux') {
+    if (executablePath && process.platform === 'darwin') {
+      if (executablePath.toLowerCase().endsWith('.app')) {
+        const plistPath = path.join(executablePath, 'Contents', 'Info.plist');
+        if (fs.existsSync(plistPath)) {
+          const plistOut = await execFilePromise(
+            'plutil',
+            ['-extract', 'CFBundleShortVersionString', 'raw', '-o', '-', plistPath],
+            { timeoutMs: 2500 }
+          );
+          if (plistOut.ok && plistOut.stdout) {
+            installedVersion = normalizeVersionString(plistOut.stdout) || null;
+          }
+        }
+      } else {
+        const out = await execFilePromise(executablePath, ['--version'], { timeoutMs: 2500 });
+        if (out.ok && out.stdout) {
+          installedVersion = normalizeVersionString(out.stdout) || null;
+        }
+      }
+    } else if (executablePath && process.platform === 'linux') {
       const out = await execFilePromise(executablePath, ['--version'], { timeoutMs: 2500 });
       if (out.ok && out.stdout) {
         installedVersion = normalizeVersionString(out.stdout) || null;
@@ -1322,7 +1361,11 @@ function createQbitSetupManager({
         ? base === 'qbittorrent.exe'
         : base === 'qbittorrent' || base === 'qbittorrent.app';
     if (exePath && path.isAbsolute(exePath) && allowedName && fs.existsSync(exePath)) {
-      const errMsg = await shell.openPath(exePath);
+      let errMsg = await shell.openPath(exePath);
+      if (errMsg && process.platform === 'darwin' && base.endsWith('.app')) {
+        const openRes = await execFilePromise('open', ['-a', exePath], { timeoutMs: 4000 });
+        if (openRes.ok) errMsg = '';
+      }
       if (!errMsg) {
         setTimeout(() => {
           void refreshLocalOnly();
@@ -1331,7 +1374,9 @@ function createQbitSetupManager({
       }
       return { ok: false, error: errMsg };
     }
-    return { ok: false, error: 'qBittorrent executable was not found on this PC.' };
+    const targetOsLabel =
+      process.platform === 'darwin' ? 'this Mac' : process.platform === 'linux' ? 'this Linux system' : 'this PC';
+    return { ok: false, error: `qBittorrent executable was not found on ${targetOsLabel}.` };
   }
 
   async function refreshLocalOnly() {

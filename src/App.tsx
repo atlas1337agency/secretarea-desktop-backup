@@ -108,6 +108,7 @@ const HypervisorGuideModal = lazy(() =>
 );
 import {
   createBackgroundUpdateScheduler,
+  getDesktopAppearanceBridge,
   getDesktopSettingsBridge,
   getDesktopUpdaterBridge,
   getDesktopWindowBridge,
@@ -142,21 +143,31 @@ import {
   compareAppVersions,
   DEFAULT_CUSTOM_THEME,
   DEFAULT_LAUNCHER_SETTINGS,
+  detectRuntimePlatform,
+  detectSystemPrefersDark,
   getActiveConsoleTheme,
   getAppVersionString,
   getEffectivePerformanceConfig,
   getLastSeenAppVersion,
   isLocalOnboardingCompleted,
   loadLauncherSettings,
+  normalizeAnimationMode,
+  normalizeAppearanceMode,
   normalizeCustomTheme,
+  normalizeOsThemePreference,
   normalizePerformanceAdvanced,
   normalizePerformanceMode,
+  resolveActiveOsTheme,
+  restoreDefaultThemeSettings,
   saveLauncherSettings,
   setLastSeenAppVersion,
   setLocalOnboardingCompleted,
+  type AnimationMode,
+  type AppearanceMode,
   type AppLanguage,
   type CustomThemeConfig,
   type LauncherSettings,
+  type OsThemePreference,
 } from './services/launcherSettings';
 import { getTranslations } from './i18n/translations';
 import {
@@ -209,7 +220,7 @@ interface ToastItem {
 function ViewLoadingSpinner() {
   return (
     <div className="flex-1 min-h-0 flex items-center justify-center p-8">
-      <div className="w-7 h-7 rounded-full border-2 border-[#0284c7] dark:border-[#38bdf8] border-t-transparent animate-spin" />
+      <div className="w-7 h-7 rounded-full border-2 border-[var(--sa-accent)] border-t-transparent animate-spin" />
     </div>
   );
 }
@@ -299,6 +310,10 @@ export default function App() {
   );
   const [isRefreshingSpecs, setIsRefreshingSpecs] = useState(false);
 
+  const runtimePlatform = useMemo(() => detectRuntimePlatform(), []);
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() =>
+    detectSystemPrefersDark(true)
+  );
   const [launcherSettings, setLauncherSettings] = useState<LauncherSettings>(() =>
     loadLauncherSettings()
   );
@@ -310,6 +325,7 @@ export default function App() {
   const updaterBridge = useMemo(() => getDesktopUpdaterBridge(), []);
   const windowBridge = useMemo(() => getDesktopWindowBridge(), []);
   const settingsBridge = useMemo(() => getDesktopSettingsBridge(), []);
+  const appearanceBridge = useMemo(() => getDesktopAppearanceBridge(), []);
   const downloadsBridge = useMemo(() => getDesktopDownloadsBridge(), []);
   const qbitSetupBridge = useMemo(() => getDesktopQbitSetupBridge(), []);
   const presentMonSetupBridge = useMemo(() => getDesktopPresentMonSetupBridge(), []);
@@ -366,6 +382,54 @@ export default function App() {
   useEffect(() => {
     saveLauncherSettings(launcherSettings);
   }, [launcherSettings]);
+
+  // Follow OS dark/light theme changes cleanly (matchMedia + Electron nativeTheme)
+  useEffect(() => {
+    let active = true;
+    const mql =
+      typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-color-scheme: dark)')
+        : null;
+
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      if (active) {
+        setSystemPrefersDark(Boolean(event.matches));
+      }
+    };
+
+    if (mql) {
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', handleMediaChange);
+      }
+    }
+
+    let unsubBridge: (() => void) | undefined;
+    if (appearanceBridge) {
+      void appearanceBridge
+        .getSystemAppearance()
+        .then((payload) => {
+          if (active && typeof payload?.shouldUseDarkColors === 'boolean') {
+            setSystemPrefersDark(payload.shouldUseDarkColors);
+          }
+        })
+        .catch(() => {
+          // Ignore non-fatal bridge error cleanly
+        });
+      unsubBridge = appearanceBridge.onSystemAppearanceChange((payload) => {
+        if (active && typeof payload?.shouldUseDarkColors === 'boolean') {
+          setSystemPrefersDark(payload.shouldUseDarkColors);
+        }
+      });
+    }
+
+    return () => {
+      active = false;
+      if (mql && typeof mql.removeEventListener === 'function') {
+        mql.removeEventListener('change', handleMediaChange);
+      }
+      unsubBridge?.();
+    };
+  }, [appearanceBridge]);
 
   // Sync persisted Electron desktop settings & first-install-only Welcome Setup
   useEffect(() => {
@@ -659,9 +723,14 @@ export default function App() {
     [launcherSettings]
   );
 
+  const activeOsTheme = useMemo(
+    () => resolveActiveOsTheme(launcherSettings, runtimePlatform),
+    [launcherSettings, runtimePlatform]
+  );
+
   useEffect(() => {
-    applyDocumentThemeSettings(launcherSettings);
-  }, [launcherSettings]);
+    applyDocumentThemeSettings(launcherSettings, systemPrefersDark, runtimePlatform);
+  }, [launcherSettings, systemPrefersDark, runtimePlatform]);
 
   const effectivePerformance = useMemo(
     () => getEffectivePerformanceConfig(launcherSettings),
@@ -746,7 +815,7 @@ export default function App() {
         interactive.getAttribute('aria-disabled') === 'true';
 
       if (isDisabled) {
-        playCursorClickSound('disabled');
+        playCursorClickSound('disabled', activeOsTheme);
         return;
       }
 
@@ -776,18 +845,17 @@ export default function App() {
           playPsClickSound();
         }
       } else {
-        playCursorClickSound(isBackAction ? 'back' : 'primary');
+        playCursorClickSound(isBackAction ? 'back' : 'primary', activeOsTheme);
       }
     };
 
     const handleCanvasPointerDown = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.button !== 0) return;
-      if (!launcherSettings.customCursorEnabled) return;
       const target = e.target as HTMLElement | null;
       if (!target) return;
       // Interactive controls & inputs trigger their dedicated click/focus sound on click
       if (target.closest(`${interactiveSelector}, input, textarea, label`)) return;
-      playCursorClickSound('soft');
+      playCursorClickSound('soft', activeOsTheme);
     };
 
     const handleGlobalHover = (e: MouseEvent) => {
@@ -801,8 +869,8 @@ export default function App() {
         playXboxHoverSound();
       } else if (activeTheme === 'ps5') {
         playPsHoverSound();
-      } else if (launcherSettings.customCursorEnabled) {
-        playCursorHoverSound();
+      } else {
+        playCursorHoverSound(activeOsTheme);
       }
     };
 
@@ -816,9 +884,9 @@ export default function App() {
     };
   }, [
     activeTheme,
+    activeOsTheme,
     soundEnabled,
     launcherSettings.uiClickSoundsEnabled,
-    launcherSettings.customCursorEnabled,
     hasSoundVolume,
   ]);
 
@@ -964,7 +1032,7 @@ export default function App() {
         }
       } catch {
         setLauncherSettings((prev) => ({ ...prev, startWithComputer: !enabled }));
-        notify('Could not update Windows startup tray setting.', 'error');
+        notify('Could not update startup tray setting.', 'error');
       } finally {
         setIsUpdatingAutoLaunch(false);
       }
@@ -1019,15 +1087,79 @@ export default function App() {
     setLauncherSettings((prev) => ({
       ...prev,
       lightMode: enabled,
+      appearanceMode: enabled ? 'light' : 'dark',
       alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
       alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
-      customTheme: { ...prev.customTheme, enabled: false },
+      customTheme: prev.customTheme.enabled
+        ? {
+            ...prev.customTheme,
+            surfaceStyle: enabled
+              ? 'daylight'
+              : prev.customTheme.surfaceStyle === 'daylight'
+              ? 'midnight'
+              : prev.customTheme.surfaceStyle,
+          }
+        : prev.customTheme,
     }));
     if (enabled) {
       stopPsAmbientSound();
       stopXboxAmbientSound();
     }
   }, []);
+
+  const handleChangeOsThemePreference = useCallback((preference: OsThemePreference) => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      osThemePreference: preference,
+      alwaysPs5Theme: false,
+      alwaysXboxTheme: false,
+    }));
+    stopPsAmbientSound();
+    stopXboxAmbientSound();
+  }, []);
+
+  const handleChangeAppearanceMode = useCallback(
+    (mode: AppearanceMode) => {
+      setLauncherSettings((prev) => {
+        const nextLight =
+          mode === 'light' ? true : mode === 'dark' ? false : !systemPrefersDark;
+        return {
+          ...prev,
+          appearanceMode: mode,
+          lightMode: nextLight,
+          alwaysPs5Theme: false,
+          alwaysXboxTheme: false,
+          customTheme: prev.customTheme.enabled
+            ? {
+                ...prev.customTheme,
+                surfaceStyle: nextLight
+                  ? 'daylight'
+                  : prev.customTheme.surfaceStyle === 'daylight'
+                  ? 'midnight'
+                  : prev.customTheme.surfaceStyle,
+              }
+            : prev.customTheme,
+        };
+      });
+      stopPsAmbientSound();
+      stopXboxAmbientSound();
+    },
+    [systemPrefersDark]
+  );
+
+  const handleChangeAnimationMode = useCallback((mode: AnimationMode) => {
+    setLauncherSettings((prev) => ({
+      ...prev,
+      animationMode: mode,
+    }));
+  }, []);
+
+  const handleRestoreDefaultThemes = useCallback(() => {
+    setLauncherSettings((prev) => restoreDefaultThemeSettings(prev, systemPrefersDark));
+    stopPsAmbientSound();
+    stopXboxAmbientSound();
+    notify(t.settings.themeRestoredToast, 'info');
+  }, [notify, systemPrefersDark, t.settings.themeRestoredToast]);
 
   const handleToggleAlwaysPs5Theme = useCallback(
     (enabled: boolean) => {
@@ -1036,7 +1168,6 @@ export default function App() {
         alwaysPs5Theme: enabled,
         alwaysXboxTheme: enabled ? false : prev.alwaysXboxTheme,
         lightMode: enabled ? false : prev.lightMode,
-        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
       if (
         enabled &&
@@ -1058,7 +1189,6 @@ export default function App() {
         alwaysXboxTheme: enabled,
         alwaysPs5Theme: enabled ? false : prev.alwaysPs5Theme,
         lightMode: enabled ? false : prev.lightMode,
-        customTheme: enabled ? { ...prev.customTheme, enabled: false } : prev.customTheme,
       }));
       if (
         enabled &&
@@ -1079,28 +1209,32 @@ export default function App() {
         ...prev.customTheme,
         ...patch,
       };
-      const activatingCustom = nextCustom.enabled;
+      const hasConsole = prev.alwaysPs5Theme || prev.alwaysXboxTheme;
       return {
         ...prev,
-        alwaysPs5Theme: activatingCustom ? false : prev.alwaysPs5Theme,
-        alwaysXboxTheme: activatingCustom ? false : prev.alwaysXboxTheme,
-        lightMode: activatingCustom ? nextCustom.surfaceStyle === 'daylight' : prev.lightMode,
+        lightMode:
+          nextCustom.enabled && !hasConsole
+            ? nextCustom.surfaceStyle === 'daylight'
+            : prev.lightMode,
         customTheme: nextCustom,
       };
     });
-    if (patch.enabled) {
-      stopPsAmbientSound();
-      stopXboxAmbientSound();
-    }
   }, []);
 
   const handleResetCustomTheme = useCallback(() => {
     setLauncherSettings((prev) => ({
       ...prev,
-      lightMode: false,
+      lightMode:
+        prev.alwaysPs5Theme || prev.alwaysXboxTheme
+          ? false
+          : prev.appearanceMode === 'light'
+          ? true
+          : prev.appearanceMode === 'dark'
+          ? false
+          : !systemPrefersDark,
       customTheme: { ...DEFAULT_CUSTOM_THEME, enabled: false },
     }));
-  }, []);
+  }, [systemPrefersDark]);
 
   const handleToggleAmbientMusic = useCallback((enabled: boolean) => {
     setLauncherSettings((prev) => ({ ...prev, ambientMusicEnabled: enabled }));
@@ -1129,9 +1263,9 @@ export default function App() {
     } else if (activeTheme === 'ps5') {
       playPsClickSound();
     } else {
-      playCursorClickSound('primary');
+      playCursorClickSound('primary', activeOsTheme);
     }
-  }, [activeTheme, launcherSettings.soundVolume]);
+  }, [activeOsTheme, activeTheme, launcherSettings.soundVolume]);
 
   const handleChangePerformanceMode = useCallback((mode: PerformanceMode) => {
     setLauncherSettings((prev) => ({
@@ -1154,8 +1288,12 @@ export default function App() {
   );
 
   const handleResetLauncherSettings = useCallback(async () => {
-    const defaults = {
+    const defaults: LauncherSettings = {
       ...DEFAULT_LAUNCHER_SETTINGS,
+      lightMode: !systemPrefersDark,
+      osThemePreference: 'auto',
+      appearanceMode: 'system',
+      animationMode: 'full',
       performanceAdvanced: { ...DEFAULT_LAUNCHER_SETTINGS.performanceAdvanced },
     };
     setLauncherSettings(defaults);
@@ -1171,7 +1309,7 @@ export default function App() {
       }
     }
     notify(getTranslations(defaults.language).settings.resetToast, 'info');
-  }, [notify, settingsBridge]);
+  }, [notify, settingsBridge, systemPrefersDark]);
 
   const handleImportLauncherSettings = useCallback(
     async (raw: Partial<LauncherSettings>) => {
@@ -1185,6 +1323,12 @@ export default function App() {
       const nextPerfMode = normalizePerformanceMode(raw.performanceMode);
       const nextPerfAdv = normalizePerformanceAdvanced(raw.performanceAdvanced, nextPerfMode);
       const nextCustomTheme = normalizeCustomTheme(raw.customTheme);
+      const nextOsPref = normalizeOsThemePreference(raw.osThemePreference);
+      const nextAppearanceMode = normalizeAppearanceMode(
+        raw.appearanceMode,
+        raw.lightMode ? 'light' : 'dark'
+      );
+      const nextAnimationMode = normalizeAnimationMode(raw.animationMode);
       const nextAlwaysXbox = Boolean(raw.alwaysXboxTheme);
       const nextAlwaysPs5 = nextAlwaysXbox ? false : Boolean(raw.alwaysPs5Theme);
       const nextLightMode =
@@ -1192,7 +1336,11 @@ export default function App() {
           ? false
           : nextCustomTheme.enabled
           ? nextCustomTheme.surfaceStyle === 'daylight'
-          : Boolean(raw.lightMode);
+          : nextAppearanceMode === 'light'
+          ? true
+          : nextAppearanceMode === 'dark'
+          ? false
+          : !systemPrefersDark;
       const nextSoundVol =
         typeof raw.soundVolume === 'number' && Number.isFinite(raw.soundVolume)
           ? Math.min(100, Math.max(0, Math.round(raw.soundVolume)))
@@ -1217,6 +1365,9 @@ export default function App() {
             ? raw.compactNavbar
             : launcherSettings.compactNavbar,
         lightMode: nextLightMode,
+        osThemePreference: nextOsPref,
+        appearanceMode: nextAppearanceMode,
+        animationMode: nextAnimationMode,
         alwaysPs5Theme: nextAlwaysPs5,
         alwaysXboxTheme: nextAlwaysXbox,
         ambientMusicEnabled:
@@ -1580,6 +1731,7 @@ export default function App() {
         setLauncherSettings((prev) => ({
           ...prev,
           lightMode: false,
+          appearanceMode: 'dark',
           alwaysPs5Theme: false,
           alwaysXboxTheme: false,
           customTheme: { ...prev.customTheme, enabled: false },
@@ -2228,8 +2380,8 @@ export default function App() {
 
   if (onboardingPhase === 'checking') {
     return (
-      <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[#f4f6f9] dark:bg-[#0e141b]">
-        <div className="w-9 h-9 rounded-full border-2 border-[#0284c7] dark:border-[#38bdf8] border-t-transparent animate-spin" />
+      <div className="sa-app-shell h-dvh w-full flex items-center justify-center bg-[var(--sa-bg-canvas)] text-[var(--sa-text-primary)]">
+        <div className="w-9 h-9 rounded-full border-2 border-[var(--sa-accent)] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -2237,12 +2389,13 @@ export default function App() {
   if (onboardingPhase === 'active') {
     return (
       <>
-        <Suspense fallback={<div className="sa-app-shell h-dvh w-full bg-[#f4f6f9] dark:bg-[#0e141b]" />}>
+        <Suspense fallback={<div className="sa-app-shell h-dvh w-full bg-[var(--sa-bg-canvas)]" />}>
           <FirstLaunchOnboarding
             isDesktopApp={isDesktopApp}
             desktopVersion={desktopUpdateState?.currentVersion || resolvedAppVersion}
             settings={launcherSettings}
             activeTheme={activeTheme}
+            activeOsTheme={activeOsTheme}
             setupState={qbitSetupState}
             torrentConfig={downloadSnapshot.torrentConfig}
             torrentConnected={downloadSnapshot.torrentConnected}
@@ -2262,6 +2415,16 @@ export default function App() {
         <CustomCursorOverlay
           enabled={launcherSettings.customCursorEnabled}
           activeTheme={activeTheme}
+          activeOsTheme={activeOsTheme}
+          customAccent={
+            launcherSettings.customTheme.enabled
+              ? {
+                  enabled: true,
+                  accentColor: launcherSettings.customTheme.accentColor,
+                  secondaryColor: launcherSettings.customTheme.secondaryColor,
+                }
+              : null
+          }
         />
       </>
     );
@@ -2275,9 +2438,11 @@ export default function App() {
       desktopUpdateState?.status === 'downloaded');
 
   return (
-    <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[#f4f6f9] text-slate-900 dark:bg-[#141921] dark:text-[#e5e9f0]">
+    <div className="sa-app-shell h-dvh w-full overflow-hidden flex flex-col bg-[var(--sa-bg-canvas)] text-[var(--sa-text-primary)]">
       <TopUtilityBar
         activeTheme={activeTheme}
+        activeOsTheme={activeOsTheme}
+        customThemeEnabled={launcherSettings.customTheme.enabled}
         activeSection={activeSection}
         onSelectSection={setActiveSection}
         activeDownloadsCount={activeDownloadsCount}
@@ -2301,6 +2466,8 @@ export default function App() {
         onSelectSection={setActiveSection}
         onOpenSpinWheel={handleOpenSpinWheel}
         activeTheme={activeTheme}
+        activeOsTheme={activeOsTheme}
+        customThemeEnabled={launcherSettings.customTheme.enabled}
         compactNavbar={launcherSettings.compactNavbar}
         language={launcherSettings.language}
         activeDownloadsCount={activeDownloadsCount}
@@ -2471,6 +2638,13 @@ export default function App() {
               onToggleLightMode={handleToggleLightMode}
               onToggleAlwaysPs5Theme={handleToggleAlwaysPs5Theme}
               onToggleAlwaysXboxTheme={handleToggleAlwaysXboxTheme}
+              activeOsTheme={activeOsTheme}
+              runtimePlatform={runtimePlatform}
+              systemPrefersDark={systemPrefersDark}
+              onChangeOsThemePreference={handleChangeOsThemePreference}
+              onChangeAppearanceMode={handleChangeAppearanceMode}
+              onChangeAnimationMode={handleChangeAnimationMode}
+              onRestoreDefaultThemes={handleRestoreDefaultThemes}
               onUpdateCustomTheme={handleUpdateCustomTheme}
               onResetCustomTheme={handleResetCustomTheme}
               onToggleAmbientMusic={handleToggleAmbientMusic}
@@ -2691,12 +2865,12 @@ export default function App() {
           className="fixed bottom-3.5 start-3.5 sm:bottom-4 sm:start-4 z-[85] pointer-events-none select-none"
         >
           {connectivityBadge === 'offline' ? (
-            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#7f1d1d]/95 border border-[#ef4444]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#fecaca] backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--sa-btn-radius)] bg-[#7f1d1d]/95 border border-[#ef4444]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#fecaca] backdrop-blur-md">
               <WifiSlash className="w-4 h-4 text-[#f87171] shrink-0" />
               <span>{t.topbar.offlineMode}</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#064e3b]/95 border border-[#10b981]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#a7f3d0] backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-[var(--sa-btn-radius)] bg-[#064e3b]/95 border border-[#10b981]/60 shadow-[0_10px_28px_rgba(0,0,0,0.45)] text-xs font-semibold text-[#a7f3d0] backdrop-blur-md">
               <WifiHigh className="w-4 h-4 text-[#34d399] shrink-0" />
               <span>{t.topbar.onlineMode}</span>
             </div>
@@ -2710,7 +2884,7 @@ export default function App() {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className="pointer-events-auto px-3.5 py-2.5 rounded bg-white dark:bg-[#1b222d] border border-slate-200 dark:border-white/[0.12] shadow-xl flex items-center gap-2.5 text-[12.5px] text-slate-900 dark:text-white"
+              className="pointer-events-auto px-3.5 py-2.5 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] shadow-xl flex items-center gap-2.5 text-[12.5px] text-[var(--sa-text-primary)]"
             >
               {toast.type === 'success' && (
                 <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-[#34d399] shrink-0" />
@@ -2719,7 +2893,7 @@ export default function App() {
                 <WarningCircle className="w-4 h-4 text-rose-600 dark:text-[#f87171] shrink-0" />
               )}
               {toast.type === 'info' && (
-                <Info className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <Info className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
               )}
               <span>{toast.message}</span>
             </div>
@@ -2729,6 +2903,16 @@ export default function App() {
       <CustomCursorOverlay
         enabled={launcherSettings.customCursorEnabled}
         activeTheme={activeTheme}
+        activeOsTheme={activeOsTheme}
+        customAccent={
+          launcherSettings.customTheme.enabled
+            ? {
+                enabled: true,
+                accentColor: launcherSettings.customTheme.accentColor,
+                secondaryColor: launcherSettings.customTheme.secondaryColor,
+              }
+            : null
+        }
       />
     </div>
   );

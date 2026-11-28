@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('secretAreaDesktop', {
   isDesktop: true,
   platform: process.platform,
+  arch: process.arch,
   updater: {
     getVersion: () => ipcRenderer.invoke('updater:get-version'),
     getState: () => ipcRenderer.invoke('updater:get-state'),
@@ -44,6 +45,21 @@ contextBridge.exposeInMainWorld('secretAreaDesktop', {
   },
   system: {
     getSpecs: (forceRefresh) => ipcRenderer.invoke('system:get-specs', Boolean(forceRefresh)),
+  },
+  appearance: {
+    getSystemAppearance: () => ipcRenderer.invoke('appearance:get-system'),
+    onSystemAppearanceChange: (callback) => {
+      if (typeof callback !== 'function') {
+        return () => {};
+      }
+      const listener = (_event, payload) => {
+        callback(payload);
+      };
+      ipcRenderer.on('appearance:system-changed', listener);
+      return () => {
+        ipcRenderer.removeListener('appearance:system-changed', listener);
+      };
+    },
   },
   settings: {
     getDesktopSettings: () => ipcRenderer.invoke('settings:get-desktop'),

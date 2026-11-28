@@ -83,12 +83,12 @@ export function PresentMonSetupModal({
       aria-labelledby="presentmon-setup-modal-title"
       className="fixed inset-0 z-[92] flex items-center justify-center p-3 sm:p-5 bg-slate-900/65 dark:bg-black/75 backdrop-blur-sm overflow-y-auto"
     >
-      <div className="sa-ps5-panel w-full max-w-xl my-auto rounded-2xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.1] shadow-2xl overflow-hidden">
+      <div className="sa-ps5-panel w-full max-w-xl my-auto rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.1] shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-white/[0.08]">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-sky-500/12 dark:bg-[#38bdf8]/15 border border-sky-500/25 dark:border-[#38bdf8]/30 flex items-center justify-center shrink-0">
-              <Gauge weight="duotone" className="w-6 h-6 text-[#0284c7] dark:text-[#38bdf8]" />
+            <div className="sa-icon-badge w-11 h-11 shrink-0">
+              <Gauge weight="duotone" className="w-6 h-6" />
             </div>
             <div className="min-w-0">
               <h2
@@ -142,7 +142,7 @@ export function PresentMonSetupModal({
               <div className="text-[11px] font-semibold text-slate-500 dark:text-[#8b9bb4]">
                 {t.latestVersionLabel}
               </div>
-              <div dir="ltr" className="mt-0.5 text-[13.5px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8] truncate">
+              <div dir="ltr" className="mt-0.5 text-[13.5px] font-bold font-mono-tabular text-[var(--sa-accent)] truncate">
                 {setupState.latestRelease?.version
                   ? `v${setupState.latestRelease.version}`
                   : setupState.stage === 'checking'
@@ -213,7 +213,7 @@ export function PresentMonSetupModal({
               <div className="flex items-center justify-between gap-2 text-[12.5px] font-semibold text-slate-900 dark:text-white">
                 <span className="inline-flex items-center gap-2">
                   {isBusy ? (
-                    <SpinnerGap className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] motion-safe:animate-spin shrink-0" />
+                    <SpinnerGap className="w-4 h-4 text-[var(--sa-accent)] motion-safe:animate-spin shrink-0" />
                   ) : setupState.stage === 'completed' ? (
                     <CheckCircle weight="fill" className="w-4 h-4 text-emerald-600 dark:text-[#34d399] shrink-0" />
                   ) : (
@@ -223,7 +223,7 @@ export function PresentMonSetupModal({
                 </span>
 
                 {isDownloading && setupState.downloadProgress && (
-                  <span dir="ltr" className="font-mono-tabular text-[12px] text-[#0284c7] dark:text-[#38bdf8]">
+                  <span dir="ltr" className="font-mono-tabular text-[12px] text-[var(--sa-accent)]">
                     {setupState.downloadProgress.percent.toFixed(1)}%
                   </span>
                 )}
@@ -233,7 +233,7 @@ export function PresentMonSetupModal({
                 <>
                   <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#0284c7] to-[#38bdf8] transition-[width] duration-150"
+                      className="h-full bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)] transition-[width] duration-150"
                       style={{ width: `${Math.min(100, Math.max(0, setupState.downloadProgress.percent))}%` }}
                     />
                   </div>
@@ -264,7 +264,7 @@ export function PresentMonSetupModal({
                     </span>
                   )}
                   {setupState.verification.signatureVerified && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/12 border border-sky-500/30 text-[11px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] text-[11px] font-semibold text-[var(--sa-accent)]">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>{t.sigVerifiedLabel}</span>
                     </span>
@@ -282,15 +282,15 @@ export function PresentMonSetupModal({
               </div>
               <ul className="space-y-1.5 text-[12px] text-slate-600 dark:text-[#9cb0c9]">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
                   <span>{t.benefit1}</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
                   <span>{t.benefit2}</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
                   <span>{t.benefit3}</span>
                 </li>
               </ul>
@@ -331,7 +331,7 @@ export function PresentMonSetupModal({
                       type="button"
                       disabled={isBusy}
                       onClick={() => void onCheckUpdates()}
-                      className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1e2633] dark:hover:bg-[#273142] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] disabled:opacity-45 transition-colors cursor-pointer"
+                      className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 text-[12px] font-semibold disabled:opacity-45 cursor-pointer"
                     >
                       <ArrowClockwise className={`w-4 h-4 ${isBusy ? 'motion-safe:animate-spin' : ''}`} />
                       <span>{t.checkUpdatesBtn}</span>
@@ -341,7 +341,7 @@ export function PresentMonSetupModal({
                         type="button"
                         disabled={isBusy}
                         onClick={() => void onStartInstallOrUpdate(true, 'reinstall')}
-                        className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1e2633] dark:hover:bg-[#273142] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] disabled:opacity-45 transition-colors cursor-pointer"
+                        className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 text-[12px] font-semibold disabled:opacity-45 cursor-pointer"
                       >
                         <Wrench className="w-3.5 h-3.5" />
                         <span>{t.reinstallBtn}</span>
@@ -357,7 +357,7 @@ export function PresentMonSetupModal({
                       onDismiss(isInstallNeeded || isRepairNeeded);
                       onClose();
                     }}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1e2633] dark:hover:bg-[#273142] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd5e1] transition-colors cursor-pointer"
+                    className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-2 text-[12.5px] font-semibold cursor-pointer"
                   >
                     <span>{isUpdateNeeded ? t.laterBtn : t.notNowBtn}</span>
                   </button>
@@ -368,7 +368,7 @@ export function PresentMonSetupModal({
                     type="button"
                     disabled={isBusy}
                     onClick={() => void onStartInstallOrUpdate(true, 'install')}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] px-4 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-bold disabled:opacity-45 transition-colors cursor-pointer"
+                    className="sa-btn-primary inline-flex items-center gap-1.5 min-h-[38px] px-4 py-2 text-[12.5px] font-bold disabled:opacity-45 cursor-pointer"
                   >
                     <DownloadSimple className="w-4 h-4" />
                     <span>{setupState.stage === 'error' ? t.retryBtn : t.allowInstallBtn}</span>
@@ -380,7 +380,7 @@ export function PresentMonSetupModal({
                     type="button"
                     disabled={isBusy}
                     onClick={() => void onStartInstallOrUpdate(true, 'update')}
-                    className="inline-flex items-center gap-1.5 min-h-[38px] px-4 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-bold disabled:opacity-45 transition-colors cursor-pointer"
+                    className="sa-btn-primary inline-flex items-center gap-1.5 min-h-[38px] px-4 py-2 text-[12.5px] font-bold disabled:opacity-45 cursor-pointer"
                   >
                     <DownloadSimple className="w-4 h-4" />
                     <span>{setupState.stage === 'error' ? t.retryBtn : t.updateNowBtn}</span>

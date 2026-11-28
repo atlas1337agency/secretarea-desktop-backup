@@ -524,7 +524,7 @@ export function GameDetailModal({
       role="dialog"
       aria-modal="true"
       aria-label={game.name}
-      className="sa-ps5-modal fixed inset-0 z-50 w-screen h-screen bg-[#f4f6f9] dark:bg-[#141921] flex flex-col overflow-hidden"
+      className="sa-ps5-modal fixed inset-0 z-50 w-screen h-screen bg-[var(--sa-bg-canvas)] text-[var(--sa-text-primary)] flex flex-col overflow-hidden"
     >
       {/* Lightweight GPU Congratulations Effect when opened from Spin Wheel */}
       {showWinCelebration && (
@@ -574,13 +574,13 @@ export function GameDetailModal({
       )}
 
       {/* Top Game Page Navigation Header */}
-      <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3 bg-white/95 dark:bg-[#10151e]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/[0.08] shrink-0">
+      <header className="sa-ps5-modal-header px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3 bg-[var(--sa-bg-surface-glass)] backdrop-blur-[var(--sa-panel-blur)] border-b border-[var(--sa-border-subtle)] shrink-0">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-white/[0.07] dark:hover:bg-white/[0.14] dark:border-white/[0.1] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
               <span>{t.back}</span>
@@ -603,7 +603,7 @@ export function GameDetailModal({
             type="button"
             onClick={onClose}
             aria-label={t.close}
-            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-white/[0.06] dark:hover:bg-white/[0.14] dark:border-white/[0.08] dark:text-[#aeb9c7] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="sa-btn-secondary w-9 h-9 flex items-center justify-center cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -613,7 +613,7 @@ export function GameDetailModal({
       {/* Scrollable Full-Screen Game Page */}
       <div
         ref={pageScrollRef}
-        className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#18202c] dark:via-[#131922] dark:to-[#0f131a]"
+        className="sa-ps5-modal-scroll flex-1 overflow-y-auto bg-[var(--sa-bg-canvas)]"
       >
         {/* Game Page Hero Header */}
         {(() => {
@@ -660,7 +660,7 @@ export function GameDetailModal({
                 aria-hidden="true"
                 animate={{ opacity: [0.18, 0.34, 0.18] }}
                 transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-24 end-1/4 w-[460px] h-[280px] rounded-full bg-[#1a9fff]/20 blur-[110px] pointer-events-none"
+                className="absolute -top-24 end-1/4 w-[460px] h-[280px] rounded-full bg-[var(--sa-accent)]/20 blur-[110px] pointer-events-none"
               />
 
               <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9 lg:py-11">
@@ -675,7 +675,7 @@ export function GameDetailModal({
                       whileHover={{ y: -5, scale: 1.015 }}
                       className="w-[195px] lg:w-[225px] xl:w-[248px] shrink-0"
                     >
-                      <div className="rounded-2xl overflow-hidden border border-white/[0.18] bg-[#0e141d]/85 backdrop-blur-xl shadow-[0_24px_60px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)]">
+                      <div className="rounded-[var(--sa-card-radius)] overflow-hidden border border-white/[0.18] bg-[#0e141d]/85 backdrop-blur-xl shadow-[0_24px_60px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)]">
                         <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#121822]">
                           <GameCover
                             src={game.coverImage}
@@ -695,7 +695,7 @@ export function GameDetailModal({
                               {isTools ? t.downloadSize : t.repackSize}
                             </span>
                             <div className="flex items-baseline gap-1.5 font-mono-tabular shrink-0">
-                              <span className="text-[13.5px] font-bold text-[#66c0f4]">
+                              <span className="text-[13.5px] font-bold text-[var(--sa-accent)]">
                                 {game.repackSize || '—'}
                               </span>
                               {game.originalSize && (
@@ -775,7 +775,7 @@ export function GameDetailModal({
 
                       <div className="min-w-0 flex-1 space-y-2">
                         {/* Unboxed Typographic Kicker */}
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.11em] text-[#38bdf8]">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.11em] text-[var(--sa-accent)]">
                           <span>{isTools ? t.tools : sectionMeta.label}</span>
                           {game.category &&
                             game.category.toLowerCase() !== sectionMeta.label.toLowerCase() && (
@@ -783,7 +783,7 @@ export function GameDetailModal({
                                 <span aria-hidden="true" className="text-white/35">
                                   ·
                                 </span>
-                                <span className="text-[#93c5fd]">{game.category}</span>
+                                <span className="text-[var(--sa-secondary)]">{game.category}</span>
                               </>
                             )}
                           {game.isNew && (
@@ -851,7 +851,7 @@ export function GameDetailModal({
                                       <button
                                         type="button"
                                         onClick={() => onSelectStudio(studio)}
-                                        className="inline-flex items-center gap-1 text-[#7dd3fc] hover:text-white underline decoration-[#38bdf8]/45 underline-offset-2 transition-colors cursor-pointer"
+                                        className="inline-flex items-center gap-1 text-[var(--sa-accent)] hover:text-white underline decoration-[var(--sa-accent)]/45 underline-offset-2 transition-colors cursor-pointer"
                                       >
                                         <Buildings weight="fill" className="w-3 h-3 shrink-0" />
                                         <span>{studio.name}</span>
@@ -947,10 +947,10 @@ export function GameDetailModal({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.35, delay: 0.06 }}
-                          className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                          className="p-3 sm:p-3.5 rounded-[var(--sa-card-inner-radius)] bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
                         >
                           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
-                            <Hash className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                            <Hash className="w-3 h-3 text-[var(--sa-accent)] shrink-0" />
                             <span className="truncate">{t.gameId}</span>
                           </div>
                           {steamGameId ? (
@@ -958,7 +958,7 @@ export function GameDetailModal({
                               type="button"
                               onClick={handleCopyGameId}
                               title={t.gameId}
-                              className="mt-1 inline-flex items-center gap-1.5 text-[13px] sm:text-[13.5px] font-bold font-mono-tabular text-[#66c0f4] hover:text-white transition-colors cursor-pointer max-w-full"
+                              className="mt-1 inline-flex items-center gap-1.5 text-[13px] sm:text-[13.5px] font-bold font-mono-tabular text-[var(--sa-accent)] hover:text-white transition-colors cursor-pointer max-w-full"
                             >
                               <span className="truncate">{steamGameId}</span>
                               {copiedGameId ? (
@@ -978,10 +978,10 @@ export function GameDetailModal({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.35, delay: 0.06 }}
-                          className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                          className="p-3 sm:p-3.5 rounded-[var(--sa-card-inner-radius)] bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
                         >
                           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
-                            <Tag className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                            <Tag className="w-3 h-3 text-[var(--sa-accent)] shrink-0" />
                             <span className="truncate">{t.version}</span>
                           </div>
                           <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-white truncate">
@@ -994,7 +994,7 @@ export function GameDetailModal({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.1 }}
-                        className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                        className="p-3 sm:p-3.5 rounded-[var(--sa-card-inner-radius)] bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
                       >
                         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
                           <HardDrive className="w-3 h-3 text-[#94a6bd] shrink-0" />
@@ -1009,15 +1009,15 @@ export function GameDetailModal({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.14 }}
-                        className="p-3 sm:p-3.5 rounded-xl bg-[#1a9fff]/[0.1] hover:bg-[#1a9fff]/[0.16] backdrop-blur-md border border-[#38bdf8]/25 hover:-translate-y-0.5 transition-all duration-200"
+                        className="p-3 sm:p-3.5 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-accent-soft)] backdrop-blur-md border border-[var(--sa-accent-ring)] hover:-translate-y-0.5 transition-all duration-200"
                       >
-                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#93c5fd] font-semibold">
-                          <DownloadSimple className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[var(--sa-secondary)] font-semibold">
+                          <DownloadSimple className="w-3 h-3 text-[var(--sa-accent)] shrink-0" />
                           <span className="truncate">
                             {isTools ? t.downloadSize : t.repackSize}
                           </span>
                         </div>
-                        <div className="mt-1 text-[13px] sm:text-[14px] font-bold text-[#66c0f4] font-mono-tabular truncate">
+                        <div className="mt-1 text-[13px] sm:text-[14px] font-bold text-[var(--sa-accent)] font-mono-tabular truncate">
                           {game.repackSize || '—'}
                         </div>
                       </motion.div>
@@ -1026,10 +1026,10 @@ export function GameDetailModal({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.18 }}
-                        className="p-3 sm:p-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+                        className="p-3 sm:p-3.5 rounded-[var(--sa-card-inner-radius)] bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
                       >
                         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-[#94a6bd] font-semibold">
-                          <CloudArrowDown className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                          <CloudArrowDown className="w-3 h-3 text-[var(--sa-accent)] shrink-0" />
                           <span className="truncate">{t.downloadChannels}</span>
                         </div>
                         <div className="mt-1 text-[13px] sm:text-[13.5px] font-bold text-white font-mono-tabular truncate">
@@ -1074,7 +1074,7 @@ export function GameDetailModal({
                             block: 'start',
                           })
                         }
-                        className="group relative overflow-hidden inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-xl bg-[#0284c7] hover:bg-[#0ea5e9] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13px] sm:text-[14px] font-semibold shadow-[0_12px_30px_rgba(26,159,255,0.35)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                        className="sa-btn-primary group relative overflow-hidden inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold whitespace-nowrap cursor-pointer"
                       >
                         <span
                           aria-hidden="true"
@@ -1088,9 +1088,9 @@ export function GameDetailModal({
                         <button
                           type="button"
                           onClick={handleWatchTrailer}
-                          className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl bg-white/[0.11] hover:bg-white/[0.2] backdrop-blur-md border border-white/[0.2] text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                          className="inline-flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-[var(--sa-btn-radius)] bg-white/[0.11] hover:bg-white/[0.2] backdrop-blur-md border border-white/[0.2] text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)]"
                         >
-                          <Play weight="fill" className="w-4 h-4 text-[#66c0f4] fill-current shrink-0" />
+                          <Play weight="fill" className="w-4 h-4 text-[var(--sa-accent)] fill-current shrink-0" />
                           <span>{t.watchTrailer}</span>
                         </button>
                       )}
@@ -1104,7 +1104,7 @@ export function GameDetailModal({
                               block: 'start',
                             })
                           }
-                          className="inline-flex items-center gap-2 px-4 py-3 sm:py-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] backdrop-blur-md border border-white/[0.14] text-[#dce8f5] hover:text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                          className="inline-flex items-center gap-2 px-4 py-3 sm:py-3.5 rounded-[var(--sa-btn-radius)] bg-white/[0.06] hover:bg-white/[0.14] backdrop-blur-md border border-white/[0.14] text-[#dce8f5] hover:text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                         >
                           <Cpu className="w-4 h-4 shrink-0" />
                           <span>{canRunEvaluation ? t.canRunItTitle : t.requirementsOnly}</span>
@@ -1126,10 +1126,10 @@ export function GameDetailModal({
               href="https://t.me/secretarea1337"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-[#24a1de]/40 hover:border-[#24a1de]/75 dark:bg-[#0d1824] dark:hover:bg-[#112131] dark:border-[#24a1de]/30 dark:hover:border-[#24a1de]/65 transition-colors"
+              className="group flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 rounded-[var(--sa-card-radius)] bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] hover:border-[var(--sa-accent)] transition-colors"
             >
               <div className="flex items-center gap-3.5 min-w-0">
-                <span className="w-10 h-10 rounded-full bg-[#24a1de] text-white flex items-center justify-center shrink-0 shadow-md">
+                <span className="w-10 h-10 rounded-full bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] flex items-center justify-center shrink-0 shadow-md">
                   <svg
                     viewBox="0 0 24 24"
                     fill="currentColor"
@@ -1143,12 +1143,12 @@ export function GameDetailModal({
                   <div className="text-[12px] font-medium text-slate-600 dark:text-[#8b9bb4] leading-tight">
                     Join our community
                   </div>
-                  <div className="mt-0.5 text-[14.5px] sm:text-[15.5px] font-bold text-[#0284c7] group-hover:text-[#0369a1] dark:text-[#24a1de] dark:group-hover:text-[#4cc2ff] transition-colors truncate">
+                  <div className="mt-0.5 text-[14.5px] sm:text-[15.5px] font-bold text-[var(--sa-accent)] transition-colors truncate">
                     Get it on Telegram
                   </div>
                 </div>
               </div>
-              <ArrowSquareOut className="w-5 h-5 text-[#0284c7] group-hover:text-[#0369a1] dark:text-[#24a1de] dark:group-hover:text-[#4cc2ff] shrink-0 transition-colors" />
+              <ArrowSquareOut className="w-5 h-5 text-[var(--sa-accent)] shrink-0 transition-colors" />
             </a>
           )}
 
@@ -1159,18 +1159,20 @@ export function GameDetailModal({
             transition={{ duration: 0.36, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4 sm:space-y-5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
           >
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <Package className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+            <div className="sa-section-header flex items-center gap-2.5 sm:gap-3">
+              <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4 text-[var(--sa-accent)]" />
+              </span>
               <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                 {t.releaseDetails}
               </h2>
-              <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+              <span className="sa-section-line flex-1" />
             </div>
 
             <dl className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-5">
               {isSteamTools ? (
                 <div className="flex items-start gap-3 min-w-0">
-                  <Hash className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                  <Hash className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                       {t.gameId}
@@ -1181,7 +1183,7 @@ export function GameDetailModal({
                           type="button"
                           onClick={handleCopyGameId}
                           title={t.gameId}
-                          className="inline-flex items-center gap-1.5 text-[#0284c7] hover:text-slate-950 dark:text-[#38bdf8] dark:hover:text-white transition-colors cursor-pointer"
+                          className="sa-link inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
                           <span className="truncate">{steamGameId}</span>
                           {copiedGameId ? (
@@ -1198,7 +1200,7 @@ export function GameDetailModal({
                 </div>
               ) : (
                 <div className="flex items-start gap-3 min-w-0">
-                  <Tag className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                  <Tag className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                       {t.version}
@@ -1223,12 +1225,12 @@ export function GameDetailModal({
               </div>
 
               <div className="flex items-start gap-3 min-w-0">
-                <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                <DownloadSimple className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                     {isTools ? t.downloadSize : t.repackSize}
                   </dt>
-                  <dd className="text-[13.5px] sm:text-[14px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#66c0f4]">
+                  <dd className="text-[13.5px] sm:text-[14px] font-bold font-mono-tabular text-[var(--sa-accent)]">
                     {game.repackSize || '—'}
                   </dd>
                 </div>
@@ -1241,7 +1243,7 @@ export function GameDetailModal({
                       className={`w-4 h-4 mt-0.5 shrink-0 ${
                         game.isFree
                           ? 'text-emerald-600 dark:text-[#34d399]'
-                          : 'text-[#0284c7] dark:text-[#38bdf8]'
+                          : 'text-[var(--sa-accent)]'
                       }`}
                     />
                     <div className="min-w-0 flex-1 space-y-0.5">
@@ -1285,7 +1287,7 @@ export function GameDetailModal({
                   </div>
 
                   <div className="flex items-start gap-3 min-w-0">
-                    <CalendarBlank className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <CalendarBlank className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                         {t.dateAdded}
@@ -1308,7 +1310,7 @@ export function GameDetailModal({
               ) : (
                 <>
                   <div className="flex items-start gap-3 min-w-0">
-                    <UserCheck className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <UserCheck className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                         {t.repacker}
@@ -1320,7 +1322,7 @@ export function GameDetailModal({
                   </div>
 
                   <div className="flex items-start gap-3 min-w-0">
-                    <Globe className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <Globe className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                         {t.languages}
@@ -1332,7 +1334,7 @@ export function GameDetailModal({
                   </div>
 
                   <div className="flex items-start gap-3 min-w-0">
-                    <GameController className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <GameController className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                         {t.genres}
@@ -1345,7 +1347,7 @@ export function GameDetailModal({
                 </>
               )}
               <div className="flex items-start gap-3 min-w-0">
-                <Buildings className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                <Buildings className="w-4 h-4 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1 space-y-0.5">
                   <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                     {t.developerStudio}
@@ -1359,7 +1361,7 @@ export function GameDetailModal({
                               key={studio.id}
                               type="button"
                               onClick={() => onSelectStudio(studio)}
-                              className="inline-flex items-center gap-1 text-[#0284c7] hover:text-slate-950 dark:text-[#38bdf8] dark:hover:text-white underline decoration-[#0284c7]/35 dark:decoration-[#38bdf8]/40 underline-offset-2 transition-colors cursor-pointer text-start"
+                              className="sa-link inline-flex items-center gap-1 underline underline-offset-2 transition-colors cursor-pointer text-start"
                             >
                               <span>{studio.name}</span>
                               <ArrowUpRight weight="bold" className="w-3.5 h-3.5 shrink-0 opacity-80" />
@@ -1389,8 +1391,10 @@ export function GameDetailModal({
             >
               {/* Unboxed Header Row */}
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <FilmStrip className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                <div className="sa-section-header flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                    <FilmStrip className="w-4 h-4 text-[var(--sa-accent)]" />
+                  </span>
                   <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                     {t.trailerGallery}
                   </h2>
@@ -1399,7 +1403,7 @@ export function GameDetailModal({
                       {activeSlideIndex + 1} / {mediaSlides.length}
                     </span>
                   )}
-                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08] hidden sm:block" />
+                  <span className="sa-section-line flex-1 hidden sm:block" />
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
@@ -1407,7 +1411,7 @@ export function GameDetailModal({
                     <button
                       type="button"
                       onClick={() => setActiveSlideIndex(trailerSlideIdx)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0284c7]/10 hover:bg-[#0284c7]/20 dark:bg-[#38bdf8]/12 dark:hover:bg-[#38bdf8]/22 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] transition-colors cursor-pointer whitespace-nowrap"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] text-[12px] font-semibold text-[var(--sa-accent)] hover:brightness-110 transition-all cursor-pointer whitespace-nowrap"
                     >
                       <Play weight="fill" className="w-3.5 h-3.5 fill-current shrink-0" />
                       <span>{t.switchToTrailer}</span>
@@ -1418,7 +1422,7 @@ export function GameDetailModal({
                       href={game.trailerUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0284c7]/10 hover:bg-[#0284c7]/20 dark:bg-[#38bdf8]/12 dark:hover:bg-[#38bdf8]/22 text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] text-[12px] font-semibold text-[var(--sa-accent)] hover:brightness-110 transition-all whitespace-nowrap"
                     >
                       <Play weight="fill" className="w-3.5 h-3.5 fill-current shrink-0" />
                       <span>{t.openTrailer}</span>
@@ -1435,7 +1439,7 @@ export function GameDetailModal({
                             (prev) => (prev - 1 + mediaSlides.length) % mediaSlides.length
                           )
                         }
-                        className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                        className="sa-btn-secondary p-1.5 cursor-pointer"
                       >
                         <CaretLeft weight="bold" className="w-4 h-4" />
                       </button>
@@ -1445,7 +1449,7 @@ export function GameDetailModal({
                         onClick={() =>
                           setActiveSlideIndex((prev) => (prev + 1) % mediaSlides.length)
                         }
-                        className="p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                        className="sa-btn-secondary p-1.5 cursor-pointer"
                       >
                         <CaretRight weight="bold" className="w-4 h-4" />
                       </button>
@@ -1465,7 +1469,7 @@ export function GameDetailModal({
                     dir="ltr"
                     className={`${
                       mediaSlides.length > 1 ? 'lg:col-span-9' : ''
-                    } relative aspect-video bg-[#080c12] rounded-2xl overflow-hidden border border-slate-300/80 dark:border-white/[0.1] shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)] group`}
+                    } relative aspect-video bg-[#080c12] rounded-[var(--sa-card-radius)] overflow-hidden border border-[var(--sa-border-subtle)] shadow-lg dark:shadow-[0_20px_50px_rgba(0,0,0,0.45)] group`}
                   >
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -1562,10 +1566,10 @@ export function GameDetailModal({
                             type="button"
                             onClick={() => setActiveSlideIndex(idx)}
                             aria-label={`View media ${idx + 1}`}
-                            className={`group relative snap-start w-32 sm:w-40 lg:w-full aspect-video rounded-xl overflow-hidden shrink-0 border transition-all duration-200 cursor-pointer bg-slate-200 dark:bg-[#0f141c] ${
+                            className={`group relative snap-start w-32 sm:w-40 lg:w-full aspect-video rounded-[var(--sa-card-inner-radius)] overflow-hidden shrink-0 border transition-all duration-200 cursor-pointer bg-slate-200 dark:bg-[#0f141c] ${
                               active
-                                ? 'border-[#0284c7] dark:border-[#38bdf8] ring-2 ring-[#0284c7]/35 dark:ring-[#38bdf8]/40 opacity-100 shadow-md'
-                                : 'border-slate-300/80 dark:border-white/[0.08] opacity-70 hover:opacity-100 hover:border-slate-400 dark:hover:border-white/[0.24]'
+                                ? 'border-[var(--sa-accent)] ring-2 ring-[var(--sa-accent-ring)] opacity-100 shadow-md'
+                                : 'border-[var(--sa-border-subtle)] opacity-70 hover:opacity-100 hover:border-slate-400 dark:hover:border-white/[0.24]'
                             }`}
                           >
                             {slide.kind === 'image' ? (
@@ -1586,7 +1590,7 @@ export function GameDetailModal({
                                     className="absolute inset-0 w-full h-full object-cover opacity-35 blur-[1px]"
                                   />
                                 )}
-                                <span className="relative z-10 w-8 h-8 rounded-full bg-[#0284c7]/90 dark:bg-[#1a9fff]/90 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+                                <span className="relative z-10 w-8 h-8 rounded-full bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                                   <Play weight="fill" className="w-3.5 h-3.5 fill-current translate-x-[0.5px]" />
                                 </span>
                                 <span className="relative z-10 text-[10px] font-semibold uppercase tracking-wider text-white/95 drop-shadow">
@@ -1598,7 +1602,7 @@ export function GameDetailModal({
                             <span
                               className={`absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-mono-tabular font-semibold leading-none backdrop-blur-sm ${
                                 active
-                                  ? 'bg-[#0284c7] text-white'
+                                  ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)]'
                                   : 'bg-black/60 text-white/85'
                               }`}
                             >
@@ -1628,12 +1632,14 @@ export function GameDetailModal({
                 transition={{ duration: 0.36, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-3.5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <FileText className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                <div className="sa-section-header flex items-center gap-2.5 sm:gap-3">
+                  <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-[var(--sa-accent)]" />
+                  </span>
                   <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                     {t.description}
                   </h2>
-                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                  <span className="sa-section-line flex-1" />
                 </div>
                 <p className="text-[14px] sm:text-[15px] leading-[1.7] text-slate-700 dark:text-[#d4dde7] whitespace-pre-line max-w-4xl">
                   {game.description || t.noDescription}
@@ -1648,12 +1654,14 @@ export function GameDetailModal({
                 transition={{ duration: 0.36, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-4 sm:space-y-5 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
               >
-                <div className="flex items-center gap-2.5 sm:gap-3">
-                  <SlidersHorizontal className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                <div className="sa-section-header flex items-center gap-2.5 sm:gap-3">
+                  <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                    <SlidersHorizontal className="w-4 h-4 text-[var(--sa-accent)]" />
+                  </span>
                   <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                     {canRunItEnabled ? t.requirementsAndCanRun : t.requirementsOnly}
                   </h2>
-                  <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                  <span className="sa-section-line flex-1" />
                 </div>
 
                 {canRunItEnabled && canRunEvaluation && systemSpecs && (
@@ -1677,7 +1685,7 @@ export function GameDetailModal({
                         transition={{ duration: 0.28, delay: 0.04 }}
                         className="flex items-start gap-3.5 min-w-0"
                       >
-                        <Monitor className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <Monitor className="w-5 h-5 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                         <div className="min-w-0 flex-1 space-y-1">
                           <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.osLabel}
@@ -1695,7 +1703,7 @@ export function GameDetailModal({
                         transition={{ duration: 0.28, delay: 0.08 }}
                         className="flex items-start gap-3.5 min-w-0"
                       >
-                        <Memory className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <Memory className="w-5 h-5 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                         <div className="min-w-0 flex-1 space-y-1">
                           <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.ramLabel}
@@ -1713,7 +1721,7 @@ export function GameDetailModal({
                         transition={{ duration: 0.28, delay: 0.12 }}
                         className="flex items-start gap-3.5 min-w-0"
                       >
-                        <Cpu className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <Cpu className="w-5 h-5 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                         <div className="min-w-0 flex-1 space-y-1">
                           <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.cpuLabel}
@@ -1731,7 +1739,7 @@ export function GameDetailModal({
                         transition={{ duration: 0.28, delay: 0.16 }}
                         className="flex items-start gap-3.5 min-w-0"
                       >
-                        <GraphicsCard className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                        <GraphicsCard className="w-5 h-5 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                         <div className="min-w-0 flex-1 space-y-1">
                           <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-500 dark:text-[#8b9bb4]">
                             {t.gpuLabel}
@@ -1745,7 +1753,7 @@ export function GameDetailModal({
                   </dl>
                 ) : (
                   <div className="flex items-start gap-3.5 text-[13.5px] sm:text-[14px] text-slate-700 dark:text-[#c6d4df] leading-relaxed">
-                    <HardDrive className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] mt-0.5 shrink-0" />
+                    <HardDrive className="w-5 h-5 text-[var(--sa-accent)] mt-0.5 shrink-0" />
                     <div className="min-w-0 flex-1 whitespace-pre-line">
                       {raw || t.noReqsListed}
                     </div>
@@ -1767,12 +1775,14 @@ export function GameDetailModal({
                       className="space-y-4 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                          <ListChecks className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                        <div className="sa-section-header flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                          <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                            <ListChecks className="w-4 h-4 text-[var(--sa-accent)]" />
+                          </span>
                           <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                             {t.steps}
                           </h2>
-                          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                          <span className="sa-section-line flex-1" />
                         </div>
                         <span className="text-[12px] font-mono-tabular font-medium text-slate-500 dark:text-[#8b9bb4] shrink-0">
                           {checkedSteps.size}/{game.parsedSteps.length} {t.completed}
@@ -1782,7 +1792,7 @@ export function GameDetailModal({
                       {/* Animated Progress Bar */}
                       <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-white/[0.08] overflow-hidden">
                         <motion.div
-                          className="h-full rounded-full bg-gradient-to-r from-[#0284c7] to-[#38bdf8]"
+                          className="h-full rounded-full bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)]"
                           initial={{ width: 0 }}
                           animate={{ width: `${completedRatio}%` }}
                           transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
@@ -1814,9 +1824,9 @@ export function GameDetailModal({
                                   toggleStepDone(i);
                                 }
                               }}
-                              className={`group relative py-2.5 px-3 -mx-2 rounded-xl transition-colors cursor-pointer flex items-start gap-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
+                              className={`group relative py-2.5 px-3 -mx-2 rounded-[var(--sa-card-inner-radius)] transition-colors cursor-pointer flex items-start gap-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)] ${
                                 isDone
-                                  ? 'bg-sky-500/[0.07] dark:bg-[#38bdf8]/[0.08]'
+                                  ? 'bg-[var(--sa-accent-soft)]'
                                   : 'hover:bg-slate-200/55 dark:hover:bg-white/[0.04]'
                               }`}
                             >
@@ -1832,8 +1842,8 @@ export function GameDetailModal({
                                 transition={{ duration: 0.25 }}
                                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold font-mono-tabular shrink-0 mt-0.5 transition-colors ${
                                   isDone
-                                    ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-sm'
-                                    : 'bg-slate-100 text-[#0284c7] border border-slate-300 group-hover:border-[#0284c7]/60 dark:bg-[#1f2937] dark:text-[#38bdf8] dark:border-white/[0.14] dark:group-hover:border-[#38bdf8]/60'
+                                    ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] shadow-sm'
+                                    : 'bg-[var(--sa-bg-subsurface)] text-[var(--sa-accent)] border border-[var(--sa-border-subtle)] group-hover:border-[var(--sa-accent)]'
                                 }`}
                               >
                                 {isDone ? <Check className="w-3.5 h-3.5" /> : i + 1}
@@ -1863,8 +1873,10 @@ export function GameDetailModal({
                       transition={{ duration: 0.36, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       className="space-y-4 pb-5 sm:pb-6 border-b border-slate-200/85 dark:border-white/[0.07]"
                     >
-                      <div className="flex items-center gap-2.5 sm:gap-3">
-                        <Wrench className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                      <div className="sa-section-header flex items-center gap-2.5 sm:gap-3">
+                        <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                          <Wrench className="w-4 h-4 text-[var(--sa-accent)]" />
+                        </span>
                         <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                           {t.tools}
                         </h2>
@@ -1873,7 +1885,7 @@ export function GameDetailModal({
                             {game.parsedTools.length}
                           </span>
                         )}
-                        <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                        <span className="sa-section-line flex-1" />
                       </div>
 
                       {game.parsedTools.length > 0 ? (
@@ -1889,7 +1901,7 @@ export function GameDetailModal({
                               initial={{ opacity: 0, y: 8 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.26, delay: Math.min(i * 0.04, 0.24) }}
-                              className="group flex items-center justify-between gap-3 py-2.5 px-3 -mx-1 rounded-xl hover:bg-slate-200/65 dark:hover:bg-white/[0.05] text-[#0284c7] hover:text-slate-950 dark:text-[#66c0f4] dark:hover:text-white transition-all duration-200"
+                              className="sa-link group flex items-center justify-between gap-3 py-2.5 px-3 -mx-1 rounded-[var(--sa-card-inner-radius)] hover:bg-[var(--sa-accent-soft)] transition-all duration-200"
                             >
                               <span className="flex items-center gap-2.5 min-w-0">
                                 <Wrench className="w-4 h-4 shrink-0 opacity-85 group-hover:rotate-[-12deg] transition-transform duration-200" />
@@ -1897,13 +1909,13 @@ export function GameDetailModal({
                                   {tool.name}
                                 </span>
                               </span>
-                              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                              <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--sa-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
                             </motion.a>
                           ))}
                         </div>
                       ) : (
                         <div className="flex items-start gap-3 text-[13.5px] sm:text-[14px] text-slate-700 dark:text-[#c6d4df] leading-relaxed">
-                          <Wrench className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 mt-0.5" />
+                          <Wrench className="w-4.5 h-4.5 text-[var(--sa-accent)] shrink-0 mt-0.5" />
                           <p className="whitespace-pre-line">{rawToolsFallback}</p>
                         </div>
                       )}
@@ -1917,8 +1929,8 @@ export function GameDetailModal({
             {hasSecondarySidebar && (
               <aside className="space-y-4">
                 {linkedCatalogItems.length > 0 && onJumpToItem && (
-                  <div className="p-4 rounded bg-white border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#12171f] dark:border-white/[0.06] space-y-2.5">
-                    <h2 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#0284c7] dark:text-[#66c0f4]">
+                  <div className="p-4 rounded-[var(--sa-card-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] shadow-sm dark:shadow-none space-y-2.5">
+                    <h2 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[var(--sa-accent)]">
                       {t.linkedEntries} ({linkedCatalogItems.length})
                     </h2>
                     <div className="space-y-1.5 max-h-60 overflow-y-auto">
@@ -1927,7 +1939,7 @@ export function GameDetailModal({
                           key={`${linked.tab}-${linked.id}`}
                           type="button"
                           onClick={() => onJumpToItem(linked)}
-                          className="w-full p-2 rounded bg-slate-50 hover:bg-slate-100 border border-slate-200 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.06] flex items-center gap-2.5 text-start transition-colors cursor-pointer"
+                          className="w-full p-2 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-bg-subsurface)] hover:border-[var(--sa-accent-ring)] border border-[var(--sa-border-subtle)] flex items-center gap-2.5 text-start transition-colors cursor-pointer"
                         >
                           <div className="w-7 h-9 rounded-[2px] overflow-hidden bg-slate-200 dark:bg-[#0b0e14] shrink-0">
                             <GameCover src={linked.coverImage} alt={linked.name} compact />
@@ -1936,7 +1948,7 @@ export function GameDetailModal({
                             <div className="text-[12px] font-semibold text-slate-900 dark:text-white truncate">
                               {linked.name}
                             </div>
-                            <div className="text-[10.5px] text-[#0284c7] dark:text-[#66c0f4] font-mono-tabular uppercase">
+                            <div className="text-[10.5px] text-[var(--sa-accent)] font-mono-tabular uppercase">
                               {linked.tab} {linked.repackSize ? `· ${linked.repackSize}` : ''}
                             </div>
                           </div>
@@ -1965,7 +1977,7 @@ export function GameDetailModal({
                 <button
                   type="button"
                   onClick={() => setIsHvGuideOpen(true)}
-                  className="inline-flex items-center gap-2 text-[13.5px] font-semibold text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-4 break-all text-start cursor-pointer"
+                  className="sa-link inline-flex items-center gap-2 text-[13.5px] font-semibold underline underline-offset-4 break-all text-start cursor-pointer"
                 >
                   <span>https://fitgirl-repacks.site/hypervisor-guide/</span>
                   <ArrowSquareOut className="w-3.5 h-3.5 shrink-0" />
@@ -2018,19 +2030,19 @@ export function GameDetailModal({
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.38, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="sa-ps5-panel relative rounded-2xl p-4 sm:p-6 lg:p-7 bg-white/95 dark:bg-[#0f1621]/95 border border-slate-200/90 dark:border-white/[0.1] shadow-[0_14px_42px_rgba(15,23,42,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] space-y-5 overflow-hidden"
+            className="sa-ps5-panel relative rounded-[var(--sa-card-radius)] p-4 sm:p-6 lg:p-7 bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] shadow-[0_14px_42px_rgba(15,23,42,0.06)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.45)] space-y-5 overflow-hidden"
           >
             {/* Subtle Top Accent Beam */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#0284c7] via-[#38bdf8] to-transparent dark:from-[#1a9fff] dark:via-[#38bdf8] dark:to-transparent"
+              className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[var(--sa-accent)] via-[var(--sa-secondary)] to-transparent"
             />
 
             {/* Box Header + Channel Metrics */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 border border-sky-200/90 dark:bg-[#1a9fff]/12 dark:border-[#1a9fff]/30 flex items-center justify-center shrink-0">
-                  <CloudArrowDown className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8]" />
+                <div className="sa-icon-badge w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center shrink-0">
+                  <CloudArrowDown className="w-5 h-5 text-[var(--sa-accent)]" />
                 </div>
                 <div className="min-w-0">
                   <h2 className="font-display text-[16px] sm:text-[18px] lg:text-[19px] font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
@@ -2081,10 +2093,10 @@ export function GameDetailModal({
                   role="tab"
                   aria-selected={activeChannelFilter === 'all'}
                   onClick={() => setActiveChannelFilter('all')}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)] ${
                     activeChannelFilter === 'all'
-                      ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-[0_6px_16px_rgba(2,132,199,0.28)]'
-                      : 'bg-slate-100 hover:bg-slate-200/85 text-slate-700 border border-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-[#b8c6d8] dark:border-white/[0.07]'
+                      ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] shadow-[0_6px_16px_var(--sa-accent-ring)]'
+                      : 'bg-[var(--sa-bg-subsurface)] text-slate-700 border border-[var(--sa-border-subtle)] dark:text-[#b8c6d8] hover:border-[var(--sa-accent-ring)]'
                   }`}
                 >
                   <Stack className="w-3.5 h-3.5 shrink-0" />
@@ -2092,7 +2104,7 @@ export function GameDetailModal({
                   <span
                     className={`font-mono-tabular text-[11px] ${
                       activeChannelFilter === 'all'
-                        ? 'text-white/85'
+                        ? 'opacity-85'
                         : 'text-slate-500 dark:text-[#7f91a8]'
                     }`}
                   >
@@ -2123,10 +2135,10 @@ export function GameDetailModal({
                       role="tab"
                       aria-selected={isActive}
                       onClick={() => setActiveChannelFilter(groupName)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)] ${
                         isActive
-                          ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-[0_6px_16px_rgba(2,132,199,0.28)]'
-                          : 'bg-slate-100 hover:bg-slate-200/85 text-slate-700 border border-slate-200/80 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] dark:text-[#b8c6d8] dark:border-white/[0.07]'
+                          ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] shadow-[0_6px_16px_var(--sa-accent-ring)]'
+                          : 'bg-[var(--sa-bg-subsurface)] text-slate-700 border border-[var(--sa-border-subtle)] dark:text-[#b8c6d8] hover:border-[var(--sa-accent-ring)]'
                       }`}
                     >
                       <TabIcon className="w-3.5 h-3.5 shrink-0" />
@@ -2134,7 +2146,7 @@ export function GameDetailModal({
                       <span
                         className={`font-mono-tabular text-[11px] ${
                           isActive
-                            ? 'text-white/85'
+                            ? 'opacity-85'
                             : 'text-slate-500 dark:text-[#7f91a8]'
                         }`}
                       >
@@ -2156,10 +2168,10 @@ export function GameDetailModal({
               const dlText = tr.downloads;
 
               return (
-                <div className="rounded-xl p-3.5 sm:p-4 bg-sky-50/75 dark:bg-[#111c2b] border border-sky-200 dark:border-[#1a9fff]/30 space-y-2.5">
+                <div className="rounded-[var(--sa-card-inner-radius)] p-3.5 sm:p-4 bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] space-y-2.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[12.5px] font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
+                      <DownloadSimple className="w-4 h-4 text-[var(--sa-accent)]" />
                       <span>{dlText.detailActiveTitle}</span>
                     </span>
                     {onOpenDownloadsTab && (
@@ -2169,7 +2181,7 @@ export function GameDetailModal({
                           onClose();
                           onOpenDownloadsTab();
                         }}
-                        className="text-[12px] font-semibold text-[#0284c7] dark:text-[#38bdf8] hover:underline cursor-pointer"
+                        className="sa-link text-[12px] font-semibold hover:underline cursor-pointer"
                       >
                         {dlText.detailManageBtn}
                       </button>
@@ -2189,7 +2201,7 @@ export function GameDetailModal({
                       return (
                         <div
                           key={task.id}
-                          className="p-2.5 sm:p-3 rounded-lg bg-white dark:bg-[#162130] border border-slate-200 dark:border-white/[0.08] space-y-2"
+                          className="p-2.5 sm:p-3 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] space-y-2"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2 text-[12px]">
                             <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[260px] sm:max-w-md">
@@ -2203,7 +2215,7 @@ export function GameDetailModal({
                                 </span>
                               )}
                               {task.status === 'downloading' && (
-                                <span dir="ltr" className="text-[#0284c7] dark:text-[#38bdf8] font-semibold">
+                                <span dir="ltr" className="text-[var(--sa-accent)] font-semibold">
                                   ↓ {formatDownloadSpeed(task.speedBytesPerSec)}
                                   {(task.source === 'qbittorrent' ||
                                     (task.uploadSpeedBytesPerSec || 0) > 0) && (
@@ -2227,7 +2239,7 @@ export function GameDetailModal({
                                   ? 'bg-amber-500'
                                   : task.status === 'failed'
                                   ? 'bg-rose-500'
-                                  : 'bg-[#0284c7] dark:bg-[#38bdf8]'
+                                  : 'bg-[var(--sa-accent)]'
                               }`}
                               style={{ width: `${pct}%` }}
                             />
@@ -2239,7 +2251,7 @@ export function GameDetailModal({
                                 <button
                                   type="button"
                                   onClick={() => onPauseDownload(task.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 text-[11.5px] font-semibold text-amber-800 dark:text-amber-300 cursor-pointer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--sa-btn-radius)] bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 text-[11.5px] font-semibold text-amber-800 dark:text-amber-300 cursor-pointer"
                                 >
                                   <Pause weight="fill" className="w-3 h-3" />
                                   <span>{dlText.actionPause}</span>
@@ -2249,7 +2261,7 @@ export function GameDetailModal({
                                 <button
                                   type="button"
                                   onClick={() => onResumeDownload(task.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] text-white text-[11.5px] font-semibold cursor-pointer"
+                                  className="sa-btn-primary inline-flex items-center gap-1 px-2.5 py-1 text-[11.5px] font-semibold cursor-pointer"
                                 >
                                   <Play weight="fill" className="w-3 h-3" />
                                   <span>{dlText.actionResume}</span>
@@ -2328,21 +2340,21 @@ export function GameDetailModal({
                           delay: Math.min(groupIndex * 0.04, 0.2),
                           ease: [0.16, 1, 0.3, 1],
                         }}
-                        className={`rounded-xl p-4 sm:p-5 border transition-colors space-y-3.5 ${
+                        className={`rounded-[var(--sa-card-radius)] p-4 sm:p-5 border transition-colors space-y-3.5 ${
                           shouldSpanFull ? 'lg:col-span-2' : ''
                         } ${
                           isFeaturedDirect
-                            ? 'bg-gradient-to-br from-sky-50/90 via-white to-sky-50/40 dark:from-[#132033] dark:via-[#111a28] dark:to-[#0f1724] border-sky-300/80 dark:border-[#1a9fff]/40'
-                            : 'bg-slate-50/90 hover:bg-white dark:bg-[#141c28]/90 dark:hover:bg-[#172130] border-slate-200/90 hover:border-slate-300 dark:border-white/[0.08] dark:hover:border-white/[0.15]'
+                            ? 'bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)]'
+                            : 'bg-[var(--sa-bg-subsurface)] border-[var(--sa-border-subtle)] hover:border-[var(--sa-accent-ring)]'
                         }`}
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2.5">
                           <div className="flex flex-wrap items-center gap-2.5 min-w-0">
                             <span
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                              className={`w-8 h-8 rounded-[var(--sa-card-inner-radius)] flex items-center justify-center shrink-0 ${
                                 isFeaturedDirect
-                                  ? 'bg-[#0284c7]/12 text-[#0284c7] border border-[#0284c7]/25 dark:bg-[#1a9fff]/20 dark:text-[#38bdf8] dark:border-[#38bdf8]/30'
-                                  : 'bg-slate-200/75 text-slate-700 border border-slate-300/70 dark:bg-white/[0.07] dark:text-[#9cb0c9] dark:border-white/[0.1]'
+                                  ? 'bg-[var(--sa-accent-soft)] text-[var(--sa-accent)] border border-[var(--sa-accent-ring)]'
+                                  : 'bg-[var(--sa-bg-surface-solid)] text-slate-700 border border-[var(--sa-border-subtle)] dark:text-[#9cb0c9]'
                               }`}
                             >
                               <ChannelIcon className="w-4 h-4" />
@@ -2353,7 +2365,7 @@ export function GameDetailModal({
                                 {groupName}
                               </span>
                               {isFeaturedDirect && (
-                                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-[0.07em] text-[#0284c7] dark:text-[#38bdf8]">
+                                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold uppercase tracking-[0.07em] text-[var(--sa-accent)]">
                                   <Sparkle className="w-3 h-3" />
                                   <span>{t.recommendedTag}</span>
                                 </span>
@@ -2381,13 +2393,13 @@ export function GameDetailModal({
                               return (
                                 <div
                                   key={mirrorKey}
-                                  className="w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden shadow-[0_8px_22px_rgba(2,132,199,0.24)] hover:shadow-[0_12px_28px_rgba(26,159,255,0.36)] hover:-translate-y-0.5 transition-all duration-200"
+                                  className="w-full sm:w-auto inline-flex items-stretch rounded-[var(--sa-btn-radius)] overflow-hidden shadow-[0_8px_22px_var(--sa-accent-ring)] hover:-translate-y-0.5 transition-all duration-200"
                                 >
                                   {isDesktopApp && onStartDownload ? (
                                     <button
                                       type="button"
                                       onClick={() => onStartDownload(mirror, game)}
-                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors cursor-pointer"
+                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-[var(--sa-accent)] hover:bg-[var(--sa-accent-hover)] text-[var(--sa-accent-fg)] text-[13px] font-semibold transition-colors cursor-pointer"
                                     >
                                       <span
                                         aria-hidden="true"
@@ -2401,7 +2413,7 @@ export function GameDetailModal({
                                     <a
                                       href={/^magnet:\?/i.test(mirror.url) ? mirror.url : /^https?:\/\//i.test(mirror.url) ? mirror.url : '#'}
                                       onClick={() => onStartDownload?.(mirror, game)}
-                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] hover:from-[#0369a1] hover:to-[#0284c7] dark:from-[#1a9fff] dark:to-[#0284c7] dark:hover:from-[#38adff] dark:hover:to-[#1a9fff] text-white text-[13px] font-semibold transition-colors"
+                                      className="group relative overflow-hidden flex-1 sm:flex-initial inline-flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 bg-[var(--sa-accent)] hover:bg-[var(--sa-accent-hover)] text-[var(--sa-accent-fg)] text-[13px] font-semibold transition-colors"
                                     >
                                       <span
                                         aria-hidden="true"
@@ -2418,7 +2430,7 @@ export function GameDetailModal({
                                     onClick={() => handleCopyMirrorUrl(mirrorKey, mirror.url)}
                                     aria-label={`Copy ${mirror.label}`}
                                     title={isCopied ? 'Copied' : 'Copy Magnet Link'}
-                                    className="px-3 bg-[#0369a1] hover:bg-[#075985] dark:bg-[#0e6eb8] dark:hover:bg-[#1482d6] text-white border-s border-white/20 flex items-center justify-center transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
+                                    className="px-3 bg-[var(--sa-accent-hover)] hover:brightness-110 text-[var(--sa-accent-fg)] border-s border-white/20 flex items-center justify-center transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white"
                                   >
                                     {isCopied ? (
                                       <Check className="w-4 h-4 text-emerald-300" />
@@ -2433,20 +2445,20 @@ export function GameDetailModal({
                             return (
                               <div
                                 key={mirrorKey}
-                                className="group w-full sm:w-auto inline-flex items-stretch rounded-xl overflow-hidden bg-white hover:bg-sky-50/75 border border-slate-200 hover:border-[#0284c7]/55 dark:bg-[#192331] dark:hover:bg-[#1e2b3d] dark:border-white/[0.09] dark:hover:border-[#38bdf8]/55 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                                className="group w-full sm:w-auto inline-flex items-stretch rounded-[var(--sa-btn-radius)] overflow-hidden bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] hover:border-[var(--sa-accent)] shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                               >
                                 {isDesktopApp && onStartDownload ? (
                                   <button
                                     type="button"
                                     onClick={() => onStartDownload(mirror, game)}
                                     title={tr.downloads.detailStartInApp}
-                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors cursor-pointer text-start"
+                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[var(--sa-accent)] dark:text-[#e5e9f0] transition-colors cursor-pointer text-start"
                                   >
                                     <span className="flex items-center gap-2 min-w-0">
-                                      <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
+                                      <DownloadSimple className="w-3.5 h-3.5 text-[var(--sa-accent)] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
                                       <span className="truncate">{mirror.label}</span>
                                     </span>
-                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[var(--sa-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
                                   </button>
                                 ) : (
                                   <a
@@ -2454,13 +2466,13 @@ export function GameDetailModal({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={() => onStartDownload?.(mirror, game)}
-                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[#0369a1] dark:text-[#e5e9f0] dark:group-hover:text-white transition-colors"
+                                    className="flex-1 min-w-0 inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 text-[12.5px] sm:text-[13px] font-semibold text-slate-800 group-hover:text-[var(--sa-accent)] dark:text-[#e5e9f0] transition-colors"
                                   >
                                     <span className="flex items-center gap-2 min-w-0">
-                                      <DownloadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
+                                      <DownloadSimple className="w-3.5 h-3.5 text-[var(--sa-accent)] shrink-0 group-hover:translate-y-0.5 transition-transform duration-200" />
                                       <span className="truncate">{mirror.label}</span>
                                     </span>
-                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0284c7] dark:text-[#7f91a8] dark:group-hover:text-[#38bdf8] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+                                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[var(--sa-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
                                   </a>
                                 )}
 
@@ -2471,7 +2483,7 @@ export function GameDetailModal({
                                     rel="noopener noreferrer"
                                     title={tr.downloads.detailOpenExternal}
                                     aria-label={`${tr.downloads.detailOpenExternal}: ${mirror.label}`}
-                                    className="px-2.5 border-s border-slate-200/85 dark:border-white/[0.08] flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-sky-100/70 dark:text-[#7f91a8] dark:hover:text-[#38bdf8] dark:hover:bg-white/[0.06] transition-colors shrink-0"
+                                    className="px-2.5 border-s border-[var(--sa-border-subtle)] flex items-center justify-center text-slate-400 hover:text-[var(--sa-accent)] hover:bg-[var(--sa-accent-soft)] transition-colors shrink-0"
                                   >
                                     <ArrowSquareOut className="w-3.5 h-3.5" />
                                   </a>
@@ -2482,7 +2494,7 @@ export function GameDetailModal({
                                   onClick={() => handleCopyMirrorUrl(mirrorKey, mirror.url)}
                                   aria-label={`Copy ${mirror.label}`}
                                   title={isCopied ? 'Copied' : 'Copy Link'}
-                                  className="px-2.5 border-s border-slate-200/85 dark:border-white/[0.08] flex items-center justify-center text-slate-400 hover:text-[#0284c7] hover:bg-sky-100/70 dark:text-[#7f91a8] dark:hover:text-[#38bdf8] dark:hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0284c7]"
+                                  className="px-2.5 border-s border-[var(--sa-border-subtle)] flex items-center justify-center text-slate-400 hover:text-[var(--sa-accent)] hover:bg-[var(--sa-accent-soft)] transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--sa-accent)]"
                                 >
                                   {isCopied ? (
                                     <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
@@ -2530,7 +2542,7 @@ export function GameDetailModal({
                     type="button"
                     aria-label="Slide recommended games left"
                     onClick={() => scrollRecommended(-1)}
-                    className="p-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] dark:hover:text-white transition-colors cursor-pointer"
+                    className="sa-btn-secondary p-2 cursor-pointer"
                   >
                     <CaretLeft weight="bold" className="w-4 h-4" />
                   </button>
@@ -2538,7 +2550,7 @@ export function GameDetailModal({
                     type="button"
                     aria-label="Slide recommended games right"
                     onClick={() => scrollRecommended(1)}
-                    className="p-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] dark:hover:text-white transition-colors cursor-pointer"
+                    className="sa-btn-secondary p-2 cursor-pointer"
                   >
                     <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
@@ -2575,7 +2587,7 @@ export function GameDetailModal({
                           onJumpToItem?.(rec);
                         }
                       }}
-                      className="group w-[138px] sm:w-[168px] md:w-[184px] lg:w-[196px] 2xl:w-[210px] shrink-0 snap-start bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                      className="sa-game-card group w-[138px] sm:w-[168px] md:w-[184px] lg:w-[196px] 2xl:w-[210px] shrink-0 snap-start bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] hover:border-[var(--sa-accent)] rounded-[var(--sa-card-radius)] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)]"
                     >
                       <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                         <GameCover
@@ -2585,7 +2597,7 @@ export function GameDetailModal({
                         />
 
                         {rec.isNew && (
-                          <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
+                          <div className="absolute inset-x-0 top-0 bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
                             NEW
                           </div>
                         )}
@@ -2603,7 +2615,7 @@ export function GameDetailModal({
                       </div>
 
                       <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
-                        <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
+                        <h3 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[var(--sa-accent)] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
                           {rec.name}
                         </h3>
                         <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4] truncate">{metaLine}</div>

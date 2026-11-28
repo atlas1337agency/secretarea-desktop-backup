@@ -1635,8 +1635,16 @@ function createDownloadManager({ getMainWindow, readSettings, writeSettings }) {
         }
       }
     } else {
-      // Non-Windows fallback check for common Linux/macOS binary locations
-      const unixCandidates = ['/usr/bin/qbittorrent', '/usr/local/bin/qbittorrent', '/Applications/qbittorrent.app'];
+      // Non-Windows fallback check for common Linux/macOS binary and .app bundle locations
+      const unixCandidates =
+        process.platform === 'darwin'
+          ? [
+              '/Applications/qBittorrent.app',
+              path.join(os.homedir(), 'Applications', 'qBittorrent.app'),
+              '/opt/homebrew/bin/qbittorrent',
+              '/usr/local/bin/qbittorrent',
+            ]
+          : ['/usr/bin/qbittorrent', '/usr/local/bin/qbittorrent'];
       for (const cand of unixCandidates) {
         if (fs.existsSync(cand)) {
           installed = true;

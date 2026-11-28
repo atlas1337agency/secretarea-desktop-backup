@@ -139,8 +139,10 @@ export function LivePlayersView({
       <div className={`sa-ps5-panel rounded-2xl border p-4 sm:p-5 space-y-4 ${panelClass}`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-sky-500 shrink-0" />
+            <div className="flex items-center gap-2.5">
+              <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
+                <Users weight="bold" className="w-4 h-4" />
+              </span>
               <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">
                 {labels.livePlayersTitle}
               </h2>
@@ -150,14 +152,14 @@ export function LivePlayersView({
             </p>
           </div>
 
-          <div className="relative w-full lg:w-72">
+          <div className="sa-search-bar relative w-full lg:w-72">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={labels.liveSearchPlaceholder}
-              className="w-full min-h-[38px] ps-9 pe-3 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-slate-50 dark:bg-[#10161e] text-[12.5px] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+              className="sa-search-input w-full min-h-[38px] ps-9 pe-3 border bg-slate-50 dark:bg-[#10161e] text-[12.5px] text-slate-900 dark:text-white"
             />
           </div>
         </div>
@@ -187,13 +189,9 @@ export function LivePlayersView({
                 type="button"
                 aria-pressed={active}
                 onClick={() => setSubTab(tab.id)}
-                className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
+                className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--sa-btn-radius)] text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
                   active
-                    ? isXbox
-                      ? 'bg-[#107C10] text-white shadow-xs'
-                      : isPs5
-                      ? 'bg-[#0070d1] text-white shadow-xs'
-                      : 'bg-white dark:bg-[#1b2533] text-slate-900 dark:text-white shadow-xs ring-1 ring-slate-200/80 dark:ring-white/[0.1]'
+                    ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] shadow-xs'
                     : 'text-slate-600 dark:text-[#8fa3bd] hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/[0.05]'
                 }`}
               >
@@ -216,7 +214,7 @@ export function LivePlayersView({
         <div className="space-y-4">
           {/* Health Methodology Info Callout */}
           <div className={`sa-ps5-panel rounded-2xl border p-4 flex items-start gap-3 ${panelClass}`}>
-            <Info className="w-5 h-5 text-sky-500 shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-[var(--sa-accent)] shrink-0 mt-0.5" />
             <div className="space-y-1 text-[12px]">
               <div className="font-bold text-slate-900 dark:text-white">
                 {labels.healthLegendTitle}
@@ -231,7 +229,7 @@ export function LivePlayersView({
                 <button
                   type="button"
                   onClick={() => onOpenExternal('https://thegamecensus.com/data')}
-                  className="text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  className="sa-link inline-flex items-center gap-1 cursor-pointer"
                 >
                   <span>The Game Census (CC BY 4.0)</span>
                   <ArrowSquareOut className="w-3 h-3" />
@@ -453,9 +451,9 @@ export function LivePlayersView({
                             type="button"
                             onClick={() => onToggleCompareLive(entry)}
                             title={isCompared ? labels.compareAddedBadge : labels.compareAddBtn}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            className={`p-1.5 rounded-[var(--sa-btn-radius)] border transition-colors cursor-pointer ${
                               isCompared
-                                ? 'bg-sky-500 text-white border-sky-500'
+                                ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] border-[var(--sa-secondary)]'
                                 : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-[#cbd6e4]'
                             }`}
                           >
@@ -465,7 +463,7 @@ export function LivePlayersView({
                             type="button"
                             onClick={() => onToggleAlertLive(entry)}
                             title={isFollowed ? labels.alertsFollowingBadge : labels.alertsFollowBtn}
-                            className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                            className={`p-1.5 rounded-[var(--sa-btn-radius)] border transition-colors cursor-pointer ${
                               isFollowed
                                 ? 'bg-amber-500 text-white border-amber-500'
                                 : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-[#cbd6e4]'
@@ -492,7 +490,7 @@ export function LivePlayersView({
               <button
                 type="button"
                 onClick={() => onOpenExternal('https://steamdata.dev/')}
-                className="underline hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="sa-link font-medium cursor-pointer"
               >
                 SteamData
               </button>
@@ -500,7 +498,7 @@ export function LivePlayersView({
               <button
                 type="button"
                 onClick={() => onOpenExternal('https://store.steampowered.com/charts/mostplayed')}
-                className="underline hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="sa-link font-medium cursor-pointer"
               >
                 Steam Charts
               </button>
@@ -508,7 +506,7 @@ export function LivePlayersView({
               <button
                 type="button"
                 onClick={() => onOpenExternal('https://thegamecensus.com/data')}
-                className="underline hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                className="sa-link font-medium cursor-pointer"
               >
                 The Game Census (CC BY 4.0)
               </button>

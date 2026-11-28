@@ -217,11 +217,11 @@ export function QbitSetupWizardModal({
       aria-labelledby="qbit-setup-modal-title"
       className="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-5 bg-slate-900/65 dark:bg-black/75 backdrop-blur-sm overflow-y-auto"
     >
-      <div className="sa-ps5-panel w-full max-w-2xl my-auto rounded-2xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.1] shadow-2xl overflow-hidden">
+      <div className="sa-ps5-panel w-full max-w-2xl my-auto rounded-[var(--sa-card-radius)] bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.1] shadow-2xl overflow-hidden">
         {/* Modal Header */}
         <div className="flex items-start justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-white/[0.08]">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center shrink-0 overflow-hidden p-1.5">
+            <div className="sa-icon-badge w-11 h-11 shrink-0 overflow-hidden p-1.5">
               {!logoFailed ? (
                 <img
                   src={QBIT_OFFICIAL_LOGO_URL}
@@ -231,7 +231,7 @@ export function QbitSetupWizardModal({
                   className="w-full h-full object-contain"
                 />
               ) : (
-                <Magnet weight="duotone" className="w-6 h-6 text-[#0284c7] dark:text-[#66c0f4]" />
+                <Magnet weight="duotone" className="w-6 h-6 text-[var(--sa-accent)]" />
               )}
             </div>
             <div className="min-w-0">
@@ -261,7 +261,7 @@ export function QbitSetupWizardModal({
         {/* Modal Body */}
         <div className="p-4 sm:p-6 space-y-4 max-h-[78vh] overflow-y-auto">
           {!isDesktopApp && (
-            <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-[#121e2e] border border-sky-200 dark:border-[#1a9fff]/30 text-[12px] text-sky-900 dark:text-[#b7d6f2]">
+            <div className="p-3.5 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] text-[12px] text-[var(--sa-text-primary)]">
               {t.webPreviewNotice}
             </div>
           )}
@@ -285,7 +285,7 @@ export function QbitSetupWizardModal({
               <dt className="text-[11px] font-medium text-slate-500 dark:text-[#7f91a8]">
                 {t.latestLabel}
               </dt>
-              <dd className="mt-0.5 text-[13px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8] truncate">
+              <dd className="mt-0.5 text-[13px] font-bold font-mono-tabular text-[var(--sa-accent)] truncate">
                 {setupState.latestRelease?.version
                   ? `v${setupState.latestRelease.version}`
                   : '—'}
@@ -358,7 +358,7 @@ export function QbitSetupWizardModal({
                       isDone
                         ? 'text-emerald-700 dark:text-[#4ade80] font-semibold'
                         : isCurrent
-                        ? 'text-[#0284c7] dark:text-[#38bdf8] font-semibold'
+                        ? 'text-[var(--sa-accent)] font-semibold'
                         : 'text-slate-500 dark:text-[#7f91a8]'
                     }`}
                   >
@@ -382,7 +382,7 @@ export function QbitSetupWizardModal({
               <div className="pt-2 space-y-1.5 border-t border-slate-200 dark:border-white/[0.07]">
                 <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-[#0b0f14] overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#0284c7] to-[#38bdf8] transition-all duration-200"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)] transition-all duration-200"
                     style={{ width: `${Math.min(100, Math.max(0, setupState.downloadProgress.percent))}%` }}
                   />
                 </div>
@@ -447,7 +447,7 @@ export function QbitSetupWizardModal({
                   type="button"
                   disabled={isBusy}
                   onClick={() => onStartInstall(true)}
-                  className="inline-flex items-center gap-2 min-h-[42px] px-4 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-55 text-white text-[13px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-primary inline-flex items-center gap-2 min-h-[42px] px-4 py-2 disabled:opacity-55 text-[13px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <DownloadSimple weight="bold" className="w-4 h-4 shrink-0" />
                   <span>
@@ -459,7 +459,7 @@ export function QbitSetupWizardModal({
                   type="button"
                   disabled={isBusy}
                   onClick={handleSkipOrClose}
-                  className="inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-700 dark:text-[#cbd6e4] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[42px] px-4 py-2 text-[12.5px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span>{t.skipBtn}</span>
                 </button>
@@ -469,7 +469,7 @@ export function QbitSetupWizardModal({
 
           {/* Web UI Post-Install Configuration & Verification Section */}
           {isDesktopApp && showWebUiPanel && (
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#11161d] border border-slate-200 dark:border-white/[0.08] space-y-3">
+            <div className="p-4 rounded-[var(--sa-card-inner-radius)] bg-slate-50 dark:bg-[#11161d] border border-slate-200 dark:border-white/[0.08] space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-[13.5px] font-bold text-slate-900 dark:text-white">
                   {t.webUiSectionTitle}
@@ -477,7 +477,7 @@ export function QbitSetupWizardModal({
                 <button
                   type="button"
                   onClick={onLaunchClient}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1b232f] dark:hover:bg-[#242f3f] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <Play weight="fill" className="w-3.5 h-3.5 text-emerald-600 dark:text-[#4ade80]" />
                   <span>{t.launchQbitBtn}</span>
@@ -527,7 +527,7 @@ export function QbitSetupWizardModal({
                         max={65535}
                         value={port}
                         onChange={(e) => setPort(Number(e.target.value) || 8080)}
-                        className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                        className="sa-search-input w-full min-h-[38px] px-2.5 py-1.5 text-[12px] font-mono-tabular"
                       />
                     </div>
 
@@ -541,7 +541,7 @@ export function QbitSetupWizardModal({
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="admin"
-                        className="w-full min-h-[38px] px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                        className="sa-search-input w-full min-h-[38px] px-2.5 py-1.5 text-[12px]"
                       />
                     </div>
 
@@ -560,7 +560,7 @@ export function QbitSetupWizardModal({
                               ? ts.torrentPasswordSavedPlaceholder
                               : '••••••••'
                           }
-                          className="w-full min-h-[38px] ps-2.5 pe-9 py-1.5 rounded-lg bg-white dark:bg-[#0c1016] border border-slate-200 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none"
+                          className="sa-search-input w-full min-h-[38px] ps-2.5 pe-9 py-1.5 text-[12px]"
                         />
                         <button
                           type="button"
@@ -585,9 +585,9 @@ export function QbitSetupWizardModal({
                     <button
                       type="button"
                       onClick={handleGeneratePwd}
-                      className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1b232f] dark:hover:bg-[#242f3f] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                     >
-                      <Key className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                      <Key className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                       <span>{t.generatePasswordBtn}</span>
                     </button>
 
@@ -613,7 +613,7 @@ export function QbitSetupWizardModal({
             type="button"
             onClick={onOpenOfficialDownload}
             title={QBIT_OFFICIAL_DOWNLOAD_URL}
-            className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] hover:underline whitespace-nowrap shrink-0 cursor-pointer"
+            className="sa-link inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
           >
             <ArrowSquareOut className="w-3.5 h-3.5" />
             <span>{t.officialDownloadBtn}</span>
@@ -632,7 +632,7 @@ export function QbitSetupWizardModal({
                       ? onStartInstall(true)
                       : onRecheck()
                   }
-                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 disabled:opacity-50 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <ArrowClockwise className="w-3.5 h-3.5" />
                   <span>
@@ -649,7 +649,7 @@ export function QbitSetupWizardModal({
                   onClose();
                   onOpenSettings();
                 }}
-                className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 disabled:opacity-50 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <span>{t.openSettingsBtn}</span>
               </button>
@@ -659,7 +659,7 @@ export function QbitSetupWizardModal({
               type="button"
               disabled={isBusy}
               onClick={handleSkipOrClose}
-              className="inline-flex items-center gap-1.5 min-h-[38px] px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-50 text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-primary inline-flex items-center gap-1.5 min-h-[38px] px-4 py-1.5 disabled:opacity-50 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
             >
               <span>{t.closeBtn}</span>
             </button>

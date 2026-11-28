@@ -148,12 +148,12 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
         isPausedRef.current = false;
       }}
     >
-      <div className="flex items-center justify-between gap-4">
+      <div className="sa-section-header flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
             {title}
           </h2>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
+          <div className="sa-section-line flex-1" />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -161,7 +161,7 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
             <button
               type="button"
               onClick={onAction}
-              className="text-[12px] font-medium text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white transition-colors me-1 whitespace-nowrap cursor-pointer"
+              className="sa-link text-[12px] font-semibold me-1 whitespace-nowrap cursor-pointer"
             >
               {actionLabel}
             </button>
@@ -171,7 +171,7 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
               type="button"
               aria-label={`Scroll ${title} left`}
               onClick={() => scrollByViewport(-1)}
-              className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-slate-700 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+              className="sa-btn-secondary p-1.5 cursor-pointer"
             >
               <CaretLeft weight="bold" className="w-4 h-4" />
             </button>
@@ -179,7 +179,7 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
               type="button"
               aria-label={`Scroll ${title} right`}
               onClick={() => scrollByViewport(1)}
-              className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-slate-700 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+              className="sa-btn-secondary p-1.5 cursor-pointer"
             >
               <CaretRight weight="bold" className="w-4 h-4" />
             </button>
@@ -197,7 +197,7 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
             return (
               <div
                 key={`${game.tab}-${game.id}`}
-                className="snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] bg-white dark:bg-[#18202b] border border-slate-200 dark:border-white/[0.06] rounded overflow-hidden select-none shadow-sm dark:shadow-none"
+                className="sa-game-card snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] border overflow-hidden select-none shadow-sm dark:shadow-none"
               >
                 <div className="relative aspect-[2/3] bg-slate-200 dark:bg-[#0f141b] overflow-hidden pointer-events-none">
                   <GameCover
@@ -224,17 +224,17 @@ const HorizontalGameSlide = memo(function HorizontalGameSlide({
               }}
               role="button"
               tabIndex={0}
-              className="sa-contain-card snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] group bg-white hover:bg-slate-50 dark:bg-[#18202b] dark:hover:bg-[#212b3a] border border-slate-200 dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col shadow-sm dark:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+              className="sa-contain-card sa-game-card snap-start shrink-0 w-[138px] sm:w-[162px] md:w-[172px] lg:w-[180px] xl:w-[190px] 2xl:w-[206px] group border overflow-hidden cursor-pointer flex flex-col shadow-sm dark:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
             >
               <div className="relative aspect-[2/3] bg-slate-200 dark:bg-[#0f141b] overflow-hidden">
                 <GameCover
                   src={game.coverImage}
                   alt={game.name}
-                  imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                  imgClassName="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
                 />
 
                 {game.isNew && (
-                  <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
+                  <div className="sa-badge-accent absolute inset-x-0 top-0 text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center rounded-none">
                     NEW
                   </div>
                 )}
@@ -339,7 +339,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
       ref={heroSectionRef}
       onMouseEnter={() => setHeroPaused(true)}
       onMouseLeave={() => setHeroPaused(false)}
-      className="sa-ps5-hero relative w-full min-h-[calc(100dvh-5.25rem)] sm:min-h-[calc(100dvh-5.75rem)] flex flex-col justify-between overflow-hidden bg-[#0a0f16] border-b border-slate-200/20 dark:border-white/[0.08]"
+      className="sa-hero sa-ps5-hero relative w-full min-h-[calc(100dvh-5.25rem)] sm:min-h-[calc(100dvh-5.75rem)] flex flex-col justify-between overflow-hidden border-b"
     >
       {/* Animated Full-Bleed Backdrop Layer */}
       <AnimatePresence mode="wait">
@@ -360,15 +360,15 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
               initial={{ scale: 1.04 }}
               animate={{ scale: 1 }}
               transition={{ duration: 6.5, ease: 'easeOut' }}
-              className="sa-ps5-hero-img w-full h-full object-cover object-center opacity-55"
+              className="sa-ps5-hero-img w-full h-full object-cover object-center opacity-35 dark:opacity-55"
             />
           )}
         </motion.div>
       </AnimatePresence>
 
       {/* Measured Contrast Scrims + Subtle Compositor-Safe Radial Ambient Glow */}
-      <div className="sa-hero-scrim-x sa-ps5-hero-scrim-x absolute inset-0 bg-gradient-to-r from-[#080c12] via-[#0a0f17]/88 to-[#0a0f17]/35 pointer-events-none" />
-      <div className="sa-ps5-hero-scrim-y absolute inset-0 bg-gradient-to-t from-[#080c12] via-[#080c12]/35 to-[#080c12]/55 pointer-events-none" />
+      <div className="sa-hero-scrim-x sa-ps5-hero-scrim-x absolute inset-0 pointer-events-none" />
+      <div className="sa-hero-scrim-y sa-ps5-hero-scrim-y absolute inset-0 pointer-events-none" />
       <motion.div
         aria-hidden="true"
         animate={isHeroInView && isTabActive ? { opacity: [0.45, 0.85, 0.45] } : { opacity: 0.45 }}
@@ -379,7 +379,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
         }
         style={{
           background:
-            'radial-gradient(closest-side, rgba(26, 159, 255, 0.24) 0%, rgba(26, 159, 255, 0.09) 48%, transparent 100%)',
+            'radial-gradient(closest-side, var(--sa-accent-soft) 0%, var(--sa-secondary-soft) 48%, transparent 100%)',
         }}
         className="absolute -top-36 start-[18%] w-[640px] h-[420px] rounded-full pointer-events-none"
       />
@@ -404,7 +404,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                     type="button"
                     onClick={() => onSelectGame(activeFeatured, 'overview')}
                     aria-label={`${activeFeatured.name} — ${t.viewDetails}`}
-                    className="md:hidden group relative w-[86px] sm:w-[102px] aspect-[2/3] rounded-xl overflow-hidden border border-white/[0.2] bg-[#0e141d] shadow-[0_14px_34px_rgba(0,0,0,0.65)] shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                    className="md:hidden sa-game-card group relative w-[86px] sm:w-[102px] aspect-[2/3] overflow-hidden border shadow-[0_14px_34px_rgba(0,0,0,0.28)] dark:shadow-[0_14px_34px_rgba(0,0,0,0.65)] shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                   >
                     <GameCover
                       src={activeFeatured.coverImage}
@@ -420,42 +420,44 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.38, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-                      className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10.5px] sm:text-[12px] font-semibold tracking-[0.11em] uppercase text-[#38bdf8]"
+                      className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10.5px] sm:text-[12px] font-semibold tracking-[0.11em] uppercase"
                     >
-                      <span>
+                      <span style={{ color: 'var(--sa-accent)' }}>
                         {activeFeatured.isPinned ? t.featuredSpotlight : t.latestRelease}
                       </span>
                       {activeFeatured.repackBy && (
                         <>
-                          <span aria-hidden="true" className="text-white/35">
+                          <span aria-hidden="true" className="text-slate-400 dark:text-white/35">
                             ·
                           </span>
-                          <span className="text-[#93c5fd]">{activeFeatured.repackBy}</span>
+                          <span style={{ color: 'var(--sa-secondary)' }} className="text-[#0284c7] dark:text-[#93c5fd]">
+                            {activeFeatured.repackBy}
+                          </span>
                         </>
                       )}
                       {activeFeatured.dateAdded && (
                         <>
-                          <span aria-hidden="true" className="text-white/35">
+                          <span aria-hidden="true" className="text-slate-400 dark:text-white/35">
                             ·
                           </span>
-                          <span className="text-white/70 font-mono-tabular">
+                          <span className="text-slate-600 dark:text-white/75 font-mono-tabular">
                             {new Date(activeFeatured.dateAdded).toLocaleDateString(tr.locale)}
                           </span>
                         </>
                       )}
                       {(activeFeatured.repackSize || activeFeatured.originalSize) && (
                         <>
-                          <span aria-hidden="true" className="text-white/35">
+                          <span aria-hidden="true" className="text-slate-400 dark:text-white/35">
                             ·
                           </span>
                           <span className="inline-flex items-baseline gap-1.5 font-mono-tabular normal-case tracking-normal">
                             {activeFeatured.repackSize && (
-                              <span className="text-[#66c0f4] font-bold">
+                              <span style={{ color: 'var(--sa-accent)' }} className="font-bold">
                                 {activeFeatured.repackSize}
                               </span>
                             )}
                             {activeFeatured.originalSize && (
-                              <span className="text-white/55 line-through font-medium">
+                              <span className="text-slate-400 dark:text-white/55 line-through font-medium">
                                 {activeFeatured.originalSize}
                               </span>
                             )}
@@ -473,7 +475,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                         fontSize: 'clamp(1.38rem, 3.2vw, 3.4rem)',
                         textWrap: 'balance',
                       }}
-                      className="font-display font-extrabold text-white tracking-[-0.025em] leading-[1.08] drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
+                      className="font-display font-extrabold text-slate-900 dark:text-white tracking-[-0.025em] leading-[1.08] drop-shadow-[0_2px_10px_rgba(255,255,255,0.45)] dark:drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)]"
                     >
                       {activeFeatured.name}
                     </motion.h1>
@@ -486,7 +488,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.42, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-medium text-[#b5c4d6] tracking-wide line-clamp-1"
+                    className="text-[12px] sm:text-[13px] lg:text-[13.5px] font-medium text-slate-600 dark:text-[#b5c4d6] tracking-wide line-clamp-1"
                   >
                     {[...activeFeatured.genreList.slice(0, 4), activeFeatured.version]
                       .filter(Boolean)
@@ -499,7 +501,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.44, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-[#d6e1ed] leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-2xl"
+                  className="text-[13px] sm:text-[14.5px] lg:text-[15.5px] text-slate-700 dark:text-[#d6e1ed] leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-2xl"
                 >
                   {activeFeatured.description}
                 </motion.p>
@@ -514,7 +516,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                   <button
                     type="button"
                     onClick={() => onSelectGame(activeFeatured, 'downloads')}
-                    className="group relative overflow-hidden inline-flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-xl bg-[#0284c7] hover:bg-[#0ea5e9] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[13px] sm:text-[14px] font-semibold shadow-[0_12px_32px_rgba(26,159,255,0.38)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                    className="sa-btn-primary group relative overflow-hidden inline-flex items-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 text-[13px] sm:text-[14px] font-semibold whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                   >
                     <span
                       aria-hidden="true"
@@ -528,7 +530,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                     <button
                       type="button"
                       onClick={() => onSelectGame(activeFeatured, 'trailer')}
-                      className="inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-xl bg-white/[0.11] hover:bg-white/[0.2] backdrop-blur-md border border-white/[0.2] text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      className="sa-btn-secondary inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3.5 backdrop-blur-md text-[13px] sm:text-[14px] font-medium whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                     >
                       <Play weight="fill" className="w-4 h-4 fill-current shrink-0" />
                       <span>{t.watchTrailer}</span>
@@ -538,7 +540,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                   <button
                     type="button"
                     onClick={() => onSelectGame(activeFeatured, 'overview')}
-                    className="inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-4.5 sm:py-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] backdrop-blur-md border border-white/[0.14] text-[#dce8f5] hover:text-white text-[13px] sm:text-[14px] font-medium hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    className="sa-btn-secondary inline-flex items-center gap-2 px-3.5 py-2.5 sm:px-4.5 sm:py-3.5 backdrop-blur-md text-[13px] sm:text-[14px] font-medium whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                   >
                     <Info className="w-4 h-4 shrink-0" />
                     <span>{t.viewDetails}</span>
@@ -570,14 +572,14 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                     }
                   }}
                   aria-label={`${activeFeatured.name} — ${t.viewDetails}`}
-                  className="group relative rounded-2xl overflow-hidden border border-white/[0.18] bg-[#0e141d]/85 backdrop-blur-xl shadow-[0_28px_70px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                  className="sa-game-card group relative overflow-hidden border shadow-[0_24px_60px_rgba(15,23,42,0.22)] dark:shadow-[0_28px_70px_rgba(0,0,0,0.68),0_0_0_1px_rgba(255,255,255,0.06)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                 >
-                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#121822]">
+                  <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-200 dark:bg-[#121822]">
                     <GameCover
                       src={activeFeatured.coverImage}
                       alt={activeFeatured.name}
                       priority
-                      imgClassName="w-full h-full object-cover"
+                      imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                     />
                   </div>
                 </div>
@@ -589,7 +591,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
 
       {/* Hero Bottom Interactive Dock: Featured Thumbnails + Controls + Scroll Cue */}
       <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 pb-3.5 sm:pb-5 pt-1.5">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 pt-2.5 border-t border-white/[0.1]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 pt-2.5 border-t border-slate-300/70 dark:border-white/[0.1]">
           {/* Clickable Featured Game Thumbnail Rail */}
           {featuredGames.length > 1 && (
             <div className="no-scrollbar flex items-center gap-2 overflow-x-auto pb-0.5 sm:pb-0 flex-1 min-w-0">
@@ -601,13 +603,21 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                     type="button"
                     onClick={() => setSlideIndex(idx)}
                     aria-label={`Spotlight ${item.name}`}
-                    className={`group relative flex items-center gap-2 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border text-start transition-all duration-200 cursor-pointer shrink-0 overflow-hidden ${
+                    style={
                       isActive
-                        ? 'bg-white/[0.14] border-white/[0.3] text-white shadow-lg min-w-[145px] sm:min-w-[180px]'
-                        : 'bg-black/35 hover:bg-white/[0.08] border-white/[0.08] text-white/70 hover:text-white max-w-[135px] sm:max-w-[170px]'
+                        ? {
+                            borderColor: 'var(--sa-accent)',
+                            boxShadow: '0 8px 20px var(--sa-accent-soft)',
+                          }
+                        : undefined
+                    }
+                    className={`group relative flex items-center gap-2 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl border text-start transition-all duration-200 cursor-pointer shrink-0 overflow-hidden backdrop-blur-md ${
+                      isActive
+                        ? 'bg-white/95 text-slate-900 dark:bg-white/[0.15] dark:text-white shadow-lg min-w-[145px] sm:min-w-[180px]'
+                        : 'bg-white/70 hover:bg-white/95 border-slate-300/80 text-slate-700 hover:text-slate-950 dark:bg-black/35 dark:hover:bg-white/[0.09] dark:border-white/[0.1] dark:text-white/75 dark:hover:text-white max-w-[135px] sm:max-w-[170px]'
                     }`}
                   >
-                    <div className="w-6 h-8 sm:w-7 sm:h-9 rounded overflow-hidden bg-[#141a23] shrink-0 border border-white/[0.1]">
+                    <div className="w-6 h-8 sm:w-7 sm:h-9 rounded overflow-hidden bg-slate-200 dark:bg-[#141a23] shrink-0 border border-slate-300/80 dark:border-white/[0.1]">
                       <GameCover
                         src={item.coverImage}
                         alt={item.name}
@@ -628,8 +638,9 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                         }}
                         style={{
                           transformOrigin: language === 'ar' ? '100% 50%' : '0% 50%',
+                          backgroundColor: 'var(--sa-accent)',
                         }}
-                        className="absolute inset-x-0 bottom-0 h-[2px] bg-[#38bdf8]"
+                        className="absolute inset-x-0 bottom-0 h-[2.5px]"
                       />
                     )}
                   </button>
@@ -650,11 +661,11 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                       (prev) => (prev - 1 + featuredGames.length) % featuredGames.length
                     )
                   }
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.18] border border-white/[0.14] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="sa-btn-secondary w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
-                <span className="px-1.5 sm:px-2 text-[11px] sm:text-[11.5px] font-mono-tabular text-white/75 select-none">
+                <span className="px-1.5 sm:px-2 text-[11px] sm:text-[11.5px] font-mono-tabular text-slate-600 dark:text-white/75 select-none">
                   {activeSlideIdx + 1} / {featuredGames.length}
                 </span>
                 <button
@@ -663,7 +674,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                   onClick={() =>
                     setSlideIndex((prev) => (prev + 1) % featuredGames.length)
                   }
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.18] border border-white/[0.14] text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="sa-btn-secondary w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center cursor-pointer"
                 >
                   <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
@@ -676,7 +687,7 @@ const HeroSpotlightSection = memo(function HeroSpotlightSection({
                 belowHeroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }
               aria-label={t.exploreCatalog}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 h-8 sm:h-9 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] border border-white/[0.14] text-white/90 hover:text-white text-[11.5px] sm:text-[12px] font-medium transition-colors whitespace-nowrap cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 sm:px-3.5 h-8 sm:h-9 text-[11.5px] sm:text-[12px] font-medium whitespace-nowrap cursor-pointer"
             >
               <span>{t.exploreCatalog}</span>
               <motion.span
@@ -1092,7 +1103,7 @@ export const StoreView = memo(function StoreView({
           <section className="sa-ps5-panel rounded-xl bg-gradient-to-br from-white via-slate-50 to-slate-100/80 dark:from-[#131b26] dark:via-[#10161f] dark:to-[#0d1118] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-lg bg-[#1a9fff]/15 border border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
                   <Laptop className="w-4 h-4" />
                 </span>
                 <div className="min-w-0">
@@ -1117,14 +1128,15 @@ export const StoreView = memo(function StoreView({
                     ] as const
                   ).map((opt) => {
                     const count = pcCompatibilityData.scopeCounts[opt.key];
+                    const isActiveScope = pcCompatScope === opt.key;
                     return (
                       <button
                         key={opt.key}
                         type="button"
                         onClick={() => setPcCompatScope(opt.key)}
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
-                          pcCompatScope === opt.key
-                            ? 'bg-[#1a9fff] text-white'
+                          isActiveScope
+                            ? 'sa-btn-primary border-transparent shadow-sm'
                             : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                         }`}
                       >
@@ -1180,7 +1192,7 @@ export const StoreView = memo(function StoreView({
                     type="button"
                     aria-label="Scroll compatibility list left"
                     onClick={() => scrollPcCompat(-1)}
-                    className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                    className="sa-btn-secondary p-1.5 cursor-pointer"
                   >
                     <CaretLeft weight="bold" className="w-4 h-4" />
                   </button>
@@ -1188,7 +1200,7 @@ export const StoreView = memo(function StoreView({
                     type="button"
                     aria-label="Scroll compatibility list right"
                     onClick={() => scrollPcCompat(1)}
-                    className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                    className="sa-btn-secondary p-1.5 cursor-pointer"
                   >
                     <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
@@ -1238,7 +1250,7 @@ export const StoreView = memo(function StoreView({
                   type="button"
                   onClick={onRefreshSpecs}
                   disabled={isRefreshingSpecs}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[11px] font-semibold text-[#0284c7] hover:text-slate-900 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.08] dark:text-[#66c0f4] dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                  className="sa-btn-secondary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold cursor-pointer disabled:opacity-50"
                 >
                   <ArrowsClockwise className={`w-3 h-3 ${isRefreshingSpecs ? 'animate-spin' : ''}`} />
                   <span>{t.scanPc}</span>
@@ -1271,7 +1283,7 @@ export const StoreView = memo(function StoreView({
                           onSelectGame(item, 'overview');
                         }
                       }}
-                      className={`sa-contain-card snap-start shrink-0 w-[142px] sm:w-[164px] md:w-[176px] lg:w-[186px] group bg-white hover:bg-slate-50 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] border rounded overflow-hidden transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff] ${
+                      className={`sa-contain-card sa-game-card snap-start shrink-0 w-[142px] sm:w-[164px] md:w-[176px] lg:w-[186px] group border overflow-hidden cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff] ${
                         isPass
                           ? 'sa-ps5-card-pass border-emerald-500/40 hover:border-emerald-500 dark:border-emerald-500/25 dark:hover:border-emerald-400/60'
                           : 'sa-ps5-card-fail border-rose-500/40 hover:border-rose-500 dark:border-rose-500/35 dark:hover:border-rose-400/75'
@@ -1330,15 +1342,15 @@ export const StoreView = memo(function StoreView({
         {/* 4. Most Popular Games (Google Sheet: PopularRepacks — all games, dynamic counter, HV/Game filter & pagination) */}
         {popularEntries.length > 0 && (
           <section ref={popularSectionRef} className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="sa-section-header flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.mostPopularGames}
                 </h2>
-                <span className="px-2 py-0.5 rounded bg-white border border-slate-200 text-[12px] font-mono-tabular font-semibold text-[#0284c7] dark:bg-[#18202b] dark:border-white/[0.08] dark:text-[#66c0f4] shrink-0">
+                <span className="sa-badge-secondary px-2 py-0.5 text-[12px] font-mono-tabular font-semibold shrink-0">
                   {popularGames.length}
                 </span>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07] hidden sm:block" />
+                <div className="sa-section-line flex-1 hidden sm:block" />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -1357,7 +1369,7 @@ export const StoreView = memo(function StoreView({
                     }}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[3px] text-[11.5px] font-semibold transition-colors cursor-pointer ${
                       popularFilter === 'all'
-                        ? 'bg-[#1a9fff] text-white shadow-sm'
+                        ? 'sa-btn-primary border-transparent shadow-sm'
                         : 'text-slate-600 hover:text-slate-900 dark:text-[#9fb0c7] dark:hover:text-white'
                     }`}
                   >
@@ -1443,16 +1455,16 @@ export const StoreView = memo(function StoreView({
                   }}
                   role="button"
                   tabIndex={0}
-                  className="sa-contain-card group bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                  className="sa-contain-card sa-game-card group border overflow-hidden cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                 >
                   <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                     <GameCover
                       src={game.coverImage}
                       alt={game.name}
-                      imgClassName="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      imgClassName="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
                     />
                     {game.isNew && (
-                      <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
+                      <div className="sa-badge-accent absolute inset-x-0 top-0 text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center rounded-none">
                         NEW
                       </div>
                     )}
@@ -1490,7 +1502,7 @@ export const StoreView = memo(function StoreView({
                     type="button"
                     disabled={safePopularPage === 0}
                     onClick={() => goToPopularPage(safePopularPage - 1)}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
+                    className="sa-btn-secondary inline-flex items-center gap-1 px-3 py-2 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium cursor-pointer"
                   >
                     <CaretLeft weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                     <span>{t.previous}</span>
@@ -1501,10 +1513,10 @@ export const StoreView = memo(function StoreView({
                       key={pageIdx}
                       type="button"
                       onClick={() => goToPopularPage(pageIdx)}
-                      className={`min-w-[34px] h-[34px] px-2 rounded text-[12px] font-mono-tabular font-semibold transition-colors cursor-pointer ${
+                      className={`min-w-[34px] h-[34px] px-2 text-[12px] font-mono-tabular font-semibold transition-colors cursor-pointer ${
                         pageIdx === safePopularPage
-                          ? 'bg-[#1a9fff] text-white'
-                          : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.06]'
+                          ? 'sa-btn-primary'
+                          : 'sa-btn-secondary'
                       }`}
                     >
                       {pageIdx + 1}
@@ -1515,7 +1527,7 @@ export const StoreView = memo(function StoreView({
                     type="button"
                     disabled={safePopularPage >= totalPopularPages - 1}
                     onClick={() => goToPopularPage(safePopularPage + 1)}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
+                    className="sa-btn-secondary inline-flex items-center gap-1 px-3 py-2 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium cursor-pointer"
                   >
                     <span>{t.next}</span>
                     <CaretRight weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
@@ -1526,7 +1538,7 @@ export const StoreView = memo(function StoreView({
                   <button
                     type="button"
                     onClick={() => goToPopularPage(safePopularPage + 1)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                    className="sa-btn-primary inline-flex items-center gap-2 px-4 py-2 text-[12.5px] font-semibold whitespace-nowrap cursor-pointer"
                   >
                     <span>
                       {t.seeMoreNext} {nextPopularPageCount}{' '}
@@ -1538,7 +1550,7 @@ export const StoreView = memo(function StoreView({
                   <button
                     type="button"
                     onClick={() => goToPopularPage(0)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                    className="sa-btn-secondary inline-flex items-center gap-2 px-4 py-2 text-[12.5px] font-semibold whitespace-nowrap cursor-pointer"
                   >
                     <span>{t.backToPage1}</span>
                   </button>
@@ -1551,18 +1563,18 @@ export const StoreView = memo(function StoreView({
         {/* 5. Top Studios (Google Sheet: profil — top 10, logo + total games count) */}
         {topStudios.length > 0 && (
           <section className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
+            <div className="sa-section-header flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <h2 className="font-display text-[15px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.topStudios}
                 </h2>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
+                <div className="sa-section-line flex-1" />
               </div>
 
               <button
                 type="button"
                 onClick={onOpenStudiosPage}
-                className="text-[12px] font-medium text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="sa-link text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 {t.viewAllStudios}
               </button>
@@ -1579,7 +1591,7 @@ export const StoreView = memo(function StoreView({
                     title={studio.name}
                     aria-label={`${studio.name} (${totalGames} ${t.gamePlural})`}
                     onClick={() => onSelectGame(studio, 'overview')}
-                    className="sa-contain-card group p-3 rounded bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/55 transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                    className="sa-contain-card sa-game-card group p-3 border flex flex-col items-center gap-2.5 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                   >
                     <StudioEmblem studio={studio} />
                     <span className="text-[12px] font-semibold font-mono-tabular text-slate-700 group-hover:text-slate-900 dark:text-[#c6d4df] dark:group-hover:text-white">
@@ -1610,16 +1622,18 @@ export const StoreView = memo(function StoreView({
             }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-between gap-4">
+            <div className="sa-section-header flex items-center justify-between gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <UsersThree className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+                <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                  <UsersThree className="w-4 h-4 shrink-0" />
+                </span>
                 <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
                   {t.bestTwoPlayers}
                 </h2>
-                <span className="text-[12px] font-mono-tabular text-slate-500 dark:text-[#7f91a8] shrink-0">
+                <span className="sa-badge-secondary px-1.5 py-0.5 text-[11px] font-mono-tabular font-semibold shrink-0">
                   {twoPlayerGames.length}
                 </span>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.07]" />
+                <div className="sa-section-line flex-1" />
               </div>
 
               <div dir="ltr" className="inline-flex items-center gap-2 shrink-0">
@@ -1627,7 +1641,7 @@ export const StoreView = memo(function StoreView({
                   type="button"
                   aria-label="Scroll Best games For Two Players left"
                   onClick={() => scrollTwoPlayers(-1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
@@ -1635,7 +1649,7 @@ export const StoreView = memo(function StoreView({
                   type="button"
                   aria-label="Scroll Best games For Two Players right"
                   onClick={() => scrollTwoPlayers(1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-950 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
@@ -1665,7 +1679,7 @@ export const StoreView = memo(function StoreView({
                       }
                     }}
                     aria-label={game.name}
-                    className="sa-contain-card group relative snap-start shrink-0 w-[148px] sm:w-[168px] md:w-[180px] lg:w-[192px] xl:w-[208px] 2xl:w-[222px] rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#141b25] hover:border-[#0284c7]/60 dark:hover:border-[#38bdf8]/60 shadow-sm hover:shadow-lg dark:shadow-none hover:-translate-y-1 transition-[transform,border-color,box-shadow] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                    className="sa-contain-card sa-game-card group relative snap-start shrink-0 w-[148px] sm:w-[168px] md:w-[180px] lg:w-[192px] xl:w-[208px] 2xl:w-[222px] overflow-hidden border shadow-sm hover:shadow-lg dark:shadow-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
                   >
                     <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-200 dark:bg-[#0f141b]">
                       <GameCover
@@ -1679,7 +1693,7 @@ export const StoreView = memo(function StoreView({
                       />
                       <span
                         aria-hidden="true"
-                        className="absolute top-2.5 end-2.5 w-7 h-7 rounded-lg bg-black/55 backdrop-blur-sm border border-white/[0.16] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        className="sa-icon-badge absolute top-2.5 end-2.5 w-7 h-7 bg-black/60 backdrop-blur-sm border-white/[0.22] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                       >
                         <ArrowUpRight className="w-3.5 h-3.5" />
                       </span>

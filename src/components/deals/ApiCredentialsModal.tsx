@@ -166,8 +166,10 @@ export function ApiCredentialsModal({
       >
         <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-white/[0.08] flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Key className="w-5 h-5 text-sky-500" />
+            <div className="flex items-center gap-2.5">
+              <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
+                <Key weight="bold" className="w-4 h-4" />
+              </span>
               <h2 className="font-display text-lg font-bold">{labels.apiKeysTitle}</h2>
             </div>
             <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9]">
@@ -201,8 +203,8 @@ export function ApiCredentialsModal({
           </div>
 
           {/* Security Note */}
-          <div className="rounded-xl border border-sky-500/25 bg-sky-500/10 p-3 flex items-start gap-2.5 text-[12px] text-slate-700 dark:text-[#b9d6f4]">
-            <ShieldCheck weight="fill" className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-[var(--sa-accent-ring)] bg-[var(--sa-accent-soft)] p-3 flex items-start gap-2.5 text-[12px] text-slate-700 dark:text-[#b9d6f4]">
+            <ShieldCheck weight="fill" className="w-4 h-4 text-[var(--sa-accent)] shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <div className="font-semibold">{labels.apiKeysSafeStorageNote}</div>
               {!isElectron && (
@@ -215,7 +217,7 @@ export function ApiCredentialsModal({
 
           {feedback && (
             <div className="rounded-lg border border-slate-200 dark:border-white/[0.12] bg-slate-100 dark:bg-white/[0.05] px-3 py-2 text-[12px] flex items-center gap-2">
-              <WarningCircle className="w-4 h-4 text-sky-500 shrink-0" />
+              <WarningCircle className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
               <span>{feedback}</span>
             </div>
           )}
@@ -264,17 +266,13 @@ export function ApiCredentialsModal({
                       }
                       disabled={!isElectron || busyId === spec.id}
                       placeholder={spec.placeholder}
-                      className="flex-1 min-h-[36px] px-3 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-[#161e29] text-[12.5px] font-mono-tabular focus:outline-none focus:ring-2 focus:ring-[#0284c7]"
+                      className="sa-search-input flex-1 min-h-[36px] px-3 border bg-white dark:bg-[#161e29] text-[12.5px] font-mono-tabular"
                     />
                     <button
                       type="button"
                       disabled={!isElectron || !inputs[spec.id].trim() || busyId === spec.id}
                       onClick={() => void handleSave(spec.id)}
-                      className={`px-3 py-1.5 min-h-[36px] rounded-lg text-[12px] font-semibold text-white whitespace-nowrap cursor-pointer disabled:opacity-45 ${
-                        isXbox
-                          ? 'bg-[#107C10] hover:bg-[#159315]'
-                          : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff]'
-                      }`}
+                      className="sa-btn-primary px-3.5 py-1.5 min-h-[36px] text-[12px] font-semibold whitespace-nowrap cursor-pointer disabled:opacity-45"
                     >
                       {labels.apiKeysSaveBtn}
                     </button>

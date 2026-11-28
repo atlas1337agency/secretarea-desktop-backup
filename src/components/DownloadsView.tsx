@@ -102,8 +102,8 @@ function resolveStatusMeta(status: DownloadStatus, t: ReturnType<typeof getTrans
     case 'downloading':
       return {
         label: t.statusDownloading,
-        textClass: 'text-[#0284c7] dark:text-[#38bdf8]',
-        barClass: 'bg-gradient-to-r from-[#0284c7] to-[#38bdf8]',
+        textClass: 'text-[var(--sa-accent)]',
+        barClass: 'bg-gradient-to-r from-[var(--sa-accent)] to-[var(--sa-secondary)]',
       };
     case 'resolving':
       return {
@@ -244,7 +244,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <SourceIcon className="w-6 h-6 text-[#0284c7] dark:text-[#66c0f4]" />
+              <SourceIcon className="w-6 h-6 text-[var(--sa-accent)]" />
             )}
           </div>
 
@@ -256,7 +256,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
                 </h3>
                 <p className="text-[12px] text-slate-500 dark:text-[#8b9bb4] flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                   <span className="inline-flex items-center gap-1 font-medium text-slate-700 dark:text-[#c7d4e5]">
-                    <SourceIcon className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                    <SourceIcon className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                     <span>{resolveSourceLabel(task.source, t)}</span>
                   </span>
                   {task.channelGroup && (
@@ -309,7 +309,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
                   {task.status === 'downloading' && (
                     <>
                       <span aria-hidden="true">·</span>
-                      <span className="font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                      <span className="font-semibold text-[var(--sa-accent)]">
                         ↓ {formatDownloadSpeed(task.speedBytesPerSec)}
                       </span>
                       {(task.uploadSpeedBytesPerSec || 0) > 0 && (
@@ -361,7 +361,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
             <button
               type="button"
               onClick={() => onResumeDownload(task.id)}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-primary min-h-[40px] px-3 py-2 text-[12px]"
             >
               <Play weight="fill" className="w-3.5 h-3.5" />
               <span>{t.actionResume}</span>
@@ -372,7 +372,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
             <button
               type="button"
               onClick={() => onCancelDownload(task.id)}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg bg-slate-100 hover:bg-rose-50 dark:bg-white/[0.06] dark:hover:bg-rose-500/20 border border-slate-200 hover:border-rose-300 dark:border-white/[0.1] dark:hover:border-rose-500/40 text-[12px] font-semibold text-slate-700 hover:text-rose-700 dark:text-[#c7d4e5] dark:hover:text-rose-300 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary min-h-[40px] px-3 py-2 text-[12px] hover:!border-rose-400 hover:!text-rose-600 dark:hover:!text-rose-300"
             >
               <Prohibit className="w-3.5 h-3.5" />
               <span>{t.actionCancel}</span>
@@ -383,7 +383,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
             <button
               type="button"
               onClick={() => onRetryDownload(task.id)}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-primary min-h-[40px] px-3 py-2 text-[12px]"
             >
               <ArrowClockwise className="w-3.5 h-3.5" />
               <span>{t.actionRetry}</span>
@@ -394,7 +394,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
             <button
               type="button"
               onClick={() => onOpenFile(task.id)}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-[var(--sa-btn-radius)] bg-emerald-600 hover:bg-emerald-700 text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               <FileArrowDown className="w-3.5 h-3.5" />
               <span>{t.actionOpenFile}</span>
@@ -406,7 +406,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
               type="button"
               onClick={() => onOpenFolder(task.id)}
               title={t.actionOpenFolder}
-              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#dce4ee] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary min-h-[40px] px-3 py-2 text-[12px]"
             >
               <FolderOpen className="w-3.5 h-3.5" />
               <span>{t.actionOpenFolder}</span>
@@ -417,7 +417,7 @@ const DownloadTaskCard = memo(function DownloadTaskCard({
             type="button"
             onClick={() => onOpenExternal(task.url)}
             title={t.actionOpenExternal}
-            className="inline-flex items-center justify-center min-h-[40px] w-10 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-200 dark:border-white/[0.1] text-slate-600 dark:text-[#9cb0c9] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0 cursor-pointer"
+            className="sa-btn-secondary min-h-[40px] w-10 px-0 justify-center"
           >
             <ArrowSquareOut className="w-4 h-4" />
           </button>
@@ -711,10 +711,10 @@ export function DownloadsView({
     <div className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#1d2633] dark:via-[#171d26] dark:to-[#12161d]">
       <div className="max-w-[1600px] mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-5">
         {/* Page Header + Folder Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
+        <div className="sa-section-header flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
           <div className="space-y-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+              <span className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
                 <DownloadSimple weight="duotone" className="w-5 h-5" />
               </span>
               <h1 className="font-display text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -730,9 +730,9 @@ export function DownloadsView({
             {isDesktopApp && snapshot.downloadFolder && (
               <div
                 title={snapshot.downloadFolder}
-                className="inline-flex items-center gap-2 min-h-[40px] max-w-full sm:max-w-[300px] px-3 py-1.5 rounded-lg bg-white dark:bg-[#141b25] border border-slate-200 dark:border-white/[0.08] text-[12px] text-slate-600 dark:text-[#9cb0c9]"
+                className="inline-flex items-center gap-2 min-h-[40px] max-w-full sm:max-w-[300px] px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-white dark:bg-[#141b25] border border-slate-200 dark:border-white/[0.08] text-[12px] text-slate-600 dark:text-[#9cb0c9]"
               >
-                <FolderOpen className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <FolderOpen className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
                 <span className="truncate font-mono-tabular" dir="ltr">
                   {snapshot.downloadFolder}
                 </span>
@@ -744,16 +744,16 @@ export function DownloadsView({
                 <button
                   type="button"
                   onClick={onChooseFolder}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-[#e5e9f0] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]"
+                  className="sa-btn-secondary min-h-[40px] px-3.5 py-2 text-[12.5px]"
                 >
-                  <FolderOpen className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
+                  <FolderOpen className="w-4 h-4 text-[var(--sa-accent)]" />
                   <span>{t.chooseFolder}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => onOpenFolder()}
-                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12.5px] font-semibold text-slate-800 dark:text-[#e5e9f0] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]"
+                  className="sa-btn-secondary min-h-[40px] px-3.5 py-2 text-[12.5px]"
                 >
                   <ArrowSquareOut className="w-4 h-4" />
                   <span>{t.openFolder}</span>
@@ -765,7 +765,7 @@ export function DownloadsView({
               <button
                 type="button"
                 onClick={onClearCompleted}
-                className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-slate-200/80 hover:bg-slate-300/80 dark:bg-white/[0.06] dark:hover:bg-white/[0.11] border border-slate-300/70 dark:border-white/[0.09] text-[12.5px] font-semibold text-slate-700 dark:text-[#c7d4e5] transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]"
+                className="sa-btn-secondary min-h-[40px] px-3.5 py-2 text-[12.5px]"
               >
                 <Trash className="w-4 h-4" />
                 <span>{t.clearFinished}</span>
@@ -850,7 +850,7 @@ export function DownloadsView({
               <button
                 type="button"
                 onClick={onOpenQbitSetupWizard}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="sa-btn-primary min-h-[36px] px-3 py-1.5 text-[12px]"
               >
                 <DownloadSimple className="w-3.5 h-3.5" />
                 <span>{tr.settings.torrentManageSetupBtn}</span>
@@ -860,7 +860,7 @@ export function DownloadsView({
             <button
               type="button"
               onClick={onOpenTorrentSettings}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1e2633] dark:hover:bg-[#273142] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
             >
               <Gear className="w-3.5 h-3.5" />
               <span>{t.configureTorrentBtn}</span>
@@ -874,7 +874,7 @@ export function DownloadsView({
           className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-3.5 sm:p-4 shadow-sm dark:shadow-lg space-y-2"
         >
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <div className="relative flex-1 min-w-0">
+            <div className="sa-search-bar relative flex-1 min-w-0">
               <LinkSimple className="w-4 h-4 text-slate-400 dark:text-[#7f91a8] absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
@@ -885,7 +885,7 @@ export function DownloadsView({
                   if (urlError) setUrlError(null);
                 }}
                 placeholder={t.quickAddPlaceholder}
-                className="w-full min-h-[42px] ps-10 pe-3.5 py-2 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.1] focus:border-[#0284c7] dark:focus:border-[#38bdf8] text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6f829a] focus:outline-none"
+                className="sa-search-input w-full min-h-[42px] ps-10 pe-3.5 py-2 text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6f829a]"
               />
             </div>
 
@@ -893,7 +893,7 @@ export function DownloadsView({
               <button
                 type="submit"
                 disabled={isAdding || !quickUrl.trim()}
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 min-h-[42px] px-5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] disabled:opacity-50 text-white text-[13px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]"
+                className="sa-btn-primary flex-1 sm:flex-initial justify-center min-h-[42px] px-5 py-2 text-[13px] disabled:opacity-50"
               >
                 <Plus weight="bold" className="w-4 h-4 shrink-0" />
                 <span>{t.quickAddBtn}</span>
@@ -904,9 +904,9 @@ export function DownloadsView({
                   type="button"
                   disabled={isAddingTorrentFile}
                   onClick={handleAddTorrentFileClick}
-                  className="inline-flex items-center justify-center gap-2 min-h-[42px] px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] disabled:opacity-50 text-slate-800 dark:text-[#e5e9f0] text-[13px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8]"
+                  className="sa-btn-secondary justify-center min-h-[42px] px-4 py-2 text-[13px] disabled:opacity-50"
                 >
-                  <FilePlus className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                  <FilePlus className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
                   <span>{t.addTorrentFileBtn}</span>
                 </button>
               )}
@@ -1003,16 +1003,14 @@ export function DownloadsView({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex items-center gap-2 min-h-[40px] px-3.5 py-2 rounded-lg text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] ${
-                    isSelected
-                      ? 'bg-[#0284c7] dark:bg-[#1a9fff] text-white shadow-sm'
-                      : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 dark:bg-[#171d25] dark:hover:bg-[#1e2631] dark:text-[#b8c6d8] dark:border-white/[0.08]'
+                  className={`min-h-[40px] px-3.5 py-2 text-[12.5px] ${
+                    isSelected ? 'sa-btn-primary shadow-sm' : 'sa-btn-secondary'
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`font-mono-tabular text-[11px] ${
-                      isSelected ? 'text-white/85' : 'text-slate-500 dark:text-[#7f91a8]'
+                      isSelected ? 'opacity-85' : 'text-slate-500 dark:text-[#7f91a8]'
                     }`}
                   >
                     {tab.count}
@@ -1022,14 +1020,14 @@ export function DownloadsView({
             })}
           </div>
 
-          <div className="relative w-full md:w-72 shrink-0">
+          <div className="sa-search-bar relative w-full md:w-72 shrink-0">
             <MagnifyingGlass className="w-4 h-4 text-slate-400 dark:text-[#7f91a8] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full min-h-[40px] ps-9 pe-8 py-2 rounded-lg bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] focus:border-[#0284c7] dark:focus:border-[#38bdf8] text-[12.5px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6f829a] focus:outline-none"
+              className="sa-search-input w-full min-h-[40px] ps-9 pe-8 py-2 text-[12.5px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6f829a]"
             />
             {searchQuery && (
               <button
@@ -1047,7 +1045,7 @@ export function DownloadsView({
         {/* Downloads List / Empty State */}
         {filteredTasks.length === 0 ? (
           <div className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] py-14 px-6 text-center space-y-2.5">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-slate-100 dark:bg-[#11161d] border border-slate-200 dark:border-white/[0.08] flex items-center justify-center text-[#0284c7] dark:text-[#66c0f4]">
+            <div className="sa-icon-badge w-12 h-12 mx-auto flex items-center justify-center">
               <FileArrowDown weight="duotone" className="w-6 h-6" />
             </div>
             <h2 className="text-[15px] font-bold text-slate-900 dark:text-white">

@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import type { AppThemeMode } from '../services/launcherSettings';
+import type { AppThemeMode, ResolvedOsTheme } from '../services/launcherSettings';
 
 export type CustomCursorKind =
   | 'default'
@@ -17,9 +17,48 @@ export type CustomCursorKind =
   | 'not-allowed'
   | 'help';
 
+export interface CustomCursorAccentOverride {
+  enabled: boolean;
+  accentColor: string;
+  secondaryColor?: string;
+}
+
+export function resolveCursorPalette({
+  activeTheme = 'default',
+  activeOsTheme = 'windows',
+  customAccent,
+}: {
+  activeTheme?: AppThemeMode;
+  activeOsTheme?: ResolvedOsTheme;
+  customAccent?: CustomCursorAccentOverride | null;
+}): { accent: string; ring: string; secondary: string } {
+  if (customAccent?.enabled && customAccent.accentColor) {
+    return {
+      accent: customAccent.accentColor,
+      ring: customAccent.accentColor,
+      secondary: customAccent.secondaryColor || customAccent.accentColor,
+    };
+  }
+  if (activeTheme === 'xbox') {
+    return { accent: '#60e650', ring: '#84f553', secondary: '#4ade80' };
+  }
+  if (activeTheme === 'ps5') {
+    return { accent: '#6cb6ff', ring: '#8ec5ff', secondary: '#38bdf8' };
+  }
+  if (activeOsTheme === 'linux') {
+    return { accent: '#88c0d0', ring: '#8fbcbb', secondary: '#a3be8c' };
+  }
+  if (activeOsTheme === 'macos') {
+    return { accent: '#3b82f6', ring: '#38bdf8', secondary: '#a855f7' };
+  }
+  return { accent: '#6cb6ff', ring: '#7ec2ff', secondary: '#38bdf8' };
+}
+
 interface CustomCursorOverlayProps {
   enabled: boolean;
   activeTheme?: AppThemeMode;
+  activeOsTheme?: ResolvedOsTheme;
+  customAccent?: CustomCursorAccentOverride | null;
 }
 
 const BURST_POOL_SIZE = 3;
@@ -154,6 +193,8 @@ interface BurstSlotNodes {
 export const CustomCursorOverlay = memo(function CustomCursorOverlay({
   enabled,
   activeTheme = 'default',
+  activeOsTheme = 'windows',
+  customAccent = null,
 }: CustomCursorOverlayProps) {
   const [isFinePointer, setIsFinePointer] = useState<boolean>(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return true;
@@ -209,10 +250,18 @@ export const CustomCursorOverlay = memo(function CustomCursorOverlay({
   const pressedRef = useRef(false);
   const rafRef = useRef<number | null>(null);
 
-  const accentBlue = activeTheme === 'xbox' ? '#60e650' : '#6cb6ff';
-  const ringBlue = activeTheme === 'xbox' ? '#84f553' : '#7ec2ff';
+  const cursorPalette = resolveCursorPalette({
+    activeTheme,
+    activeOsTheme,
+    customAccent,
+  });
+  const accentBlue = cursorPalette.accent;
+  const ringBlue = cursorPalette.ring;
+  const ringSecondary = cursorPalette.secondary;
   const ringBlueRef = useRef(ringBlue);
   ringBlueRef.current = ringBlue;
+  const ringSecondaryRef = useRef(ringSecondary);
+  ringSecondaryRef.current = ringSecondary;
 
   // Watch pointer capability changes (e.g. tablet detach/attach)
   useEffect(() => {
@@ -365,6 +414,7 @@ export const CustomCursorOverlay = memo(function CustomCursorOverlay({
 
       const isBlocked = kind === 'not-allowed';
       const burstColor = isBlocked ? '#f87171' : ringBlueRef.current;
+      const secondaryBurstColor = isBlocked ? '#fda4af' : ringSecondaryRef.current;
 
       slot.root.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
@@ -380,7 +430,7 @@ export const CustomCursorOverlay = memo(function CustomCursorOverlay({
       }
 
       if (slot.innerCircle) {
-        slot.innerCircle.setAttribute('stroke', burstColor);
+        slot.innerCircle.setAttribute('stroke', secondaryBurstColor);
         slot.innerAnim = slot.innerCircle.animate(
           [
             { opacity: 0.95, transform: 'scale(0.45)' },
@@ -546,7 +596,7 @@ export const CustomCursorOverlay = memo(function CustomCursorOverlay({
               cy="26"
               r="5"
               fill="none"
-              stroke={ringBlue}
+              stroke={ringSecondary}
               strokeWidth="1.8"
               style={{ opacity: 0, transformOrigin: '26px 26px' }}
             />

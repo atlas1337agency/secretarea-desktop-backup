@@ -1,8 +1,10 @@
+const os = require('os');
 const fs = require('fs');
 const fsp = fs.promises;
 const path = require('path');
 const { execFile } = require('child_process');
 const si = require('systeminformation');
+const { readMacSystemProfilerDisplaysAsync } = require('./platformTelemetry.cjs');
 
 function runExec(cmd, args, timeoutMs = 2800) {
   return new Promise((resolve) => {
@@ -86,6 +88,14 @@ function classifyCpuFamily(modelName, manufacturer) {
       }
     }
     return { vendor: 'Intel', series, generation };
+  }
+  if (lower.includes('apple') || /\bm[1-9]\b(?:\s*(?:pro|max|ultra))?/i.test(lower)) {
+    const mMatch = full.match(/\b(m[1-9](?:\s*(?:pro|max|ultra))?)\b/i);
+    return {
+      vendor: 'Apple',
+      series: 'Apple Silicon',
+      generation: mMatch ? mMatch[1].replace(/\s+/g, ' ').trim() : null,
+    };
   }
   return { vendor: sanitize(manufacturer), series: null, generation: null };
 }
@@ -318,6 +328,9 @@ function determineHybridGpuMode({ gpus, hasBattery }) {
   if (gpus.length >= 2) {
     return `Multi-GPU (${gpus.length} Adapters)`;
   }
+  if (/apple/i.test(`${gpus[0]?.model || ''} ${gpus[0]?.manufacturer || ''}`)) {
+    return 'Apple Silicon Unified Memory';
+  }
   if (isIntegratedGpuModel(gpus[0]?.model, gpus[0]?.manufacturer)) {
     return 'Integrated Graphics Only';
   }
@@ -345,7 +358,69 @@ function estimateDirectXVersionFromGpus(gpus, dxdiagText) {
 function createDisplayLaptopAdapter({ execWinPs } = {}) {
   let cachedStaticWinInfo = null;
   let lastWinInfoAt = 0;
+  let cachedStaticMacInfo = null;
+  let lastMacInfoAt = 0;
   let confirmedNoBattery = false;
+
+  async function queryMacExtendedSystem() {
+    if (process.platform !== 'darwin') return null;
+    const now = Date.now();
+    if (cachedStaticMacInfo && now - lastMacInfoAt < 30000) {
+      return cachedStaticMacInfo;
+    }
+    const [battRaw, pmsetRaw] = await Promise.all([
+      confirmedNoBattery ? Promise.resolve(null) : runExec('ioreg', ['-rc', 'AppleSmartBattery'], 2800),
+      confirmedNoBattery ? Promise.resolve(null) : runExec('pmset', ['-g', 'batt'], 2200),
+    ]);
+    let hasBattery = false;
+    let maxCap = null;
+    let designCap = null;
+    let isCharging = null;
+    let externalConnected = null;
+    let currentPct = null;
+
+    if (battRaw && /AppleSmartBattery/i.test(battRaw)) {
+      hasBattery = true;
+      const designMatch = battRaw.match(/"DesignCapacity"\s*=\s*(\d+)/i);
+      const maxMatch = battRaw.match(/"(?:AppleRawMaxCapacity|MaxCapacity)"\s*=\s*(\d+)/i);
+      const extMatch = battRaw.match(/"ExternalConnected"\s*=\s*(Yes|No)/i);
+      const chgMatch = battRaw.match(/"IsCharging"\s*=\s*(Yes|No)/i);
+      const pctMatch = battRaw.match(/"CurrentCapacity"\s*=\s*(\d+)/i);
+      if (designMatch) designCap = toNum(designMatch[1]);
+      if (maxMatch) maxCap = toNum(maxMatch[1]);
+      if (extMatch) externalConnected = extMatch[1].toLowerCase() === 'yes';
+      if (chgMatch) isCharging = chgMatch[1].toLowerCase() === 'yes';
+      if (pctMatch && maxCap && maxCap > 0 && toNum(pctMatch[1]) <= maxCap && maxCap > 100) {
+        currentPct = Math.round((toNum(pctMatch[1]) / maxCap) * 100);
+      } else if (pctMatch && toNum(pctMatch[1]) <= 100) {
+        currentPct = toNum(pctMatch[1]);
+      }
+    }
+    if (pmsetRaw) {
+      if (/InternalBattery/i.test(pmsetRaw)) {
+        hasBattery = true;
+        const pMatch = pmsetRaw.match(/(\d{1,3})%/);
+        if (pMatch) currentPct = toNum(pMatch[1]);
+        if (/charging/i.test(pmsetRaw) && !/discharging/i.test(pmsetRaw)) {
+          isCharging = true;
+        } else if (/discharging/i.test(pmsetRaw)) {
+          isCharging = false;
+        }
+        if (/AC Power/i.test(pmsetRaw)) externalConnected = true;
+        else if (/Battery Power/i.test(pmsetRaw)) externalConnected = false;
+      }
+    }
+    cachedStaticMacInfo = {
+      hasBattery,
+      batteryPercent: currentPct,
+      acConnected: externalConnected,
+      isCharging,
+      designedCapacity: designCap,
+      maxCapacity: maxCap,
+    };
+    lastMacInfoAt = Date.now();
+    return cachedStaticMacInfo;
+  }
 
   async function queryWindowsExtendedSystem() {
     if (process.platform !== 'win32') return null;
@@ -390,14 +465,15 @@ function createDisplayLaptopAdapter({ execWinPs } = {}) {
   }
 
   async function collectDisplayAndLaptopInfo({ gpus }) {
-    const [siGraphics, siBattery, winExt] = await Promise.all([
+    const [siGraphics, siBattery, winExt, macExt] = await Promise.all([
       si.graphics().catch(() => null),
       confirmedNoBattery ? Promise.resolve(null) : si.battery().catch(() => null),
       queryWindowsExtendedSystem().catch(() => null),
+      queryMacExtendedSystem().catch(() => null),
     ]);
-    if (siBattery && siBattery.hasBattery === false && !winExt?.bat) {
+    if (siBattery && siBattery.hasBattery === false && !winExt?.bat && !macExt?.hasBattery) {
       confirmedNoBattery = true;
-    } else if (siBattery?.hasBattery || winExt?.bat) {
+    } else if (siBattery?.hasBattery || winExt?.bat || macExt?.hasBattery) {
       confirmedNoBattery = false;
     }
 
@@ -419,6 +495,14 @@ function createDisplayLaptopAdapter({ execWinPs } = {}) {
       : [];
 
     const monitors = matchDisplayMonitors(rawDisplays, winDisplays, winMonIds, winVideoCtrls);
+
+    // On macOS, if systeminformation graphics displays omitted resolution or builtin flags, consult cached system_profiler displays
+    if (process.platform === 'darwin' && monitors.length === 0) {
+      const macDisp = await readMacSystemProfilerDisplaysAsync(os.totalmem()).catch(() => ({ displays: [] }));
+      if (Array.isArray(macDisp?.displays) && macDisp.displays.length > 0) {
+        monitors.push(...macDisp.displays);
+      }
+    }
 
     // If si.graphics().displays was empty on headless Linux or certain Windows drivers, inspect Win32_VideoController
     if (monitors.length === 0 && winVideoCtrls.length > 0) {
@@ -455,19 +539,35 @@ function createDisplayLaptopAdapter({ execWinPs } = {}) {
     }
 
     // Battery & Laptop Support
-    let hasBattery = Boolean(siBattery?.hasBattery || winExt?.bat);
-    let batteryPercent = toNum(siBattery?.percent) ?? toNum(winExt?.bat?.EstimatedChargeRemaining);
+    let hasBattery = Boolean(siBattery?.hasBattery || winExt?.bat || macExt?.hasBattery);
+    let batteryPercent =
+      toNum(siBattery?.percent) ??
+      toNum(winExt?.bat?.EstimatedChargeRemaining) ??
+      toNum(macExt?.batteryPercent);
     let acConnected =
       typeof siBattery?.acConnected === 'boolean'
         ? siBattery.acConnected
         : winExt?.bat?.BatteryStatus !== undefined
         ? Number(winExt.bat.BatteryStatus) === 2 || Number(winExt.bat.BatteryStatus) >= 6
+        : typeof macExt?.acConnected === 'boolean'
+        ? macExt.acConnected
         : null;
-    let isCharging = typeof siBattery?.isCharging === 'boolean' ? siBattery.isCharging : null;
+    let isCharging =
+      typeof siBattery?.isCharging === 'boolean'
+        ? siBattery.isCharging
+        : typeof macExt?.isCharging === 'boolean'
+        ? macExt.isCharging
+        : null;
 
     let batteryHealthPercent = null;
-    const designedCap = toNum(siBattery?.designedCapacity) ?? toNum(winExt?.batStatic?.DesignedCapacity);
-    const maxCap = toNum(siBattery?.maxCapacity) ?? toNum(winExt?.batFull?.FullChargedCapacity);
+    const designedCap =
+      toNum(siBattery?.designedCapacity) ??
+      toNum(winExt?.batStatic?.DesignedCapacity) ??
+      toNum(macExt?.designedCapacity);
+    const maxCap =
+      toNum(siBattery?.maxCapacity) ??
+      toNum(winExt?.batFull?.FullChargedCapacity) ??
+      toNum(macExt?.maxCapacity);
     if (designedCap && maxCap && designedCap > 0) {
       batteryHealthPercent = Math.min(100, Math.max(1, Math.round((maxCap / designedCap) * 100)));
     }
@@ -525,7 +625,13 @@ function createDisplayLaptopAdapter({ execWinPs } = {}) {
         ? (gpus.find((g) => !isIntegratedGpuModel(g.model, g.manufacturer)) || gpus[0]).model
         : null;
 
+    const resolvedOsVersion =
+      typeof process.getSystemVersion === 'function'
+        ? process.getSystemVersion()
+        : os.release();
+
     return {
+      osVersion: resolvedOsVersion,
       monitors,
       primaryMonitor,
       activeRenderingGpu,

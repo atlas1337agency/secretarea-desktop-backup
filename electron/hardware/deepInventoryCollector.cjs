@@ -5,6 +5,11 @@ const path = require('path');
 const { execFile } = require('child_process');
 const si = require('systeminformation');
 const { readManagedLhmSensors } = require('./lhmLibBridge.cjs');
+const {
+  readMacSysctlAsync,
+  readMacSystemProfilerDisplaysAsync,
+  probeLinuxRaplEnergyAsync,
+} = require('./platformTelemetry.cjs');
 
 function runExecFile(cmd, args, timeoutMs = 6500) {
   return new Promise((resolve) => {
@@ -1008,6 +1013,7 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
     pendingPromise = (async () => {
       const isWindows = process.platform === 'win32';
       const isLinux = process.platform === 'linux';
+      const isDarwin = process.platform === 'darwin';
       const limitations = [];
 
       const [
@@ -1023,6 +1029,9 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
         winData,
         linuxSensors,
         linuxTpmInfo,
+        linuxRaplProbe,
+        macSysctl,
+        macProfiler,
         nvSmiRes,
       ] = await Promise.all([
         si.system().catch(() => null),
@@ -1037,17 +1046,36 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
         isWindows ? queryWindowsDeepData().catch(() => null) : Promise.resolve(null),
         isLinux ? readLinuxSensors().catch(() => ({ fans: [], temps: [] })) : Promise.resolve({ fans: [], temps: [] }),
         isLinux ? readLinuxTpmInfo().catch(() => null) : Promise.resolve(null),
+        isLinux ? probeLinuxRaplEnergyAsync().catch(() => null) : Promise.resolve(null),
+        isDarwin ? readMacSysctlAsync().catch(() => ({})) : Promise.resolve({}),
+        isDarwin ? readMacSystemProfilerDisplaysAsync(os.totalmem()).catch(() => ({ gpus: [], displays: [] })) : Promise.resolve({ gpus: [], displays: [] }),
         queryNvidiaSmiDeep(),
       ]);
 
       const chassis = mapChassisFormFactor(winData?.enc?.ChassisTypes);
       const hasBattery = Boolean(siBattery?.hasBattery || winData?.bat);
+      const hwModelStr = String(macSysctl?.hwModel || siSys?.model || '').toLowerCase();
       const formFactor =
         chassis.formFactor !== 'unknown'
           ? chassis.formFactor
+          : isDarwin && /macbook/i.test(hwModelStr)
+          ? 'laptop'
+          : isDarwin && /(imac|macmini|macstudio|macpro)/i.test(hwModelStr)
+          ? 'desktop'
           : hasBattery
           ? 'laptop'
           : 'unknown';
+
+      if (isLinux) {
+        if (linuxRaplProbe?.status === 'permission_required') {
+          limitations.push('Linux RAPL package power counters (sysfs powercap energy_uj) require elevated read permission on this kernel.');
+        }
+        if (!fs.existsSync('/sys/class/hwmon')) {
+          limitations.push('Linux sysfs /sys/class/hwmon sensors are unavailable in this environment.');
+        }
+      } else if (isDarwin) {
+        limitations.push('macOS does not expose Apple SMC die temperatures, fan RPMs, or package wattage to unprivileged user-space apps without privileged helpers.');
+      }
 
       if (isWindows && typeof winData?.isAdmin === 'boolean' && typeof onElevationDetected === 'function') {
         try {
@@ -1643,17 +1671,21 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
         detectionLimitations: limitations,
         system: {
           formFactor,
-          chassisTypeLabel: chassis.label,
-          manufacturer: cleanStr(winData?.cs?.Manufacturer) || cleanStr(siSys?.manufacturer),
-          model: cleanStr(winData?.cs?.Model) || cleanStr(winData?.csp?.Name) || cleanStr(siSys?.model),
+          chassisTypeLabel: chassis.label || (isDarwin ? macSysctl?.hwModel || 'Mac' : null),
+          manufacturer: cleanStr(winData?.cs?.Manufacturer) || cleanStr(siSys?.manufacturer) || (isDarwin ? 'Apple' : null),
+          model: cleanStr(winData?.cs?.Model) || cleanStr(winData?.csp?.Name) || cleanStr(siSys?.model) || cleanStr(macSysctl?.hwModel),
           sku: cleanStr(winData?.cs?.SystemSKUNumber) || cleanStr(winData?.csp?.SKUNumber) || cleanStr(siSys?.sku),
           family: cleanStr(winData?.cs?.SystemFamily),
           serialMasked: maskValue(winData?.bios?.SerialNumber || winData?.csp?.IdentifyingNumber || siSys?.serial),
           uuidMasked: maskValue(winData?.csp?.UUID || siSys?.uuid),
           architecture: cleanStr(winData?.os?.OSArchitecture) || os.arch(),
-          osName: cleanStr(winData?.os?.Caption)?.replace(/^Microsoft\s+/i, '') || `${os.type()} ${os.release()}`,
-          osVersion: cleanStr(winData?.os?.Version) || os.release(),
-          osBuild: cleanStr(winData?.os?.BuildNumber),
+          osName:
+            cleanStr(winData?.os?.Caption)?.replace(/^Microsoft\s+/i, '') ||
+            (isDarwin && macSysctl?.osProductVersion ? `macOS ${macSysctl.osProductVersion}` : `${os.type()} ${os.release()}`),
+          osVersion:
+            cleanStr(winData?.os?.Version) ||
+            (isDarwin && macSysctl?.osProductVersion ? macSysctl.osProductVersion : os.release()),
+          osBuild: cleanStr(winData?.os?.BuildNumber) || (isDarwin ? cleanStr(macSysctl?.osVersionBuild) : null),
           bootMode:
             String(winData?.bootMode || '').toUpperCase().includes('UEFI')
               ? 'UEFI'
@@ -1661,6 +1693,10 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
               ? 'Legacy BIOS'
               : isLinux && fs.existsSync('/sys/firmware/efi')
               ? 'UEFI'
+              : isDarwin
+              ? macSysctl?.isAppleSilicon
+                ? 'Apple iBoot'
+                : 'Apple EFI'
               : 'Unknown',
           secureBoot: typeof winData?.secureBoot === 'boolean' ? winData.secureBoot : null,
           tpm: resolveTpmState({ platform: process.platform, winData, linuxTpmInfo }),
@@ -1695,13 +1731,16 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
           provenance: 'detected',
         },
         cpu: {
-          model: cpuModel,
-          manufacturer: cleanStr(winData?.cpu?.Manufacturer) || cleanStr(siCpu?.manufacturer),
+          model: macSysctl?.cpuModel || cpuModel,
+          manufacturer:
+            cleanStr(winData?.cpu?.Manufacturer) ||
+            cleanStr(siCpu?.manufacturer) ||
+            (isDarwin && macSysctl?.isAppleSilicon ? 'Apple' : null),
           architecture: os.arch(),
-          socket: cleanStr(winData?.cpu?.SocketDesignation) || cleanStr(siCpu?.socket) || guessedPlatform.socket,
-          physicalCores: toNum(winData?.cpu?.NumberOfCores) ?? toNum(siCpu?.physicalCores),
-          logicalThreads: toNum(winData?.cpu?.NumberOfLogicalProcessors) ?? toNum(siCpu?.cores),
-          baseClockGhz: normalizeCpuClockGhz(siCpu?.speed),
+          socket: cleanStr(winData?.cpu?.SocketDesignation) || cleanStr(siCpu?.socket) || guessedPlatform.socket || (isDarwin && macSysctl?.isAppleSilicon ? 'SoC Package' : null),
+          physicalCores: macSysctl?.physicalCores ?? toNum(winData?.cpu?.NumberOfCores) ?? toNum(siCpu?.physicalCores),
+          logicalThreads: macSysctl?.logicalThreads ?? toNum(winData?.cpu?.NumberOfLogicalProcessors) ?? toNum(siCpu?.cores),
+          baseClockGhz: macSysctl?.cpuBaseClockGhz ?? normalizeCpuClockGhz(siCpu?.speed),
           maxBoostClockGhz:
             toNum(winData?.cpu?.MaxClockSpeed) && Number(winData.cpu.MaxClockSpeed) > 0
               ? normalizeCpuClockGhz(Number(winData.cpu.MaxClockSpeed) / 1000)
@@ -1737,6 +1776,22 @@ function createDeepInventoryCollector({ getLhmLibraryInfo, onElevationDetected }
                   provenance: 'detected',
                 };
               })
+            : isDarwin && asArray(macProfiler?.gpus).length > 0
+            ? asArray(macProfiler.gpus).map((mg, idx) => ({
+                id: mg.id || `dgpu-mac-${idx}`,
+                model: mg.model || `Apple GPU ${idx + 1}`,
+                vendor: mg.manufacturer || 'Apple',
+                isIntegrated: Boolean(mg.isUnifiedMemory || classifyIsIntegratedGpu(mg.model, mg.manufacturer)),
+                workloadRole: mg.isUnifiedMemory
+                  ? 'Apple Silicon Unified Memory Graphics & Metal Compute'
+                  : 'Primary 3D Rendering, Gaming & Compute',
+                driverVersion: macSysctl?.osProductVersion ? `macOS ${macSysctl.osProductVersion}` : null,
+                driverDate: null,
+                vramMB: mg.vramMB,
+                directXFeatureLevel: null,
+                pnpDeviceId: null,
+                provenance: 'detected',
+              }))
             : asArray(siGraphics?.controllers).map((c, idx) => {
                 const name = cleanStr(c?.model) || `GPU ${idx + 1}`;
                 const vendor = cleanStr(c?.vendor);

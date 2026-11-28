@@ -166,11 +166,14 @@ function buildCleanerCategories({ getUserDataPath }) {
   const sysTemp = os.tmpdir();
 
   const isWin = process.platform === 'win32';
+  const isMac = process.platform === 'darwin';
   const categories = [];
 
   // 1. Old Temporary Files (> 24h in Windows\Temp or /tmp)
   const oldTempRoots = isWin
     ? [path.join(winDir, 'Temp')]
+    : isMac
+    ? Array.from(new Set([sysTemp, '/tmp'].filter(Boolean)))
     : [sysTemp];
   categories.push({
     id: 'old_temp',
@@ -186,6 +189,9 @@ function buildCleanerCategories({ getUserDataPath }) {
   if (sysTemp && !oldTempRoots.includes(sysTemp)) {
     userTempRoots.push(sysTemp);
   }
+  if (isMac && sysTemp && !userTempRoots.includes(sysTemp)) {
+    userTempRoots.push(sysTemp);
+  }
   if (isWin && localAppData) {
     const p = path.join(localAppData, 'Temp');
     if (!userTempRoots.includes(p)) userTempRoots.push(p);
@@ -199,10 +205,16 @@ function buildCleanerCategories({ getUserDataPath }) {
     filePattern: null,
   });
 
-  // 3. Application Crash & Telemetry Temp Cache (Win CrashDumps / Temp logs)
-  const appCacheRoots = isWin && localAppData
-    ? [path.join(localAppData, 'CrashDumps')]
-    : [path.join(homeDir, '.cache', 'thumbnails')];
+  // 3. Application Crash & Telemetry Temp Cache (Win CrashDumps / macOS DiagnosticReports / Linux thumbnails)
+  const appCacheRoots =
+    isWin && localAppData
+      ? [path.join(localAppData, 'CrashDumps')]
+      : isMac
+      ? [
+          path.join(homeDir, 'Library', 'Logs', 'DiagnosticReports'),
+          path.join(homeDir, 'Library', 'Logs', 'CrashReporter'),
+        ]
+      : [path.join(homeDir, '.cache', 'thumbnails')];
   categories.push({
     id: 'app_cache',
     defaultSelected: true,
@@ -252,6 +264,8 @@ function buildCleanerCategories({ getUserDataPath }) {
         path.join(localAppData, 'AMD', 'GLCache'),
         path.join(localAppData, 'Intel', 'ShaderCache'),
       ]
+    : isMac
+    ? []
     : [path.join(homeDir, '.cache', 'mesa_shader_cache')];
   categories.push({
     id: 'dx_shader_cache',
@@ -262,7 +276,7 @@ function buildCleanerCategories({ getUserDataPath }) {
     filePattern: null,
   });
 
-  // 7. Recycle Bin (OPT-IN — unchecked by default)
+  // 7. Recycle Bin (OPT-IN — unchecked by default; disabled on macOS so TCC privacy prompt never triggers on ~/.Trash)
   categories.push({
     id: 'recycle_bin',
     defaultSelected: false,
@@ -273,7 +287,7 @@ function buildCleanerCategories({ getUserDataPath }) {
     filePattern: null,
   });
 
-  // 8. Browser Cache ONLY (OPT-IN — strictly Cache / Code Cache / cache2 directories, NEVER cookies/logins/bookmarks/history)
+  // 8. Browser Cache ONLY (OPT-IN — strictly Cache / Code Cache / cache2 directories; NEVER Safari on macOS to avoid TCC prompts)
   const browserCacheRoots = isWin && localAppData
     ? [
         path.join(localAppData, 'Google', 'Chrome', 'User Data', 'Default', 'Cache'),
@@ -282,6 +296,14 @@ function buildCleanerCategories({ getUserDataPath }) {
         path.join(localAppData, 'Microsoft', 'Edge', 'User Data', 'Default', 'Code Cache'),
         path.join(localAppData, 'BraveSoftware', 'Brave-Browser', 'User Data', 'Default', 'Cache'),
         path.join(localAppData, 'Mozilla', 'Firefox', 'Profiles'),
+      ]
+    : isMac
+    ? [
+        path.join(homeDir, 'Library', 'Caches', 'Google', 'Chrome', 'Default', 'Cache'),
+        path.join(homeDir, 'Library', 'Caches', 'Google', 'Chrome', 'Default', 'Code Cache'),
+        path.join(homeDir, 'Library', 'Caches', 'Microsoft Edge', 'Default', 'Cache'),
+        path.join(homeDir, 'Library', 'Caches', 'BraveSoftware', 'Brave-Browser', 'Default', 'Cache'),
+        path.join(homeDir, 'Library', 'Caches', 'Firefox', 'Profiles'),
       ]
     : [
         path.join(homeDir, '.cache', 'google-chrome', 'Default', 'Cache'),
@@ -383,9 +405,9 @@ function createPcCleaner({ getMainWindow, getUserDataPath }) {
           continue;
         }
 
-        // For Firefox Profiles on Windows, scope strictly to .../cache2 so bookmarks/passwords are untouched
+        // For Firefox Profiles on Windows & macOS, scope strictly to .../cache2 so bookmarks/passwords are untouched
         let effectiveRoots = cat.roots;
-        if (cat.id === 'browser_cache' && process.platform === 'win32') {
+        if (cat.id === 'browser_cache' && (process.platform === 'win32' || process.platform === 'darwin')) {
           const expanded = [];
           for (const r of cat.roots) {
             if (r.endsWith('Profiles') && fs.existsSync(r)) {
@@ -406,12 +428,21 @@ function createPcCleaner({ getMainWindow, getUserDataPath }) {
           effectiveRoots = expanded;
         }
 
-        const scanRes = await scanDirectoryTargets(effectiveRoots, {
-          minAgeMs: cat.minAgeMs,
-          filePattern: cat.filePattern,
-          allowedRoots: effectiveRoots,
-          cancelledRef,
-        });
+        const isCategorySupported =
+          cat.id === 'thumbnail_cache'
+            ? process.platform === 'win32'
+            : cat.id === 'dx_shader_cache'
+            ? process.platform !== 'darwin'
+            : true;
+
+        const scanRes = isCategorySupported
+          ? await scanDirectoryTargets(effectiveRoots, {
+              minAgeMs: cat.minAgeMs,
+              filePattern: cat.filePattern,
+              allowedRoots: effectiveRoots,
+              cancelledRef,
+            })
+          : { scannedDirs: [], totalBytes: 0, fileCount: 0, matchedPaths: [] };
 
         cachedScannedItemsByCategory.set(cat.id, {
           isRecycleBin: false,
@@ -424,7 +455,7 @@ function createPcCleaner({ getMainWindow, getUserDataPath }) {
           id: cat.id,
           defaultSelected: cat.defaultSelected,
           optInWarning: cat.optInWarning,
-          supported: true,
+          supported: isCategorySupported,
           paths: scanRes.scannedDirs.length > 0 ? scanRes.scannedDirs : effectiveRoots.filter((r) => fs.existsSync(r)),
           fileCount: scanRes.fileCount,
           estimatedBytes: scanRes.totalBytes,

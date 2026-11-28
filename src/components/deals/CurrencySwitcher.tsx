@@ -113,19 +113,19 @@ export function CurrencySwitcher({
           aria-expanded={openMenu === 'currency'}
           aria-haspopup="dialog"
           aria-label={labels.currencyLabel}
-          className={`sa-ps5-subpanel w-full sm:w-auto inline-flex items-center justify-between gap-2 h-9 px-2.5 sm:px-3 rounded-xl text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer min-w-0 active:scale-[0.98] ${controlSurfaceClass(
+          className={`sa-ps5-subpanel w-full sm:w-auto inline-flex items-center justify-between gap-2 h-9 px-2.5 sm:px-3 rounded-[var(--sa-btn-radius)] text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer min-w-0 active:scale-[0.98] ${controlSurfaceClass(
             openMenu === 'currency'
           )}`}
         >
           <span className="inline-flex items-center gap-2 min-w-0">
             <span
               dir="ltr"
-              className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-1 rounded-md font-mono-tabular text-[11px] font-bold shrink-0 ${
+              className={`sa-icon-badge inline-flex items-center justify-center min-w-[22px] h-[22px] px-1 rounded-[var(--sa-card-inner-radius)] font-mono-tabular text-[11px] font-bold shrink-0 ${
                 isXbox
                   ? 'bg-[#52e042]/18 text-[#6ee755]'
                   : isPs5
                   ? 'bg-[#0070d1]/30 text-[#7cc4ff]'
-                  : 'bg-sky-500/12 text-[#0284c7] dark:text-[#38bdf8] sa-custom-accent-text'
+                  : ''
               }`}
             >
               {activeMeta.symbol}
@@ -152,7 +152,7 @@ export function CurrencySwitcher({
           aria-expanded={openMenu === 'region'}
           aria-haspopup="dialog"
           aria-label={labels.regionLabel}
-          className={`sa-ps5-subpanel w-full sm:w-auto inline-flex items-center justify-between gap-2 h-9 px-2.5 sm:px-3 rounded-xl text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer min-w-0 active:scale-[0.98] ${controlSurfaceClass(
+          className={`sa-ps5-subpanel w-full sm:w-auto inline-flex items-center justify-between gap-2 h-9 px-2.5 sm:px-3 rounded-[var(--sa-btn-radius)] text-[12.5px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer min-w-0 active:scale-[0.98] ${controlSurfaceClass(
             openMenu === 'region'
           )}`}
         >
@@ -164,7 +164,7 @@ export function CurrencySwitcher({
                   ? 'text-[#6ee755]'
                   : isPs5
                   ? 'text-[#7cc4ff]'
-                  : 'text-[#0284c7] dark:text-[#38bdf8] sa-custom-accent-text'
+                  : 'text-[var(--sa-accent)]'
               }`}
             />
             <span className="truncate">
@@ -233,24 +233,22 @@ export function CurrencySwitcher({
                     onSelectCurrency(opt.code);
                     setOpenMenu(null);
                   }}
-                  className={`sa-ps5-subpanel flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl border text-start transition-all cursor-pointer active:scale-[0.98] ${
+                  className={`sa-ps5-subpanel flex items-center justify-between gap-2 px-2.5 py-2 rounded-[var(--sa-card-inner-radius)] border text-start transition-all cursor-pointer active:scale-[0.98] ${
                     active
                       ? isXbox
                         ? 'bg-[#107C10]/30 border-[#6ee755] text-white'
                         : isPs5
                         ? 'bg-[#0070d1]/35 border-[#7cc4ff] text-white'
-                        : 'bg-sky-500/12 border-[#0284c7] dark:border-[#38bdf8] text-slate-900 dark:text-white'
+                        : 'bg-[var(--sa-accent-soft)] border-[var(--sa-accent)] text-slate-900 dark:text-white'
                       : 'bg-slate-50/70 hover:bg-slate-100 dark:bg-[#10161e]/75 dark:hover:bg-[#1b2432] border-slate-200/80 dark:border-white/[0.06] text-slate-800 dark:text-[#cbd6e4]'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
                       dir="ltr"
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono-tabular text-[11.5px] font-bold shrink-0 ${
+                      className={`w-8 h-8 rounded-[var(--sa-card-inner-radius)] flex items-center justify-center font-mono-tabular text-[11.5px] font-bold shrink-0 ${
                         active
-                          ? isXbox
-                            ? 'bg-[#107C10] text-white'
-                            : 'bg-[#0284c7] dark:bg-[#1a9fff] text-white'
+                          ? 'bg-[var(--sa-accent)] text-[var(--sa-accent-fg)]'
                           : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-700 dark:text-[#cbd6e4]'
                       }`}
                     >
@@ -276,11 +274,7 @@ export function CurrencySwitcher({
                     {active && (
                       <Check
                         weight="bold"
-                        className={`w-3.5 h-3.5 shrink-0 ${
-                          isXbox
-                            ? 'text-[#6ee755]'
-                            : 'text-[#0284c7] dark:text-[#38bdf8] sa-custom-accent-text'
-                        }`}
+                        className="w-3.5 h-3.5 shrink-0 text-[var(--sa-accent)]"
                       />
                     )}
                   </div>
@@ -317,13 +311,13 @@ export function CurrencySwitcher({
                     onSelectRegion(opt.code);
                     setOpenMenu(null);
                   }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-start text-[12.5px] transition-colors cursor-pointer ${
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-[var(--sa-card-inner-radius)] text-start text-[12.5px] transition-colors cursor-pointer ${
                     active
                       ? isXbox
                         ? 'bg-[#107C10]/30 text-white font-semibold'
                         : isPs5
                         ? 'bg-[#0070d1]/35 text-white font-semibold'
-                        : 'bg-sky-500/12 text-[#0284c7] dark:text-[#38bdf8] font-semibold'
+                        : 'bg-[var(--sa-accent-soft)] text-[var(--sa-accent)] font-semibold'
                       : 'text-slate-700 dark:text-[#cbd6e4] hover:bg-slate-100 dark:hover:bg-white/[0.06]'
                   }`}
                 >

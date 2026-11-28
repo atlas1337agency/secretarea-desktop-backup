@@ -13,7 +13,7 @@ export function ProvenanceTag({
     provenance === 'measured' || provenance === 'detected'
       ? 'text-emerald-700 dark:text-[#34d399]'
       : provenance === 'manufacturer_spec'
-      ? 'text-[#0284c7] dark:text-[#38bdf8]'
+      ? 'text-[var(--sa-accent)]'
       : provenance === 'estimated'
       ? 'text-amber-700 dark:text-amber-300'
       : 'text-slate-500 dark:text-[#8b9bb4]';
@@ -51,12 +51,12 @@ export function ExpandablePanel({
           className="flex items-center gap-2.5 text-start min-w-0 flex-1 cursor-pointer group"
         >
           {icon && (
-            <span className="w-8 h-8 rounded-lg bg-sky-500/10 dark:bg-[#38bdf8]/12 border border-sky-500/20 dark:border-[#38bdf8]/25 flex items-center justify-center shrink-0 text-[#0284c7] dark:text-[#38bdf8]">
+            <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
               {icon}
             </span>
           )}
           <div className="min-w-0">
-            <h3 className="font-display text-[15px] font-bold text-slate-900 dark:text-white truncate group-hover:text-[#0284c7] dark:group-hover:text-[#38bdf8] transition-colors">
+            <h3 className="font-display text-[15px] font-bold text-slate-900 dark:text-white truncate group-hover:text-[var(--sa-accent)] transition-colors">
               {title}
             </h3>
             {subtitle && (
@@ -71,7 +71,7 @@ export function ExpandablePanel({
             type="button"
             onClick={() => setExpanded((prev) => !prev)}
             aria-label={expanded ? 'Collapse section' : 'Expand section'}
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] flex items-center justify-center text-slate-600 dark:text-[#9cb0c9] transition-colors cursor-pointer"
+            className="sa-btn-secondary w-8 h-8 p-0 flex items-center justify-center cursor-pointer"
           >
             {expanded ? <CaretUp className="w-4 h-4" /> : <CaretDown className="w-4 h-4" />}
           </button>

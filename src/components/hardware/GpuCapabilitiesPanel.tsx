@@ -36,7 +36,7 @@ function getTechStatusDisplay(
     case 'supported':
       return {
         label: t.techStatusSupported,
-        tone: 'text-[#0284c7] dark:text-[#38bdf8] bg-sky-500/12 border-sky-500/30',
+        tone: 'text-[var(--sa-accent)] bg-[var(--sa-accent-soft)] border-[var(--sa-accent-ring)]',
         Icon: CheckCircle,
       };
     case 'detected':
@@ -87,11 +87,11 @@ export function GpuCapabilitiesPanel({ language, snapshot }: GpuCapabilitiesPane
       {/* Header Summary */}
       <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-2">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-sky-500/12 dark:bg-[#38bdf8]/15 border border-sky-500/25 dark:border-[#38bdf8]/30 flex items-center justify-center shrink-0">
-            <GraphicsCard weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8]" />
+          <div className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
+            <GraphicsCard weight="duotone" className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-[16px] font-bold text-slate-900 dark:text-white">{t.techTitle}</h2>
+            <h2 className="font-display text-[16px] font-bold text-slate-900 dark:text-white">{t.techTitle}</h2>
             <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9]">{t.techSubtitle}</p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export function GpuCapabilitiesPanel({ language, snapshot }: GpuCapabilitiesPane
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
                 <div className="space-y-0.5 min-w-0">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-violet-700 dark:text-[#a78bfa]">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--sa-accent)]">
                     {profile.vendor} {profile.isIntegrated ? '· iGPU' : '· dGPU'}
                   </div>
                   <h3 className="text-[15.5px] font-bold text-slate-900 dark:text-white truncate">
@@ -182,7 +182,7 @@ export function GpuCapabilitiesPanel({ language, snapshot }: GpuCapabilitiesPane
         {/* Display & Windows Gaming Settings */}
         <article className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-3">
           <div className="flex items-center gap-2.5">
-            <Monitor weight="duotone" className="w-5 h-5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />
+            <Monitor weight="duotone" className="w-5 h-5 text-[var(--sa-accent)] shrink-0" />
             <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{t.displayTitle}</h3>
           </div>
 
@@ -222,19 +222,28 @@ export function GpuCapabilitiesPanel({ language, snapshot }: GpuCapabilitiesPane
             <div className="py-2 flex items-center justify-between gap-3">
               <span className="text-slate-600 dark:text-[#9cb0c9]">{t.displayDirectXLabel}</span>
               <span dir="ltr" className="font-mono-tabular font-semibold text-slate-900 dark:text-white">
-                {display?.directXVersion || naLabel}
+                {display?.directXVersion ||
+                  (snapshot.platform === 'linux' || snapshot.platform === 'darwin'
+                    ? `${naLabel} · ${t.windowsOnlyTag}`
+                    : naLabel)}
               </span>
             </div>
             <div className="py-2 flex items-center justify-between gap-3">
               <span className="text-slate-600 dark:text-[#9cb0c9]">{t.displayHagsLabel}</span>
               <span className="font-semibold text-slate-900 dark:text-white">
-                {display?.hagsStatus || naLabel}
+                {display?.hagsStatus ||
+                  (snapshot.platform === 'linux' || snapshot.platform === 'darwin'
+                    ? `${naLabel} · ${t.windowsOnlyTag}`
+                    : naLabel)}
               </span>
             </div>
             <div className="py-2 flex items-center justify-between gap-3">
               <span className="text-slate-600 dark:text-[#9cb0c9]">{t.displayGameModeLabel}</span>
               <span className="font-semibold text-slate-900 dark:text-white">
-                {display?.windowsGameMode || naLabel}
+                {display?.windowsGameMode ||
+                  (snapshot.platform === 'linux' || snapshot.platform === 'darwin'
+                    ? `${naLabel} · ${t.windowsOnlyTag}`
+                    : naLabel)}
               </span>
             </div>
             <div className="py-2 flex items-center justify-between gap-3">

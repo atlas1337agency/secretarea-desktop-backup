@@ -93,8 +93,10 @@ export function PriceAlertsView({
       {/* Header */}
       <div className={`sa-ps5-panel rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${panelClass}`}>
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <BellRinging className="w-5 h-5 text-amber-500 shrink-0" />
+          <div className="flex items-center gap-2.5">
+            <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
+              <BellRinging weight="bold" className="w-4 h-4 text-amber-500" />
+            </span>
             <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">
               {labels.alertsTitle}
             </h2>
@@ -108,11 +110,7 @@ export function PriceAlertsView({
           type="button"
           disabled={isChecking || rules.length === 0}
           onClick={onCheckNow}
-          className={`inline-flex items-center justify-center gap-2 min-h-[38px] px-4 py-1.5 rounded-xl text-[12.5px] font-semibold text-white whitespace-nowrap cursor-pointer disabled:opacity-50 ${
-            isXbox
-              ? 'bg-[#107C10] hover:bg-[#159315]'
-              : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff]'
-          }`}
+          className="sa-btn-primary inline-flex items-center justify-center gap-2 min-h-[38px] px-4 py-1.5 text-[12.5px] font-semibold whitespace-nowrap cursor-pointer disabled:opacity-50"
         >
           <ArrowsClockwise className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
           <span>{isChecking ? labels.alertsCheckingBtn : labels.alertsCheckNowBtn}</span>
@@ -130,7 +128,7 @@ export function PriceAlertsView({
               <button
                 type="button"
                 onClick={onMarkAllRead}
-                className="inline-flex items-center gap-1 text-[12px] font-semibold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
+                className="sa-link inline-flex items-center gap-1 text-[12px] font-semibold cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>{labels.alertsMarkAllReadBtn}</span>
@@ -183,7 +181,7 @@ export function PriceAlertsView({
                       onOpenExternal(ev.dealUrl);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-semibold cursor-pointer self-start sm:self-auto"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-emerald-600 hover:bg-emerald-500 text-white text-[12px] font-semibold cursor-pointer self-start sm:self-auto transition-colors"
                 >
                   <span>{labels.viewDealBtn}</span>
                   <ArrowSquareOut className="w-3.5 h-3.5" />
@@ -261,7 +259,7 @@ export function PriceAlertsView({
                           const usd = convertFilterAmountToUsd(raw, selectedCurrency, fxSnapshot);
                           onUpdateTargetUsd(rule.id, usd ?? null);
                         }}
-                        className="w-full sm:w-28 min-h-[34px] px-2.5 rounded-lg border border-slate-200 dark:border-white/[0.1] bg-white dark:bg-[#161e29] text-[12px] font-mono-tabular sm:text-end"
+                        className="sa-search-input w-full sm:w-28 min-h-[34px] px-2.5 border bg-white dark:bg-[#161e29] text-[12px] font-mono-tabular sm:text-end"
                       />
                     </div>
                     <button

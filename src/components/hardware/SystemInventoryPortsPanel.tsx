@@ -173,7 +173,7 @@ export function SystemInventoryPortsPanel({
                     <span
                       className={
                         sl.currentUsage === 'In Use'
-                          ? 'text-[#0284c7] dark:text-[#38bdf8] font-semibold shrink-0'
+                          ? 'text-[var(--sa-accent)] font-semibold shrink-0'
                           : 'text-emerald-600 dark:text-[#34d399] font-semibold shrink-0'
                       }
                     >
@@ -203,7 +203,7 @@ export function SystemInventoryPortsPanel({
         }
       >
         <div className="space-y-4">
-          <div className="rounded-lg bg-sky-50/80 dark:bg-[#38bdf8]/10 border border-sky-200 dark:border-[#38bdf8]/25 px-3.5 py-2.5 text-[12px] text-sky-900 dark:text-[#bae6fd]">
+          <div className="rounded-lg bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] px-3.5 py-2.5 text-[12px] text-slate-900 dark:text-[#e2eaf4]">
             {t.portsHonestyBanner}
           </div>
 
@@ -222,10 +222,11 @@ export function SystemInventoryPortsPanel({
                 <button
                   key={tab.id}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => setPortTab(tab.id)}
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-semibold border transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     active
-                      ? 'bg-[#0284c7] dark:bg-[#0ea5e9] border-[#0284c7] text-white'
+                      ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)] shadow-xs'
                       : 'bg-slate-50 dark:bg-[#10151c] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-[#cbd5e1] hover:bg-slate-100 dark:hover:bg-[#1e2633]'
                   }`}
                 >
@@ -260,7 +261,7 @@ export function SystemInventoryPortsPanel({
                       <div className="text-[13px] font-bold text-slate-900 dark:text-white truncate" title={p.name}>
                         {p.name}
                       </div>
-                      <div className="text-[11.5px] text-[#0284c7] dark:text-[#38bdf8] font-medium truncate">
+                      <div className="text-[11.5px] text-[var(--sa-accent)] font-medium truncate">
                         {p.connectorType || p.kind.toUpperCase()}
                       </div>
                     </div>
@@ -415,7 +416,7 @@ export function SystemInventoryPortsPanel({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-slate-900 dark:text-white">{g.model}</span>
-                    <span className="text-[11px] font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                    <span className="text-[11px] font-semibold text-[var(--sa-accent)]">
                       {g.isIntegrated ? 'iGPU (Integrated)' : 'dGPU (Discrete)'}
                     </span>
                   </div>
@@ -498,7 +499,7 @@ export function SystemInventoryPortsPanel({
                     <span>
                       {d.name} {d.diagonalInches ? `(${d.diagonalInches}")` : ''}
                     </span>
-                    <span className="text-[11px] text-[#0284c7] dark:text-[#38bdf8]">
+                    <span className="text-[11px] text-[var(--sa-accent)]">
                       {d.isInternal ? 'Internal Panel' : 'External'} {d.isPrimary ? '· Primary' : ''}
                     </span>
                   </div>
@@ -596,7 +597,7 @@ export function SystemInventoryPortsPanel({
                   >
                     <div className="flex items-center justify-between gap-2 font-bold text-slate-900 dark:text-white">
                       <span className="truncate">{a.name}</span>
-                      <span className="text-[11px] uppercase text-[#0284c7] dark:text-[#38bdf8] shrink-0">
+                      <span className="text-[11px] uppercase text-[var(--sa-accent)] shrink-0">
                         {a.kind} · {a.status}
                       </span>
                     </div>

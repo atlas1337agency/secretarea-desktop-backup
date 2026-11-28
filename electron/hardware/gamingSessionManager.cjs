@@ -383,17 +383,36 @@ function createGamingSessionManager({ getMainWindow, getUserDataPath, getPresent
       }
     }
 
-    // Linux process listing fallback (read-only /proc)
+    // Linux / macOS process listing fallback
     const out = await runExec('ps', ['-eo', 'pid=,comm=,rss='], 1800);
     if (!out) return [];
-    const ignoreNames = new Set(['systemd', 'bash', 'sh', 'ps', 'grep', 'dbus-daemon', 'kworker']);
+    const ignoreNames = new Set([
+      'systemd',
+      'bash',
+      'sh',
+      'zsh',
+      'ps',
+      'grep',
+      'dbus-daemon',
+      'kworker',
+      'launchd',
+      'kernel_task',
+      'WindowServer',
+      'loginwindow',
+      'cfprefsd',
+      'distnoted',
+      'mdworker',
+      'mds',
+      'mds_stores',
+    ]);
     const list = [];
     for (const line of out.split(/\r?\n/)) {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length < 3) continue;
-      const pid = Number(parts[0]);
-      const name = parts[1];
-      const rssKb = Number(parts[2]);
+      const m = line.trim().match(/^(\d+)\s+(.+?)\s+(\d+)$/);
+      if (!m) continue;
+      const pid = Number(m[1]);
+      const rawComm = m[2].trim();
+      const name = path.basename(rawComm);
+      const rssKb = Number(m[3]);
       if (!Number.isFinite(pid) || !name || ignoreNames.has(name)) continue;
       list.push({
         pid,
@@ -491,6 +510,8 @@ function createGamingSessionManager({ getMainWindow, getUserDataPath, getPresent
       const args =
         process.platform === 'win32'
           ? ['-n', '4', '-w', '900', pingTarget]
+          : process.platform === 'darwin'
+          ? ['-c', '4', '-W', '1000', pingTarget]
           : ['-c', '4', '-W', '1', pingTarget];
       const out = await runExec('ping', args, 5000);
       const parsed = parsePingOutput(out);

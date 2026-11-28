@@ -170,7 +170,7 @@ export function HealthDiagnosticsPanel({
               <select
                 value={workload}
                 onChange={(e) => onChangeWorkload(e.target.value as WorkloadProfileId)}
-                className="min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12.5px] font-semibold text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none cursor-pointer"
+                className="sa-search-input min-h-[36px] px-3 py-1.5 text-[12.5px] font-semibold cursor-pointer"
               >
                 {WORKLOAD_OPTIONS.map((opt) => (
                   <option key={opt.id} value={opt.id}>
@@ -184,7 +184,7 @@ export function HealthDiagnosticsPanel({
               type="button"
               onClick={onRefreshInventory}
               disabled={isLoadingInventory}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-[12px] font-semibold disabled:opacity-50 whitespace-nowrap cursor-pointer"
             >
               <ArrowClockwise className={`w-4 h-4 ${isLoadingInventory ? 'motion-safe:animate-spin' : ''}`} />
               <span>{t.intelRefreshDeepScan}</span>
@@ -196,7 +196,7 @@ export function HealthDiagnosticsPanel({
             <button
               type="button"
               onClick={() => setPrivacyShield((p) => !p)}
-              className={`inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg border text-[12px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+              className={`inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-[var(--sa-btn-radius)] border text-[12px] font-semibold whitespace-nowrap cursor-pointer transition-colors ${
                 privacyShield
                   ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-400/30 text-emerald-700 dark:text-[#34d399]'
                   : 'bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.1] text-slate-600 dark:text-[#9cb0c9]'
@@ -209,7 +209,7 @@ export function HealthDiagnosticsPanel({
             <button
               type="button"
               onClick={() => void handleExportJson()}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white whitespace-nowrap cursor-pointer transition-colors"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap cursor-pointer"
             >
               <DownloadSimple className="w-4 h-4 shrink-0" />
               <span>{t.intelExportJson}</span>
@@ -218,7 +218,7 @@ export function HealthDiagnosticsPanel({
             <button
               type="button"
               onClick={() => void handleExportPdf()}
-              className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#0284c7] text-white text-[12px] font-semibold whitespace-nowrap cursor-pointer transition-colors"
+              className="sa-btn-primary inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap cursor-pointer"
             >
               <FilePdf className="w-4 h-4 shrink-0" />
               <span>{isDesktopApp ? t.intelExportPdf : t.intelExportHtml}</span>
@@ -227,7 +227,7 @@ export function HealthDiagnosticsPanel({
         </div>
 
         {exportMessage && (
-          <div className="rounded-lg bg-sky-50 dark:bg-[#38bdf8]/10 border border-sky-200 dark:border-[#38bdf8]/25 px-3 py-2 text-[12px] text-sky-900 dark:text-[#bae6fd]">
+          <div className="rounded-lg bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] px-3 py-2 text-[12px] text-slate-900 dark:text-[#e2eaf4]">
             {exportMessage}
           </div>
         )}
@@ -271,7 +271,7 @@ export function HealthDiagnosticsPanel({
               </span>
               <ProvenanceTag provenance="estimated" labels={provenanceLabels} />
             </div>
-            <div dir="ltr" className="text-[24px] font-display font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]">
+            <div dir="ltr" className="text-[24px] font-display font-bold font-mono-tabular text-[var(--sa-accent)]">
               {assessment.performanceCapabilityScore !== null
                 ? `${assessment.performanceCapabilityScore} / 100`
                 : t.naValue}
@@ -328,7 +328,7 @@ export function HealthDiagnosticsPanel({
               c.status === 'healthy'
                 ? 'text-emerald-600 dark:text-[#34d399]'
                 : c.status === 'fair'
-                ? 'text-[#0284c7] dark:text-[#38bdf8]'
+                ? 'text-[var(--sa-accent)]'
                 : c.status === 'warning'
                 ? 'text-amber-600 dark:text-[#fbbf24]'
                 : c.status === 'critical'
@@ -422,7 +422,7 @@ export function HealthDiagnosticsPanel({
               <h4 className="text-[12.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8b9bb4]">
                 {t.thermalSensorsHeader}
               </h4>
-              <Thermometer className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8]" />
+              <Thermometer className="w-4 h-4 text-[var(--sa-accent)]" />
             </div>
 
             <div className="rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200/80 dark:border-white/[0.06] p-3.5 space-y-1">
@@ -565,7 +565,7 @@ export function HealthDiagnosticsPanel({
                   value={driverFilter}
                   onChange={(e) => setDriverFilter(e.target.value)}
                   placeholder={t.searchDriversPlaceholder}
-                  className="min-h-[34px] px-3 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#0284c7] focus:outline-none w-full sm:w-64"
+                  className="sa-search-input min-h-[34px] px-3 py-1 text-[12px] w-full sm:w-64"
                 />
               </div>
               <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-white/[0.08] max-h-72">

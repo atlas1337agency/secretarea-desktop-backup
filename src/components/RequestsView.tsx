@@ -122,11 +122,14 @@ export function RequestsView({
     <div className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#1d2633] dark:via-[#171d26] dark:to-[#12161d]">
       <div className="max-w-6xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-7">
         {/* Page Heading */}
-        <div className="flex items-center gap-3">
-          <h1 className="text-[15px] font-bold tracking-[0.08em] uppercase text-slate-900 dark:text-[#e5e9f0] shrink-0">
+        <div className="sa-section-header flex items-center gap-3">
+          <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+            <PaperPlaneRight className="w-4 h-4 shrink-0" />
+          </span>
+          <h1 className="font-display text-[15px] font-bold tracking-[0.08em] uppercase text-slate-900 dark:text-[#e5e9f0] shrink-0">
             {t.pageTitle}
           </h1>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+          <div className="sa-section-line flex-1" />
         </div>
 
         {/* Request Form + Recent Queue */}
@@ -165,7 +168,7 @@ export function RequestsView({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t.titlePlaceholder}
-                className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-[#0e1319] border border-slate-300 dark:border-white/[0.1] text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-3 py-2 border text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none"
               />
             </div>
 
@@ -181,7 +184,7 @@ export function RequestsView({
                   id="req-category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-[#0e1319] border border-slate-300 dark:border-white/[0.1] text-[13px] text-slate-900 dark:text-white focus:outline-none focus:border-[#1a9fff] cursor-pointer"
+                  className="sa-search-input w-full px-3 py-2 border text-[13px] text-slate-900 dark:text-white focus:outline-none cursor-pointer"
                 >
                   {REQUEST_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat} className="bg-white text-slate-900 dark:bg-[#0e1319] dark:text-white">
@@ -205,7 +208,7 @@ export function RequestsView({
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-[#0e1319] border border-slate-300 dark:border-white/[0.1] text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+                  className="sa-search-input w-full px-3 py-2 border text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none"
                 />
               </div>
             </div>
@@ -224,7 +227,7 @@ export function RequestsView({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t.detailsPlaceholder}
-                className="w-full px-3 py-2 rounded bg-slate-50 dark:bg-[#0e1319] border border-slate-300 dark:border-white/[0.1] text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-3 py-2 border text-[13px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] focus:outline-none"
               />
             </div>
 
@@ -232,7 +235,7 @@ export function RequestsView({
               <button
                 type="submit"
                 disabled={isSubmitting || !title.trim() || !message.trim()}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] disabled:opacity-50 text-white text-[13px] font-semibold transition-colors cursor-pointer"
+                className="sa-btn-primary inline-flex items-center gap-2 px-4 py-2 disabled:opacity-50 text-[13px] font-semibold cursor-pointer"
               >
                 <PaperPlaneRight className="w-3.5 h-3.5" />
                 <span>{isSubmitting ? t.sending : t.submitRequest}</span>
@@ -295,11 +298,11 @@ export function RequestsView({
 
         {/* Community & Support Us Section */}
         <section aria-label={t.communitySupportTitle} className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-[14px] font-bold tracking-[0.08em] uppercase text-slate-900 dark:text-[#e5e9f0] shrink-0">
+          <div className="sa-section-header flex items-center gap-3">
+            <h2 className="font-display text-[14px] font-bold tracking-[0.08em] uppercase text-slate-900 dark:text-[#e5e9f0] shrink-0">
               {t.communitySupportTitle}
             </h2>
-            <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+            <div className="sa-section-line flex-1" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
@@ -419,7 +422,7 @@ export function RequestsView({
                     href={trocadorUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white font-medium underline underline-offset-4 transition-colors"
+                    className="sa-link inline-flex items-center gap-1 font-medium underline underline-offset-4 transition-colors"
                   >
                     <span>{t.openInBrowser}</span>
                     <ArrowSquareOut className="w-3 h-3" />

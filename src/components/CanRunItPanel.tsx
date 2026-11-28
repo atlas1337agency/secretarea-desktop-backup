@@ -153,7 +153,7 @@ export function CanRunItPanel({
       {/* Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Laptop className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+          <Laptop className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
           <h3 className="text-[14px] sm:text-[15px] font-bold text-slate-900 dark:text-white tracking-tight">
             {t.canRunItTitle}
           </h3>
@@ -175,7 +175,7 @@ export function CanRunItPanel({
               type="button"
               onClick={onRefreshAutoSpecs}
               disabled={isRefreshingSpecs}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-[#1a222d] dark:hover:bg-[#243040] border border-slate-300 dark:border-white/[0.08] text-slate-700 hover:text-slate-950 dark:text-[#9fb0c7] dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+              className="sa-btn-secondary inline-flex items-center gap-1 px-2.5 py-1 text-[11.5px] font-medium cursor-pointer disabled:opacity-50"
             >
               <ArrowsClockwise
                 className={`w-3.5 h-3.5 ${isRefreshingSpecs ? 'animate-spin' : ''}`}
@@ -187,7 +187,7 @@ export function CanRunItPanel({
             <button
               type="button"
               onClick={openEditor}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 dark:bg-[#1a222d] dark:hover:bg-[#243040] border border-slate-300 dark:border-white/[0.08] text-[#0284c7] hover:text-slate-950 dark:text-[#66c0f4] dark:hover:text-white transition-colors cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1 px-2.5 py-1 text-[11.5px] font-semibold text-[var(--sa-accent)] cursor-pointer"
             >
               <SlidersHorizontal className="w-3 h-3" />
               <span>{showEditor ? t.close : t.myPc}</span>
@@ -251,8 +251,8 @@ export function CanRunItPanel({
           </div>
         </div>
       ) : (
-        <div className="sa-ps5-subpanel p-3.5 rounded-md border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#151c26] flex items-center gap-3 text-[12.5px] text-slate-700 dark:text-[#aeb9c7]">
-          <Info className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+        <div className="sa-ps5-subpanel p-3.5 rounded-[var(--sa-card-inner-radius)] border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-[#151c26] flex items-center gap-3 text-[12.5px] text-slate-700 dark:text-[#aeb9c7]">
+          <Info className="w-4 h-4 text-[var(--sa-accent)] shrink-0" />
           <span>{evaluation.summaryText}</span>
         </div>
       )}
@@ -261,10 +261,10 @@ export function CanRunItPanel({
       {showEditor && onSaveCustomSpecs && (
         <form
           onSubmit={handleApplyDraft}
-          className="sa-ps5-subpanel p-3.5 rounded-md bg-slate-50 dark:bg-[#161d28] border border-sky-300 dark:border-[#1a9fff]/35 space-y-3"
+          className="sa-ps5-subpanel p-3.5 rounded-[var(--sa-card-inner-radius)] bg-slate-50 dark:bg-[#161d28] border border-[var(--sa-accent-ring)] space-y-3"
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11.5px] font-bold uppercase tracking-wider text-[#0284c7] dark:text-[#66c0f4]">
+            <span className="text-[11.5px] font-bold uppercase tracking-wider text-[var(--sa-accent)]">
               {t.pcSpecsHeading}
             </span>
             {specs.source === 'custom' && onResetCustomSpecs && (
@@ -274,7 +274,7 @@ export function CanRunItPanel({
                   onResetCustomSpecs();
                   setShowEditor(false);
                 }}
-                className="text-[11px] font-semibold text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white cursor-pointer"
+                className="sa-link text-[11px] font-semibold cursor-pointer"
               >
                 {t.resetAuto}
               </button>
@@ -289,7 +289,7 @@ export function CanRunItPanel({
                 value={draftGpu}
                 onChange={(e) => setDraftGpu(e.target.value)}
                 placeholder="e.g. GeForce RTX 4050 Laptop"
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-[#0f141b] border border-slate-300 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-2.5 py-1.5 text-[12px]"
               />
             </label>
             <label className="space-y-1 text-[11px] text-slate-600 dark:text-[#9fb0c7]">
@@ -300,7 +300,7 @@ export function CanRunItPanel({
                 value={draftCpu}
                 onChange={(e) => setDraftCpu(e.target.value)}
                 placeholder="e.g. Core i7-12650H"
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-[#0f141b] border border-slate-300 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-2.5 py-1.5 text-[12px]"
               />
             </label>
             <label className="space-y-1 text-[11px] text-slate-600 dark:text-[#9fb0c7]">
@@ -311,7 +311,7 @@ export function CanRunItPanel({
                 max={512}
                 value={draftRam}
                 onChange={(e) => setDraftRam(e.target.value)}
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-[#0f141b] border border-slate-300 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-2.5 py-1.5 text-[12px]"
               />
             </label>
             <label className="space-y-1 text-[11px] text-slate-600 dark:text-[#9fb0c7]">
@@ -323,7 +323,7 @@ export function CanRunItPanel({
                 value={draftSpace}
                 onChange={(e) => setDraftSpace(e.target.value)}
                 placeholder="e.g. 120"
-                className="w-full px-2.5 py-1.5 rounded bg-white dark:bg-[#0f141b] border border-slate-300 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white focus:outline-none focus:border-[#1a9fff]"
+                className="sa-search-input w-full px-2.5 py-1.5 text-[12px]"
               />
             </label>
           </div>
@@ -331,13 +331,13 @@ export function CanRunItPanel({
             <button
               type="button"
               onClick={() => setShowEditor(false)}
-              className="px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 dark:bg-[#232b36] dark:hover:bg-[#2d3847] text-[12px] text-slate-800 dark:text-[#c6d4df] cursor-pointer"
+              className="sa-btn-secondary px-3 py-1.5 text-[12px] cursor-pointer"
             >
               {t.cancel}
             </button>
             <button
               type="submit"
-              className="px-3 py-1.5 rounded bg-[#1a9fff] hover:bg-[#38adff] text-[12px] font-semibold text-white cursor-pointer"
+              className="sa-btn-primary px-3 py-1.5 text-[12px] font-semibold cursor-pointer"
             >
               {t.compareSpecs}
             </button>
@@ -360,7 +360,7 @@ export function CanRunItPanel({
                       ? 'bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-700 dark:text-[#4ade80]'
                       : row.status === 'fail'
                       ? 'bg-rose-500/15 text-rose-700 dark:text-[#f87171]'
-                      : 'bg-slate-100 dark:bg-[#1a222e] text-[#0284c7] dark:text-[#66c0f4]'
+                      : 'bg-[var(--sa-accent-soft)] text-[var(--sa-accent)]'
                   }`}
                 >
                   {getRowIcon(row.key)}

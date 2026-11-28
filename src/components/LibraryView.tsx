@@ -233,7 +233,7 @@ function LibraryFilterDropdown<T extends string>({
               left: coords.left,
               minWidth: coords.minWidth,
             }}
-            className="fixed z-[140] max-w-[min(300px,calc(100vw-24px))] max-h-[min(320px,55vh)] overflow-y-auto rounded-xl border border-slate-200/95 dark:border-white/[0.12] bg-white/98 dark:bg-[#141b24]/98 backdrop-blur-xl p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.16)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.68)]"
+            className="sa-ps5-panel fixed z-[140] max-w-[min(300px,calc(100vw-24px))] max-h-[min(320px,55vh)] overflow-y-auto rounded-xl border border-slate-200/95 dark:border-white/[0.12] bg-white/98 dark:bg-[#141b24]/98 backdrop-blur-xl p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.16)] dark:shadow-[0_20px_48px_rgba(0,0,0,0.68)]"
           >
             {options.map((opt) => {
               const selected = opt.value === value;
@@ -243,7 +243,7 @@ function LibraryFilterDropdown<T extends string>({
                   : opt.tone === 'rose'
                     ? 'text-rose-700 dark:text-[#f87171]'
                     : selected
-                      ? 'text-[#0284c7] dark:text-[#7dd3fc]'
+                      ? 'font-semibold'
                       : 'text-slate-700 dark:text-[#dbe3ec]';
 
               return (
@@ -256,9 +256,17 @@ function LibraryFilterDropdown<T extends string>({
                     onChange(opt.value);
                     setOpen(false);
                   }}
+                  style={
+                    selected && (!opt.tone || opt.tone === 'default')
+                      ? {
+                          backgroundColor: 'var(--sa-accent-soft)',
+                          color: 'var(--sa-accent)',
+                        }
+                      : undefined
+                  }
                   className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] text-start transition-colors cursor-pointer ${
                     selected
-                      ? 'bg-[#0284c7]/10 dark:bg-[#1a9fff]/18 font-semibold'
+                      ? 'font-semibold'
                       : 'font-medium hover:bg-slate-100 dark:hover:bg-white/[0.07]'
                   } ${optTone}`}
                 >
@@ -340,9 +348,9 @@ export const LibraryView = memo(function LibraryView({
       className="flex-1 min-w-0 h-full overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#1f2937] dark:via-[#1b222c] dark:to-[#151a22] px-3.5 sm:px-5 lg:px-7 py-4 sm:py-5"
     >
       {/* Header Title Row */}
-      <div className="flex items-center justify-between gap-3 mb-4">
+      <div className="sa-section-header flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="w-8 h-8 rounded-lg bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.1] shadow-xs flex items-center justify-center shrink-0">
+          <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
             <SectionIcon className={`w-4.5 h-4.5 ${sectionVisual.iconColorClass}`} />
           </span>
           <h1 className="font-display text-[15px] sm:text-[16px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
@@ -352,7 +360,7 @@ export const LibraryView = memo(function LibraryView({
               {games.length !== totalCount ? ` / ${totalCount}` : ''})
             </span>
           </h1>
-          <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+          <div className="sa-section-line flex-1" />
         </div>
 
         {totalPages > 1 && (
@@ -396,14 +404,14 @@ export const LibraryView = memo(function LibraryView({
         )}
 
         {/* Single Smart Search Bar (always on the same single line across all screens) */}
-        <div className="relative flex-1 min-w-0 sm:flex-initial sm:w-64 lg:w-72">
+        <div className="sa-search-bar relative flex-1 min-w-0 sm:flex-initial sm:w-64 lg:w-72">
           <MagnifyingGlass className="w-4 h-4 text-slate-400 dark:text-[#7a8ca5] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={`${t.searchPlaceholder} ${sectionLabel.toLowerCase()}...`}
-            className="sa-ps5-select-wrap w-full h-9 ps-9 pe-8 rounded-xl bg-white/95 dark:bg-[#141b24]/95 border border-slate-200/95 dark:border-white/[0.1] text-[12px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus:outline-none focus:border-[#1a9fff] focus:ring-2 focus:ring-[#1a9fff]/20 transition-all"
+            className="sa-search-input sa-ps5-select-wrap w-full h-9 ps-9 pe-8 border text-[12px] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#566376] shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus:outline-none transition-all"
           />
           {searchQuery && (
             <button
@@ -420,7 +428,7 @@ export const LibraryView = memo(function LibraryView({
 
       {/* Poster Grid */}
       {pageGames.length === 0 ? (
-        <div className="py-20 text-center bg-white dark:bg-[#141921]/60 border border-slate-200 dark:border-white/[0.06] rounded">
+        <div className="sa-ps5-panel py-20 text-center bg-white dark:bg-[#141921]/60 border border-slate-200 dark:border-white/[0.06] rounded">
           <p className="text-[15px] font-semibold text-slate-900 dark:text-[#e5e9f0] mb-1">
             {t.emptyTitle}
           </p>
@@ -450,18 +458,18 @@ export const LibraryView = memo(function LibraryView({
                   }}
                   role="button"
                   tabIndex={0}
-                  className="sa-contain-card group relative aspect-[2/3] rounded-xl overflow-hidden bg-slate-200 dark:bg-[#10151c] border border-slate-300/90 dark:border-white/[0.09] hover:border-[#0284c7] dark:hover:border-[#1a9fff] shadow-sm dark:shadow-md hover:shadow-xl hover:shadow-black/25 dark:hover:shadow-black/60 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9fff]"
+                  className="sa-contain-card sa-game-card group relative aspect-[2/3] overflow-hidden border shadow-sm dark:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a9fff]"
                 >
                   <GameCover
                     src={game.coverImage}
                     alt={game.name}
                     priority={index < 14}
-                    imgClassName="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300"
+                    imgClassName="w-full h-full object-cover group-hover:scale-[1.045] transition-transform duration-300"
                   />
 
                   {/* Modern Floating New Release Badge */}
                   {game.isNew && (
-                    <span className="absolute top-2 end-2 inline-flex items-center gap-1 px-2 py-[3px] rounded-full bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] border border-white/25 text-white text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none shadow-[0_4px_14px_rgba(2,132,199,0.5)] pointer-events-none select-none">
+                    <span className="sa-badge-accent absolute top-2 end-2 inline-flex items-center gap-1 px-2 py-[3px] border border-white/25 text-[9.5px] font-bold tracking-[0.07em] uppercase leading-none shadow-md pointer-events-none select-none">
                       <Sparkle weight="fill" className="w-2.5 h-2.5 shrink-0" />
                       <span>NEW</span>
                     </span>
@@ -492,7 +500,7 @@ export const LibraryView = memo(function LibraryView({
                                   onSelectStudio(studio);
                                 }}
                                 onKeyDown={(e) => e.stopPropagation()}
-                                className="truncate hover:text-white underline decoration-[#38bdf8]/40 underline-offset-2 transition-colors cursor-pointer text-start"
+                                className="sa-link truncate text-[#7dd3fc] hover:text-white underline decoration-[#38bdf8]/40 underline-offset-2 transition-colors cursor-pointer text-start"
                               >
                                 {studio.name}
                               </button>
@@ -519,7 +527,7 @@ export const LibraryView = memo(function LibraryView({
                           </span>
                         )}
                         {game.repackBy && (
-                          <span className="text-[#66c0f4]">{game.repackBy}</span>
+                          <span style={{ color: 'var(--sa-secondary, #66c0f4)' }}>{game.repackBy}</span>
                         )}
                       </div>
                     </div>
@@ -558,7 +566,7 @@ export const LibraryView = memo(function LibraryView({
                   type="button"
                   disabled={safePage === 0}
                   onClick={() => goToPage(safePage - 1)}
-                  className="sa-ps5-select-wrap h-9 inline-flex items-center gap-1 px-3 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] disabled:opacity-40 disabled:pointer-events-none border border-slate-200/95 dark:border-white/[0.1] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] shadow-[0_1px_2px_rgba(15,23,42,0.05)] whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                  className="sa-btn-secondary h-9 inline-flex items-center gap-1 px-3 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                   <span className="hidden min-[440px]:inline">{t.previous}</span>
@@ -577,10 +585,10 @@ export const LibraryView = memo(function LibraryView({
                       key={token}
                       type="button"
                       onClick={() => goToPage(token)}
-                      className={`min-w-[36px] h-9 px-2.5 rounded-xl text-[12px] font-mono-tabular font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                      className={`min-w-[36px] h-9 px-2.5 text-[12px] font-mono-tabular font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
                         token === safePage
-                          ? 'bg-[#1a9fff] text-white shadow-[0_4px_12px_rgba(26,159,255,0.3)]'
-                          : 'bg-white/95 text-slate-700 hover:bg-white hover:text-slate-950 border border-slate-200/95 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.08]'
+                          ? 'sa-btn-primary'
+                          : 'sa-btn-secondary'
                       }`}
                     >
                       {token + 1}
@@ -592,7 +600,7 @@ export const LibraryView = memo(function LibraryView({
                   type="button"
                   disabled={safePage >= totalPages - 1}
                   onClick={() => goToPage(safePage + 1)}
-                  className="sa-ps5-select-wrap h-9 inline-flex items-center gap-1 px-3 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] disabled:opacity-40 disabled:pointer-events-none border border-slate-200/95 dark:border-white/[0.1] text-[12px] font-medium text-slate-800 dark:text-[#dce4ee] shadow-[0_1px_2px_rgba(15,23,42,0.05)] whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                  className="sa-btn-secondary h-9 inline-flex items-center gap-1 px-3 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span className="hidden min-[440px]:inline">{t.next}</span>
                   <CaretRight weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
@@ -603,7 +611,7 @@ export const LibraryView = memo(function LibraryView({
                 <button
                   type="button"
                   onClick={() => goToPage(safePage + 1)}
-                  className="hidden sm:inline-flex h-9 items-center gap-2 px-4 rounded-xl bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold shadow-[0_4px_14px_rgba(26,159,255,0.28)] transition-all whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-primary hidden sm:inline-flex h-9 items-center gap-2 px-4 text-[12.5px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span>{t.next50}</span>
                   <CaretRight weight="bold" className="w-4 h-4 rtl:rotate-180" />
@@ -612,7 +620,7 @@ export const LibraryView = memo(function LibraryView({
                 <button
                   type="button"
                   onClick={() => goToPage(0)}
-                  className="hidden sm:inline-flex h-9 items-center gap-2 px-4 rounded-xl bg-white/95 hover:bg-white dark:bg-[#1e2733]/90 dark:hover:bg-[#263140] border border-slate-200/95 dark:border-white/[0.1] text-slate-800 dark:text-[#dce4ee] text-[12.5px] font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer"
+                  className="sa-btn-secondary hidden sm:inline-flex h-9 items-center gap-2 px-4 text-[12.5px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <span>{t.backToPage1}</span>
                 </button>

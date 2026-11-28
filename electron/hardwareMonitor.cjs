@@ -14,6 +14,15 @@ const {
 } = require('./hardware/displayLaptopAdapter.cjs');
 const { readManagedLhmSensors, parseLhmBridgeOutput } = require('./hardware/lhmLibBridge.cjs');
 const { createWinTelemetryWorker } = require('./hardware/winTelemetryWorker.cjs');
+const {
+  buildAppleGpuProfile,
+  readLinuxLiveHwmonSensorsAsync,
+  probeLinuxRaplEnergyAsync,
+  readMacVmStatAsync,
+  readMacSystemProfilerDisplaysAsync,
+  readMacSysctlAsync,
+  buildMetricAvailability,
+} = require('./hardware/platformTelemetry.cjs');
 
 function runExecFile(cmd, args, timeoutMs = 2500) {
   return new Promise((resolve) => {
@@ -64,6 +73,9 @@ function normalizeManufacturer(rawVendor, rawModel) {
   }
   if (/\b(amd|radeon|ati)\b/i.test(combined) || /advanced micro devices/i.test(combined)) {
     return 'AMD';
+  }
+  if (/\b(apple)\b/i.test(combined)) {
+    return 'Apple';
   }
   return sanitizeLabel(rawVendor);
 }
@@ -971,6 +983,11 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
   let prevDiskstatsAt = 0;
   let prevNetBytes = new Map();
   let hasWarmedFsStats = false;
+  let darwinTempBackoffUntil = 0;
+  let darwinTempMissStreak = 0;
+  let linuxRaplStatus = null;
+  let cachedLinuxSensors = { fans: [], extraTemps: [], source: null };
+  let lastLinuxSensorsAt = 0;
 
   let lastSnapshot = null;
 
@@ -1204,13 +1221,16 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
     if (staticProfilePromise) return staticProfilePromise;
 
     staticProfilePromise = (async () => {
-      const [cpuInfo, memLayout, diskLayout, winStatic, netIfaces, graphics] = await Promise.all([
+      const isDarwin = process.platform === 'darwin';
+      const [cpuInfo, memLayout, diskLayout, winStatic, netIfaces, graphics, macSysctl, macProfiler] = await Promise.all([
         si.cpu().catch(() => null),
         si.memLayout().catch(() => []),
         si.diskLayout().catch(() => []),
         queryWindowsStaticHardware().catch(() => null),
         si.networkInterfaces().catch(() => []),
         si.graphics().catch(() => null),
+        isDarwin ? readMacSysctlAsync().catch(() => ({})) : Promise.resolve(null),
+        isDarwin ? readMacSystemProfilerDisplaysAsync(os.totalmem()).catch(() => ({ gpus: [], displays: [] })) : Promise.resolve(null),
         detectNvidiaSmiPath().catch(() => null),
       ]);
 
@@ -1321,25 +1341,60 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
       const rawManufacturer = sanitizeLabel(cpuInfo?.manufacturer);
       const rawBrand = sanitizeLabel(cpuInfo?.brand);
       const rawOsModel = sanitizeLabel(osCpus[0]?.model);
-      const cpuBrand = [rawManufacturer, rawBrand].filter(Boolean).join(' ').trim() || rawOsModel || null;
-      const cpuClassification = classifyCpuFamily(cpuBrand, rawManufacturer);
+      const macCpuModel = sanitizeLabel(macSysctl?.cpuModel);
+      const cpuBrand = macCpuModel || [rawManufacturer, rawBrand].filter(Boolean).join(' ').trim() || rawOsModel || null;
+      const cpuClassification = classifyCpuFamily(cpuBrand, rawManufacturer || (macSysctl?.isAppleSilicon ? 'Apple' : null));
+
+      if (isDarwin && macSysctl?.isAppleSilicon) {
+        if (!memoryType) memoryType = 'Unified Memory (LPDDR)';
+        if (!channelMode) channelMode = 'Unified Architecture';
+      }
+
+      let initialGraphics = Array.isArray(graphics?.controllers) ? graphics.controllers : [];
+      if (isDarwin && Array.isArray(macProfiler?.gpus) && macProfiler.gpus.length > 0) {
+        if (initialGraphics.length === 0) {
+          initialGraphics = macProfiler.gpus.map((mg) => ({
+            model: mg.model,
+            vendor: mg.manufacturer,
+            vram: mg.vramMB,
+          }));
+        } else {
+          initialGraphics = initialGraphics.map((ctrl) => {
+            const match = macProfiler.gpus.find(
+              (mg) =>
+                mg.model &&
+                ctrl?.model &&
+                (ctrl.model.toLowerCase().includes(mg.model.toLowerCase()) ||
+                  mg.model.toLowerCase().includes(ctrl.model.toLowerCase()))
+            );
+            return match
+              ? {
+                  ...ctrl,
+                  vendor: ctrl.vendor || match.manufacturer,
+                  vram: toFiniteNumber(ctrl.vram) || match.vramMB,
+                }
+              : ctrl;
+          });
+        }
+      }
 
       staticProfile = {
         hostname: sanitizeLabel(os.hostname()),
         platform: process.platform,
         cpu: {
           model: cpuBrand,
-          manufacturer: rawManufacturer || cpuClassification.vendor,
+          manufacturer: rawManufacturer || cpuClassification.vendor || (macSysctl?.isAppleSilicon ? 'Apple' : null),
           series: cpuClassification.series,
           generation: cpuClassification.generation,
-          physicalCores: toFiniteNumber(cpuInfo?.physicalCores) || null,
-          logicalThreads: toFiniteNumber(cpuInfo?.cores) || osCpus.length || null,
+          physicalCores: macSysctl?.physicalCores || toFiniteNumber(cpuInfo?.physicalCores) || null,
+          logicalThreads: macSysctl?.logicalThreads || toFiniteNumber(cpuInfo?.cores) || osCpus.length || null,
           baseSpeedGhz:
-            toFiniteNumber(cpuInfo?.speed) && cpuInfo.speed > 0
+            macSysctl?.cpuBaseClockGhz ||
+            (toFiniteNumber(cpuInfo?.speed) && cpuInfo.speed > 0
               ? Number(cpuInfo.speed.toFixed(2))
               : osCpus[0]?.speed && osCpus[0].speed > 0
               ? Number((osCpus[0].speed / 1000).toFixed(2))
-              : null,
+              : null),
         },
         ram: {
           memoryType,
@@ -1347,6 +1402,7 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           populatedSlots,
           channelMode,
         },
+        macMeta: isDarwin ? { sysctl: macSysctl, profiler: macProfiler } : null,
         winDriveLetterToDisk,
         winDisksByNumber,
         winDxAdapters,
@@ -1355,7 +1411,7 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           hasOhm: Boolean(winStatic?.hasOhm),
         },
         initialNetIfaces: Array.isArray(netIfaces) ? netIfaces : [],
-        initialGraphics: Array.isArray(graphics?.controllers) ? graphics.controllers : [],
+        initialGraphics,
       };
       cachedNetIfaces = staticProfile.initialNetIfaces;
       lastNetIfacesAt = Date.now();
@@ -1370,12 +1426,17 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
   }
 
   async function resolveLinuxCpuMetrics() {
-    const [procStat, clockGhz, tempC, raplNow] = await Promise.all([
+    const canPollRapl = linuxRaplStatus !== 'permission_required' && linuxRaplStatus !== 'unsupported';
+    const [procStat, clockGhz, tempC, raplProbe] = await Promise.all([
       readLinuxCpuStatsAsync(),
       readLinuxCpuClockGhzAsync(),
       readLinuxCpuTemperatureCelsiusAsync(),
-      readLinuxRaplEnergyUjAsync(),
+      canPollRapl ? probeLinuxRaplEnergyAsync() : Promise.resolve(null),
     ]);
+    if (raplProbe?.status) {
+      linuxRaplStatus = raplProbe.status;
+    }
+    const raplNow = raplProbe?.status === 'available' && raplProbe.uj !== null ? { uj: raplProbe.uj, at: raplProbe.at } : null;
 
     let usagePercent = null;
     let coreLoads = [];
@@ -1446,7 +1507,12 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           prevDiskstats = parseLinuxDiskstats(diskstatsInit);
           prevDiskstatsAt = Date.now();
         }
-        prevRaplSample = await readLinuxRaplEnergyUjAsync();
+        const raplInitProbe = await probeLinuxRaplEnergyAsync();
+        linuxRaplStatus = raplInitProbe.status;
+        prevRaplSample =
+          raplInitProbe.status === 'available' && raplInitProbe.uj !== null
+            ? { uj: raplInitProbe.uj, at: raplInitProbe.at }
+            : null;
         const initIfaceNames = (profile.initialNetIfaces || [])
           .map((n) => n?.iface)
           .filter((name) => name && !isLoopbackIface(name));
@@ -1500,19 +1566,26 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
     const adaptiveScale = Math.max(1, intervalMs / 1500);
     const fsIntervalMs = Math.round((isWindows ? 10000 : 3000) * adaptiveScale);
     const shouldRefreshFs = !cachedFsSize || now - lastFsFetchAt >= fsIntervalMs;
-    const diskLayoutInterval = Math.round((isWindows ? 90000 : 12000) * Math.min(2.5, adaptiveScale));
+    const diskLayoutInterval = Math.round(
+      (isWindows ? 90000 : isDarwin ? 45000 : 12000) * Math.min(2.5, adaptiveScale)
+    );
     const shouldRefreshDiskLayout = !cachedDiskLayout || now - lastDiskLayoutAt >= diskLayoutInterval;
     const netIfaceInterval = Math.round((isWindows ? 30000 : 15000) * Math.min(2, adaptiveScale));
     const shouldRefreshNetIfaces = !cachedNetIfaces || now - lastNetIfacesAt >= netIfaceInterval;
     const fsStatsIntervalMs = Math.max(1400, intervalMs);
     const shouldRefreshFsStats =
       (isLinux || isDarwin) && (!cachedFsStats || now - lastFsStatsAt >= fsStatsIntervalMs);
+    const shouldProbeDarwinTemp = isDarwin && now >= darwinTempBackoffUntil;
+
+    const shouldPollLinuxHwmon = isLinux && now - lastLinuxSensorsAt >= Math.max(1500, intervalMs);
 
     const [
       linuxCpuRes,
       cpuSpeedRes,
       darwinTempRes,
       memRes,
+      darwinVmStatRes,
+      linuxHwmonRes,
       nvidiaRes,
       drmGpuRes,
       fsStatsRes,
@@ -1525,8 +1598,10 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
     ] = await Promise.all([
       isLinux ? resolveLinuxCpuMetrics() : Promise.resolve(null),
       !isLinux && !isWindows ? si.cpuCurrentSpeed().catch(() => null) : Promise.resolve(null),
-      isDarwin ? si.cpuTemperature().catch(() => null) : Promise.resolve(null),
-      isWindows ? Promise.resolve(null) : si.mem().catch(() => null),
+      shouldProbeDarwinTemp ? si.cpuTemperature().catch(() => null) : Promise.resolve(null),
+      isWindows || isDarwin ? Promise.resolve(null) : si.mem().catch(() => null),
+      isDarwin ? readMacVmStatAsync(os.totalmem()).catch(() => null) : Promise.resolve(null),
+      shouldPollLinuxHwmon ? readLinuxLiveHwmonSensorsAsync().catch(() => cachedLinuxSensors) : Promise.resolve(cachedLinuxSensors),
       nvidiaSmiPath ? queryNvidiaSmi().catch(() => cachedNvidiaRes) : Promise.resolve([]),
       isLinux ? readLinuxDrmGpuDynamicAsync() : Promise.resolve({ AMD: [], Intel: [] }),
       shouldRefreshFsStats ? si.fsStats().catch(() => cachedFsStats) : Promise.resolve(cachedFsStats),
@@ -1547,6 +1622,10 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
     ]);
 
     const sampleTimestamp = Date.now();
+    if (shouldPollLinuxHwmon && linuxHwmonRes) {
+      cachedLinuxSensors = linuxHwmonRes;
+      lastLinuxSensorsAt = sampleTimestamp;
+    }
     if (shouldRefreshFs && Array.isArray(fsSizeRes)) {
       cachedFsSize = fsSizeRes;
       lastFsFetchAt = sampleTimestamp;
@@ -1659,7 +1738,16 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
         cpuVoltageVolts = winSensorsBundle.cpuVoltageVolts;
       } else if (isDarwin) {
         const dTemp = toFiniteNumber(darwinTempRes?.main);
-        cpuTempC = dTemp !== null && dTemp > 0 && dTemp <= 120 ? dTemp : null;
+        if (dTemp !== null && dTemp > 0 && dTemp <= 120) {
+          cpuTempC = dTemp;
+          darwinTempMissStreak = 0;
+        } else if (shouldProbeDarwinTemp) {
+          darwinTempMissStreak += 1;
+          // Apple Silicon / restricted macOS hosts without SMC helper return null; back off to avoid wasted spawns
+          if (darwinTempMissStreak >= 2) {
+            darwinTempBackoffUntil = sampleTimestamp + 60000;
+          }
+        }
       }
     }
 
@@ -1837,16 +1925,28 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
     // --- 3. RAM Metrics ---
     let totalRam = os.totalmem();
     let availableRam = os.freemem();
-    if (!isWindows && memRes) {
-      totalRam = toFiniteNumber(memRes.total) ?? totalRam;
-      availableRam = toFiniteNumber(memRes.available) ?? toFiniteNumber(memRes.free) ?? availableRam;
-    }
-    const usedRam =
+    let usedRam =
       totalRam !== null && availableRam !== null ? Math.max(0, totalRam - availableRam) : null;
-    const ramUsagePercent =
+    let ramUsagePercent =
       totalRam && usedRam !== null && totalRam > 0
         ? Number(((usedRam / totalRam) * 100).toFixed(1))
         : null;
+
+    if (isDarwin && darwinVmStatRes) {
+      totalRam = darwinVmStatRes.totalBytes;
+      usedRam = darwinVmStatRes.usedBytes;
+      availableRam = darwinVmStatRes.availableBytes;
+      ramUsagePercent = darwinVmStatRes.usagePercent;
+    } else if (!isWindows && memRes) {
+      totalRam = toFiniteNumber(memRes.total) ?? totalRam;
+      availableRam = toFiniteNumber(memRes.available) ?? toFiniteNumber(memRes.free) ?? availableRam;
+      usedRam =
+        totalRam !== null && availableRam !== null ? Math.max(0, totalRam - availableRam) : null;
+      ramUsagePercent =
+        totalRam && usedRam !== null && totalRam > 0
+          ? Number(((usedRam / totalRam) * 100).toFixed(1))
+          : null;
+    }
 
     // --- 4. Storage Drives & Real Bytes/sec I/O ---
     const layoutList = Array.isArray(cachedDiskLayout) ? cachedDiskLayout : [];
@@ -1955,6 +2055,17 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           (fsType === 'overlay' && mount !== '/') ||
           mount.startsWith('/snap') ||
           mount.startsWith('/boot/efi')
+        ) {
+          return false;
+        }
+      } else if (isDarwin) {
+        if (
+          fsType === 'devfs' ||
+          fsType === 'autofs' ||
+          mount === '/dev' ||
+          /^\/System\/Volumes\/(VM|Preboot|Update|xarts|iSCPreboot|Hardware|FieldService|Recovery|Basebits|Data\/home)/i.test(
+            mount
+          )
         ) {
           return false;
         }
@@ -2264,6 +2375,18 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           driverVersion: winDrv,
         });
       }
+      if (mfgLower.includes('apple')) {
+        const macGpuMatch = profile.macMeta?.profiler?.gpus?.find(
+          (mg) => mg.manufacturer === 'Apple' || /apple/i.test(String(mg.model || ''))
+        );
+        return buildAppleGpuProfile({
+          gpu,
+          metalSupport: macGpuMatch?.metalSupport || null,
+          gpuCores: macGpuMatch?.cores || null,
+          osVersion: cachedDisplayLaptop?.osVersion || null,
+          vramTotalMB: gpu.vramTotalMB,
+        });
+      }
       return {
         gpuId: gpu.id,
         model: gpu.model,
@@ -2324,9 +2447,11 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
         totalUploadBytesPerSec,
       },
       liveSensors: {
-        fans: winSensorsBundle.fans || [],
-        extraTemps: winSensorsBundle.extraTemps || [],
-        source: profile.winFeatures?.hasLhm
+        fans: isLinux ? cachedLinuxSensors.fans || [] : winSensorsBundle.fans || [],
+        extraTemps: isLinux ? cachedLinuxSensors.extraTemps || [] : winSensorsBundle.extraTemps || [],
+        source: isLinux
+          ? cachedLinuxSensors.source
+          : profile.winFeatures?.hasLhm
           ? 'LibreHardwareMonitor WMI'
           : usedDirectLhm
           ? 'LibreHardwareMonitorLib (Direct)'
@@ -2352,6 +2477,22 @@ function createHardwareMonitor({ getMainWindow, onSnapshot, getLhmLibraryInfo } 
           : null,
         laptop: cachedDisplayLaptop?.laptop || null,
       },
+      metricAvailability: buildMetricAvailability({
+        platform: profile.platform,
+        cpuUsage,
+        cpuTempC,
+        cpuPowerWatts,
+        linuxRaplStatus,
+        gpus,
+        liveSensors: {
+          fans: isLinux ? cachedLinuxSensors.fans || [] : winSensorsBundle.fans || [],
+          source: isLinux ? cachedLinuxSensors.source : null,
+        },
+        ramUsagePercent,
+        storage,
+        network: { activeInterface, interfaces },
+        capabilities: cachedDisplayLaptop ? { display: cachedDisplayLaptop } : null,
+      }),
     };
 
     lastSnapshot = snapshot;

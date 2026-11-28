@@ -25,12 +25,12 @@ export function ToggleSwitch({
       aria-labelledby={labelId}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className="inline-flex items-center gap-2.5 shrink-0 cursor-pointer disabled:opacity-50 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0284c7] dark:focus-visible:ring-[#38bdf8] rounded-md p-0.5"
+      className="inline-flex items-center gap-2.5 shrink-0 cursor-pointer disabled:opacity-50 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)] rounded-md p-0.5"
     >
       <span
         className={`text-[11px] font-semibold uppercase tracking-[0.06em] whitespace-nowrap ${
           checked
-            ? 'text-[#0284c7] dark:text-[#66c0f4]'
+            ? 'text-[var(--sa-accent)]'
             : 'text-slate-500 dark:text-[#8b9bb4]'
         }`}
       >
@@ -39,7 +39,7 @@ export function ToggleSwitch({
       <span
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border p-0.5 transition-colors duration-200 ${
           checked
-            ? 'bg-[#1a9fff] border-[#38adff]'
+            ? 'bg-[var(--sa-accent)] border-[var(--sa-accent)] shadow-[0_0_12px_var(--sa-accent-soft)]'
             : 'bg-slate-200 border-slate-300 group-hover:border-slate-400 dark:bg-[#0e131b] dark:border-white/[0.14] dark:group-hover:border-white/[0.28]'
         }`}
       >
@@ -74,7 +74,7 @@ export function SettingsRow({
     <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
-          <span className="w-8 h-8 rounded-lg bg-slate-200/80 dark:bg-[#1a2433] border border-slate-300/70 dark:border-white/[0.08] text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0 mt-0.5">
+          <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">
             {icon}
           </span>
           <div className="space-y-0.5 min-w-0">

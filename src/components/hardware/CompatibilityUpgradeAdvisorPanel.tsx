@@ -102,10 +102,11 @@ export function CompatibilityUpgradeAdvisorPanel({
                 <button
                   key={fy.year}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => setTargetYear(fy.year)}
-                  className={`px-2.5 py-1 rounded-md text-[11.5px] font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-2.5 py-1 rounded-[var(--sa-btn-radius)] text-[11.5px] font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-[#0284c7] dark:bg-[#0ea5e9] border-[#0284c7] text-white'
+                      ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)] shadow-xs'
                       : 'bg-slate-50 dark:bg-[#10151c] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-[#cbd5e1] hover:bg-slate-100 dark:hover:bg-[#1e2633]'
                   }`}
                 >
@@ -126,7 +127,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                 {futureProjection.overallVerdict}
               </div>
             </div>
-            <div dir="ltr" className="text-[22px] font-mono-tabular font-bold text-[#0284c7] dark:text-[#38bdf8]">
+            <div dir="ltr" className="text-[22px] font-mono-tabular font-bold text-[var(--sa-accent)]">
               {futureProjection.readinessScore !== null ? `${futureProjection.readinessScore} / 100` : t.naValue}
             </div>
           </div>
@@ -161,7 +162,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                 wf.outlook === 'Strong'
                   ? 'text-emerald-600 dark:text-[#34d399]'
                   : wf.outlook === 'Adequate'
-                  ? 'text-[#0284c7] dark:text-[#38bdf8]'
+                  ? 'text-[var(--sa-accent)]'
                   : wf.outlook === 'Strained'
                   ? 'text-amber-600 dark:text-[#fbbf24]'
                   : 'text-rose-600 dark:text-[#fb7185]';
@@ -199,13 +200,13 @@ export function CompatibilityUpgradeAdvisorPanel({
                   onChange={(e) => setPsuDraft(e.target.value)}
                   placeholder="e.g. 650"
                   dir="ltr"
-                  className="w-28 min-h-[34px] px-2.5 py-1 rounded-md bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.12] text-[12px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] focus:outline-none"
+                  className="sa-search-input w-28 min-h-[34px] px-2.5 py-1 text-[12px] font-mono-tabular"
                 />
               </label>
               <button
                 type="button"
                 onClick={handleApplyPsu}
-                className="min-h-[34px] px-3 py-1 rounded-md bg-[#0284c7] hover:bg-[#0369a1] text-white text-[12px] font-semibold cursor-pointer transition-colors"
+                className="sa-btn-primary min-h-[34px] px-3 py-1 text-[12px] font-semibold cursor-pointer whitespace-nowrap"
               >
                 {t.psuApplyBtn}
               </button>
@@ -226,7 +227,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#0284c7] dark:text-[#38bdf8]">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--sa-accent)]">
                         {u.priority} Priority · {u.component}
                       </span>
                       <h4 className="text-[14px] font-bold text-slate-900 dark:text-white">{u.recommendedUpgrade}</h4>
@@ -282,7 +283,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                   <span dir="ltr" className="text-[14px] font-bold font-mono-tabular text-slate-900 dark:text-white">
                     {r.resolution}
                   </span>
-                  <span className="text-[11.5px] font-bold text-[#0284c7] dark:text-[#38bdf8]">{r.verdict}</span>
+                  <span className="text-[11.5px] font-bold text-[var(--sa-accent)]">{r.verdict}</span>
                 </div>
                 <div className="text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee]">{r.recommendedPreset}</div>
                 <p className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] leading-snug">{r.notes}</p>
@@ -317,7 +318,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                   value={gameQuery}
                   onChange={(e) => setGameQuery(e.target.value)}
                   placeholder={t.catalogSearchPlaceholder}
-                  className="min-h-[34px] px-3 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px] text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#0284c7] focus:outline-none w-full sm:w-64"
+                  className="sa-search-input min-h-[34px] px-3 py-1 text-[12px] w-full sm:w-64"
                 />
               </div>
 
@@ -369,7 +370,7 @@ export function CompatibilityUpgradeAdvisorPanel({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[13px] font-bold text-slate-900 dark:text-white">{p.workload}</span>
-                  <span className="text-[11.5px] font-bold text-[#0284c7] dark:text-[#38bdf8]">{p.verdict}</span>
+                  <span className="text-[11.5px] font-bold text-[var(--sa-accent)]">{p.verdict}</span>
                 </div>
                 <p className="text-[11.5px] text-slate-600 dark:text-[#9cb0c9]">{p.reason}</p>
               </div>
@@ -397,7 +398,7 @@ export function CompatibilityUpgradeAdvisorPanel({
                         ? 'text-rose-600 dark:text-[#fb7185]'
                         : m.priority === 'High'
                         ? 'text-amber-600 dark:text-[#fbbf24]'
-                        : 'text-[#0284c7] dark:text-[#38bdf8]'
+                        : 'text-[var(--sa-accent)]'
                     }`}
                   >
                     {m.priority}

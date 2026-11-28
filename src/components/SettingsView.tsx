@@ -42,9 +42,14 @@ import {
 import {
   getAppVersionString,
   getEffectivePerformanceConfig,
+  resolveEffectiveLightMode,
+  type AnimationMode,
+  type AppearanceMode,
   type AppLanguage,
   type CustomThemeConfig,
   type LauncherSettings,
+  type OsThemePreference,
+  type ResolvedOsTheme,
 } from '../services/launcherSettings';
 import type {
   CloseBehaviorMode,
@@ -106,6 +111,13 @@ interface SettingsViewProps {
   onToggleLightMode: (enabled: boolean) => void;
   onToggleAlwaysPs5Theme: (enabled: boolean) => void;
   onToggleAlwaysXboxTheme: (enabled: boolean) => void;
+  activeOsTheme?: ResolvedOsTheme;
+  runtimePlatform?: 'win32' | 'linux' | 'darwin';
+  systemPrefersDark?: boolean;
+  onChangeOsThemePreference?: (preference: OsThemePreference) => void;
+  onChangeAppearanceMode?: (mode: AppearanceMode) => void;
+  onChangeAnimationMode?: (mode: AnimationMode) => void;
+  onRestoreDefaultThemes?: () => void;
   onUpdateCustomTheme: (patch: Partial<CustomThemeConfig>) => void;
   onResetCustomTheme: () => void;
   onToggleAmbientMusic: (enabled: boolean) => void;
@@ -243,6 +255,13 @@ export function SettingsView({
   onToggleLightMode,
   onToggleAlwaysPs5Theme,
   onToggleAlwaysXboxTheme,
+  activeOsTheme = 'windows',
+  runtimePlatform = 'win32',
+  systemPrefersDark = true,
+  onChangeOsThemePreference,
+  onChangeAppearanceMode,
+  onChangeAnimationMode,
+  onRestoreDefaultThemes,
   onUpdateCustomTheme,
   onResetCustomTheme,
   onToggleAmbientMusic,
@@ -475,7 +494,7 @@ export function SettingsView({
     } else if (mode === 'xbox') {
       onToggleAlwaysXboxTheme(true);
     } else if (mode === 'custom') {
-      onUpdateCustomTheme({ enabled: true });
+      onUpdateCustomTheme({ enabled: !settings.customTheme.enabled });
     } else {
       onToggleAlwaysPs5Theme(false);
       onToggleAlwaysXboxTheme(false);
@@ -577,8 +596,12 @@ export function SettingsView({
         t.lightModeTitle,
         t.alwaysPs5Title,
         t.alwaysXboxTitle,
+        t.osThemeProfileTitle,
+        t.appearanceModeTitle,
+        t.animationModeTitle,
+        t.restoreThemeDefaultsBtn,
         tr.customTheme.sectionTitle,
-        'theme dark light ps5 playstation xbox custom color accent glass blur navbar cursor',
+        'theme dark light ps5 playstation xbox custom color accent glass blur navbar cursor windows linux macos system animation motion reduced',
       ]
         .join(' ')
         .toLowerCase(),
@@ -727,9 +750,9 @@ export function SettingsView({
               <button
                 type="button"
                 onClick={handleExportSettings}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1b232e] dark:hover:bg-[#232d3b] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#cbd5e1] transition-colors whitespace-nowrap cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
               >
-                <Export className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                <Export className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                 <span>{th.exportSettingsBtn}</span>
               </button>
 
@@ -737,9 +760,9 @@ export function SettingsView({
                 <button
                   type="button"
                   onClick={() => importInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1b232e] dark:hover:bg-[#232d3b] border border-slate-300 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#cbd5e1] transition-colors whitespace-nowrap cursor-pointer"
+                  className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
                 >
-                  <UploadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                  <UploadSimple className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                   <span>{th.importSettingsBtn}</span>
                 </button>
               )}
@@ -748,7 +771,7 @@ export function SettingsView({
                 <button
                   type="button"
                   onClick={onReplayOnboarding}
-                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-[#1a9fff]/15 dark:hover:bg-[#1a9fff]/25 border border-sky-200 dark:border-[#1a9fff]/35 text-[12px] font-semibold text-[#0284c7] dark:text-[#66c0f4] transition-colors whitespace-nowrap cursor-pointer"
+                  className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] !border-[var(--sa-accent-ring)] !text-[var(--sa-accent)]"
                 >
                   <Sparkle className="w-3.5 h-3.5" />
                   <span>{t.replaySetupBtn}</span>
@@ -758,7 +781,7 @@ export function SettingsView({
               <button
                 type="button"
                 onClick={onResetDefaults}
-                className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.08] text-[12px] font-semibold text-slate-700 hover:text-slate-900 dark:text-[#c6d4df] dark:hover:text-white transition-colors whitespace-nowrap cursor-pointer"
+                className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
               >
                 <ArrowCounterClockwise className="w-3.5 h-3.5" />
                 <span>{t.resetDefaults}</span>
@@ -768,7 +791,7 @@ export function SettingsView({
 
           {/* Instant Search Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
-            <div className="relative flex-1">
+            <div className="sa-search-bar relative flex-1">
               <MagnifyingGlass className="w-4 h-4 text-slate-400 dark:text-[#7f91ab] absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="search"
@@ -776,7 +799,7 @@ export function SettingsView({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={th.searchPlaceholder}
                 aria-label={th.searchPlaceholder}
-                className="w-full min-h-[42px] ps-10 pe-10 py-2 rounded-xl bg-white dark:bg-[#131820] border border-slate-200 dark:border-white/[0.09] text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6d7f99] focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none shadow-xs"
+                className="sa-search-input w-full min-h-[42px] ps-10 pe-10 py-2 text-[13px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#6d7f99]"
               />
               {searchQuery && (
                 <button
@@ -895,7 +918,17 @@ export function SettingsView({
               )}
             </div>
             <div className="text-[11.5px] text-slate-500 dark:text-[#8b9bb4] truncate">
-              {systemSpecs?.gpuName || (downloadFolder || (isDesktopApp ? 'Windows' : 'Browser'))}
+              {systemSpecs?.gpuName ||
+                downloadFolder ||
+                (isDesktopApp
+                  ? ((window as unknown as { secretAreaDesktop?: { platform?: string } })
+                      .secretAreaDesktop?.platform === 'darwin'
+                      ? 'macOS'
+                      : (window as unknown as { secretAreaDesktop?: { platform?: string } })
+                          .secretAreaDesktop?.platform === 'linux'
+                      ? 'Linux'
+                      : 'Windows')
+                  : 'Browser')}
             </div>
           </button>
         </div>
@@ -914,10 +947,8 @@ export function SettingsView({
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
-                    active
-                      ? 'bg-[#0284c7] dark:bg-[#1a9fff] border-[#0284c7] dark:border-[#38bdf8] text-white'
-                      : 'bg-white dark:bg-[#171d25] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-[#b4c2d4]'
+                  className={`px-3 py-2 text-[12px] ${
+                    active ? 'sa-btn-primary' : 'sa-btn-secondary'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -926,7 +957,7 @@ export function SettingsView({
                     <span
                       dir="ltr"
                       className={`font-mono-tabular text-[11px] ${
-                        active ? 'text-white/90' : 'text-slate-400 dark:text-[#7f91ab]'
+                        active ? 'opacity-90' : 'text-slate-400 dark:text-[#7f91ab]'
                       }`}
                     >
                       {cat.badge}
@@ -957,9 +988,9 @@ export function SettingsView({
                       setSearchQuery('');
                       setActiveCategory(cat.id);
                     }}
-                    className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold transition-colors cursor-pointer text-start ${
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-[var(--sa-btn-radius)] text-[12.5px] font-semibold transition-colors cursor-pointer text-start ${
                       active
-                        ? 'bg-[#0284c7]/12 dark:bg-[#1a9fff]/16 text-[#0284c7] dark:text-[#66c0f4] border border-[#0284c7]/35 dark:border-[#38bdf8]/35'
+                        ? 'bg-[var(--sa-accent-soft)] text-[var(--sa-accent)] border border-[var(--sa-accent-ring)]'
                         : 'text-slate-700 dark:text-[#b4c2d4] hover:bg-slate-100 dark:hover:bg-white/[0.04] border border-transparent'
                     }`}
                   >
@@ -997,7 +1028,7 @@ export function SettingsView({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors cursor-pointer"
+                  className="sa-btn-primary px-4 py-2 text-[12.5px]"
                 >
                   <X className="w-3.5 h-3.5" />
                   <span>{th.clearSearchBtn}</span>
@@ -1054,7 +1085,7 @@ export function SettingsView({
               <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-lg">
                 <div className="flex flex-wrap items-start justify-between gap-3 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
                   <div className="flex items-start gap-3">
-                    <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                    <span className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
                       <Globe className="w-4.5 h-4.5" />
                     </span>
                     <div className="space-y-0.5">
@@ -1308,7 +1339,9 @@ export function SettingsView({
             {shouldRenderSection('appearance') && (
               <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-4 shadow-sm dark:shadow-lg">
                 <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
-                  <Swatches className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                  <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0">
+                    <Swatches className="w-4 h-4" />
+                  </span>
                   <h2 className="text-[14.5px] font-bold text-slate-900 dark:text-white tracking-tight">
                     {t.windowSectionTitle}
                   </h2>
@@ -1362,7 +1395,10 @@ export function SettingsView({
                         },
                       ]
                     ).map((item) => {
-                      const active = activeThemeModeKey === item.id;
+                      const active =
+                        item.id === 'custom'
+                          ? settings.customTheme.enabled
+                          : activeThemeModeKey === item.id;
                       const isConsoleCard = item.id === 'ps5' || item.id === 'xbox';
                       return (
                         <button
@@ -1370,7 +1406,7 @@ export function SettingsView({
                           type="button"
                           aria-pressed={active}
                           onClick={() => selectQuickTheme(item.id)}
-                          className={`sa-ps5-subpanel p-3 rounded-lg border text-start transition-colors cursor-pointer flex flex-col justify-between gap-2 ${
+                          className={`sa-game-card sa-ps5-subpanel p-3 border text-start cursor-pointer flex flex-col justify-between gap-2 ${
                             active
                               ? item.activeStyle
                               : 'bg-slate-50 dark:bg-[#12171f] border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.18]'
@@ -1384,7 +1420,7 @@ export function SettingsView({
                                 className={`w-3.5 h-3.5 ${
                                   active && isConsoleCard
                                     ? 'text-white'
-                                    : 'text-[#0284c7] dark:text-[#66c0f4]'
+                                    : 'text-[var(--sa-accent)]'
                                 }`}
                               />
                             )}
@@ -1404,11 +1440,235 @@ export function SettingsView({
                   </div>
                 </div>
 
-                {/* Custom Default Theme Builder */}
+                {/* Operating System Design Profile */}
+                <div className="sa-ps5-subpanel p-4 rounded-xl bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
+                    <div className="space-y-0.5">
+                      <div className="text-[13px] font-semibold text-slate-900 dark:text-white">
+                        {t.osThemeProfileTitle}
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-[#8b9bb4] leading-snug">
+                        {t.osThemeProfileDesc}
+                      </p>
+                    </div>
+                    <span className="text-[11.5px] font-medium text-[#0284c7] dark:text-[#7cc4ff] shrink-0">
+                      {activeOsTheme === 'linux'
+                        ? t.osThemeLinuxLabel
+                        : activeOsTheme === 'macos'
+                        ? t.osThemeMacosLabel
+                        : t.osThemeWindowsLabel}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                    {(
+                      [
+                        {
+                          id: 'auto' as const,
+                          label: t.osThemeAutoLabel,
+                          subtitle:
+                            runtimePlatform === 'darwin'
+                              ? 'macOS'
+                              : runtimePlatform === 'linux'
+                              ? 'Linux'
+                              : 'Windows',
+                          swatches: ['#0e141b', '#2e3440', '#2563eb'],
+                        },
+                        {
+                          id: 'windows' as const,
+                          label: t.osThemeWindowsLabel,
+                          subtitle: 'Fluent Slate',
+                          swatches: ['#0e141b', '#171d25', '#1a9fff'],
+                        },
+                        {
+                          id: 'linux' as const,
+                          label: t.osThemeLinuxLabel,
+                          subtitle: 'Nordic Darker',
+                          swatches: ['#242933', '#2e3440', '#88c0d0'],
+                        },
+                        {
+                          id: 'macos' as const,
+                          label: t.osThemeMacosLabel,
+                          subtitle: 'Cobalt Glass',
+                          swatches: ['#11132e', '#2563eb', '#38bdf8'],
+                        },
+                      ]
+                    ).map((opt) => {
+                      const selected = settings.osThemePreference === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => onChangeOsThemePreference?.(opt.id)}
+                          className={`group min-h-[56px] px-3.5 py-2.5 rounded-xl border text-start transition-all duration-150 cursor-pointer flex items-center justify-between gap-2.5 active:scale-[0.99] ${
+                            selected
+                              ? 'bg-[#0284c7]/12 dark:bg-[#38bdf8]/16 border-[#0284c7] dark:border-[#38bdf8] text-[#0369a1] dark:text-white shadow-xs'
+                              : 'bg-white dark:bg-[#161c26] border-slate-200 dark:border-white/[0.09] text-slate-800 dark:text-[#d5dfed] hover:border-slate-300 dark:hover:border-white/[0.22] hover:bg-slate-50 dark:hover:bg-[#1b2230]'
+                          }`}
+                        >
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center -space-x-1 shrink-0" aria-hidden="true">
+                                {opt.swatches.map((hex, i) => (
+                                  <span
+                                    key={i}
+                                    className="w-3 h-3 rounded-full border border-white/70 dark:border-white/30"
+                                    style={{ backgroundColor: hex }}
+                                  />
+                                ))}
+                              </span>
+                              <span className="text-[12.5px] font-semibold leading-snug whitespace-normal">
+                                {opt.label}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4] leading-tight">
+                              {opt.subtitle}
+                            </div>
+                          </div>
+
+                          {selected && (
+                            <Check
+                              weight="bold"
+                              className="w-4 h-4 text-[#0284c7] dark:text-[#38bdf8] shrink-0"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* System Appearance Mode & Motion Intensity */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* System / Dark / Light Appearance */}
+                  <div className="sa-ps5-subpanel p-4 rounded-xl bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="text-[13px] font-semibold text-slate-900 dark:text-white">
+                        {t.appearanceModeTitle}
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-[#8b9bb4] leading-snug">
+                        {th.themeStudioDesc}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {(
+                        [
+                          {
+                            id: 'system' as const,
+                            label: t.appearanceSystemLabel,
+                            icon: <Laptop className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                          {
+                            id: 'dark' as const,
+                            label: t.appearanceDarkLabel,
+                            icon: <Moon className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                          {
+                            id: 'light' as const,
+                            label: t.appearanceLightLabel,
+                            icon: <Sun className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                        ]
+                      ).map((opt) => {
+                        const selected =
+                          !hasConsoleTheme &&
+                          settings.appearanceMode === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => onChangeAppearanceMode?.(opt.id)}
+                            className={`min-h-[38px] px-3 py-2 rounded-lg border text-[12px] font-semibold transition-all duration-150 inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
+                              selected
+                                ? 'bg-[#0284c7]/14 dark:bg-[#38bdf8]/16 border-[#0284c7] dark:border-[#38bdf8] text-[#0369a1] dark:text-white shadow-xs'
+                                : 'bg-white dark:bg-[#161c26] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-[#b8c4d4] hover:border-slate-300 dark:hover:border-white/[0.22]'
+                            }`}
+                          >
+                            {opt.icon}
+                            <span>{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Motion & Animations */}
+                  <div className="sa-ps5-subpanel p-4 rounded-xl bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] flex flex-col justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="text-[13px] font-semibold text-slate-900 dark:text-white">
+                        {t.animationModeTitle}
+                      </div>
+                      <p className="text-[11.5px] text-slate-600 dark:text-[#8b9bb4] leading-snug">
+                        {t.animationModeDesc}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {(
+                        [
+                          {
+                            id: 'full' as const,
+                            label: t.animationFullLabel,
+                            icon: <Lightning className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                          {
+                            id: 'subtle' as const,
+                            label: t.animationSubtleLabel,
+                            icon: <Sparkle className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                          {
+                            id: 'reduced' as const,
+                            label: t.animationReducedLabel,
+                            icon: <Leaf className="w-3.5 h-3.5 shrink-0" />,
+                          },
+                        ]
+                      ).map((opt) => {
+                        const selected = settings.animationMode === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            aria-pressed={selected}
+                            onClick={() => onChangeAnimationMode?.(opt.id)}
+                            className={`min-h-[38px] px-3 py-2 rounded-lg border text-[12px] font-semibold transition-all duration-150 inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer active:scale-[0.98] ${
+                              selected
+                                ? 'bg-[#0284c7]/14 dark:bg-[#38bdf8]/16 border-[#0284c7] dark:border-[#38bdf8] text-[#0369a1] dark:text-white shadow-xs'
+                                : 'bg-white dark:bg-[#161c26] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-[#b8c4d4] hover:border-slate-300 dark:hover:border-white/[0.22]'
+                            }`}
+                          >
+                            {opt.icon}
+                            <span>{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {onRestoreDefaultThemes && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={onRestoreDefaultThemes}
+                      className="sa-btn-secondary w-full sm:w-auto justify-center min-h-[38px] px-4 py-2 text-[12.5px]"
+                    >
+                      <ArrowCounterClockwise className="w-4 h-4 shrink-0" />
+                      <span>{t.restoreThemeDefaultsBtn}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Custom Theme Builder (layers on Windows, Linux, macOS, PS5, or Xbox) */}
                 <CustomThemeBuilder
                   language={settings.language}
                   customTheme={settings.customTheme}
                   hasConsoleThemeActive={hasConsoleTheme}
+                  activeBaseTheme={
+                    settings.alwaysXboxTheme ? 'xbox' : settings.alwaysPs5Theme ? 'ps5' : 'default'
+                  }
+                  activeOsTheme={activeOsTheme}
+                  isDarkMode={!resolveEffectiveLightMode(settings, systemPrefersDark)}
                   onUpdateCustomTheme={onUpdateCustomTheme}
                   onResetCustomTheme={onResetCustomTheme}
                 />
@@ -2107,7 +2367,7 @@ export function SettingsView({
                         <button
                           type="button"
                           onClick={() => onChooseDownloadFolder?.()}
-                          className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                          className="sa-btn-primary min-h-[40px] px-3.5 py-2 text-[12.5px]"
                         >
                           <FolderOpen className="w-4 h-4" />
                           <span>{t.chooseFolderBtn}</span>
@@ -2115,7 +2375,7 @@ export function SettingsView({
                         <button
                           type="button"
                           onClick={() => onOpenDownloadFolder?.()}
-                          className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-slate-800 dark:text-[#dce4ee] text-[12.5px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                          className="sa-btn-secondary min-h-[40px] px-3.5 py-2 text-[12.5px]"
                         >
                           <ArrowSquareOut className="w-4 h-4" />
                           <span>{t.openFolderBtn}</span>
@@ -2143,7 +2403,7 @@ export function SettingsView({
                                 ? 'bg-rose-500'
                                 : diskPct > 72
                                 ? 'bg-amber-500'
-                                : 'bg-[#0284c7] dark:bg-[#1a9fff]'
+                                : 'bg-[var(--sa-accent)]'
                             }`}
                             style={{ width: `${diskPct}%` }}
                           />
@@ -2156,7 +2416,7 @@ export function SettingsView({
                 {/* Cache Maintenance & Portable Config Backup */}
                 <div className="sa-ps5-subpanel p-3.5 sm:p-4 rounded-lg bg-slate-50 dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.07] space-y-3">
                   <div className="flex items-start gap-3">
-                    <span className="w-8 h-8 rounded-lg bg-slate-200/80 dark:bg-[#1a2433] border border-slate-300/70 dark:border-white/[0.08] text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="sa-icon-badge w-8 h-8 flex items-center justify-center shrink-0 mt-0.5">
                       <Database className="w-4 h-4" />
                     </span>
                     <div className="space-y-0.5">
@@ -2173,9 +2433,9 @@ export function SettingsView({
                     <button
                       type="button"
                       onClick={handleClearDealsCache}
-                      className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors cursor-pointer"
+                      className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
                     >
-                      <Broom className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                      <Broom className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                       <span>{th.clearDealsCacheBtn}</span>
                     </button>
 
@@ -2183,18 +2443,18 @@ export function SettingsView({
                       type="button"
                       disabled={clearingImageCache}
                       onClick={() => void handleClearArtworkCache()}
-                      className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white disabled:opacity-55 transition-colors cursor-pointer"
+                      className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px] disabled:opacity-55"
                     >
-                      <FloppyDisk className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                      <FloppyDisk className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                       <span>{th.clearImageCacheBtn}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleExportSettings}
-                      className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors cursor-pointer"
+                      className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
                     >
-                      <Export className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                      <Export className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                       <span>{th.exportSettingsBtn}</span>
                     </button>
 
@@ -2202,9 +2462,9 @@ export function SettingsView({
                       <button
                         type="button"
                         onClick={() => importInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#1c2430] dark:hover:bg-[#253040] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-800 dark:text-white transition-colors cursor-pointer"
+                        className="sa-btn-secondary min-h-[36px] px-3 py-1.5 text-[12px]"
                       >
-                        <UploadSimple className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#66c0f4]" />
+                        <UploadSimple className="w-3.5 h-3.5 text-[var(--sa-accent)]" />
                         <span>{th.importSettingsBtn}</span>
                       </button>
                     )}
@@ -2218,7 +2478,7 @@ export function SettingsView({
               <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 space-y-3.5 shadow-sm dark:shadow-lg">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <span className="w-9 h-9 rounded-lg bg-sky-500/10 dark:bg-[#1a9fff]/15 border border-sky-500/25 dark:border-[#1a9fff]/35 text-[#0284c7] dark:text-[#66c0f4] flex items-center justify-center shrink-0">
+                    <span className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
                       <ClockCounterClockwise className="w-4.5 h-4.5" />
                     </span>
                     <div className="space-y-0.5 min-w-0">
@@ -2228,7 +2488,7 @@ export function SettingsView({
                         </h2>
                         <span
                           dir="ltr"
-                          className="text-[12px] font-mono-tabular font-semibold text-[#0284c7] dark:text-[#38bdf8]"
+                          className="text-[12px] font-mono-tabular font-semibold text-[var(--sa-accent)]"
                         >
                           · v{currentVersion}
                         </span>
@@ -2255,9 +2515,9 @@ export function SettingsView({
                           onCheckForUpdates?.();
                           onOpenUpdater();
                         }}
-                        className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-slate-800 dark:text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="sa-btn-secondary min-h-[38px] px-3.5 py-1.5 text-[12px]"
                       >
-                        <DownloadSimple className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
+                        <DownloadSimple className="w-4 h-4 text-[var(--sa-accent)]" />
                         <span>{th.openUpdaterBtn}</span>
                       </button>
                     )}
@@ -2266,9 +2526,9 @@ export function SettingsView({
                       <button
                         type="button"
                         onClick={onOpenNotifications}
-                        className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 dark:bg-[#212a37] dark:hover:bg-[#2c3849] border border-slate-300 dark:border-white/[0.1] text-slate-800 dark:text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="sa-btn-secondary min-h-[38px] px-3.5 py-1.5 text-[12px]"
                       >
-                        <Bell className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4]" />
+                        <Bell className="w-4 h-4 text-[var(--sa-accent)]" />
                         <span>{tr.notificationCenter.title}</span>
                       </button>
                     )}
@@ -2277,7 +2537,7 @@ export function SettingsView({
                       <button
                         type="button"
                         onClick={onOpenUpdateHistory}
-                        className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="sa-btn-primary min-h-[38px] px-3.5 py-1.5 text-[12px]"
                       >
                         <ClockCounterClockwise className="w-4 h-4" />
                         <span>{tr.updateHistory.openHistoryBtn}</span>

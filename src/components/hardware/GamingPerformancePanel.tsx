@@ -114,7 +114,7 @@ function FrameTimeSparkline({
           {points && (
             <polyline
               fill="none"
-              stroke="#38bdf8"
+              stroke="var(--sa-accent, #38bdf8)"
               strokeWidth="2.2"
               strokeLinejoin="round"
               strokeLinecap="round"
@@ -251,7 +251,7 @@ export function GamingPerformancePanel({
   const sessionB = historyList.find((s) => s.sessionId === compareIdB) || null;
 
   const fpsCards = [
-    { label: t.gamingFpsCurrent, value: formatFps(sessionState.fps.currentFps, naLabel), accent: 'text-[#0284c7] dark:text-[#38bdf8]' },
+    { label: t.gamingFpsCurrent, value: formatFps(sessionState.fps.currentFps, naLabel), accent: 'text-[var(--sa-accent)]' },
     { label: t.gamingFpsAvg, value: formatFps(sessionState.fps.averageFps, naLabel), accent: 'text-emerald-600 dark:text-[#34d399]' },
     { label: t.gamingFps1Low, value: formatFps(sessionState.fps.low1PercentFps, naLabel), accent: 'text-amber-600 dark:text-[#fbbf24]' },
     { label: t.gamingFps01Low, value: formatFps(sessionState.fps.low01PercentFps, naLabel), accent: 'text-rose-600 dark:text-[#fb7185]' },
@@ -270,18 +270,18 @@ export function GamingPerformancePanel({
       <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-violet-500/12 dark:bg-[#a78bfa]/15 border border-violet-500/25 dark:border-[#a78bfa]/30 flex items-center justify-center shrink-0">
-              <GameController weight="duotone" className="w-5 h-5 text-violet-600 dark:text-[#a78bfa]" />
+            <div className="sa-icon-badge w-9 h-9 flex items-center justify-center shrink-0">
+              <GameController weight="duotone" className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[16px] font-bold text-slate-900 dark:text-white">{t.gamingTitle}</h2>
+              <h2 className="font-display text-[16px] font-bold text-slate-900 dark:text-white">{t.gamingTitle}</h2>
               <p className="text-[12.5px] text-slate-600 dark:text-[#9cb0c9]">{t.gamingSubtitle}</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             {sessionState.isActive && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/12 border border-emerald-500/30 text-emerald-700 dark:text-[#34d399] text-[12px] font-mono-tabular font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--sa-btn-radius)] bg-emerald-500/12 border border-emerald-500/30 text-emerald-700 dark:text-[#34d399] text-[12px] font-mono-tabular font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
                 <span>{t.gamingSessionActive}</span>
                 <span>·</span>
@@ -293,10 +293,10 @@ export function GamingPerformancePanel({
               type="button"
               disabled={!isDesktopApp || isTogglingSession}
               onClick={() => void handleToggleSession()}
-              className={`inline-flex items-center gap-2 min-h-[38px] px-4 py-2 rounded-lg text-[12.5px] font-bold transition-colors disabled:opacity-45 cursor-pointer ${
+              className={`inline-flex items-center gap-2 min-h-[38px] px-4 py-2 text-[12.5px] font-bold transition-colors disabled:opacity-45 cursor-pointer whitespace-nowrap ${
                 sessionState.isActive
-                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                  : 'bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#0ea5e9] dark:hover:bg-[#0284c7] text-white'
+                  ? 'rounded-[var(--sa-btn-radius)] bg-rose-600 hover:bg-rose-700 text-white'
+                  : 'sa-btn-primary'
               }`}
             >
               {sessionState.isActive ? (
@@ -325,7 +325,7 @@ export function GamingPerformancePanel({
                 value={selectedProcessKey}
                 disabled={!isDesktopApp || sessionState.isActive}
                 onChange={(e) => setSelectedProcessKey(e.target.value)}
-                className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12.5px] text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none disabled:opacity-55"
+                className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] disabled:opacity-55"
               >
                 <option value="foreground">{t.gamingAllProcesses}</option>
                 {processes.map((proc) => (
@@ -339,7 +339,7 @@ export function GamingPerformancePanel({
               type="button"
               disabled={!isDesktopApp || isLoadingProcesses || sessionState.isActive}
               onClick={() => void loadProcesses()}
-              className="inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#1f2835] dark:hover:bg-[#293546] border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] disabled:opacity-45 shrink-0"
+              className="sa-btn-secondary inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3 py-1.5 text-[12px] font-semibold disabled:opacity-45 shrink-0 whitespace-nowrap"
             >
               <ArrowClockwise className={`w-4 h-4 ${isLoadingProcesses ? 'motion-safe:animate-spin' : ''}`} />
               <span>{t.gamingRefreshProcesses}</span>
@@ -362,13 +362,25 @@ export function GamingPerformancePanel({
                 }
               }}
               placeholder="1.1.1.1"
-              className="w-full min-h-[38px] px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12.5px] font-mono-tabular text-slate-900 dark:text-white focus:border-[#0284c7] dark:focus:border-[#38bdf8] focus:outline-none disabled:opacity-55"
+              className="sa-search-input w-full min-h-[38px] px-3 py-1.5 text-[12.5px] font-mono-tabular disabled:opacity-55"
             />
           </label>
         </div>
 
         {/* PresentMon Status Notice */}
-        {!sessionState.presentMonAvailable ? (
+        {snapshot.platform !== 'win32' && snapshot.platform !== 'web' ? (
+          <div className="rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.1] px-3.5 py-2.5 flex items-start gap-2.5 text-[12px]">
+            <Info className="w-4.5 h-4.5 text-[var(--sa-accent)] shrink-0 mt-0.5" />
+            <div className="space-y-0.5 min-w-0">
+              <div className="font-semibold text-slate-900 dark:text-white">
+                {t.gamingPresentMonUnsupportedTitle}
+              </div>
+              <p className="text-slate-600 dark:text-[#9cb0c9] leading-relaxed">
+                {t.gamingPresentMonUnsupportedDesc}
+              </p>
+            </div>
+          </div>
+        ) : !sessionState.presentMonAvailable ? (
           <div className="rounded-lg bg-amber-50 dark:bg-amber-500/[0.08] border border-amber-200 dark:border-amber-400/25 px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[12px]">
             <div className="flex items-start gap-2.5 min-w-0">
               <Info className="w-4.5 h-4.5 text-amber-600 dark:text-amber-300 shrink-0 mt-0.5" />
@@ -391,7 +403,7 @@ export function GamingPerformancePanel({
               <button
                 type="button"
                 onClick={onOpenPresentMonManager}
-                className="inline-flex items-center justify-center gap-1.5 min-h-[34px] px-3.5 py-1.5 rounded-lg bg-[#0284c7] hover:bg-[#0369a1] dark:bg-[#1a9fff] dark:hover:bg-[#38adff] text-white text-[12px] font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="sa-btn-primary inline-flex items-center justify-center gap-1.5 min-h-[34px] px-3.5 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <span>
                   {presentMonSetupState?.actionNeeded === 'repair_required'
@@ -422,10 +434,10 @@ export function GamingPerformancePanel({
                 <button
                   type="button"
                   onClick={onOpenPresentMonManager}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                     presentMonSetupState?.actionNeeded === 'update_available'
-                      ? 'bg-[#0284c7] hover:bg-[#0369a1] text-white'
-                      : 'bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-[#34d399]'
+                      ? 'sa-btn-primary'
+                      : 'rounded-[var(--sa-btn-radius)] bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-800 dark:text-[#34d399]'
                   }`}
                 >
                   <span>
@@ -470,7 +482,7 @@ export function GamingPerformancePanel({
 
         <article className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 shadow-xs dark:shadow-md space-y-3">
           <div className="flex items-center gap-2">
-            <WifiHigh className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8]" />
+            <WifiHigh className="w-4.5 h-4.5 text-[var(--sa-accent)]" />
             <h3 className="text-[14px] font-bold text-slate-900 dark:text-white">
               {t.gamingNetworkLatencyTitle}
             </h3>
@@ -532,7 +544,7 @@ export function GamingPerformancePanel({
       <section className="sa-ps5-panel rounded-xl bg-white dark:bg-[#171d25] border border-slate-200 dark:border-white/[0.08] p-4 sm:p-5 shadow-xs dark:shadow-md space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Pulse className="w-4.5 h-4.5 text-[#0284c7] dark:text-[#38bdf8]" />
+            <Pulse className="w-4.5 h-4.5 text-[var(--sa-accent)]" />
             <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">
               {t.gamingBottleneckTitle}
             </h3>
@@ -598,7 +610,7 @@ export function GamingPerformancePanel({
             <button
               type="button"
               onClick={() => void handleClearHistory()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-500/15 dark:bg-[#1f2835] dark:hover:bg-rose-500/20 border border-slate-200 dark:border-white/[0.1] text-[12px] font-semibold text-slate-700 dark:text-[#d5e0ee] hover:text-rose-600 dark:hover:text-rose-300 transition-colors"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold hover:text-rose-600 dark:hover:text-rose-300 cursor-pointer whitespace-nowrap"
             >
               <Trash className="w-3.5 h-3.5" />
               <span>{t.gamingClearHistory}</span>
@@ -631,7 +643,7 @@ export function GamingPerformancePanel({
                       <td dir="ltr" className="py-2.5 px-2 font-mono-tabular">
                         {formatSessionDuration(item.durationSeconds)}
                       </td>
-                      <td dir="ltr" className="py-2.5 px-2 font-mono-tabular font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                      <td dir="ltr" className="py-2.5 px-2 font-mono-tabular font-semibold text-[var(--sa-accent)]">
                         {formatFps(item.averageFps, naLabel)}
                       </td>
                       <td dir="ltr" className="py-2.5 px-2 font-mono-tabular">
@@ -662,7 +674,7 @@ export function GamingPerformancePanel({
                     <select
                       value={compareIdA}
                       onChange={(e) => setCompareIdA(e.target.value)}
-                      className="w-full min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px]"
+                      className="sa-search-input w-full min-h-[34px] px-2.5 py-1 text-[12px]"
                     >
                       {historyList.map((s) => (
                         <option key={s.sessionId} value={s.sessionId}>
@@ -676,7 +688,7 @@ export function GamingPerformancePanel({
                     <select
                       value={compareIdB}
                       onChange={(e) => setCompareIdB(e.target.value)}
-                      className="w-full min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-[#10151c] border border-slate-200 dark:border-white/[0.12] text-[12px]"
+                      className="sa-search-input w-full min-h-[34px] px-2.5 py-1 text-[12px]"
                     >
                       {historyList.map((s) => (
                         <option key={s.sessionId} value={s.sessionId}>

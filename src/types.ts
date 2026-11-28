@@ -604,6 +604,19 @@ export interface LiveExtraTempItem {
   source: string;
 }
 
+export type MetricAvailabilityState =
+  | 'available'
+  | 'unsupported'
+  | 'permission_required'
+  | 'temporarily_unavailable'
+  | 'detection_failed';
+
+export interface MetricAvailabilityItem {
+  state: MetricAvailabilityState;
+  reason: string;
+  source: string | null;
+}
+
 export interface HardwareMonitorSnapshot {
   timestamp: number;
   platform: string;
@@ -639,6 +652,7 @@ export interface HardwareMonitorSnapshot {
     display: DisplayCapabilitiesProfile | null;
     laptop: LaptopCapabilitiesProfile | null;
   } | null;
+  metricAvailability?: Record<string, MetricAvailabilityItem> | null;
 }
 
 export interface GamingProcessCandidate {

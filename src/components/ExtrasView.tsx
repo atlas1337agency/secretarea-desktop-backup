@@ -260,12 +260,14 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
         {/* 1. Upcoming List (Text List with Random Colors / Google Sheet: UpcomingList) */}
         {upcomingGroups.length > 0 && (
           <section className="space-y-3 sm:space-y-3.5">
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <ListChecks className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+            <div className="sa-section-header flex items-center gap-2.5 sm:gap-3">
+              <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                <ListChecks className="w-4 h-4 shrink-0" />
+              </span>
               <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                 {t.upcomingList}
               </h2>
-              <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+              <div className="sa-section-line flex-1" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-3.5">
@@ -320,13 +322,15 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
         {/* 2. Trailers Slide with Video Popup (Google Sheet: UpcomingTrailers) */}
         {trailerEntries.length > 0 && (
           <section className="space-y-3 sm:space-y-3.5">
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="sa-section-header flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <FilmStrip className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                  <FilmStrip className="w-4 h-4 shrink-0" />
+                </span>
                 <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.trailers}
                 </h2>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                <div className="sa-section-line flex-1" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -334,7 +338,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Trailers left"
                   onClick={() => scrollRow(trailersScrollerRef, -1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
@@ -342,7 +346,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Trailers right"
                   onClick={() => scrollRow(trailersScrollerRef, 1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
@@ -412,13 +416,15 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
         {/* 3. Best Series Slide (Google Sheet: BestGameSeries) */}
         {bestSeriesEntries.length > 0 && (
           <section className="space-y-3 sm:space-y-3.5">
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="sa-section-header flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <Stack className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+                <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                  <Stack className="w-4 h-4 shrink-0" />
+                </span>
                 <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white shrink-0">
                   {t.bestSeries}
                 </h2>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08]" />
+                <div className="sa-section-line flex-1" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -426,7 +432,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Best Series left"
                   onClick={() => scrollRow(seriesScrollerRef, -1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
@@ -434,7 +440,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Best Series right"
                   onClick={() => scrollRow(seriesScrollerRef, 1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretRight weight="bold" className="w-4 h-4" />
                 </button>
@@ -489,16 +495,18 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
         {/* 4. Top Open World Games Slide (Google Sheet: topgames — auto-updated count & rank numbers) */}
         {topGamesEntries.length > 0 && (
           <section className="space-y-3 sm:space-y-3.5">
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="sa-section-header flex items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <Trophy className="w-4 h-4 text-amber-500 dark:text-[#fbbf24] shrink-0" />
+                <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                  <Trophy className="w-4 h-4 text-amber-500 dark:text-[#fbbf24] shrink-0" />
+                </span>
                 <h2 className="font-display text-[15px] sm:text-[16px] lg:text-[17px] font-bold tracking-tight text-slate-900 dark:text-white truncate">
                   {t.topOpenWorld}{' '}
-                  <span className="text-[#0284c7] dark:text-[#66c0f4] font-mono-tabular font-semibold">
-                    ({topGamesEntries.length})
+                  <span className="sa-badge-secondary px-1.5 py-0.5 text-[11.5px] font-mono-tabular font-semibold ms-1">
+                    {topGamesEntries.length}
                   </span>
                 </h2>
-                <div className="h-px flex-1 bg-slate-200 dark:bg-white/[0.08] hidden sm:block" />
+                <div className="sa-section-line flex-1 hidden sm:block" />
               </div>
 
               <div dir="ltr" className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -506,7 +514,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Top Open World Games left"
                   onClick={() => scrollRow(topGamesScrollerRef, -1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretLeft weight="bold" className="w-4 h-4" />
                 </button>
@@ -514,7 +522,7 @@ export const ExtrasView = memo(function ExtrasView({ catalog, language = 'en' }:
                   type="button"
                   aria-label="Scroll Top Open World Games right"
                   onClick={() => scrollRow(topGamesScrollerRef, 1)}
-                  className="p-1.5 rounded bg-slate-200 hover:bg-slate-300 border border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#c6d4df] dark:hover:text-white transition-colors cursor-pointer"
+                  className="sa-btn-secondary p-1.5 cursor-pointer"
                 >
                   <CaretRight weight="bold" className="w-4 h-4" />
                 </button>

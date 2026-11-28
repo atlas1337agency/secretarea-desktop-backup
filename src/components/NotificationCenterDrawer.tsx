@@ -170,20 +170,14 @@ export function NotificationCenterDrawer({
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div
-                className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${
-                  isXboxTheme
-                    ? 'bg-[#107C10]/20 border-[#52e042]/40 text-[#6ee755]'
-                    : 'bg-sky-500/10 border-sky-500/25 text-[#0284c7] dark:bg-[#1a9fff]/15 dark:border-[#1a9fff]/30 dark:text-[#66c0f4]'
-                }`}
-              >
+              <div className="sa-icon-badge w-9 h-9 shrink-0">
                 <Bell className="w-4.5 h-4.5" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 min-w-0">
                   <h2 className="text-[15px] font-bold tracking-tight truncate">{t.title}</h2>
                   {unreadCount > 0 && (
-                    <span className="font-mono-tabular text-[11px] font-bold text-[#0284c7] dark:text-[#38bdf8]">
+                    <span className="font-mono-tabular text-[11px] font-bold text-[var(--sa-accent)]">
                       ({unreadCount})
                     </span>
                   )}
@@ -208,7 +202,7 @@ export function NotificationCenterDrawer({
                   disabled={isSyncing}
                   title={isSyncing ? t.syncingBtn : t.syncNowBtn}
                   aria-label={isSyncing ? t.syncingBtn : t.syncNowBtn}
-                  className={`p-1.5 rounded-lg border transition-colors cursor-pointer disabled:opacity-60 shrink-0 ${
+                  className={`p-1.5 rounded-[var(--sa-btn-radius)] border transition-colors cursor-pointer disabled:opacity-60 shrink-0 ${
                     isPs5Theme || isXboxTheme
                       ? 'bg-white/[0.06] hover:bg-white/[0.14] border-white/[0.12] text-white'
                       : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700 dark:bg-white/[0.05] dark:hover:bg-white/[0.11] dark:border-white/[0.1] dark:text-[#c7d5e8]'
@@ -224,7 +218,7 @@ export function NotificationCenterDrawer({
                 <button
                   type="button"
                   onClick={onMarkAllRead}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--sa-btn-radius)] text-[11px] font-semibold border whitespace-nowrap transition-colors cursor-pointer ${
                     isPs5Theme || isXboxTheme
                       ? 'bg-white/[0.06] hover:bg-white/[0.14] border-white/[0.12] text-white'
                       : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700 dark:bg-white/[0.05] dark:hover:bg-white/[0.11] dark:border-white/[0.1] dark:text-[#c7d5e8]'
@@ -239,7 +233,7 @@ export function NotificationCenterDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label="Close notifications"
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${
+                className={`p-1.5 rounded-[var(--sa-btn-radius)] transition-colors cursor-pointer shrink-0 ${
                   isPs5Theme || isXboxTheme
                     ? 'text-[#9fb0c7] hover:text-white hover:bg-white/[0.08]'
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-[#8b9bb4] dark:hover:text-white dark:hover:bg-white/[0.08]'
@@ -328,7 +322,7 @@ export function NotificationCenterDrawer({
                         className={`w-5 h-5 ${
                           item.importance === 'news'
                             ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-[#0284c7] dark:text-[#66c0f4]'
+                            : 'text-[var(--sa-accent)]'
                         }`}
                       />
                     )}
@@ -340,20 +334,10 @@ export function NotificationCenterDrawer({
                         {isUnread && (
                           <span
                             aria-hidden="true"
-                            className={`w-2 h-2 rounded-full shrink-0 ${
-                              isXboxTheme
-                                ? 'bg-[#6ee755]'
-                                : 'bg-[#0284c7] dark:bg-[#38bdf8]'
-                            }`}
+                            className="w-2 h-2 rounded-full shrink-0 bg-[var(--sa-accent)]"
                           />
                         )}
-                        <span
-                          className={
-                            isXboxTheme
-                              ? 'text-[#6ee755]'
-                              : 'text-[#0284c7] dark:text-[#38bdf8]'
-                          }
-                        >
+                        <span className="text-[var(--sa-accent)]">
                           {tabDisplay}
                         </span>
                         {kindLabel && (

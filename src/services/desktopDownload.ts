@@ -1,11 +1,64 @@
 const DESKTOP_URL_STORAGE_KEY = 'secretarea_desktop_exe_url';
 
+export type PlatformDownloadTarget =
+  | 'win64'
+  | 'macos-arm64'
+  | 'macos-x64'
+  | 'linux-appimage'
+  | 'linux-deb';
+
+export const PLATFORM_ASSET_FILENAMES: Record<PlatformDownloadTarget, string> = {
+  win64: 'SecretArea.exe',
+  'macos-arm64': 'SecretArea-macOS-AppleSilicon.dmg',
+  'macos-x64': 'SecretArea-macOS-Intel.dmg',
+  'linux-appimage': 'SecretArea-linux-x86_64.AppImage',
+  'linux-deb': 'SecretArea-linux-amd64.deb',
+};
+
 export function isRunningInDesktopApp(): boolean {
   if (typeof window === 'undefined') return false;
   const win = window as unknown as {
     secretAreaDesktop?: { isDesktop?: boolean };
   };
   return Boolean(win.secretAreaDesktop?.isDesktop);
+}
+
+export function detectClientPlatformTarget(): PlatformDownloadTarget {
+  if (typeof window !== 'undefined') {
+    const win = window as unknown as {
+      secretAreaDesktop?: { platform?: string; arch?: string };
+    };
+    const bridgePlatform = win.secretAreaDesktop?.platform;
+    const bridgeArch = win.secretAreaDesktop?.arch;
+    if (bridgePlatform === 'darwin') {
+      return bridgeArch === 'x64' ? 'macos-x64' : 'macos-arm64';
+    }
+    if (bridgePlatform === 'linux') {
+      return 'linux-appimage';
+    }
+    if (bridgePlatform === 'win32') {
+      return 'win64';
+    }
+  }
+
+  if (typeof navigator !== 'undefined') {
+    const ua = navigator.userAgent || '';
+    const plat = navigator.platform || '';
+    if (/Mac/i.test(plat) || /Macintosh|Mac OS X/i.test(ua)) {
+      const uaArch = (
+        navigator as unknown as { userAgentData?: { architecture?: string } }
+      ).userAgentData?.architecture;
+      if (uaArch && /x86/i.test(uaArch)) {
+        return 'macos-x64';
+      }
+      return 'macos-arm64';
+    }
+    if (/Linux/i.test(plat) || (/Linux/i.test(ua) && !/Android/i.test(ua))) {
+      return /Ubuntu|Debian/i.test(ua) ? 'linux-deb' : 'linux-appimage';
+    }
+  }
+
+  return 'win64';
 }
 
 function isSafePublicHttpsUrl(rawUrl: string): boolean {
@@ -34,31 +87,47 @@ function isSafePublicHttpsUrl(rawUrl: string): boolean {
 }
 
 /**
- * Accepts a direct HTTPS SecretArea.exe URL OR a GitHub repo URL/slug (e.g. https://github.com/user/repo)
- * and resolves it to the direct GitHub Releases installer link:
- * https://github.com/<user>/<repo>/releases/latest/download/SecretArea.exe
+ * Resolves a GitHub repository URL/slug or GitHub latest-release asset URL
+ * into the requested OS/architecture permanent release asset URL:
+ * https://github.com/<user>/<repo>/releases/latest/download/<PLATFORM_ASSET_FILENAME>
  */
-export function resolveInstallerUrl(input: string): string {
+export function resolvePlatformInstallerUrl(
+  input: string,
+  target: PlatformDownloadTarget = 'win64'
+): string {
   const trimmed = input.trim();
   if (!trimmed || /[\x00-\x1f\x7f]/.test(trimmed)) return '';
 
-  // Direct HTTPS executable / release asset URL
-  if (/^https:\/\/.+\.(exe|msi)(\?.*)?$/i.test(trimmed) && isSafePublicHttpsUrl(trimmed)) {
+  const targetAsset = PLATFORM_ASSET_FILENAMES[target] || PLATFORM_ASSET_FILENAMES.win64;
+
+  // Rewrite GitHub Releases permanent /latest/download/<asset> links to the requested target asset
+  const latestMatch = trimmed.match(
+    /^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\/releases\/latest\/download\/[^/?#]+(?:\?.*)?$/i
+  );
+  if (latestMatch) {
+    return `https://github.com/${latestMatch[1]}/${latestMatch[2]}/releases/latest/download/${targetAsset}`;
+  }
+
+  // Direct HTTPS installer / release asset URL (.exe, .msi, .dmg, .zip, .AppImage, .deb)
+  if (
+    /^https:\/\/.+\.(exe|msi|dmg|zip|AppImage|deb)(\?.*)?$/i.test(trimmed) &&
+    isSafePublicHttpsUrl(trimmed)
+  ) {
     return trimmed;
   }
 
-  // GitHub repository URL -> latest release SecretArea.exe
+  // GitHub repository URL -> latest release asset
   const ghUrlMatch = trimmed.match(
     /^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git|\/.*)?$/i
   );
   if (ghUrlMatch) {
-    return `https://github.com/${ghUrlMatch[1]}/${ghUrlMatch[2]}/releases/latest/download/SecretArea.exe`;
+    return `https://github.com/${ghUrlMatch[1]}/${ghUrlMatch[2]}/releases/latest/download/${targetAsset}`;
   }
 
   // Short "owner/repo" slug
   const slugMatch = trimmed.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
   if (slugMatch) {
-    return `https://github.com/${slugMatch[1]}/${slugMatch[2]}/releases/latest/download/SecretArea.exe`;
+    return `https://github.com/${slugMatch[1]}/${slugMatch[2]}/releases/latest/download/${targetAsset}`;
   }
 
   if (isSafePublicHttpsUrl(trimmed)) {
@@ -66,6 +135,15 @@ export function resolveInstallerUrl(input: string): string {
   }
 
   return '';
+}
+
+/**
+ * Accepts a direct HTTPS SecretArea.exe URL OR a GitHub repo URL/slug (e.g. https://github.com/user/repo)
+ * and resolves it to the direct GitHub Releases installer link:
+ * https://github.com/<user>/<repo>/releases/latest/download/SecretArea.exe
+ */
+export function resolveInstallerUrl(input: string): string {
+  return resolvePlatformInstallerUrl(input, 'win64');
 }
 
 export function getConfiguredDesktopExeUrl(): string {
@@ -109,12 +187,15 @@ export function saveDesktopExeUrl(rawInput: string): string {
   return resolved;
 }
 
-export function triggerExeDownload(exeUrl: string): void {
-  const safeUrl = resolveInstallerUrl(exeUrl);
+export function triggerExeDownload(
+  exeUrl: string,
+  target: PlatformDownloadTarget = 'win64'
+): void {
+  const safeUrl = resolvePlatformInstallerUrl(exeUrl, target);
   if (!safeUrl || typeof document === 'undefined') return;
   const link = document.createElement('a');
   link.href = safeUrl;
-  link.download = 'SecretArea.exe';
+  link.download = PLATFORM_ASSET_FILENAMES[target] || 'SecretArea.exe';
   link.rel = 'noopener noreferrer';
   document.body.appendChild(link);
   link.click();

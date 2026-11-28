@@ -147,7 +147,7 @@ export function StudioDetailModal({
       role="dialog"
       aria-modal="true"
       aria-label={studio.name}
-      className="sa-ps5-modal fixed inset-0 z-40 w-screen h-screen bg-[#f4f6f9] dark:bg-[#141921] flex flex-col overflow-hidden"
+      className="sa-ps5-modal fixed inset-0 z-40 w-screen h-screen bg-[var(--sa-bg-canvas)] flex flex-col overflow-hidden"
     >
       {/* Top Studio Header */}
       <header className="sa-ps5-modal-header px-3 sm:px-6 lg:px-8 py-3 sm:py-3.5 bg-white dark:bg-[#171a21] border-b border-slate-200 dark:border-white/[0.08] shrink-0">
@@ -156,7 +156,7 @@ export function StudioDetailModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-[#232b36] dark:hover:bg-[#2d3847] dark:border-white/[0.08] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
               <span className="hidden xs:inline sm:inline">{t.back}</span>
@@ -191,7 +191,7 @@ export function StudioDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Close studio popup"
-            className="p-2 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#252f3d] dark:hover:bg-[#313e50] dark:text-[#aeb9c7] dark:hover:text-white transition-colors cursor-pointer shrink-0"
+            className="sa-btn-secondary p-2 cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -206,7 +206,7 @@ export function StudioDetailModal({
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           {/* About This Studio */}
           <section className="sa-ps5-panel p-4 sm:p-5 rounded bg-white dark:bg-[#12171f] border border-slate-200 dark:border-white/[0.06] shadow-sm dark:shadow-none space-y-1.5">
-            <h3 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#0284c7] dark:text-[#66c0f4]">
+            <h3 className="text-[12px] font-bold tracking-[0.08em] uppercase text-[var(--sa-accent)]">
               {t.aboutStudio}
             </h3>
             <p className="text-[13.5px] leading-relaxed text-slate-700 dark:text-[#d4dde7] whitespace-pre-line">
@@ -224,17 +224,18 @@ export function StudioDetailModal({
                     <button
                       key={tab.key}
                       type="button"
+                      aria-pressed={isActive}
                       onClick={() => setActiveCategory(tab.key)}
-                      className={`px-3 py-1.5 rounded text-[12px] font-semibold transition-colors whitespace-nowrap cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                         isActive
-                          ? 'bg-[#1a9fff] text-white'
-                          : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 dark:bg-[#12171f] dark:text-[#9ca8b8] dark:hover:bg-[#212a37] dark:hover:text-white dark:border-white/[0.06]'
+                          ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)] shadow-xs'
+                          : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-slate-200 dark:bg-[#12171f] dark:text-[#9ca8b8] dark:hover:bg-[#212a37] dark:hover:text-white dark:border-white/[0.06]'
                       }`}
                     >
                       <span>{tab.label}</span>
                       <span
                         className={`ms-1.5 font-mono-tabular text-[11px] ${
-                          isActive ? 'text-white/90' : 'text-[#0284c7] dark:text-[#66c0f4]'
+                          isActive ? 'text-[var(--sa-accent-fg)]/90' : 'text-[var(--sa-accent)]'
                         }`}
                       >
                         {tab.count}
@@ -278,7 +279,7 @@ export function StudioDetailModal({
                         }}
                         role="button"
                         tabIndex={0}
-                        className="group bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[#1a9fff]/60 rounded overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1a9fff]"
+                        className="sa-game-card group bg-white hover:bg-slate-50 border border-slate-200 shadow-sm dark:shadow-none dark:bg-[#18202b] dark:hover:bg-[#212b3a] dark:border-white/[0.06] hover:border-[var(--sa-accent)] rounded-[var(--sa-card-radius)] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 cursor-pointer flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sa-accent)]"
                       >
                         <div className="relative aspect-[2/3] bg-slate-100 dark:bg-[#0f141b] overflow-hidden">
                           <GameCover
@@ -288,7 +289,7 @@ export function StudioDetailModal({
                           />
 
                           {item.isNew && (
-                            <div className="absolute inset-x-0 top-0 bg-[#1a9fff] text-white text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
+                            <div className="absolute inset-x-0 top-0 bg-[var(--sa-accent)] text-[var(--sa-accent-fg)] text-[9.5px] font-bold tracking-[0.07em] uppercase py-[3px] text-center">
                               NEW
                             </div>
                           )}
@@ -301,7 +302,7 @@ export function StudioDetailModal({
                         </div>
 
                         <div className="p-2.5 flex-1 flex flex-col justify-between gap-1">
-                          <h4 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[#0284c7] dark:text-[#e5e9f0] dark:group-hover:text-white line-clamp-1">
+                          <h4 className="text-[12.5px] font-semibold text-slate-900 group-hover:text-[var(--sa-accent)] dark:text-[#e5e9f0] dark:group-hover:text-[var(--sa-accent)] line-clamp-1 transition-colors">
                             {item.name}
                           </h4>
                           <div className="text-[11px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular truncate">
@@ -321,7 +322,7 @@ export function StudioDetailModal({
                         type="button"
                         disabled={safePage === 0}
                         onClick={() => goToPage(safePage - 1)}
-                        className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
+                        className="sa-btn-secondary inline-flex items-center gap-1 px-3 py-2 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <CaretLeft weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
                         <span>{t.previous}</span>
@@ -332,10 +333,10 @@ export function StudioDetailModal({
                           key={idx}
                           type="button"
                           onClick={() => goToPage(idx)}
-                          className={`min-w-[34px] h-[34px] px-2 rounded text-[12px] font-mono-tabular font-semibold transition-colors cursor-pointer ${
+                          className={`min-w-[34px] h-[34px] px-2 rounded-[var(--sa-btn-radius)] text-[12px] font-mono-tabular font-semibold border transition-colors cursor-pointer ${
                             idx === safePage
-                              ? 'bg-[#1a9fff] text-white'
-                              : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.06]'
+                              ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)]'
+                              : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-slate-200 dark:bg-[#18202b] dark:text-[#9ca8b8] dark:hover:bg-[#232f3e] dark:hover:text-white dark:border-white/[0.06]'
                           }`}
                         >
                           {idx + 1}
@@ -346,7 +347,7 @@ export function StudioDetailModal({
                         type="button"
                         disabled={safePage >= totalPages - 1}
                         onClick={() => goToPage(safePage + 1)}
-                        className="inline-flex items-center gap-1 px-3 py-2 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-40 disabled:pointer-events-none border border-slate-300 text-[12px] font-medium text-slate-800 dark:bg-[#212a37] dark:hover:bg-[#2c3849] dark:border-white/[0.08] dark:text-[#dce4ee] cursor-pointer"
+                        className="sa-btn-secondary inline-flex items-center gap-1 px-3 py-2 disabled:opacity-40 disabled:pointer-events-none text-[12px] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <span>{t.next}</span>
                         <CaretRight weight="bold" className="w-3.5 h-3.5 rtl:rotate-180" />
@@ -357,7 +358,7 @@ export function StudioDetailModal({
                       <button
                         type="button"
                         onClick={() => goToPage(safePage + 1)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded bg-[#1a9fff] hover:bg-[#38adff] text-white text-[12.5px] font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="sa-btn-primary inline-flex items-center gap-2 px-4 py-2 text-[12.5px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <span>{t.next20Games}</span>
                         <CaretRight weight="bold" className="w-4 h-4 rtl:rotate-180" />

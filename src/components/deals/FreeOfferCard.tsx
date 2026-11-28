@@ -52,12 +52,12 @@ export function FreeOfferCard({
 
   return (
     <article
-      className={`sa-ps5-subpanel group rounded-xl border overflow-hidden transition-all duration-150 hover:-translate-y-0.5 flex flex-col ${
+      className={`sa-ps5-subpanel sa-game-card group rounded-[var(--sa-card-radius)] border overflow-hidden transition-all duration-150 flex flex-col ${
         isXbox
           ? 'bg-[#0c2110]/85 border-[#52e042]/22 hover:border-[#6ee755]/70'
           : isPs5
           ? 'bg-[#081a3d]/75 border-white/[0.12] hover:border-[#7cc4ff]/70'
-          : 'bg-white dark:bg-[#171f2a] border-slate-200 dark:border-white/[0.08] hover:border-emerald-500/60 dark:hover:border-[#4ade80]/60 shadow-sm dark:shadow-none'
+          : 'bg-white dark:bg-[#171f2a] border-slate-200 dark:border-white/[0.08] shadow-sm dark:shadow-none'
       }`}
     >
       {/* Cover */}
@@ -173,12 +173,10 @@ export function FreeOfferCard({
           <button
             type="button"
             onClick={handleOpenOffer}
-            className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white border transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.97] ${
-              isXbox
-                ? 'bg-gradient-to-b from-[#169616] to-[#107C10] hover:from-[#1aad1a] hover:to-[#138c13] border-[#6ee755]/30 shadow-xs'
-                : isPermanent
-                ? 'bg-gradient-to-b from-[#0ea5e9] to-[#0284c7] hover:from-[#38bdf8] hover:to-[#0ea5e9] border-sky-300/25 shadow-xs'
-                : 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 border-emerald-300/25 shadow-xs'
+            className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-[var(--sa-btn-radius)] text-[12px] font-semibold border transition-all duration-150 whitespace-nowrap shrink-0 cursor-pointer active:scale-[0.97] ${
+              isXbox || isPermanent
+                ? 'sa-btn-primary'
+                : 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white border-emerald-300/25 shadow-xs'
             }`}
           >
             <span>{ctaLabel}</span>

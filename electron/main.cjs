@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, shell, session, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, session, Tray, nativeImage, nativeTheme } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
@@ -110,9 +110,77 @@ function detectLinuxPackageType() {
   return app.isPackaged ? 'deb' : 'unpacked';
 }
 
+let macSigningChecked = false;
+let macAppCodeSigned = false;
+
+function getMacAppBundlePath() {
+  if (process.platform !== 'darwin' || !app.isPackaged) return null;
+  // process.execPath -> .../SecretArea.app/Contents/MacOS/SecretArea
+  const bundlePath = path.resolve(process.execPath, '..', '..', '..');
+  return bundlePath.endsWith('.app') ? bundlePath : null;
+}
+
+async function detectMacCodeSigningStatus() {
+  if (process.platform !== 'darwin') return false;
+  if (macSigningChecked) return macAppCodeSigned;
+  macSigningChecked = true;
+  const bundlePath = getMacAppBundlePath();
+  if (!bundlePath) {
+    macAppCodeSigned = false;
+    return false;
+  }
+  try {
+    const out = await new Promise((resolve) => {
+      execFile('codesign', ['-dv', '--verbose=2', bundlePath], { timeout: 3500 }, (err, stdout, stderr) => {
+        // codesign prints metadata to stderr
+        const combined = `${stdout || ''}\n${stderr || ''}`;
+        resolve({ ok: !err, combined });
+      });
+    });
+    if (
+      out &&
+      out.ok &&
+      out.combined &&
+      !/Signature=adhoc/i.test(out.combined) &&
+      !/code object is not signed/i.test(out.combined) &&
+      /Authority=/i.test(out.combined)
+    ) {
+      macAppCodeSigned = true;
+      return true;
+    }
+  } catch {
+    // treat as unsigned on failure
+  }
+  macAppCodeSigned = false;
+  return false;
+}
+
+function getManualDownloadUrlForCurrentPlatform(fallbackReleaseUrl = null) {
+  const baseLatest = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest/download`;
+  if (process.platform === 'darwin') {
+    return process.arch === 'arm64'
+      ? `${baseLatest}/SecretArea-macOS-AppleSilicon.dmg`
+      : `${baseLatest}/SecretArea-macOS-Intel.dmg`;
+  }
+  if (process.platform === 'linux') {
+    return detectLinuxPackageType() === 'deb'
+      ? `${baseLatest}/SecretArea-linux-amd64.deb`
+      : `${baseLatest}/SecretArea-linux-x86_64.AppImage`;
+  }
+  if (process.platform === 'win32') {
+    return `${baseLatest}/SecretArea.exe`;
+  }
+  return fallbackReleaseUrl || `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+}
+
 function isAutoUpdateSupported() {
   if (process.platform === 'linux') {
     return detectLinuxPackageType() === 'appimage';
+  }
+  if (process.platform === 'darwin') {
+    // Squirrel.Mac (MacUpdater) rejects unsigned/adhoc bundles during in-place replacement;
+    // unsigned macOS builds cleanly direct users to the official DMG release asset instead.
+    return app.isPackaged ? macAppCodeSigned : true;
   }
   return true;
 }
@@ -215,10 +283,13 @@ function isTrustedSender(event) {
   return isAllowedAppUrl(senderUrl);
 }
 
+let autoUpdaterConfigured = false;
+
 function configureAutoUpdater() {
-  if (!isAutoUpdateSupported()) {
+  if (!isAutoUpdateSupported() || autoUpdaterConfigured) {
     return;
   }
+  autoUpdaterConfigured = true;
 
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
@@ -320,6 +391,25 @@ function configureAutoUpdater() {
     const scrubbedMsg = rawMsg
       .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [redacted]')
       .replace(/([?&](?:token|access_token|key|secret)=)[^&\s]+/gi, '$1[redacted]');
+
+    // If Squirrel.Mac rejects code signature on an unsigned macOS install, fall back cleanly to DMG download
+    if (
+      process.platform === 'darwin' &&
+      (/code signature/i.test(scrubbedMsg) || /could not get code signature/i.test(scrubbedMsg) || /shipit/i.test(scrubbedMsg))
+    ) {
+      macSigningChecked = true;
+      macAppCodeSigned = false;
+      patchUpdateState({
+        status: updateState.availableVersion ? 'available' : 'idle',
+        autoUpdateSupported: false,
+        manualDownloadUrl: getManualDownloadUrlForCurrentPlatform(),
+        progress: null,
+        error: null,
+        lastCheckedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
     const friendlyMsg = scrubbedMsg.includes('ERR_INTERNET_DISCONNECTED') || scrubbedMsg.includes('ENOTFOUND')
       ? 'Unable to reach GitHub Releases. Please check your internet connection.'
       : scrubbedMsg.split('\n')[0].slice(0, 220);
@@ -364,9 +454,17 @@ async function runUpdateCheck({ manual }) {
     updateState.postponed = false;
   }
 
-  // On Linux .deb / non-AppImage installs, electron-updater's DebUpdater requires root privileges
-  // and dpkg/apt integration; check GitHub Releases directly and direct users to download the .deb asset safely.
-  if (process.platform === 'linux' && !isAutoUpdateSupported() && app.isPackaged) {
+  if (process.platform === 'darwin' && app.isPackaged && !macSigningChecked) {
+    await detectMacCodeSigningStatus();
+    patchUpdateState({ autoUpdateSupported: isAutoUpdateSupported() });
+    if (isAutoUpdateSupported()) {
+      configureAutoUpdater();
+    }
+  }
+
+  // On Linux .deb / non-AppImage installs and unsigned macOS builds, check GitHub Releases directly
+  // and direct users to download the verified package/DMG asset safely.
+  if (!isAutoUpdateSupported() && app.isPackaged) {
     activeCheckPromise = (async () => {
       patchUpdateState({
         status: 'checking',
@@ -390,6 +488,7 @@ async function runUpdateCheck({ manual }) {
           typeof latestRel.html_url === 'string' && /^https:\/\/github\.com\//i.test(latestRel.html_url)
             ? latestRel.html_url
             : `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+        const directPlatformUrl = getManualDownloadUrlForCurrentPlatform(releaseUrl);
         if (compareSemverVersions(latestVer, updateState.currentVersion) > 0) {
           patchUpdateState({
             status: 'available',
@@ -403,7 +502,7 @@ async function runUpdateCheck({ manual }) {
                 ? stripHtmlNotes(latestRel.body) || latestRel.body.trim()
                 : null,
             releaseDate: typeof latestRel.published_at === 'string' ? latestRel.published_at : null,
-            manualDownloadUrl: releaseUrl,
+            manualDownloadUrl: directPlatformUrl,
             progress: null,
             error: null,
             postponed: false,
@@ -457,10 +556,9 @@ async function runUpdateDownload() {
   if (updateState.status === 'downloaded') {
     return { ...updateState };
   }
-  if (process.platform === 'linux' && !isAutoUpdateSupported()) {
+  if (!isAutoUpdateSupported()) {
     const safeUrl = parseSafeExternalUrl(
-      updateState.manualDownloadUrl ||
-        `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`
+      updateState.manualDownloadUrl || getManualDownloadUrlForCurrentPlatform()
     );
     if (safeUrl) {
       void shell.openExternal(safeUrl);
@@ -638,6 +736,19 @@ function registerUpdaterIpc() {
     if (!isTrustedSender(event)) return null;
     return collectDesktopPerformanceMetrics();
   });
+
+  ipcMain.handle('appearance:get-system', (event) => {
+    if (!isTrustedSender(event)) return null;
+    return getSystemAppearancePayload();
+  });
+}
+
+function getSystemAppearancePayload() {
+  return {
+    shouldUseDarkColors: Boolean(nativeTheme.shouldUseDarkColors),
+    themeSource: nativeTheme.themeSource || 'system',
+    highContrast: Boolean(nativeTheme.shouldUseHighContrastColors),
+  };
 }
 
 const releaseNotesCache = new Map();
@@ -943,7 +1054,8 @@ function ensureSystemTray() {
   const iconPath = resolveAppIcon();
   let trayImg = iconPath ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty();
   if (!trayImg.isEmpty()) {
-    trayImg = trayImg.resize({ width: 16, height: 16 });
+    const iconSize = process.platform === 'darwin' ? 18 : 16;
+    trayImg = trayImg.resize({ width: iconSize, height: iconSize });
   }
   try {
     appTray = new Tray(trayImg);
@@ -1356,6 +1468,61 @@ async function detectWindowsHardwareDetails() {
   }
 }
 
+async function detectMacHardwareDetails() {
+  if (process.platform !== 'darwin') return null;
+  const [swVer, swBuild, cpuBrand, cpuCoresRaw, hwProfRaw, dispProfRaw] = await Promise.all([
+    execFileAsync('sw_vers', ['-productVersion'], 2500),
+    execFileAsync('sw_vers', ['-buildVersion'], 2500),
+    execFileAsync('sysctl', ['-n', 'machdep.cpu.brand_string'], 2500),
+    execFileAsync('sysctl', ['-n', 'hw.logicalcpu'], 2500),
+    execFileAsync('system_profiler', ['SPHardwareDataType', '-json'], 4500),
+    execFileAsync('system_profiler', ['SPDisplaysDataType', '-json'], 5000),
+  ]);
+
+  let hwChip = '';
+  try {
+    if (hwProfRaw) {
+      const hwJson = JSON.parse(hwProfRaw);
+      const item = Array.isArray(hwJson?.SPHardwareDataType) ? hwJson.SPHardwareDataType[0] : null;
+      hwChip = cleanHardwareLabel(item?.chip_type || item?.cpu_type || '');
+    }
+  } catch {
+    // ignore hardware profiler parse errors
+  }
+
+  const gpus = [];
+  try {
+    if (dispProfRaw) {
+      const dispJson = JSON.parse(dispProfRaw);
+      const items = Array.isArray(dispJson?.SPDisplaysDataType) ? dispJson.SPDisplaysDataType : [];
+      for (const item of items) {
+        const name = cleanHardwareLabel(item?.sppci_model || item?._name || '');
+        if (!name) continue;
+        let vramGB = null;
+        const vramRaw = String(item?.spdisplays_vram || item?.spdisplays_vram_shared || '').trim();
+        const gbMatch = vramRaw.match(/(\d+(?:\.\d+)?)\s*GB/i);
+        const mbMatch = vramRaw.match(/(\d+(?:\.\d+)?)\s*MB/i);
+        if (gbMatch) {
+          vramGB = Number(gbMatch[1]);
+        } else if (mbMatch) {
+          vramGB = Number((Number(mbMatch[1]) / 1024).toFixed(1));
+        }
+        gpus.push({ name, vramGB });
+      }
+    }
+  } catch {
+    // ignore display profiler parse errors
+  }
+
+  return {
+    osVersion: swVer || '',
+    osBuild: swBuild || '',
+    cpuName: cleanHardwareLabel(cpuBrand) || hwChip || '',
+    cpuCores: Number(cpuCoresRaw) > 0 ? Number(cpuCoresRaw) : null,
+    gpus,
+  };
+}
+
 async function detectStaticHardwareProfile() {
   const cpus = os.cpus() || [];
   let cpuName = cleanHardwareLabel(cpus[0]?.model || '') || 'Unknown Processor';
@@ -1402,6 +1569,27 @@ async function detectStaticHardwareProfile() {
         if (cleaned[0].vramBytes > 0) {
           gpuVramGB = Number((cleaned[0].vramBytes / (1024 ** 3)).toFixed(1));
         }
+      }
+    }
+  } else if (process.platform === 'darwin') {
+    const macInfo = await detectMacHardwareDetails();
+    if (macInfo) {
+      if (macInfo.osVersion) {
+        osName = `macOS ${macInfo.osVersion} (${os.arch()})`;
+      }
+      if (macInfo.cpuName) {
+        cpuName = macInfo.cpuName;
+      }
+      if (macInfo.cpuCores) {
+        cpuCores = macInfo.cpuCores;
+      }
+      if (Array.isArray(macInfo.gpus) && macInfo.gpus.length > 0) {
+        const sortedMacGpus = [...macInfo.gpus].sort(
+          (a, b) => scoreGpuAdapterPriority(b.name) - scoreGpuAdapterPriority(a.name)
+        );
+        allGpus = sortedMacGpus.map((g) => g.name);
+        gpuName = sortedMacGpus[0].name;
+        gpuVramGB = sortedMacGpus[0].vramGB;
       }
     }
   }
@@ -1717,7 +1905,111 @@ app.on('web-contents-created', (_event, contents) => {
   });
 });
 
-app.whenReady().then(() => {
+function setupApplicationMenu() {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+  const template = [
+    {
+      label: app.name || 'SecretArea',
+      submenu: [
+        { role: 'about', label: 'About SecretArea' },
+        {
+          label: 'Check for Updates...',
+          click: () => {
+            showAndFocusMainWindow();
+            void runUpdateCheck({ manual: true });
+          },
+        },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide', label: 'Hide SecretArea' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        {
+          label: 'Quit SecretArea',
+          accelerator: 'Command+Q',
+          click: () => performFullAppShutdown(),
+        },
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'pasteAndMatchStyle' },
+        { role: 'delete' },
+        { role: 'selectAll' },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        { role: 'front' },
+        { type: 'separator' },
+        { role: 'close' },
+      ],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
+app.on('open-url', (event, rawUrl) => {
+  event.preventDefault();
+  if (typeof rawUrl === 'string' && /^secretarea:\/\//i.test(rawUrl.trim())) {
+    if (app.isReady()) {
+      showAndFocusMainWindow();
+    }
+  }
+});
+
+app.whenReady().then(async () => {
+  setupApplicationMenu();
+  nativeTheme.on('updated', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('appearance:system-changed', getSystemAppearancePayload());
+    }
+  });
+  if (process.platform === 'darwin' && app.dock) {
+    const iconPath = resolveAppIcon();
+    if (iconPath) {
+      try {
+        app.dock.setIcon(iconPath);
+      } catch {
+        // ignore dock icon failure
+      }
+    }
+  }
+  if (process.platform === 'darwin' && app.isPackaged) {
+    await detectMacCodeSigningStatus();
+    updateState.autoUpdateSupported = isAutoUpdateSupported();
+    if (!updateState.autoUpdateSupported) {
+      updateState.manualDownloadUrl = getManualDownloadUrlForCurrentPlatform();
+    }
+  }
   configureSecurityPolicies();
   configureYouTubeEmbedHeaders();
   configureAutoUpdater();

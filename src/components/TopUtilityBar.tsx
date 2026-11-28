@@ -16,7 +16,7 @@ import {
   WifiHigh,
 } from '@phosphor-icons/react';
 import type { HardwareMonitorSnapshot, PrimarySection } from '../types';
-import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
+import type { AppLanguage, AppThemeMode, ResolvedOsTheme } from '../services/launcherSettings';
 import {
   formatStorageBytes,
   getDesktopHardwareMonitorBridge,
@@ -27,6 +27,8 @@ import { getTranslations } from '../i18n/translations';
 
 interface TopUtilityBarProps {
   activeTheme: AppThemeMode;
+  activeOsTheme?: ResolvedOsTheme;
+  customThemeEnabled?: boolean;
   activeSection: PrimarySection;
   onSelectSection: (section: PrimarySection) => void;
   activeDownloadsCount?: number;
@@ -69,6 +71,7 @@ function formatCompactTemp(celsius: number | null | undefined): string {
 
 const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
   activeTheme,
+  activeOsTheme = 'windows',
   activeSection,
   onSelectSection,
   hasConsoleAudio,
@@ -77,6 +80,7 @@ const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
   label,
 }: {
   activeTheme: AppThemeMode;
+  activeOsTheme?: ResolvedOsTheme;
   activeSection: PrimarySection;
   onSelectSection: (section: PrimarySection) => void;
   hasConsoleAudio: boolean;
@@ -143,6 +147,9 @@ const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
   const hardwareSnapshot = externalSnapshot ?? liveSnapshot;
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
+  const isLinuxDefault = !isPs5Theme && !isXboxTheme && activeOsTheme === 'linux';
+  const isMacDefault = !isPs5Theme && !isXboxTheme && activeOsTheme === 'macos';
+  const isWindowsDefault = !isPs5Theme && !isXboxTheme && activeOsTheme === 'windows';
 
   const primaryGpu = selectPrimaryGpu(hardwareSnapshot?.gpus);
   const gpuUtil = primaryGpu?.utilizationPercent ?? null;
@@ -181,6 +188,12 @@ const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
       ? 'text-[#7cc4ff]'
       : isXboxTheme
       ? 'text-[#6ee755]'
+      : isLinuxDefault
+      ? 'text-[#4c6f9c] dark:text-[#88c0d0]'
+      : isMacDefault
+      ? 'text-[#0066cc] dark:text-[#38bdf8]'
+      : isWindowsDefault
+      ? 'text-[#0284c7] dark:text-[#38bdf8]'
       : 'text-[#0284c7] dark:text-[#38bdf8]';
   };
 
@@ -291,6 +304,10 @@ const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
               ? 'text-[#7cc4ff]'
               : isXboxTheme
               ? 'text-[#6ee755]'
+              : isLinuxDefault
+              ? 'text-[#4c6f9c] dark:text-[#88c0d0]'
+              : isMacDefault
+              ? 'text-[#0066cc] dark:text-[#38bdf8]'
               : 'text-[#0284c7] dark:text-[#38bdf8]'
           }`}
         />
@@ -323,6 +340,8 @@ const TopHardwareTelemetryStrip = memo(function TopHardwareTelemetryStrip({
 
 export const TopUtilityBar = memo(function TopUtilityBar({
   activeTheme,
+  activeOsTheme = 'windows',
+  customThemeEnabled = false,
   activeSection,
   onSelectSection,
   activeDownloadsCount = 0,
@@ -346,6 +365,18 @@ export const TopUtilityBar = memo(function TopUtilityBar({
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
   const hasConsoleAudio = isPs5Theme || isXboxTheme;
+  const isWindowsDefault = !hasConsoleAudio && activeOsTheme === 'windows';
+  const isLinuxDefault = !hasConsoleAudio && activeOsTheme === 'linux';
+  const isMacDefault = !hasConsoleAudio && activeOsTheme === 'macos';
+  const customActiveUtilStyle = customThemeEnabled
+    ? {
+        backgroundColor: 'var(--sa-accent)',
+        borderColor: 'var(--sa-secondary)',
+        color: 'var(--sa-accent-fg)',
+        borderRadius: 'var(--sa-btn-radius, 8px)',
+        boxShadow: '0 0 12px var(--sa-accent-ring)',
+      }
+    : undefined;
 
   const utilityNavItems: {
     id: PrimarySection;
@@ -370,6 +401,12 @@ export const TopUtilityBar = memo(function TopUtilityBar({
           ? 'bg-[#020f2b]/85 border-white/[0.12] text-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,6,20,0.45)]'
           : isXboxTheme
           ? 'bg-[#071509]/88 border-[#52e042]/22 text-[#e8f8ea] backdrop-blur-md shadow-[0_4px_20px_rgba(2,14,4,0.5)]'
+          : isLinuxDefault
+          ? 'bg-[#dfe5ef] border-slate-300/80 text-slate-700 dark:bg-[#191d24] dark:border-[#d8dee9]/10 dark:text-[#b8c4d6]'
+          : isMacDefault
+          ? 'bg-[#f8faff]/78 border-slate-900/[0.08] text-slate-700 dark:bg-[#0d102c]/76 dark:border-white/[0.12] dark:text-[#cbd5e1] backdrop-blur-2xl'
+          : isWindowsDefault
+          ? 'bg-[#f1f5fb]/86 border-slate-200/85 text-slate-700 dark:bg-[#0b1017]/84 dark:border-white/[0.08] dark:text-[#a8b8ce] backdrop-blur-xl'
           : 'bg-slate-50/95 border-slate-200/80 text-slate-600 dark:bg-[#0b0f16]/95 dark:border-white/[0.06] dark:text-[#9fb0c7]'
       }`}
     >
@@ -377,6 +414,7 @@ export const TopUtilityBar = memo(function TopUtilityBar({
       {/* Left Zone: Live Desktop Hardware Telemetry (GPU, CPU, RAM, Wi-Fi Speed, PC Temp — Icon & Value Only) */}
       <TopHardwareTelemetryStrip
         activeTheme={activeTheme}
+        activeOsTheme={activeOsTheme}
         activeSection={activeSection}
         onSelectSection={onSelectSection}
         hasConsoleAudio={hasConsoleAudio}
@@ -392,12 +430,16 @@ export const TopUtilityBar = memo(function TopUtilityBar({
           target="_blank"
           rel="noopener noreferrer"
           title="Open https://www.secretarea.site"
-          className={`inline-flex items-center gap-1.5 font-semibold tracking-[0.02em] whitespace-nowrap transition-colors ${
+          className={`sa-link inline-flex items-center gap-1.5 font-semibold tracking-[0.02em] whitespace-nowrap transition-colors ${
             isPs5Theme
               ? 'text-white/90 hover:text-white drop-shadow-[0_1px_6px_rgba(0,118,255,0.45)]'
               : isXboxTheme
               ? 'text-[#dcfce0] hover:text-[#6ee755] drop-shadow-[0_1px_6px_rgba(82,224,66,0.35)]'
-              : 'text-slate-800 hover:text-[#1a9fff] dark:text-[#d4e2f4] dark:hover:text-[#1a9fff]'
+              : isLinuxDefault
+              ? 'text-[#2e3440] hover:text-[#4c6f9c] dark:text-[#d8dee9] dark:hover:text-[#88c0d0]'
+              : isMacDefault
+              ? 'text-slate-800 hover:text-[#0066cc] dark:text-[#e2e8f0] dark:hover:text-[#38bdf8]'
+              : 'text-slate-800 hover:text-[#0284c7] dark:text-[#d4e2f4] dark:hover:text-[#38bdf8]'
           }`}
         >
           <span>{t.topbar.webVersion}</span>
@@ -482,41 +524,56 @@ export const TopUtilityBar = memo(function TopUtilityBar({
           </span>
         ) : null}
 
-        {hasConsoleAudio && (
-          <button
-            type="button"
-            onClick={onToggleSound}
-            title={
-              isXboxTheme
-                ? soundEnabled
-                  ? t.topbar.muteXboxSounds
-                  : t.topbar.enableXboxSounds
-                : soundEnabled
-                ? t.topbar.muteSounds
-                : t.topbar.enableSounds
-            }
-            aria-label={
-              isXboxTheme
-                ? soundEnabled
-                  ? t.topbar.muteXboxSounds
-                  : t.topbar.enableXboxSounds
-                : soundEnabled
-                ? t.topbar.muteSounds
-                : t.topbar.enableSounds
-            }
-            className={`inline-flex items-center gap-1.5 px-2 py-1 transition-colors cursor-pointer shrink-0 border ${
-              isXboxTheme
-                ? 'rounded-md bg-[#112914] hover:bg-[#193d1d] text-[#e8fcef] border-[#52e042]/35 hover:border-[#6ee755]/80'
-                : 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 hover:text-white border-white/[0.18]'
-            }`}
-          >
-            {soundEnabled ? (
-              <>
-                <SpeakerHigh
-                  className={`w-3.5 h-3.5 ${
-                    isXboxTheme ? 'text-[#6ee755]' : 'text-[#7cc4ff]'
-                  }`}
-                />
+        <button
+          type="button"
+          onClick={onToggleSound}
+          title={
+            isXboxTheme
+              ? soundEnabled
+                ? t.topbar.muteXboxSounds
+                : t.topbar.enableXboxSounds
+              : soundEnabled
+              ? t.topbar.muteSounds
+              : t.topbar.enableSounds
+          }
+          aria-label={
+            isXboxTheme
+              ? soundEnabled
+                ? t.topbar.muteXboxSounds
+                : t.topbar.enableXboxSounds
+              : soundEnabled
+              ? t.topbar.muteSounds
+              : t.topbar.enableSounds
+          }
+          className={`inline-flex items-center gap-1.5 px-2 py-1 transition-colors cursor-pointer shrink-0 border ${
+            isXboxTheme
+              ? 'rounded-md bg-[#112914] hover:bg-[#193d1d] text-[#e8fcef] border-[#52e042]/35 hover:border-[#6ee755]/80'
+              : isPs5Theme
+              ? 'rounded-full bg-white/[0.1] hover:bg-white/[0.2] text-white/90 hover:text-white border-white/[0.18]'
+              : isLinuxDefault
+              ? 'rounded-md bg-[#eceff4] hover:bg-[#e2e8f0] border-slate-300/80 text-slate-700 hover:text-slate-900 dark:bg-[#272d38] dark:hover:bg-[#3b4252] dark:border-[#d8dee9]/12 dark:text-[#d8dee9] dark:hover:text-white'
+              : isMacDefault
+              ? 'rounded-xl bg-white/65 hover:bg-white/95 border-slate-900/10 text-slate-700 hover:text-slate-950 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] dark:border-white/[0.15] dark:text-[#e2e8f0] dark:hover:text-white'
+              : 'rounded bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:text-[#c7d5e8] dark:hover:text-white dark:border-white/[0.08]'
+          }`}
+        >
+          {soundEnabled ? (
+            <>
+              <SpeakerHigh
+                style={customThemeEnabled ? { color: 'var(--sa-accent)' } : undefined}
+                className={`w-3.5 h-3.5 ${
+                  isXboxTheme
+                    ? 'text-[#6ee755]'
+                    : isPs5Theme
+                    ? 'text-[#7cc4ff]'
+                    : isLinuxDefault
+                    ? 'text-[#4c6f9c] dark:text-[#88c0d0]'
+                    : isMacDefault
+                    ? 'text-[#0066cc] dark:text-[#38bdf8]'
+                    : 'text-[#0284c7] dark:text-[#38bdf8]'
+                }`}
+              />
+              {hasConsoleAudio && (
                 <span className="inline-flex items-end gap-[2px] h-2.5" aria-hidden="true">
                   <span
                     className={`w-[2px] h-full rounded-full sa-ps5-eq-bar-1 ${
@@ -530,12 +587,12 @@ export const TopUtilityBar = memo(function TopUtilityBar({
                     }`}
                   />
                 </span>
-              </>
-            ) : (
-              <SpeakerSlash className="w-3.5 h-3.5 opacity-65" />
-            )}
-          </button>
-        )}
+              )}
+            </>
+          ) : (
+            <SpeakerSlash className="w-3.5 h-3.5 opacity-65" />
+          )}
+        </button>
 
         {/* Quick Utility Navigation (Downloads, Hardware Monitor, Settings) next to Fullscreen */}
         <nav
@@ -559,6 +616,7 @@ export const TopUtilityBar = memo(function TopUtilityBar({
                 title={item.label}
                 aria-label={item.label}
                 aria-current={isActive ? 'page' : undefined}
+                style={isActive ? customActiveUtilStyle : undefined}
                 className={`inline-flex items-center gap-1.5 px-2 py-1 text-[11px] whitespace-nowrap transition-colors cursor-pointer shrink-0 border ${
                   isPs5Theme
                     ? isActive
@@ -568,6 +626,14 @@ export const TopUtilityBar = memo(function TopUtilityBar({
                     ? isActive
                       ? 'rounded-md bg-[#107C10]/85 border-[#6ee755]/85 text-white font-semibold shadow-[0_0_12px_rgba(82,224,66,0.3)]'
                       : 'rounded-md bg-[#122b15] hover:bg-[#193b1c] border-[#52e042]/28 hover:border-[#6ee755]/70 text-[#ccecd0] hover:text-white font-medium'
+                    : isLinuxDefault
+                    ? isActive
+                      ? 'rounded-md bg-[#5e81ac]/20 border-[#4c6f9c]/45 text-[#2e3440] dark:bg-[#3b4252] dark:border-[#88c0d0]/55 dark:text-[#eceff4] font-semibold'
+                      : 'rounded-md bg-[#eceff4] hover:bg-[#e2e8f0] border-slate-300/80 text-slate-700 hover:text-slate-900 dark:bg-[#272d38] dark:hover:bg-[#3b4252] dark:border-[#d8dee9]/12 dark:text-[#d8dee9] dark:hover:text-white font-medium'
+                    : isMacDefault
+                    ? isActive
+                      ? 'rounded-xl bg-[#0066cc]/15 border-[#0066cc]/40 text-[#0066cc] dark:bg-[#2563eb]/35 dark:border-[#60a5fa]/55 dark:text-white font-semibold shadow-[0_2px_10px_rgba(37,99,235,0.28)]'
+                      : 'rounded-xl bg-white/65 hover:bg-white/95 border-slate-900/10 text-slate-700 hover:text-slate-950 dark:bg-white/[0.08] dark:hover:bg-white/[0.15] dark:border-white/[0.15] dark:text-[#e2e8f0] dark:hover:text-white font-medium'
                     : isActive
                     ? 'rounded bg-sky-500/[0.14] border-sky-500/35 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:border-[#38bdf8]/40 dark:text-[#38bdf8] font-semibold'
                     : 'rounded bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 hover:text-slate-900 dark:bg-[#1a222d] dark:hover:bg-[#243040] dark:border-white/[0.08] dark:text-[#c7d5e8] dark:hover:text-white font-medium'
@@ -578,10 +644,16 @@ export const TopUtilityBar = memo(function TopUtilityBar({
                 {typeof item.count === 'number' && (
                   <span
                     className={`font-mono-tabular text-[10.5px] font-bold ${
-                      isPs5Theme
+                      isActive && customThemeEnabled
+                        ? 'opacity-95'
+                        : isPs5Theme
                         ? 'text-white'
                         : isXboxTheme
                         ? 'text-[#6ee755]'
+                        : isLinuxDefault
+                        ? 'text-[#4c6f9c] dark:text-[#88c0d0]'
+                        : isMacDefault
+                        ? 'text-[#0066cc] dark:text-[#38bdf8]'
                         : 'text-[#0284c7] dark:text-[#38bdf8]'
                     }`}
                   >
@@ -600,6 +672,7 @@ export const TopUtilityBar = memo(function TopUtilityBar({
             title={t.notificationCenter.buttonLabel}
             aria-label={t.notificationCenter.buttonLabel}
             aria-expanded={isNotificationCenterOpen}
+            style={isNotificationCenterOpen ? customActiveUtilStyle : undefined}
             className={`relative inline-flex items-center gap-1 p-1.5 rounded transition-colors cursor-pointer shrink-0 border ${
               isPs5Theme
                 ? isNotificationCenterOpen
@@ -618,6 +691,11 @@ export const TopUtilityBar = memo(function TopUtilityBar({
             {unreadNotificationsCount > 0 && (
               <span
                 dir="ltr"
+                style={
+                  customThemeEnabled && !isNotificationCenterOpen
+                    ? { color: 'var(--sa-accent)' }
+                    : undefined
+                }
                 className={`font-mono-tabular text-[10px] font-bold leading-none ${
                   isPs5Theme
                     ? 'text-[#7cc4ff]'
@@ -637,6 +715,7 @@ export const TopUtilityBar = memo(function TopUtilityBar({
           onClick={onToggleFullscreen}
           title={isFullscreen ? t.topbar.exitFullscreen : t.topbar.enterFullscreen}
           aria-label={isFullscreen ? t.topbar.exitFullscreen : t.topbar.enterFullscreen}
+          style={customThemeEnabled ? { borderRadius: 'var(--sa-btn-radius, 8px)' } : undefined}
           className={`p-1.5 rounded transition-colors cursor-pointer shrink-0 ${
             isPs5Theme
               ? 'rounded-full bg-white/[0.12] hover:bg-white/[0.24] text-white ring-1 ring-white/40 hover:ring-white/80 shadow-[0_0_14px_rgba(0,118,255,0.4)]'

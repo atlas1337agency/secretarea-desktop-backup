@@ -91,14 +91,17 @@ export const LibrarySidebar = memo(function LibrarySidebar({
             aria-expanded={sectionMenuOpen}
             aria-label={t.sectionLabel}
             onClick={() => setSectionMenuOpen((prev) => !prev)}
-            className={`w-full px-2.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#232b36] dark:hover:bg-[#2a3441] border transition-colors flex items-center justify-between gap-2 text-start cursor-pointer ${
+            style={
               sectionMenuOpen
-                ? 'border-[#1a9fff]'
-                : 'border-slate-300 dark:border-white/[0.08]'
-            }`}
+                ? { borderColor: 'var(--sa-accent)', boxShadow: '0 0 0 2px var(--sa-accent-soft)' }
+                : undefined
+            }
+            className="sa-ps5-subpanel w-full px-2.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-[#232b36] dark:hover:bg-[#2a3441] border border-slate-300 dark:border-white/[0.08] transition-colors flex items-center justify-between gap-2 text-start cursor-pointer"
           >
             <span className="flex items-center gap-2 min-w-0">
-              <ActiveIcon className={`w-4 h-4 shrink-0 ${activeVisual.iconColorClass}`} />
+              <span className="sa-icon-badge w-6 h-6 flex items-center justify-center shrink-0">
+                <ActiveIcon className={`w-3.5 h-3.5 shrink-0 ${activeVisual.iconColorClass}`} />
+              </span>
               <span className="text-[12.5px] font-semibold text-slate-900 dark:text-[#e5e9f0] truncate">
                 {activeSection.label}
               </span>
@@ -118,7 +121,7 @@ export const LibrarySidebar = memo(function LibrarySidebar({
             <div
               role="listbox"
               aria-label={t.sectionLabel}
-              className="absolute inset-x-0 top-full mt-1 z-30 rounded-xl bg-white dark:bg-[#1b222c] border border-slate-200 dark:border-white/[0.12] shadow-2xl py-1 overflow-hidden"
+              className="sa-ps5-panel absolute inset-x-0 top-full mt-1 z-30 rounded-xl bg-white dark:bg-[#1b222c] border border-slate-200 dark:border-white/[0.12] shadow-2xl py-1 overflow-hidden"
             >
               {LIBRARY_SECTIONS.map((sec) => {
                 const isSelected = sec.key === activeSectionTab;
@@ -134,20 +137,28 @@ export const LibrarySidebar = memo(function LibrarySidebar({
                       onSelectSectionTab(sec.key);
                       setSectionMenuOpen(false);
                     }}
+                    style={
+                      isSelected
+                        ? {
+                            backgroundColor: 'var(--sa-accent-soft)',
+                            color: 'var(--sa-accent)',
+                          }
+                        : undefined
+                    }
                     className={`w-full px-3 py-2 flex items-center justify-between gap-2 text-start text-[12.5px] transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-sky-50 text-sky-950 font-semibold dark:bg-[#2a394b] dark:text-white'
+                        ? 'font-semibold'
                         : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-[#c6d4df] dark:hover:bg-white/[0.06] dark:hover:text-white'
                     }`}
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
                       <SecIcon className={`w-4 h-4 shrink-0 ${visual.iconColorClass}`} />
                       <span className="truncate">{sec.label}</span>
-                      <span className="text-[11px] text-slate-500 dark:text-[#8b9bb4] font-mono-tabular">
+                      <span className="text-[11px] opacity-75 font-mono-tabular">
                         ({sectionCounts[sec.key] || 0})
                       </span>
                     </span>
-                    {isSelected && <Check weight="bold" className="w-3.5 h-3.5 text-[#0284c7] dark:text-[#38bdf8] shrink-0" />}
+                    {isSelected && <Check weight="bold" className="w-3.5 h-3.5 shrink-0" />}
                   </button>
                 );
               })}
@@ -166,7 +177,7 @@ export const LibrarySidebar = memo(function LibrarySidebar({
               <button
                 type="button"
                 onClick={() => onGenreFilterChange('all')}
-                className="text-[10.5px] text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white cursor-pointer"
+                className="sa-link text-[10.5px] font-semibold cursor-pointer"
               >
                 {t.reset}
               </button>
@@ -177,7 +188,7 @@ export const LibrarySidebar = memo(function LibrarySidebar({
             aria-label={t.allGenres}
             value={genreFilter}
             onChange={(e) => onGenreFilterChange(e.target.value)}
-            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1f2733] border border-slate-300 dark:border-white/[0.08] text-[12px] text-slate-900 dark:text-[#dce4ee] focus:outline-none focus:border-[#1a9fff] cursor-pointer"
+            className="sa-search-input w-full px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-[#1f2733] border border-slate-300 dark:border-white/[0.08] text-[12px] text-slate-900 dark:text-[#dce4ee] focus:outline-none cursor-pointer"
           >
             <option value="all" className="bg-white text-slate-900 dark:bg-[#1f2733] dark:text-[#dce4ee]">
               {t.allGenres} ({availableGenres.length})
@@ -236,9 +247,17 @@ export const LibrarySidebar = memo(function LibrarySidebar({
                 key={`${game.tab}-${game.id}`}
                 type="button"
                 onClick={() => onSelectGame(game)}
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: 'var(--sa-accent-soft)',
+                        color: 'var(--sa-accent)',
+                      }
+                    : undefined
+                }
                 className={`sa-sidebar-row w-full px-3 py-1.5 flex items-center gap-2.5 text-start transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-sky-100 text-sky-950 font-semibold dark:bg-[#2d3e52] dark:text-white'
+                    ? 'font-semibold'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-[#aeb9c7] dark:hover:bg-white/[0.04] dark:hover:text-white'
                 }`}
               >
@@ -249,7 +268,7 @@ export const LibrarySidebar = memo(function LibrarySidebar({
                   {game.name}
                 </span>
                 {game.isNew && (
-                  <span className="px-1.5 py-[2px] rounded-full bg-gradient-to-r from-[#0284c7] to-[#0ea5e9] dark:from-[#1a9fff] dark:to-[#38bdf8] text-white text-[8.5px] font-bold tracking-[0.08em] uppercase shadow-xs shrink-0">
+                  <span className="sa-badge-accent px-1.5 py-[2px] text-[8.5px] font-bold tracking-[0.08em] uppercase shadow-xs shrink-0">
                     NEW
                   </span>
                 )}

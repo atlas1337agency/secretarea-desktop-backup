@@ -200,12 +200,12 @@ export function UpdateHistoryModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-2xl max-h-[88dvh] flex flex-col rounded-xl border shadow-2xl overflow-hidden ${
+        className={`sa-ps5-panel w-full max-w-2xl max-h-[88dvh] flex flex-col rounded-[var(--sa-card-radius)] border shadow-2xl overflow-hidden ${
           isPs5Theme
             ? 'bg-[#031333]/96 border-white/[0.18] text-white'
             : isXboxTheme
             ? 'bg-[#081b0c]/96 border-[#52e042]/35 text-[#ecfdf0]'
-            : 'bg-white border-slate-200 text-slate-800 dark:bg-[#151b24] dark:border-white/[0.1] dark:text-[#e5e9f0]'
+            : 'bg-[var(--sa-bg-surface-solid)] border-[var(--sa-border-strong)] text-[var(--sa-text-primary)]'
         }`}
       >
         {/* Header */}
@@ -217,7 +217,7 @@ export function UpdateHistoryModal({
           }`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-[#1a9fff]/15 border border-[#1a9fff]/30 flex items-center justify-center text-[#0284c7] dark:text-[#66c0f4] shrink-0">
+            <div className="sa-icon-badge w-8 h-8 shrink-0">
               <ClockCounterClockwise className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -245,7 +245,7 @@ export function UpdateHistoryModal({
                   isConsoleTheme ? 'text-[#9fb0c7]' : 'text-slate-500 dark:text-[#8b9bb4]'
                 }`}
               >
-                <ArrowsClockwise className="w-3.5 h-3.5 animate-spin text-[#0284c7] dark:text-[#38bdf8]" />
+                <ArrowsClockwise className="w-3.5 h-3.5 animate-spin text-[var(--sa-accent)]" />
                 <span className="hidden sm:inline">{t.syncingAutoLabel}</span>
               </span>
             )}
@@ -254,7 +254,7 @@ export function UpdateHistoryModal({
               <button
                 type="button"
                 onClick={onCheckForUpdates}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#1a9fff] hover:bg-[#38adff] text-white text-[11.5px] font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="sa-btn-primary inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11.5px] font-semibold cursor-pointer whitespace-nowrap shrink-0"
               >
                 <span>{t.checkUpdatesBtn}</span>
               </button>
@@ -310,7 +310,7 @@ export function UpdateHistoryModal({
           </div>
 
           {summaryHighlights.updateEntry ? (
-            <span className="inline-flex items-center gap-1.5 font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--sa-accent)]">
               <ArrowCircleUp weight="fill" className="w-3.5 h-3.5 shrink-0" />
               <span>{t.updateAvailableBadge}:</span>
               <span dir="ltr" className="font-mono-tabular">
@@ -385,11 +385,7 @@ export function UpdateHistoryModal({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className={`w-full ps-8 pe-3 py-1.5 rounded-md border text-[12px] outline-none transition-colors ${
-                isConsoleTheme
-                  ? 'bg-black/30 border-white/[0.12] text-white placeholder:text-[#7f8ea3] focus:border-[#38bdf8]'
-                  : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-[#1a9fff] dark:bg-black/30 dark:border-white/[0.1] dark:text-white dark:placeholder:text-[#7f8ea3]'
-              }`}
+              className="sa-search-input w-full ps-8 pe-3 py-1.5 text-[12px]"
             />
           </div>
 
@@ -408,12 +404,12 @@ export function UpdateHistoryModal({
                   key={filter.id}
                   type="button"
                   onClick={() => setCategoryFilter(filter.id)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-2.5 py-1 rounded-[var(--sa-btn-radius)] text-[11px] font-semibold border transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-[#1a9fff] text-white'
+                      ? 'bg-[var(--sa-accent)] border-[var(--sa-secondary)] text-[var(--sa-accent-fg)]'
                       : isConsoleTheme
-                      ? 'bg-white/[0.06] text-[#b8c7dc] hover:bg-white/[0.12]'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-transparent dark:bg-white/[0.06] dark:text-[#b8c7dc] dark:hover:bg-white/[0.12]'
+                      ? 'bg-white/[0.06] border-transparent text-[#b8c7dc] hover:bg-white/[0.12]'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-transparent dark:bg-white/[0.06] dark:text-[#b8c7dc] dark:hover:bg-white/[0.12]'
                   }`}
                 >
                   {filter.label}
@@ -480,7 +476,7 @@ export function UpdateHistoryModal({
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           dir="ltr"
-                          className="text-[14px] font-bold font-mono-tabular text-[#0284c7] dark:text-[#38bdf8]"
+                          className="text-[14px] font-bold font-mono-tabular text-[var(--sa-accent)]"
                         >
                           v{release.version}
                         </span>
@@ -508,12 +504,12 @@ export function UpdateHistoryModal({
                           </>
                         )}
                         {status.isUpdateAvailable && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#1a9fff]/20 text-[#0284c7] dark:bg-[#1a9fff]/25 dark:text-[#66c0f4]">
+                          <span className="sa-badge-accent px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
                             {t.updateAvailableBadge}
                           </span>
                         )}
                         {status.isLatestPublished && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#1a9fff]/15 text-[#0284c7] dark:bg-[#1a9fff]/20 dark:text-[#66c0f4]">
+                          <span className="sa-badge-accent px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
                             {t.latestBadge}
                           </span>
                         )}
@@ -543,7 +539,7 @@ export function UpdateHistoryModal({
                           }`}
                         >
                           {counts.feature > 0 && (
-                            <span className="font-semibold text-[#0284c7] dark:text-[#38bdf8]">
+                            <span className="font-semibold text-[var(--sa-accent)]">
                               {counts.feature} {t.newCountLabel}
                             </span>
                           )}
@@ -599,7 +595,7 @@ export function UpdateHistoryModal({
                             ? 'text-amber-700 dark:text-amber-300'
                             : item.category === 'improvement'
                             ? 'text-emerald-700 dark:text-[#4ade80]'
-                            : 'text-[#0284c7] dark:text-[#38bdf8]';
+                            : 'text-[var(--sa-accent)]';
 
                         return (
                           <li

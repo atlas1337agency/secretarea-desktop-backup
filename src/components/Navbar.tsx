@@ -13,7 +13,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type { PrimarySection } from '../types';
-import type { AppLanguage, AppThemeMode } from '../services/launcherSettings';
+import type { AppLanguage, AppThemeMode, ResolvedOsTheme } from '../services/launcherSettings';
 import { getTranslations } from '../i18n/translations';
 
 interface NavbarProps {
@@ -21,6 +21,8 @@ interface NavbarProps {
   onSelectSection: (section: PrimarySection) => void;
   onOpenSpinWheel?: () => void;
   activeTheme?: AppThemeMode;
+  activeOsTheme?: ResolvedOsTheme;
+  customThemeEnabled?: boolean;
   compactNavbar?: boolean;
   language?: AppLanguage;
   activeDownloadsCount?: number;
@@ -73,6 +75,8 @@ export const Navbar = memo(function Navbar({
   onSelectSection,
   onOpenSpinWheel,
   activeTheme = 'default',
+  activeOsTheme = 'windows',
+  customThemeEnabled = false,
   compactNavbar = false,
   language = 'en',
   activeDownloadsCount = 0,
@@ -84,6 +88,18 @@ export const Navbar = memo(function Navbar({
   const isPs5Theme = activeTheme === 'ps5';
   const isXboxTheme = activeTheme === 'xbox';
   const isDefaultTheme = !isPs5Theme && !isXboxTheme;
+  const isWindowsDefault = isDefaultTheme && activeOsTheme === 'windows';
+  const isLinuxDefault = isDefaultTheme && activeOsTheme === 'linux';
+  const isMacDefault = isDefaultTheme && activeOsTheme === 'macos';
+  const customActiveNavStyle = customThemeEnabled
+    ? {
+        backgroundColor: 'var(--sa-accent)',
+        borderColor: 'var(--sa-secondary)',
+        color: 'var(--sa-accent-fg)',
+        borderRadius: 'var(--sa-btn-radius, 10px)',
+        boxShadow: '0 6px 18px var(--sa-accent-ring)',
+      }
+    : undefined;
 
   const navItems: {
     id: PrimarySection;
@@ -155,6 +171,12 @@ export const Navbar = memo(function Navbar({
             ? 'bg-[#021233]/80 border-white/[0.12] backdrop-blur-md shadow-[0_8px_28px_rgba(0,6,20,0.42)]'
             : isXboxTheme
             ? 'bg-[#081a0b]/84 border-[#52e042]/20 backdrop-blur-md shadow-[0_8px_28px_rgba(2,14,4,0.48)]'
+            : isLinuxDefault
+            ? 'bg-[#eef1f6]/97 dark:bg-[#272d38]/97 border-slate-300/80 dark:border-[#d8dee9]/12 shadow-[0_2px_14px_rgba(14,17,24,0.22)]'
+            : isMacDefault
+            ? 'bg-white/75 dark:bg-[#101434]/72 border-slate-900/10 dark:border-white/[0.14] backdrop-blur-2xl shadow-[0_8px_28px_rgba(4,6,24,0.34)]'
+            : isWindowsDefault
+            ? 'bg-white/85 dark:bg-[#131a24]/82 border-slate-200/85 dark:border-white/[0.1] backdrop-blur-xl shadow-[0_4px_18px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_24px_rgba(0,4,14,0.36)]'
             : 'bg-white/[0.97] dark:bg-[#0f141c]/[0.97] border-slate-200/85 dark:border-white/[0.08] shadow-[0_1px_16px_rgba(15,23,42,0.05)] dark:shadow-[0_6px_24px_rgba(0,0,0,0.35)]'
         }`}
       >
@@ -163,7 +185,7 @@ export const Navbar = memo(function Navbar({
           <button
             type="button"
             onClick={() => handleSelectNav('store')}
-            className={`flex items-center gap-2.5 text-start group rounded-lg py-1 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 ${
+            className={`flex items-center gap-2.5 text-start group rounded-lg py-1 cursor-pointer shrink-0 transition-transform duration-150 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 ${
               isXboxTheme
                 ? 'focus-visible:ring-[#6ee755]'
                 : isPs5Theme
@@ -193,11 +215,18 @@ export const Navbar = memo(function Navbar({
 
             {!compactNavbar && (
               <span
+                style={customThemeEnabled ? { color: 'var(--sa-text-primary)' } : undefined}
                 className={`font-display text-[15.5px] sm:text-[17px] whitespace-nowrap shrink-0 transition-colors ${
                   isPs5Theme
                     ? 'font-semibold tracking-[0.04em] text-white'
                     : isXboxTheme
                     ? 'font-bold tracking-[0.04em] text-[#ecfdf0]'
+                    : isLinuxDefault
+                    ? 'font-bold tracking-[-0.015em] text-[#2e3440] group-hover:text-[#4c6f9c] dark:text-[#eceff4] dark:group-hover:text-[#88c0d0]'
+                    : isMacDefault
+                    ? 'font-bold tracking-[-0.025em] text-slate-900 group-hover:text-[#0066cc] dark:text-white dark:group-hover:text-[#60a5fa]'
+                    : isWindowsDefault
+                    ? 'font-bold tracking-[-0.018em] text-slate-900 group-hover:text-[#0284c7] dark:text-white dark:group-hover:text-[#38bdf8]'
                     : 'font-bold tracking-[-0.02em] text-slate-900 group-hover:text-[#0284c7] dark:text-white dark:group-hover:text-[#38bdf8]'
                 }`}
               >
@@ -210,7 +239,9 @@ export const Navbar = memo(function Navbar({
           <nav
             aria-label="Primary navigation"
             className={`hidden md:flex items-center justify-center min-w-0 overflow-x-auto no-scrollbar ${
-              isDefaultTheme
+              isMacDefault
+                ? 'px-1.5 py-1 rounded-2xl bg-slate-900/[0.045] dark:bg-white/[0.07] border border-slate-900/[0.08] dark:border-white/[0.12] gap-1 lg:gap-1.5'
+                : isDefaultTheme
                 ? compactNavbar
                   ? 'gap-1 lg:gap-1.5'
                   : 'gap-0.5 lg:gap-1 xl:gap-2'
@@ -232,6 +263,7 @@ export const Navbar = memo(function Navbar({
                     aria-label={item.label}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => handleSelectNav(item.id)}
+                    style={isActive ? customActiveNavStyle : undefined}
                     className={`relative inline-flex items-center justify-center gap-1.5 text-[11.5px] lg:text-[12.5px] xl:text-[13px] tracking-[0.04em] lg:tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7cc4ff] ${
                       isActive
                         ? compactNavbar
@@ -262,6 +294,7 @@ export const Navbar = memo(function Navbar({
                     aria-label={item.label}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => handleSelectNav(item.id)}
+                    style={isActive ? customActiveNavStyle : undefined}
                     className={`relative inline-flex items-center justify-center gap-1.5 text-[11.5px] lg:text-[12.5px] xl:text-[13px] tracking-[0.04em] lg:tracking-[0.06em] whitespace-nowrap transition-all cursor-pointer shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6ee755] ${
                       isActive
                         ? compactNavbar
@@ -283,7 +316,46 @@ export const Navbar = memo(function Navbar({
                 );
               }
 
-              // Modern Default Theme Nav Link
+              if (isMacDefault) {
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    title={item.label}
+                    aria-label={item.label}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => handleSelectNav(item.id)}
+                    style={isActive ? customActiveNavStyle : undefined}
+                    className={`relative inline-flex items-center justify-center gap-1.5 lg:gap-2 text-[11.5px] lg:text-[12.5px] xl:text-[13px] whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shrink-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] ${
+                      compactNavbar ? 'w-10 h-10' : 'px-2.5 lg:px-3.5 py-1.5 lg:py-2'
+                    } ${
+                      isActive
+                        ? 'bg-gradient-to-b from-[#3b82f6] to-[#2563eb] border border-[#93c5fd]/55 font-semibold text-white shadow-[0_6px_18px_rgba(37,99,235,0.38)]'
+                        : 'border border-transparent font-medium text-slate-700 hover:text-slate-950 hover:bg-white/75 dark:text-[#cbd5e1] dark:hover:text-white dark:hover:bg-white/[0.11]'
+                    }`}
+                  >
+                    <Icon
+                      className={`${
+                        compactNavbar ? 'w-4.5 h-4.5' : 'w-4 h-4'
+                      } shrink-0 transition-transform duration-200 ${
+                        isActive ? 'scale-105' : 'opacity-85'
+                      }`}
+                    />
+                    {!compactNavbar && <span>{item.label}</span>}
+                    {typeof item.count === 'number' && !compactNavbar && (
+                      <span
+                        className={`font-mono-tabular text-[11px] font-bold ${
+                          isActive ? 'text-white/95' : 'text-[#0066cc] dark:text-[#38bdf8]'
+                        }`}
+                      >
+                        ({item.count})
+                      </span>
+                    )}
+                  </button>
+                );
+              }
+
+              // Modern Windows / Linux Default Theme Nav Link
               return (
                 <button
                   key={item.id}
@@ -295,11 +367,29 @@ export const Navbar = memo(function Navbar({
                   className="relative h-14 sm:h-[60px] flex items-center shrink-0 group cursor-pointer focus-visible:outline-none"
                 >
                   <span
-                    className={`inline-flex items-center justify-center gap-1 lg:gap-2 rounded-lg text-[11.5px] lg:text-[12.5px] xl:text-[13px] whitespace-nowrap transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-[#0284c7] dark:group-focus-visible:ring-[#38bdf8] ${
+                    style={
+                      isActive && customThemeEnabled
+                        ? {
+                            backgroundColor: 'var(--sa-accent-soft)',
+                            borderColor: 'var(--sa-accent)',
+                            color: 'var(--sa-accent)',
+                            borderRadius: 'var(--sa-btn-radius, 8px)',
+                          }
+                        : undefined
+                    }
+                    className={`inline-flex items-center justify-center gap-1 lg:gap-2 rounded-lg text-[11.5px] lg:text-[12.5px] xl:text-[13px] whitespace-nowrap transition-all duration-150 ${
+                      isLinuxDefault
+                        ? 'group-focus-visible:ring-2 group-focus-visible:ring-[#4c6f9c] dark:group-focus-visible:ring-[#88c0d0]'
+                        : 'group-focus-visible:ring-2 group-focus-visible:ring-[#0284c7] dark:group-focus-visible:ring-[#38bdf8]'
+                    } ${
                       compactNavbar ? 'w-10 h-10' : 'px-1.5 lg:px-2.5 xl:px-3 py-2'
                     } ${
                       isActive
-                        ? 'font-semibold text-[#0284c7] dark:text-[#38bdf8] bg-sky-500/[0.08] dark:bg-[#38bdf8]/[0.1]'
+                        ? isLinuxDefault
+                          ? 'font-semibold text-[#2e3440] dark:text-[#eceff4] bg-[#5e81ac]/15 dark:bg-[#3b4252] border border-[#4c6f9c]/30 dark:border-[#88c0d0]/40'
+                          : 'font-semibold text-[#0284c7] dark:text-[#38bdf8] bg-sky-500/[0.08] dark:bg-[#38bdf8]/[0.1]'
+                        : isLinuxDefault
+                        ? 'font-medium text-slate-600 group-hover:text-slate-950 group-hover:bg-slate-200/80 dark:text-[#b8c4d6] dark:group-hover:text-[#eceff4] dark:group-hover:bg-[#3b4252]/70'
                         : 'font-medium text-slate-600 group-hover:text-slate-950 group-hover:bg-slate-100/90 dark:text-[#b4c2d4] dark:group-hover:text-white dark:group-hover:bg-white/[0.05]'
                     }`}
                   >
@@ -312,16 +402,38 @@ export const Navbar = memo(function Navbar({
                     />
                     {!compactNavbar && <span>{item.label}</span>}
                     {typeof item.count === 'number' && !compactNavbar && (
-                      <span className="font-mono-tabular text-[11.5px] font-bold text-[#0284c7] dark:text-[#38bdf8]">
+                      <span
+                        className={`font-mono-tabular text-[11.5px] font-bold ${
+                          isLinuxDefault
+                            ? 'text-[#4c6f9c] dark:text-[#88c0d0]'
+                            : 'text-[#0284c7] dark:text-[#38bdf8]'
+                        }`}
+                      >
                         ({item.count})
                       </span>
+                    )}
+                    {isActive && customThemeEnabled && (
+                      <span
+                        aria-hidden="true"
+                        style={{ backgroundColor: 'var(--sa-secondary)' }}
+                        className="w-1.5 h-1.5 rounded-full shrink-0 ms-0.5"
+                      />
                     )}
                   </span>
 
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-2 bottom-0 h-[2.5px] rounded-t-full bg-[#0284c7] dark:bg-[#38bdf8]"
+                      style={
+                        customThemeEnabled
+                          ? { backgroundColor: 'var(--sa-accent)' }
+                          : undefined
+                      }
+                      className={`absolute inset-x-2 bottom-0 h-[2.5px] rounded-t-full ${
+                        isLinuxDefault
+                          ? 'bg-[#4c6f9c] dark:bg-[#88c0d0]'
+                          : 'bg-[#0284c7] dark:bg-[#38bdf8]'
+                      }`}
                     />
                   )}
                 </button>
@@ -413,6 +525,10 @@ export const Navbar = memo(function Navbar({
                 ? 'bg-[#021233]/96 border-white/[0.14] backdrop-blur-xl text-white'
                 : isXboxTheme
                 ? 'bg-[#071a0b]/96 border-[#52e042]/25 backdrop-blur-xl text-[#ecfdf0]'
+                : isLinuxDefault
+                ? 'bg-[#eef1f6]/98 dark:bg-[#272d38]/98 border-slate-300 dark:border-[#d8dee9]/12 text-[#2e3440] dark:text-[#eceff4]'
+                : isMacDefault
+                ? 'bg-white/90 dark:bg-[#101434]/92 border-slate-200 dark:border-white/[0.14] backdrop-blur-2xl text-slate-900 dark:text-white'
                 : 'bg-white/98 dark:bg-[#0f141c]/98 border-slate-200 dark:border-white/[0.08] backdrop-blur-xl text-slate-900 dark:text-white'
             }`}
           >
@@ -437,6 +553,7 @@ export const Navbar = memo(function Navbar({
                       type="button"
                       aria-current={isActive ? 'page' : undefined}
                       onClick={() => handleSelectNav(item.id)}
+                      style={isActive && customThemeEnabled ? customActiveNavStyle : undefined}
                       className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-[14px] transition-colors cursor-pointer ${
                         isPs5Theme
                           ? isActive
@@ -446,6 +563,14 @@ export const Navbar = memo(function Navbar({
                           ? isActive
                             ? 'bg-[#107C10]/75 border border-[#6ee755]/75 font-bold text-white'
                             : 'font-medium text-[#b5d6b8] hover:bg-[#107C10]/30 hover:text-white'
+                          : isLinuxDefault
+                          ? isActive
+                            ? 'bg-[#5e81ac]/18 dark:bg-[#3b4252] border border-[#4c6f9c]/35 dark:border-[#88c0d0]/45 text-[#2e3440] dark:text-[#eceff4] font-semibold'
+                            : 'font-medium text-slate-700 hover:bg-slate-200/80 dark:text-[#cbd5e1] dark:hover:bg-[#3b4252]/70 dark:hover:text-white'
+                          : isMacDefault
+                          ? isActive
+                            ? 'bg-gradient-to-r from-[#3b82f6] to-[#2563eb] border border-[#93c5fd]/50 text-white font-semibold'
+                            : 'font-medium text-slate-700 hover:bg-white/75 dark:text-[#cbd5e1] dark:hover:bg-white/[0.1] dark:hover:text-white'
                           : isActive
                           ? 'bg-sky-500/[0.1] dark:bg-[#38bdf8]/[0.12] text-[#0284c7] dark:text-[#38bdf8] font-semibold'
                           : 'font-medium text-slate-700 hover:bg-slate-100 dark:text-[#c7d4e5] dark:hover:bg-white/[0.06] dark:hover:text-white'
@@ -463,11 +588,20 @@ export const Navbar = memo(function Navbar({
                       {isActive && (
                         <span
                           aria-hidden="true"
+                          style={
+                            customThemeEnabled
+                              ? { backgroundColor: 'var(--sa-accent-fg)' }
+                              : undefined
+                          }
                           className={`w-1.5 h-5 rounded-full shrink-0 ${
                             isPs5Theme
                               ? 'bg-white'
                               : isXboxTheme
                               ? 'bg-[#6ee755]'
+                              : isLinuxDefault
+                              ? 'bg-[#4c6f9c] dark:bg-[#88c0d0]'
+                              : isMacDefault
+                              ? 'bg-white'
                               : 'bg-[#0284c7] dark:bg-[#38bdf8]'
                           }`}
                         />

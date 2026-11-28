@@ -40,23 +40,23 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
       role="dialog"
       aria-modal="true"
       aria-label="Hypervisor Guide"
-      className="fixed inset-0 z-[60] w-screen h-screen bg-[#f4f6f9] dark:bg-[#11161d] flex flex-col overflow-hidden"
+      className="fixed inset-0 z-[60] w-screen h-screen bg-[var(--sa-bg-canvas)] text-[var(--sa-text-primary)] flex flex-col overflow-hidden"
     >
       {/* Sticky Top Popup Bar */}
-      <header className="px-4 sm:px-6 lg:px-8 py-3 bg-white dark:bg-[#171a21] border-b border-slate-200 dark:border-white/[0.08] shrink-0">
+      <header className="px-4 sm:px-6 lg:px-8 py-3 bg-[var(--sa-bg-surface-solid)] border-b border-[var(--sa-border-subtle)] shrink-0">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[12px] font-semibold text-slate-800 hover:text-slate-950 dark:bg-[#232b36] dark:hover:bg-[#2d3847] dark:border-white/[0.08] dark:text-[#e5e9f0] dark:hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="sa-btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap shrink-0 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 rtl:rotate-180" />
               <span>Back to Game</span>
             </button>
 
             <div className="flex items-center gap-2 min-w-0">
-              <span className="px-1.5 py-[2px] rounded-[2px] bg-[#dc2626] text-white text-[10px] font-extrabold uppercase tracking-wider shrink-0">
+              <span className="px-1.5 py-[2px] rounded-[var(--sa-btn-radius)] bg-[#dc2626] text-white text-[10px] font-extrabold uppercase tracking-wider shrink-0">
                 HV
               </span>
               <h2 className="font-display text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
@@ -70,7 +70,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
               href="https://fitgirl-repacks.site/hypervisor-guide/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 border border-slate-300 text-[11.5px] font-medium text-[#0284c7] hover:text-slate-900 dark:bg-[#1d2532] dark:hover:bg-[#273244] dark:border-white/[0.08] dark:text-[#66c0f4] dark:hover:text-white transition-colors"
+              className="sa-btn-secondary hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-[11.5px] font-medium whitespace-nowrap"
             >
               <span>Original Article</span>
               <ArrowSquareOut className="w-3 h-3" />
@@ -79,7 +79,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
               type="button"
               onClick={onClose}
               aria-label="Close Hypervisor Guide"
-              className="p-2 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-[#252f3d] dark:hover:bg-[#313e50] dark:text-[#aeb9c7] dark:hover:text-white transition-colors cursor-pointer"
+              className="sa-btn-secondary p-2 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -88,11 +88,11 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
       </header>
 
       {/* Scrollable Guide Body */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-50 via-[#f4f6f9] to-slate-100 dark:from-[#161e29] dark:via-[#121821] dark:to-[#0d1118]">
+      <div className="flex-1 overflow-y-auto bg-[var(--sa-bg-canvas)]">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 text-[13.5px] sm:text-[14px] leading-relaxed text-slate-700 dark:text-[#cfd9e4]">
           {/* Title + WIP Notice */}
-          <div className="space-y-3 border-b border-slate-200 dark:border-white/[0.08] pb-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-rose-50 border border-rose-300 text-rose-800 dark:bg-[#dc2626]/15 dark:border-[#dc2626]/40 dark:text-[#fca5a5] text-[12px] font-semibold">
+          <div className="space-y-3 border-b border-[var(--sa-border-subtle)] pb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--sa-card-inner-radius)] bg-rose-50 border border-rose-300 text-rose-800 dark:bg-[#dc2626]/15 dark:border-[#dc2626]/40 dark:text-[#fca5a5] text-[12px] font-semibold">
               <Warning className="w-3.5 h-3.5 text-rose-600 dark:text-[#f87171] shrink-0" />
               <span>This page is a work-in-progress and will be updated.</span>
             </div>
@@ -109,7 +109,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                 href="https://cs.rin.ru/forum/viewtopic.php?f=10&t=156407"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[15px] sm:text-[17px] font-semibold text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-4 break-all"
+                className="sa-link inline-flex items-center gap-1.5 text-[15px] sm:text-[17px] font-semibold underline underline-offset-4 break-all"
               >
                 <span>https://cs.rin.ru/forum/viewtopic.php?f=10&amp;t=156407</span>
                 <ArrowSquareOut className="w-4 h-4 shrink-0" />
@@ -140,12 +140,15 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
           </section>
 
           {/* Windows virtualization-based security components */}
-          <section className="space-y-3 p-4 sm:p-5 rounded bg-white dark:bg-[#121822] border border-slate-200 dark:border-white/[0.07] shadow-sm dark:shadow-none">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+          <section className="space-y-3 p-4 sm:p-5 rounded-[var(--sa-card-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)] shadow-sm dark:shadow-none">
+            <div className="sa-section-header flex items-center gap-2.5">
+              <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 text-[var(--sa-accent)]" />
+              </span>
               <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 Windows virtualization-based security components
               </h3>
+              <span className="sa-section-line flex-1" />
             </div>
             <p>
               On modern systems with Secure Boot, TPM 2.0 and hardware-assisted virtualization capabilities, Windows 10 and 11 enable, mostly* by default, various security solutions via Virtualization-based Security (VBS). VBS is an umbrella term for using a bare-metal hypervisor, the Windows hypervisor, to create isolated virtual spaces that are safe from even a fully compromised OS, in which these security components run and monitor the OS or store confidential information.
@@ -159,7 +162,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
+                  className="sa-link underline underline-offset-2 font-semibold"
                 >
                   Memory Integrity (HVCI)
                 </a>
@@ -170,7 +173,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-credential-guard"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
+                  className="sa-link underline underline-offset-2 font-semibold"
                 >
                   Credential Guard
                 </a>
@@ -181,7 +184,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/windows-hello"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
+                  className="sa-link underline underline-offset-2 font-semibold"
                 >
                   Windows Hello
                 </a>
@@ -192,7 +195,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://learn.microsoft.com/en-us/windows/security/hardware-security/how-hardware-based-root-of-trust-helps-protect-windows"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2 font-semibold"
+                  className="sa-link underline underline-offset-2 font-semibold"
                 >
                   System Guard (Secure Launch)
                 </a>
@@ -201,7 +204,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   href="https://en.wikipedia.org/wiki/System_Management_Mode"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline underline-offset-2"
+                  className="sa-link underline underline-offset-2"
                 >
                   System Management Mode
                 </a>{' '}
@@ -212,7 +215,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
             <p className="text-[12.5px] text-slate-500 dark:text-[#9cb0c6]">
               * Even though hardware and boot requirements are met, Windows sometimes seems to fail at enabling features that are supposed to be enabled automatically, such as VBS and memority integrity.
             </p>
-            <div className="p-3.5 rounded bg-sky-50 border border-sky-200 text-slate-900 dark:bg-[#182230] dark:border-[#66c0f4]/30 dark:text-white font-semibold space-y-2">
+            <div className="p-3.5 rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-accent-soft)] border border-[var(--sa-accent-ring)] text-slate-900 dark:text-white font-semibold space-y-2">
               <p>
                 Without the Windows hypervisor, none of these security features can be used. By design, the hypervisor cannot be disabled directly. Instead, all the above features that want to utilize VBS signal that it needs to be enabled, which then loads the hypervisor. Therefore, we must disable all those features to prevent the Windows hypervisor from being loaded.
               </p>
@@ -267,7 +270,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                 </p>
 
                 {/* Highlighted Green VBS.cmd Card */}
-                <div className="rounded-lg bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
+                <div className="rounded-[var(--sa-card-radius)] bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
                   <a
                     href="https://paste.fitgirl-repacks.site/?770949937a1c73bd#HH6HLTXZj4NFQtUoe44KYiPetXHqenCveB4Wc8uYC5mf"
                     target="_blank"
@@ -279,7 +282,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                   </a>
 
                   {/* Expandable Changes Log Spoiler */}
-                  <div className="rounded bg-white border border-emerald-200 dark:bg-[#0d1712]/80 dark:border-white/[0.1] overflow-hidden">
+                  <div className="rounded-[var(--sa-card-inner-radius)] bg-[var(--sa-bg-surface-solid)] border border-emerald-200 dark:border-white/[0.1] overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setChangelogOpen((prev) => !prev)}
@@ -324,7 +327,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                                className="sa-link underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -342,7 +345,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://learn.microsoft.com/en-us/windows-hardware/drivers/install/test-signing#test-sign-a-driver-package"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                                className="sa-link underline"
                               >
                                 here
                               </a>
@@ -358,7 +361,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                                className="sa-link underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -382,7 +385,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                                className="sa-link underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -404,7 +407,7 @@ export function HypervisorGuideModal({ isOpen, onClose }: HypervisorGuideModalPr
                                 href="https://cs.rin.ru/forum/viewtopic.php?f=14&t=156435"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                                className="sa-link underline"
                               >
                                 https://cs.rin.ru/forum/viewtopic.php?f=14&amp;t=156435
                               </a>
@@ -594,7 +597,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
               </h3>
             </div>
 
-            <div className="rounded-lg bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
+            <div className="rounded-[var(--sa-card-radius)] bg-emerald-50 border border-emerald-400 dark:bg-[#12331b]/55 dark:border-[#159311] p-4 sm:p-5 space-y-3">
               <div>
                 <a
                   href="https://paste.fitgirl-repacks.site/?7bb76c6f568d3725#G68jW7TWoMwDHUxBXhP4ttUX7Eeky9yCPPVHHtTs9aKj"
@@ -611,7 +614,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                     href="https://github.com/NotAndreh/hypervisor-launcher/releases"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#0284c7] hover:text-slate-900 dark:text-[#66c0f4] dark:hover:text-white underline"
+                    className="sa-link underline"
                   >
                     this official GitHub page
                   </a>
@@ -626,13 +629,13 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                 <p className="font-semibold text-slate-900 dark:text-white">
                   My repacks with older version “hypervisor-launcher.exe”:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-[#0284c7] dark:text-[#93c5fd]">
+                <ul className="list-disc pl-5 space-y-1">
                   <li>
                     <a
                       href="https://fitgirl-repacks.site/assassins-creed-shadows/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-slate-900 dark:hover:text-white underline"
+                      className="sa-link underline"
                     >
                       Assassin’s Creed Shadows
                     </a>
@@ -642,7 +645,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/hello-kitty-island-adventure/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-slate-900 dark:hover:text-white underline"
+                      className="sa-link underline"
                     >
                       Hello Kitty Island Adventure
                     </a>
@@ -652,7 +655,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/nba-2k26/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-slate-900 dark:hover:text-white underline"
+                      className="sa-link underline"
                     >
                       NBA 2K26
                     </a>
@@ -662,7 +665,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
                       href="https://fitgirl-repacks.site/stellar-blade/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-slate-900 dark:hover:text-white underline"
+                      className="sa-link underline"
                     >
                       Stellar Blade
                     </a>
@@ -673,12 +676,15 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
           </section>
 
           {/* Pre-requirements */}
-          <section className="space-y-2 p-4 sm:p-5 rounded bg-white border border-slate-200 dark:bg-[#121822] dark:border-white/[0.07]">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-[#0284c7] dark:text-[#66c0f4] shrink-0" />
+          <section className="space-y-2 p-4 sm:p-5 rounded-[var(--sa-card-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)]">
+            <div className="sa-section-header flex items-center gap-2.5">
+              <span className="sa-icon-badge w-7 h-7 flex items-center justify-center shrink-0">
+                <Cpu className="w-4 h-4 text-[var(--sa-accent)]" />
+              </span>
               <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                 Pre-requirements
               </h3>
+              <span className="sa-section-line flex-1" />
             </div>
             <p>Your CPU must support one of two virtualization techniques: VT-x for Intel and AMD-V (SVM) for AMD.</p>
             <p>Google if CPU model supports virtualization to know if you can play HV-games.</p>
@@ -686,7 +692,7 @@ reg add HKLM\\SOFTWARE\\Classes\\cmdfile\\shell\\runas\\command /f /v "" /t REG_
           </section>
 
           {/* Secure Boot FAQ */}
-          <section className="space-y-2 p-4 sm:p-5 rounded bg-white border border-slate-200 dark:bg-[#121822] dark:border-white/[0.07]">
+          <section className="space-y-2 p-4 sm:p-5 rounded-[var(--sa-card-radius)] bg-[var(--sa-bg-surface-solid)] border border-[var(--sa-border-subtle)]">
             <h3 className="font-display text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
               Do I need to disable Secure Boot or use EfiGuard?
             </h3>
